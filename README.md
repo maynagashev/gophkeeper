@@ -6,4 +6,6 @@
 
 Ссылки:
 
-- [Техническое задание](SPECIFICATION.md)
+- [Техническое задание](docs/specification.md)
+- [Архитектура](ARCHITECTURE.md)
+- [API для взаимодействия клиента и сервера](docs/api.md)
