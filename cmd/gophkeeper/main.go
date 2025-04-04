@@ -1,8 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"github.com/maynagashev/gophkeeper/internal/tui"
+)
 
 func main() {
-	fmt.Println("GophKeeper Client Starting...")
-	// TODO: Добавить инициализацию TUI
+	// Запуск TUI
+	tui.Start()
 }
