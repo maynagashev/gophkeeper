@@ -13,11 +13,11 @@ run:
 # Сборка клиента
 build:
 	@echo "Сборка GophKeeper клиента..."
-	@go build -o gophkeeper ./cmd/gophkeeper/main.go
-	@echo "Клиент собран: ./gophkeeper"
+	@go build -o ./bin/gophkeeper ./cmd/gophkeeper/main.go
+	@echo "Клиент собран: ./bin/gophkeeper"
 
 # Очистка
 clean:
 	@echo "Очистка..."
-	@rm -f gophkeeper
+	@rm -f ./bin/gophkeeper
 	@echo "Очищено." 
