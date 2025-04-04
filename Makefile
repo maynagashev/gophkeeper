@@ -20,4 +20,16 @@ build:
 clean:
 	@echo "Очистка..."
 	@rm -f ./bin/gophkeeper
-	@echo "Очищено." 
+	@echo "Очищено."
+
+# Запуск всех тестов
+test:
+	@echo "Запуск всех тестов..."
+	@go test -v ./... | tee logs/test.log
+
+# Тест с генерацией отчёта о покрытии
+test-coverage:
+	@echo "Запуск тестов с генерацией покрытия..."
+	go test -coverprofile=logs/coverage.out ./...
+	go tool cover -html=logs/coverage.out -o logs/coverage.html
+	go tool cover -func=logs/coverage.out | tee logs/coverage.log

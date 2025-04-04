@@ -1,0 +1,22 @@
+mode: set
+github.com/maynagashev/gophkeeper/cmd/gophkeeper/main.go:7.13,10.2 1 0
+github.com/maynagashev/gophkeeper/internal/tui/tui.go:28.27,41.2 7 0
+github.com/maynagashev/gophkeeper/internal/tui/tui.go:44.31,47.2 1 0
+github.com/maynagashev/gophkeeper/internal/tui/tui.go:50.57,53.27 2 0
+github.com/maynagashev/gophkeeper/internal/tui/tui.go:55.18,56.18 1 0
+github.com/maynagashev/gophkeeper/internal/tui/tui.go:57.22,58.24 1 0
+github.com/maynagashev/gophkeeper/internal/tui/tui.go:59.23,60.23 1 0
+github.com/maynagashev/gophkeeper/internal/tui/tui.go:61.17,64.18 2 0
+github.com/maynagashev/gophkeeper/internal/tui/tui.go:66.28,67.24 1 0
+github.com/maynagashev/gophkeeper/internal/tui/tui.go:68.18,69.23 1 0
+github.com/maynagashev/gophkeeper/internal/tui/tui.go:70.17,74.23 2 0
+github.com/maynagashev/gophkeeper/internal/tui/tui.go:77.4,78.17 2 0
+github.com/maynagashev/gophkeeper/internal/tui/tui.go:85.2,85.36 1 0
+github.com/maynagashev/gophkeeper/internal/tui/tui.go:85.36,88.3 2 0
+github.com/maynagashev/gophkeeper/internal/tui/tui.go:90.2,90.15 1 0
+github.com/maynagashev/gophkeeper/internal/tui/tui.go:94.30,95.17 1 0
+github.com/maynagashev/gophkeeper/internal/tui/tui.go:96.21,102.11 5 0
+github.com/maynagashev/gophkeeper/internal/tui/tui.go:103.27,108.11 4 0
+github.com/maynagashev/gophkeeper/internal/tui/tui.go:109.10,110.54 1 0
+github.com/maynagashev/gophkeeper/internal/tui/tui.go:115.14,117.35 2 0
+github.com/maynagashev/gophkeeper/internal/tui/tui.go:117.35,120.3 2 0

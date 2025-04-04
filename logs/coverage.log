@@ -1,0 +1,7 @@
+github.com/maynagashev/gophkeeper/cmd/gophkeeper/main.go:7:	main		0.0%
+github.com/maynagashev/gophkeeper/internal/tui/tui.go:28:	initialModel	0.0%
+github.com/maynagashev/gophkeeper/internal/tui/tui.go:44:	Init		0.0%
+github.com/maynagashev/gophkeeper/internal/tui/tui.go:50:	Update		0.0%
+github.com/maynagashev/gophkeeper/internal/tui/tui.go:94:	View		0.0%
+github.com/maynagashev/gophkeeper/internal/tui/tui.go:115:	Start		0.0%
+total:								(statements)	0.0%
