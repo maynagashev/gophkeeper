@@ -4,163 +4,51 @@
 совместимый с форматом KDBX (KeePass).
 
 Нажмите Enter для продолжения или Ctrl+C/q для выхода.
-[7;H[2J[H[HВведите мастер-пароль для открытия базы данных: example/test.kdbx
+
+(Enter - продолжить, Ctrl+C/q - выход)[8;H[2J[H[HВведите мастер-пароль для открытия базы данных: example/test.kdbx
 
 > Мастер-пароль        
 
 (Нажмите Enter для подтверждения или Ctrl+C для выхода)
-[J[6;H[H
+
+(Enter - подтвердить, Ctrl+C - выход)[J[7;H[H
 
 > *                    
 
 
-[6;H[H
+
+[7;H[H
 
 > **                   
 
 
-[6;H[H
+
+[7;H[H
 
 > ***                  
 
 
-[6;H[H
+
+[7;H[H
 
 > ****                 
 
 
-[6;H[H
 
-> *****                
-
-
-[6;H[H
-
-> ******               
-
-
-[6;H[H
+[7;H[H
 
 > Мастер-пароль        
 
 
-[6;H[H
-Ошибка: ошибка дешифровани�[2K[?2004l[?25h[?1002l[?1003l[?1006l[?1049l[?25hA256 of header mismatching
 
-(Нажмите любую клавишу для продолжения)
-Ошибка: ошибка дешифрования файла 'example/test.kdbx': Wrong password? HMAC-SHA256 of header mismatching
-
-(Нажмите любую клавишу для продолжения)[7;H[HВведите мастер-пароль для открытия базы данных: example/test.kdbx
-
-> Мастер-пароль        
-
-(Нажмите Enter для подтверждения или Ctrl+C для выхода)
-[J[6;H[H
-Ошибка: ошибка дешифрования файла 'example/test.kdbx': Wrong password? HMAC-SHA256 of header mismatching
-
-(Нажмите любую клавишу для продолжения)
-Ошибка: ошибка дешифрования файла 'example/test.kdbx': Wrong password? HMAC-SHA256 of header mismatching
-
-(Нажмите любую клавишу для продолжения)[7;H[HВведите мастер-пароль для открытия базы данных: example/test.kdbx
-
-> Мастер-пароль        
-
-(Нажмите Enter для подтверждения или Ctrl+C для выхода)
-[J[6;H[H
-Ошибка: ошибка дешифрования файла 'example/test.kdbx': Wrong password? HMAC-SHA256 of header mismatching
-
-(Нажмите любую клавишу для продолжения)
-Ошибка: ошибка дешифрования файла 'example/test.kdbx': Wrong password? HMAC-SHA256 of header mismatching
-
-(Нажмите любую клавишу для продолжения)[7;H[HВведите мастер-пароль для открытия базы данных: example/test.kdbx
-
-> Мастер-пароль        
-
-(Нажмите Enter для подтверждения или Ctrl+C для выхода)
-[J[6;H[H
-
-> *                    
-
-
-[6;H[H
-
-> **                   
-
-
-[6;H[H
-
-> ***                  
-
-
-[6;H[H
-
-> ****                 
-
-
-[6;H[H
-
-> *****                
-
-
-[6;H[H
-
-> Мастер-пароль        
-
-
-[6;H[H
-Ошибка: ошибка дешифрования файла 'example/test.kdbx': Wrong password? HMAC-SHA256 of header mismatching
-
-(Нажмите любую клавишу для продолжения)
-Ошибка: ошибка дешифрования файла 'example/test.kdbx': Wrong password? HMAC-SHA256 of header mismatching
-
-(Нажмите любую клавишу для продолжения)[7;H[HВведите мастер-пароль для открытия базы данных: example/test.kdbx
-
-> Мастер-пароль        
-
-(Нажмите Enter для подтверждения или Ctrl+C для выхода)
-[J[6;H[H
-
-> *                    
-
-
-[6;H[H
-
-> **                   
-
-
-[6;H[H
-
-> ***                  
-
-
-[6;H[H
-
-> ****                 
-
-
-[6;H[H
-
-> *****                
-
-
-[6;H[H
-
-> ******               
-
-
-[6;H[H
-
-> Мастер-пароль        
-
-
-[6;H[2J[H[H   Записи в 'example/test.kdbx' (2)                
+[7;H[2J[H[H   Записи в 'example/test.kdbx' (2)                
                                                    
   2 items                                          
                                                    
 │ mail@example.com                                 
 │ User: mail@example.com | URL: https://example.com
                                                    
-  test entry 2                                     
+  test entry 4                                     
   User: user1                                      
                                                    
                                                    
@@ -176,14 +64,14 @@
                                                    
                                                    
                                                    
-                                                   [24;H[H
+                                                   (↑/↓ - навигация, Enter - детали, / - поиск, Ctrl+S - сохр., q - выход)[24;H[H
 
 
 
   mail@example.com                                 
   User: mail@example.com | URL: https://example.com
 
-│ test entry 2                                     
+│ test entry 4                                     
 │ User: user1                                      
 
 
@@ -199,178 +87,217 @@
 
 
 
-[24;H[H
+[24;H[2J[H[HДетали записи: test entry 4
 
+Title: test entry 4
+UserName: user1
+Password: ********
+URL: 
+Notes: 
+[J[8;H[2J[H[HРедактирование записи: test entry 4
 
+> Title: > test entry 4 
+  UserName: > user1 
+  Password: > ********* 
+  URL: > URL
+  Notes: > Notes
+[8;H[H
 
-│ mail@example.com                                 
-│ User: mail@example.com | URL: https://example.com
+  Title: > test entry 4 
+> UserName: > user1 
 
-  test entry 2                                     
-  User: user1                                      
 
 
+[8;H[H
 
 
+  UserName: > user1 
+> Password: > ********* 
 
 
+[8;H[H
 
 
 
+  Password: > ********* 
+> URL: > URL
 
+[8;H[H
 
 
 
 
-[24;H[H
+> URL: > h 
 
+[8;H[H
 
 
-  mail@example.com                                 
-  User: mail@example.com | URL: https://example.com
 
-│ test entry 2                                     
-│ User: user1                                      
 
+> URL: > ht 
 
+[8;H[H
 
 
 
 
+> URL: > htt 
 
+[8;H[H
 
 
 
 
+> URL: > http 
 
+[8;H[H
 
 
-[24;H[H
 
 
+> URL: > https 
 
-│ mail@example.com                                 
-│ User: mail@example.com | URL: https://example.com
+[8;H[H
 
-  test entry 2                                     
-  User: user1                                      
 
 
 
+> URL: > https: 
 
+[8;H[H
 
 
 
 
+> URL: > https:/ 
 
+[8;H[H
 
 
 
 
+> URL: > https:// 
 
-[24;H[H
+[8;H[H
 
 
 
-  mail@example.com                                 
-  User: mail@example.com | URL: https://example.com
 
-│ test entry 2                                     
-│ User: user1                                      
+> URL: > https://l 
 
+[8;H[H
 
 
 
 
+> URL: > https://lo 
 
+[8;H[H
 
 
 
 
+> URL: > https://loc 
 
+[8;H[H
 
 
 
-[24;H[H
 
+> URL: > https://loca 
 
+[8;H[H
 
-│ mail@example.com                                 
-│ User: mail@example.com | URL: https://example.com
 
-  test entry 2                                     
-  User: user1                                      
 
 
+> URL: > https://local 
 
+[8;H[H
 
 
 
 
+> URL: > https://localh 
 
+[8;H[H
 
 
 
 
+> URL: > https://localho 
 
+[8;H[H
 
-[24;H[H
 
 
 
-  mail@example.com                                 
-  User: mail@example.com | URL: https://example.com
+> URL: > https://localhos 
 
-│ test entry 2                                     
-│ User: user1                                      
+[8;H[H
 
 
 
 
+> URL: > https://localhost 
 
+[8;H[H
 
 
 
 
+> URL: > https://localhost. 
 
+[8;H[H
 
 
 
 
-[24;H[H
+> URL: > https://localhost 
 
+[8;H[H
 
 
-│ mail@example.com                                 
-│ User: mail@example.com | URL: https://example.com
 
-  test entry 2                                     
-  User: user1                                      
+> Password: > ********* 
+  URL: > https://localhost 
 
+[8;H[H
 
 
+> UserName: > user1 
+  Password: > ********* 
 
 
+[8;H[H
 
+> Title: > test entry 4 
+  UserName: > user1 
 
 
 
+[8;H[HРедактирование записи: test entry 
 
+> Title: > test entry  
 
 
 
 
-[24;H[H
+[8;H[HРедактирование записи: test entry 5
 
+> Title: > test entry 5 
 
 
-  mail@example.com                                 
-  User: mail@example.com | URL: https://example.com
 
-│ test entry 2                                     
-│ User: user1                                      
 
+[8;H[2J[H[HДетали записи: test entry 5
 
+Title: test entry 5
+UserName: user1
+Password: ********
+URL: https://localhost
+Notes: 
+[8;H[H
 
 
 
@@ -378,515 +305,12 @@
 
 
 
+Сохранение...[9;H[H
 
 
 
 
 
-[24;H[H
 
 
-
-│ mail@example.com                                 
-│ User: mail@example.com | URL: https://example.com
-
-  test entry 2                                     
-  User: user1                                      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[24;H[H
-
-
-
-  mail@example.com                                 
-  User: mail@example.com | URL: https://example.com
-
-│ test entry 2                                     
-│ User: user1                                      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[24;H[H
-
-
-
-│ mail@example.com                                 
-│ User: mail@example.com | URL: https://example.com
-
-  test entry 2                                     
-  User: user1                                      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[24;H[H
-
-
-
-  mail@example.com                                 
-  User: mail@example.com | URL: https://example.com
-
-│ test entry 2                                     
-│ User: user1                                      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[24;H[H
-
-
-
-│ mail@example.com                                 
-│ User: mail@example.com | URL: https://example.com
-
-  test entry 2                                     
-  User: user1                                      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[24;H[H
-
-
-
-  mail@example.com                                 
-  User: mail@example.com | URL: https://example.com
-
-│ test entry 2                                     
-│ User: user1                                      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[24;H[H
-
-
-
-│ mail@example.com                                 
-│ User: mail@example.com | URL: https://example.com
-
-  test entry 2                                     
-  User: user1                                      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[24;H[H
-
-
-
-  mail@example.com                                 
-  User: mail@example.com | URL: https://example.com
-
-│ test entry 2                                     
-│ User: user1                                      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[24;H[H
-
-
-
-│ mail@example.com                                 
-│ User: mail@example.com | URL: https://example.com
-
-  test entry 2                                     
-  User: user1                                      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[24;H[H
-
-
-
-  mail@example.com                                 
-  User: mail@example.com | URL: https://example.com
-
-│ test entry 2                                     
-│ User: user1                                      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[24;H[H
-
-
-
-│ mail@example.com                                 
-│ User: mail@example.com | URL: https://example.com
-
-  test entry 2                                     
-  User: user1                                      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[24;H[H
-
-
-
-  mail@example.com                                 
-  User: mail@example.com | URL: https://example.com
-
-│ test entry 2                                     
-│ User: user1                                      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[24;H[H
-
-
-
-│ mail@example.com                                 
-│ User: mail@example.com | URL: https://example.com
-
-  test entry 2                                     
-  User: user1                                      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[24;H[H
-
-
-
-  mail@example.com                                 
-  User: mail@example.com | URL: https://example.com
-
-│ test entry 2                                     
-│ User: user1                                      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[24;H[H
-
-
-
-│ mail@example.com                                 
-│ User: mail@example.com | URL: https://example.com
-
-  test entry 2                                     
-  User: user1                                      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[24;H[H
-
-
-
-  mail@example.com                                 
-  User: mail@example.com | URL: https://example.com
-
-│ test entry 2                                     
-│ User: user1                                      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[24;H[H
-
-
-
-│ mail@example.com                                 
-│ User: mail@example.com | URL: https://example.com
-
-  test entry 2                                     
-  User: user1                                      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[24;H[H
-
-
-
-  mail@example.com                                 
-  User: mail@example.com | URL: https://example.com
-
-│ test entry 2                                     
-│ User: user1                                      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[24;H[H
-
-
-
-│ mail@example.com                                 
-│ User: mail@example.com | URL: https://example.com
-
-  test entry 2                                     
-  User: user1                                      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[24;H[H
-
-
-
-  mail@example.com                                 
-  User: mail@example.com | URL: https://example.com
-
-│ test entry 2                                     
-│ User: user1                                      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[24;H[H
-
-
-
-│ mail@example.com                                 
-│ User: mail@example.com | URL: https://example.com
-
-  test entry 2                                     
-  User: user1                                      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[24;H[H
-
-
-
-  mail@example.com                                 
-  User: mail@example.com | URL: https://example.com
-
-│ test entry 2                                     
-│ User: user1                                      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[24;H[2K[?2004l[?25h[?1002l[?1003l[?1006l[?1049l[?25h
+Сохранено успешно![9;H

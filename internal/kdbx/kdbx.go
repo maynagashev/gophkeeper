@@ -3,6 +3,7 @@ package kdbx
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 
 	"github.com/tobischo/gokeepasslib/v3"
@@ -64,4 +65,49 @@ func collectEntries(entries *[]gokeepasslib.Entry, groups []gokeepasslib.Group) 
 // Пока это только заглушка для тестов, которая всегда возвращает ошибку.
 func CreateDatabase(_ string, _ string) (*gokeepasslib.Database, error) {
 	return nil, errors.New("функция CreateDatabase еще не реализована")
+}
+
+// SaveFile кодирует и сохраняет базу данных KDBX в указанный файл.
+func SaveFile(db *gokeepasslib.Database, filePath string, password string) error {
+	if db == nil {
+		return errors.New("база данных не инициализирована (nil)")
+	}
+
+	// Устанавливаем учетные данные, если их нет (нужны для сохранения)
+	if db.Credentials == nil {
+		if password == "" {
+			return errors.New("пароль не может быть пустым при сохранении")
+		}
+		db.Credentials = gokeepasslib.NewPasswordCredentials(password)
+	}
+
+	// Важно: перед сохранением нужно заблокировать защищенные поля!
+	err := db.LockProtectedEntries()
+	if err != nil {
+		// Логируем ошибку, но не прерываем сохранение, если не критично
+		slog.Warn("Не удалось заблокировать поля перед сохранением", "error", err)
+	}
+
+	// Открываем файл для записи (перезаписываем существующий)
+	file, err := os.Create(filePath)
+	if err != nil {
+		return fmt.Errorf("ошибка создания/открытия файла '%s' для записи: %w", filePath, err)
+	}
+	defer file.Close()
+
+	// Кодируем и записываем БД в файл
+	keepassEncoder := gokeepasslib.NewEncoder(file)
+	if encodeErr := keepassEncoder.Encode(db); encodeErr != nil {
+		return fmt.Errorf("ошибка кодирования и записи БД в файл '%s': %w", filePath, encodeErr)
+	}
+
+	// Разблокируем обратно после сохранения (если нужно продолжить работу)
+	// TODO: Решить, нужно ли это делать здесь или после вызова SaveFile
+	err = db.UnlockProtectedEntries()
+	if err != nil {
+		slog.Warn("Не удалось разблокировать поля после сохранения", "error", err)
+		// Не возвращаем ошибку, так как сохранение прошло успешно
+	}
+
+	return nil // Сохранение успешно
 }

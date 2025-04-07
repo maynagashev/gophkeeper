@@ -11,6 +11,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/tobischo/gokeepasslib/v3"
+	w "github.com/tobischo/gokeepasslib/v3/wrappers"
 
 	"github.com/maynagashev/gophkeeper/internal/kdbx"
 )
@@ -22,7 +23,21 @@ const (
 	welcomeScreen       screenState = iota // Приветственный экран
 	passwordInputScreen                    // Экран ввода пароля
 	entryListScreen                        // Экран списка записей
+	entryDetailScreen                      // Экран деталей записи
+	entryEditScreen                        // Экран редактирования записи
 	// TODO: Добавить другие экраны (детали записи и т.д.)
+)
+
+// Поля, доступные для редактирования.
+const (
+	editableFieldTitle = iota
+	editableFieldUserName
+	editableFieldPassword
+	editableFieldURL
+	editableFieldNotes
+	numEditableFields // Количество редактируемых полей
+
+	fieldNamePassword = "Password"
 )
 
 // Константы для TUI.
@@ -30,6 +45,12 @@ const (
 	defaultListWidth    = 80 // Стандартная ширина терминала для списка
 	defaultListHeight   = 24 // Стандартная высота терминала для списка
 	passwordInputOffset = 4  // Отступ для поля ввода пароля
+
+	keyEnter = "enter" // Клавиша Enter
+	keyQuit  = "q"     // Клавиша выхода
+	keyBack  = "b"     // Клавиша возврата
+	keyEsc   = "esc"   // Клавиша Escape
+	keyEdit  = "e"     // Клавиша редактирования
 )
 
 // entryItem представляет элемент списка записей.
@@ -74,10 +95,19 @@ func (i entryItem) FilterValue() string { return i.Title() }
 type model struct {
 	state         screenState            // Текущее состояние (экран)
 	passwordInput textinput.Model        // Поле ввода для пароля
+	password      string                 // Сохраненный в памяти пароль от базы (для применения изменений)
 	db            *gokeepasslib.Database // Объект открытой базы KDBX
 	kdbxPath      string                 // Путь к KDBX файлу (пока захардкожен)
 	err           error                  // Последняя ошибка для отображения
 	entryList     list.Model             // Компонент списка записей
+	selectedEntry *entryItem             // Выбранная запись для детального просмотра
+
+	// Поля для редактирования записи
+	editingEntry *gokeepasslib.Entry // Копия записи, которую редактируем
+	editInputs   []textinput.Model   // Поля ввода для редактирования
+	focusedField int                 // Индекс активного поля ввода
+
+	savingStatus string // Статус операции сохранения файла
 }
 
 // initialModel создает начальное состояние модели.
@@ -155,7 +185,27 @@ func openKdbxCmd(path, password string) tea.Cmd {
 	}
 }
 
+// Структуры для сообщений о сохранении.
+type dbSavedMsg struct{}
+
+type dbSaveErrorMsg struct {
+	err error
+}
+
+// Команда для асинхронного сохранения файла.
+func saveKdbxCmd(db *gokeepasslib.Database, path, password string) tea.Cmd {
+	return func() tea.Msg {
+		err := kdbx.SaveFile(db, path, password)
+		if err != nil {
+			return dbSaveErrorMsg{err: err}
+		}
+		return dbSavedMsg{}
+	}
+}
+
 // Update обрабатывает входящие сообщения.
+//
+//nolint:gocognit,funlen // Снизим сложность и длину в будущем рефакторинге
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// var cmd tea.Cmd
 	// var cmds []tea.Cmd // Собираем команды
@@ -172,17 +222,58 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.handleDBOpenedMsg(msg)
 
 	case errMsg:
-		m.err = msg.err
-		slog.Error("Ошибка при работе с KDBX", "error", m.err)
-		m.passwordInput.Blur() // Снимаем фокус, чтобы показать ошибку
+		return m.handleErrorMsg(msg)
+
+	case dbSavedMsg:
+		m.savingStatus = "Сохранено успешно!"
+		slog.Info("База KDBX успешно сохранена", "path", m.kdbxPath)
+		// Можно добавить таймер для скрытия сообщения через пару секунд
+		return m, nil
+
+	case dbSaveErrorMsg:
+		m.savingStatus = fmt.Sprintf("Ошибка сохранения: %v", msg.err)
+		slog.Error("Ошибка сохранения KDBX", "path", m.kdbxPath, "error", msg.err)
 		return m, nil
 
 	// Обработка нажатия клавиш делегируется состоянию
 	case tea.KeyMsg:
-		// Сочетание Ctrl+C всегда приводит к выходу
-		if msg.Type == tea.KeyCtrlC {
+		// Глобальные команды (работают на всех экранах, кроме ввода пароля?)
+		switch msg.String() {
+		case "ctrl+c":
 			return m, tea.Quit
+		case "ctrl+s":
+			// Сохраняем только из списка или деталей (не при редактировании)
+			if (m.state == entryListScreen || m.state == entryDetailScreen) && m.db != nil {
+				m.savingStatus = "Подготовка к сохранению..."
+				slog.Info("Начало обновления m.db перед сохранением")
+
+				// Проходим по всем элементам в списке интерфейса
+				items := m.entryList.Items()
+				updatedCount := 0
+				for _, item := range items {
+					if listItem, ok := item.(entryItem); ok {
+						// Находим соответствующую запись в m.db по UUID
+						dbEntryPtr := findEntryInDB(m.db, listItem.entry.UUID)
+						if dbEntryPtr != nil {
+							// Обновляем найденную запись данными из элемента списка
+							// Создаем копию перед присваиванием, чтобы не менять listItem
+							entryToSave := deepCopyEntry(listItem.entry)
+							*dbEntryPtr = entryToSave
+							updatedCount++
+						} else {
+							slog.Warn("Запись из списка не найдена в m.db", "uuid", listItem.entry.UUID)
+						}
+					}
+				}
+				slog.Info("Обновление m.db завершено", "updated_count", updatedCount)
+
+				m.savingStatus = "Сохранение..."
+				slog.Info("Запуск сохранения KDBX", "path", m.kdbxPath)
+				// Используем сохраненный пароль
+				return m, saveKdbxCmd(m.db, m.kdbxPath, m.password)
+			}
 		}
+		// Если не глобальная команда, передаем дальше
 	}
 
 	// == Обновление компонентов в зависимости от состояния ==
@@ -193,6 +284,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.updatePasswordInputScreen(msg)
 	case entryListScreen:
 		return m.updateEntryListScreen(msg)
+	case entryDetailScreen:
+		return m.updateEntryDetailScreen(msg)
+	case entryEditScreen:
+		return m.updateEntryEditScreen(msg)
 	default:
 		// Для неизвестных состояний возвращаем модель без изменений и команд
 		return m, nil
@@ -206,12 +301,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m *model) updateWelcomeScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 	if keyMsg, ok := msg.(tea.KeyMsg); ok {
-		if keyMsg.String() == "q" {
+		switch keyMsg.String() {
+		case keyQuit:
 			return m, tea.Quit
-		} else if keyMsg.String() == "enter" {
+		case keyEnter:
 			m.state = passwordInputScreen
 			m.passwordInput.Focus()
-			// Добавляем явную очистку экрана при переходе
 			cmds = append(cmds, textinput.Blink, tea.ClearScreen)
 		}
 	}
@@ -235,10 +330,12 @@ func (m *model) updatePasswordInputScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.passwordInput.Focus() // Возвращаем фокус
 			cmds = append(cmds, textinput.Blink)
 			// Не обрабатываем другие клавиши в этом цикле
-		} else if keyMsg.String() == "enter" {
+		} else if keyMsg.String() == keyEnter {
 			password := m.passwordInput.Value()
 			m.passwordInput.Blur()
 			m.passwordInput.Reset()
+			// Сохраняем пароль в модели перед отправкой команды
+			m.password = password
 			cmds = append(cmds, openKdbxCmd(m.kdbxPath, password))
 		}
 	}
@@ -256,21 +353,236 @@ func (m *model) updateEntryListScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// Обработка клавиш для экрана списка
 	if keyMsg, ok := msg.(tea.KeyMsg); ok {
-		if keyMsg.String() == "q" {
+		switch keyMsg.String() {
+		case keyQuit:
 			// Выход по 'q', если не активен режим фильтрации
 			if m.entryList.FilterState() == list.Unfiltered {
 				return m, tea.Quit
 			}
-			// TODO: Обработка Enter для выбора записи
+		case keyEnter:
+			selectedItem := m.entryList.SelectedItem()
+			if selectedItem != nil {
+				// Убеждаемся, что это наш тип entryItem
+				if item, isEntryItem := selectedItem.(entryItem); isEntryItem {
+					m.selectedEntry = &item
+					m.state = entryDetailScreen
+					slog.Info("Переход к деталям записи", "title", item.Title())
+					cmds = append(cmds, tea.ClearScreen)
+				}
+			}
 		}
 	}
 	return m, tea.Batch(cmds...)
+}
+
+// updateEntryDetailScreen обрабатывает сообщения для экрана деталей записи.
+func (m *model) updateEntryDetailScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
+	if keyMsg, ok := msg.(tea.KeyMsg); ok {
+		switch keyMsg.String() {
+		case keyEsc, keyBack:
+			m.state = entryListScreen
+			m.selectedEntry = nil // Сбрасываем выбранную запись
+			slog.Info("Возврат к списку записей")
+			return m, tea.ClearScreen
+		case keyEdit:
+			if m.selectedEntry != nil {
+				m.prepareEditScreen()
+				m.state = entryEditScreen
+				slog.Info("Переход к редактированию записи", "title", m.selectedEntry.Title())
+				return m, tea.ClearScreen
+			}
+		}
+	}
+	return m, nil
+}
+
+// deepCopyEntry создает глубокую копию записи gokeepasslib.Entry.
+func deepCopyEntry(original gokeepasslib.Entry) gokeepasslib.Entry {
+	newEntry := gokeepasslib.NewEntry()
+
+	// Копируем UUID
+	copy(newEntry.UUID[:], original.UUID[:])
+
+	// Копируем основные поля (простые типы копируются по значению)
+	newEntry.Times = original.Times
+	newEntry.Tags = original.Tags             // Строки неизменяемы, можно копировать напрямую
+	newEntry.CustomData = original.CustomData // Тоже карта строк, копируем
+	// TODO: Добавить копирование других полей при необходимости (AutoType, History, CustomIcons)
+
+	// Глубокое копирование среза Values
+	if original.Values != nil {
+		newEntry.Values = make([]gokeepasslib.ValueData, len(original.Values))
+		for i, val := range original.Values {
+			newValue := gokeepasslib.ValueData{
+				Key:   val.Key,
+				Value: gokeepasslib.V{Content: val.Value.Content, Protected: val.Value.Protected},
+			}
+			newEntry.Values[i] = newValue
+		}
+	}
+
+	return newEntry
+}
+
+// prepareEditScreen инициализирует поля для экрана редактирования.
+func (m *model) prepareEditScreen() {
+	if m.selectedEntry == nil {
+		return // Нечего редактировать
+	}
+
+	// Создаем глубокую копию записи для редактирования
+	entryCopy := deepCopyEntry(m.selectedEntry.entry)
+	m.editingEntry = &entryCopy
+
+	m.editInputs = make([]textinput.Model, numEditableFields)
+	m.focusedField = editableFieldTitle // Начинаем с поля Title
+
+	placeholders := map[int]string{
+		editableFieldTitle:    "Title",
+		editableFieldUserName: "UserName",
+		editableFieldPassword: "Password",
+		editableFieldURL:      "URL",
+		editableFieldNotes:    "Notes",
+	}
+
+	for i := range numEditableFields {
+		m.editInputs[i] = textinput.New()
+		m.editInputs[i].Placeholder = placeholders[i]
+		m.editInputs[i].SetValue(m.editingEntry.GetContent(placeholders[i]))
+		// Первое поле делаем активным
+		if i == m.focusedField {
+			m.editInputs[i].Focus()
+		}
+	}
+
+	// Настроим поле пароля
+	m.editInputs[editableFieldPassword].EchoMode = textinput.EchoPassword
+}
+
+// updateEntryEditScreen обрабатывает сообщения для экрана редактирования записи.
+func (m *model) updateEntryEditScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmds []tea.Cmd
+
+	// Обрабатываем только KeyMsg
+	if keyMsg, ok := msg.(tea.KeyMsg); ok {
+		switch keyMsg.String() {
+		case keyEsc, keyBack:
+			// Отмена редактирования
+			m.state = entryDetailScreen
+			m.editingEntry = nil // Сбрасываем редактируемую запись
+			m.editInputs = nil   // Очищаем поля ввода
+			slog.Info("Отмена редактирования, возврат к деталям записи")
+			return m, tea.ClearScreen
+
+		case "tab", "down":
+			// Переход к следующему полю
+			m.focusedField = (m.focusedField + 1) % numEditableFields
+			cmds = m.updateFocus()
+			return m, tea.Batch(cmds...)
+
+		case "shift+tab", "up":
+			// Переход к предыдущему полю
+			m.focusedField = (m.focusedField - 1 + numEditableFields) % numEditableFields
+			cmds = m.updateFocus()
+			return m, tea.Batch(cmds...)
+
+		case keyEnter:
+			// Сохранение изменений
+			return m.saveEntryChanges()
+		}
+	} // конец if keyMsg, ok := msg.(tea.KeyMsg)
+
+	// Если сообщение не KeyMsg или было обработано выше (кроме навигации/Enter/Esc),
+	// обновляем активное поле ввода.
+	var cmd tea.Cmd
+	m.editInputs[m.focusedField], cmd = m.editInputs[m.focusedField].Update(msg)
+	cmds = append(cmds, cmd)
+
+	// Обновляем соответствующее поле в копии записи
+	fieldName := m.editInputs[m.focusedField].Placeholder
+	newValue := m.editInputs[m.focusedField].Value()
+
+	// Ищем существующее значение или создаем новое
+	found := false
+	for i := range m.editingEntry.Values {
+		if m.editingEntry.Values[i].Key == fieldName {
+			m.editingEntry.Values[i].Value.Content = newValue
+			// Обработка Protected для поля Password
+			if fieldName == fieldNamePassword {
+				m.editingEntry.Values[i].Value.Protected = w.NewBoolWrapper(newValue != "")
+			}
+			found = true
+			break
+		}
+	}
+	// Если значение не найдено, добавляем новое
+	if !found {
+		valueData := gokeepasslib.ValueData{
+			Key:   fieldName,
+			Value: gokeepasslib.V{Content: newValue},
+		}
+		if fieldName == fieldNamePassword {
+			valueData.Value.Protected = w.NewBoolWrapper(newValue != "")
+		}
+		m.editingEntry.Values = append(m.editingEntry.Values, valueData)
+	}
+
+	return m, tea.Batch(cmds...)
+}
+
+// saveEntryChanges применяет изменения из editingEntry к selectedEntry и списку.
+func (m *model) saveEntryChanges() (tea.Model, tea.Cmd) {
+	var cmds []tea.Cmd
+	if m.selectedEntry == nil || m.editingEntry == nil {
+		slog.Warn("Попытка сохранить изменения без выбранной или редактируемой записи")
+		return m, nil // Ничего не делаем
+	}
+
+	// 1. Создаем финальную обновленную запись на основе editingEntry
+	finalUpdatedEntry := deepCopyEntry(*m.editingEntry) // Используем deepCopy на всякий случай
+	// Обновляем время модификации
+	now := w.Now()
+	finalUpdatedEntry.Times.LastModificationTime = &now
+
+	// 2. Создаем новый элемент списка с обновленной записью
+	newSelectedItem := entryItem{entry: finalUpdatedEntry}
+
+	// 3. Обновляем элемент в списке list.Model
+	idx := m.entryList.Index()
+	updateCmd := m.entryList.SetItem(idx, newSelectedItem) // Передаем новый элемент
+	cmds = append(cmds, updateCmd)
+
+	// 4. Обновляем selectedEntry в модели, чтобы он указывал на новый элемент
+	m.selectedEntry = &newSelectedItem
+
+	// 5. Возвращаемся к деталям и очищаем состояние редактирования
+	m.state = entryDetailScreen
+	m.editingEntry = nil
+	m.editInputs = nil
+	slog.Info("Изменения сохранены, возврат к деталям записи")
+	// Добавим ClearScreen к другим командам
+	cmds = append(cmds, tea.ClearScreen)
+	return m, tea.Batch(cmds...)
+}
+
+// updateFocus обновляет фокус полей ввода и возвращает команды Blink.
+func (m *model) updateFocus() []tea.Cmd {
+	cmds := make([]tea.Cmd, len(m.editInputs))
+	for i := range len(m.editInputs) {
+		if i == m.focusedField {
+			cmds[i] = m.editInputs[i].Focus()
+		} else {
+			m.editInputs[i].Blur()
+		}
+	}
+	return cmds
 }
 
 // handleDBOpenedMsg обрабатывает сообщение об успешном открытии базы.
 func (m *model) handleDBOpenedMsg(msg dbOpenedMsg) (tea.Model, tea.Cmd) {
 	m.db = msg.db
 	m.err = nil
+	// Пароль уже сохранен в m.password при вызове openKdbxCmd
 	prevState := m.state // Сохраняем предыдущее состояние
 	m.state = entryListScreen
 	slog.Info("База KDBX успешно открыта", "path", m.kdbxPath)
@@ -305,31 +617,144 @@ func (m *model) handleDBOpenedMsg(msg dbOpenedMsg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(dbOpenedCmds...)
 }
 
+// handleErrorMsg обрабатывает сообщение об ошибке.
+func (m *model) handleErrorMsg(msg errMsg) (tea.Model, tea.Cmd) {
+	m.err = msg.err
+	slog.Error("Ошибка при работе с KDBX", "error", m.err)
+	m.passwordInput.Blur() // Снимаем фокус, чтобы показать ошибку
+	return m, nil
+}
+
 // View отрисовывает пользовательский интерфейс.
 func (m model) View() string {
+	var mainContent string
+	var help string
+
 	switch m.state {
 	case welcomeScreen:
-		s := "Добро пожаловать в GophKeeper!\n\n"
-		s += "Это безопасный менеджер паролей для командной строки,\n"
-		s += "совместимый с форматом KDBX (KeePass).\n\n"
-		s += "Нажмите Enter для продолжения или Ctrl+C/q для выхода.\n"
-		return s
+		mainContent = m.viewWelcomeScreen()
+		help = "(Enter - продолжить, Ctrl+C/q - выход)"
 	case passwordInputScreen:
-		s := "Введите мастер-пароль для открытия базы данных: " + m.kdbxPath + "\n\n"
-		s += m.passwordInput.View() + "\n\n"
-		if m.err != nil {
-			errMsgStr := fmt.Sprintf("\nОшибка: %s\n\n(Нажмите любую клавишу для продолжения)", m.err)
-			return s + errMsgStr // Возвращаем основной текст + текст ошибки
-		}
-		s += "(Нажмите Enter для подтверждения или Ctrl+C для выхода)\n"
-		return s
+		mainContent = m.viewPasswordInputScreen()
+		help = "(Enter - подтвердить, Ctrl+C - выход)"
 	case entryListScreen:
-		// Временно возвращаем простую строку для теста очистки экрана
-		// return "ЭКРАН СПИСКА ЗАПИСЕЙ\n\n(Нажмите q для выхода)"
-		return m.entryList.View()
+		mainContent = m.entryList.View()
+		help = "(↑/↓ - навигация, Enter - детали, / - поиск, Ctrl+S - сохр., q - выход)"
+	case entryDetailScreen:
+		mainContent = m.viewEntryDetailScreen()
+		help = "(e - ред., Ctrl+S - сохр., Esc/b - назад)" // Уже добавлено в viewEntryDetailScreen
+	case entryEditScreen:
+		mainContent = m.viewEntryEditScreen()
+		help = "(Tab/↑/↓ - навигация, Enter - сохр., Esc/b - отмена)" // Обновим и здесь
 	default:
-		return "Неизвестное состояние!"
+		mainContent = "Неизвестное состояние!"
 	}
+
+	// Добавляем статус сохранения, если он есть
+	statusLine := ""
+	if m.savingStatus != "" && m.state != welcomeScreen && m.state != passwordInputScreen {
+		statusLine = "\n" + m.savingStatus
+	}
+
+	// Собираем финальный вывод
+	// Для list.View уже есть отступ снизу, для остальных добавляем
+	if m.state == entryListScreen {
+		return mainContent + help + statusLine
+	}
+	// Для детального и редактирования - help уже внутри view-функций
+	if m.state == entryDetailScreen || m.state == entryEditScreen {
+		return mainContent + statusLine
+	}
+
+	return mainContent + "\n" + help + statusLine
+}
+
+// viewWelcomeScreen отрисовывает экран приветствия.
+func (m model) viewWelcomeScreen() string {
+	s := "Добро пожаловать в GophKeeper!\n\n"
+	s += "Это безопасный менеджер паролей для командной строки,\n"
+	s += "совместимый с форматом KDBX (KeePass).\n\n"
+	s += "Нажмите Enter для продолжения или Ctrl+C/q для выхода.\n"
+	return s
+}
+
+// viewPasswordInputScreen отрисовывает экран ввода пароля.
+func (m model) viewPasswordInputScreen() string {
+	s := "Введите мастер-пароль для открытия базы данных: " + m.kdbxPath + "\n\n"
+	s += m.passwordInput.View() + "\n\n"
+	if m.err != nil {
+		errMsgStr := fmt.Sprintf("\nОшибка: %s\n\n(Нажмите любую клавишу для продолжения)", m.err)
+		return s + errMsgStr // Возвращаем основной текст + текст ошибки
+	}
+	s += "(Нажмите Enter для подтверждения или Ctrl+C для выхода)\n"
+	return s
+}
+
+// viewEntryDetailScreen отрисовывает экран деталей записи.
+func (m model) viewEntryDetailScreen() string {
+	if m.selectedEntry == nil {
+		return "Ошибка: Запись не выбрана!" // Такого не должно быть, но на всякий случай
+	}
+
+	// Определяем желаемый порядок полей
+	desiredOrder := []string{"Title", "UserName", "Password", "URL", "Notes"}
+	// Собираем значения в map для быстрого доступа
+	valuesMap := make(map[string]gokeepasslib.ValueData)
+	for _, val := range m.selectedEntry.entry.Values {
+		valuesMap[val.Key] = val
+	}
+
+	s := fmt.Sprintf("Детали записи: %s\n\n", m.selectedEntry.Title())
+
+	// Выводим поля в заданном порядке
+	for _, key := range desiredOrder {
+		if val, ok := valuesMap[key]; ok {
+			// Пока не будем показывать пароли
+			if val.Key == fieldNamePassword {
+				s += fmt.Sprintf("%s: ********\n", val.Key)
+			} else {
+				s += fmt.Sprintf("%s: %s\n", val.Key, val.Value.Content)
+			}
+			// Удаляем из карты, чтобы потом вывести оставшиеся (нестандартные) поля
+			delete(valuesMap, key)
+		} else {
+			// Если поля нет в записи, можно вывести прочерк или ничего
+			s += fmt.Sprintf("%s: \n", key)
+		}
+	}
+
+	// Выводим остальные (нестандартные) поля, если они есть
+	if len(valuesMap) > 0 {
+		s += "\n--- Дополнительные поля ---\n"
+		for _, val := range m.selectedEntry.entry.Values {
+			if _, existsInMap := valuesMap[val.Key]; existsInMap {
+				s += fmt.Sprintf("%s: %s\n", val.Key, val.Value.Content)
+			}
+		}
+	}
+
+	// s += "\n(e - ред., Ctrl+S - сохр., Esc/b - назад)" // Убрали, т.к. добавляется в View
+	return s
+}
+
+// viewEntryEditScreen отрисовывает экран редактирования записи.
+func (m model) viewEntryEditScreen() string {
+	if m.editingEntry == nil || len(m.editInputs) == 0 {
+		return "Ошибка: Нет данных для редактирования!"
+	}
+
+	s := "Редактирование записи: " + m.editingEntry.GetTitle() + "\n\n"
+	for i, input := range m.editInputs {
+		// Добавляем индикатор фокуса
+		focusIndicator := "  "
+		if m.focusedField == i {
+			focusIndicator = "> " // Или другой индикатор, например, стиль
+		}
+		s += fmt.Sprintf("%s%s: %s\n", focusIndicator, input.Placeholder, input.View())
+	}
+	// s += "\n(Tab/Shift+Tab - навигация, Esc/b - отмена)" // Убрали, т.к. добавляется в View
+	// TODO: Добавить подсказку про Enter для сохранения
+	return s
 }
 
 // Start запускает TUI приложение.
@@ -340,4 +765,35 @@ func Start() {
 		slog.Error("Ошибка при запуске TUI", "error", err)
 		os.Exit(1)
 	}
+}
+
+// --- Вспомогательные функции ---
+
+// findEntryInDB рекурсивно ищет запись по UUID в базе данных.
+// Возвращает указатель на найденную запись или nil.
+func findEntryInDB(db *gokeepasslib.Database, uuid gokeepasslib.UUID) *gokeepasslib.Entry {
+	if db == nil || db.Content == nil || db.Content.Root == nil {
+		return nil
+	}
+	return findEntryInGroups(db.Content.Root.Groups, uuid)
+}
+
+// findEntryInGroups рекурсивно ищет запись по UUID в срезе групп.
+// Возвращает указатель на найденную запись или nil.
+func findEntryInGroups(groups []gokeepasslib.Group, uuid gokeepasslib.UUID) *gokeepasslib.Entry {
+	for i := range groups { // Используем индекс, чтобы получить указатель на элемент среза
+		group := &groups[i]
+		// Ищем в записях текущей группы
+		for j := range group.Entries {
+			entry := &group.Entries[j]
+			if entry.UUID == uuid {
+				return entry // Нашли!
+			}
+		}
+		// Ищем рекурсивно в подгруппах
+		if entry := findEntryInGroups(group.Groups, uuid); entry != nil {
+			return entry // Нашли в подгруппе
+		}
+	}
+	return nil // Не нашли
 }
