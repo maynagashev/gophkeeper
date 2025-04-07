@@ -1,4 +1,23 @@
 ?   	github.com/maynagashev/gophkeeper/cmd/gophkeeper	[no test files]
 ?   	github.com/maynagashev/gophkeeper/internal/client	[no test files]
-?   	github.com/maynagashev/gophkeeper/internal/kdbx	[no test files]
+=== RUN   TestOpenFile
+=== RUN   TestOpenFile/Success_With_Correct_Password
+=== RUN   TestOpenFile/Error_With_Incorrect_Password
+=== RUN   TestOpenFile/Error_With_Nonexistent_File
+--- PASS: TestOpenFile (1.88s)
+    --- PASS: TestOpenFile/Success_With_Correct_Password (1.09s)
+    --- PASS: TestOpenFile/Error_With_Incorrect_Password (0.79s)
+    --- PASS: TestOpenFile/Error_With_Nonexistent_File (0.00s)
+=== RUN   TestGetAllEntries
+=== RUN   TestGetAllEntries/Success_Get_Entries
+=== RUN   TestGetAllEntries/Handle_Nil_Database
+--- PASS: TestGetAllEntries (0.79s)
+    --- PASS: TestGetAllEntries/Success_Get_Entries (0.79s)
+    --- PASS: TestGetAllEntries/Handle_Nil_Database (0.00s)
+=== RUN   TestCreateDatabase
+=== RUN   TestCreateDatabase/Create_New_Database
+--- PASS: TestCreateDatabase (0.00s)
+    --- PASS: TestCreateDatabase/Create_New_Database (0.00s)
+PASS
+ok  	github.com/maynagashev/gophkeeper/internal/kdbx	2.726s
 ?   	github.com/maynagashev/gophkeeper/internal/tui	[no test files]
