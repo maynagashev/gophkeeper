@@ -33,3 +33,8 @@ test-coverage:
 	go test -coverprofile=logs/coverage.out ./...
 	go tool cover -html=logs/coverage.out -o logs/coverage.html
 	go tool cover -func=logs/coverage.out | tee logs/coverage.log
+
+# Линтер
+lint:
+	@echo "Запуск линтера..."
+	golangci-lint run ./... --fix
