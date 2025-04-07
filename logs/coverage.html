@@ -57,7 +57,9 @@
 				
 				<option value="file0">github.com/maynagashev/gophkeeper/cmd/gophkeeper/main.go (0.0%)</option>
 				
-				<option value="file1">github.com/maynagashev/gophkeeper/internal/tui/tui.go (0.0%)</option>
+				<option value="file1">github.com/maynagashev/gophkeeper/internal/kdbx/kdbx.go (95.5%)</option>
+				
+				<option value="file2">github.com/maynagashev/gophkeeper/internal/tui/tui.go (0.0%)</option>
 				
 				</select>
 			</div>
@@ -74,123 +76,400 @@
 		<pre class="file" id="file0" style="display: none">package main
 
 import (
+        "log/slog"
+        "os"
+
         "github.com/maynagashev/gophkeeper/internal/tui"
 )
 
 func main() <span class="cov0" title="0">{
+        // Настройка логирования в файл
+        logFile, err := os.OpenFile("logs/gophkeeper.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+        if err != nil </span><span class="cov0" title="0">{
+                panic("Не удалось открыть лог-файл: " + err.Error())</span>
+        }
+        <span class="cov0" title="0">defer logFile.Close()
+
+        // Создаем JSON обработчик, пишущий в файл
+        // Уровень Debug, чтобы видеть все наши отладочные сообщения
+        logger := slog.New(slog.NewJSONHandler(logFile, &amp;slog.HandlerOptions{
+                Level: slog.LevelDebug,
+        }))
+        // Устанавливаем созданный логгер как стандартный
+        slog.SetDefault(logger)
+
+        slog.Info("Логгер инициализирован, запись в gophkeeper.log")
+
         // Запуск TUI
-        tui.Start()
-}</span>
+        tui.Start()</span>
+}
 </pre>
 		
-		<pre class="file" id="file1" style="display: none">package tui
+		<pre class="file" id="file1" style="display: none">package kdbx
 
 import (
         "fmt"
         "os"
 
-        "github.com/charmbracelet/bubbles/textinput"
-        tea "github.com/charmbracelet/bubbletea"
+        "github.com/tobischo/gokeepasslib/v3"
 )
 
-// Состояния (экраны) приложения
+// TODO: Реализация работы с KDBX файлами
+
+// OpenFile открывает и дешифрует KDBX файл по указанному пути и паролю.
+// Возвращает объект базы данных или ошибку.
+func OpenFile(filePath string, password string) (*gokeepasslib.Database, error) <span class="cov8" title="1">{
+        // Открываем файл
+        file, err := os.Open(filePath)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, fmt.Errorf("ошибка открытия файла '%s': %w", filePath, err)
+        }</span>
+        <span class="cov8" title="1">defer file.Close()
+
+        // Создаем новую базу данных для декодирования
+        db := gokeepasslib.NewDatabase()
+        // Устанавливаем учетные данные для дешифровки
+        db.Credentials = gokeepasslib.NewPasswordCredentials(password)
+
+        // Декодируем (дешифруем) файл
+        err = gokeepasslib.NewDecoder(file).Decode(db)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, fmt.Errorf("ошибка дешифрования файла '%s': %w", filePath, err)
+        }</span>
+
+        // Разблокируем защищенные значения (пароли и т.д.)
+        <span class="cov8" title="1">err = db.UnlockProtectedEntries()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("ошибка разблокировки защищенных полей: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">return db, nil</span>
+}
+
+// GetAllEntries рекурсивно обходит все группы и возвращает плоский список всех записей.
+func GetAllEntries(db *gokeepasslib.Database) []gokeepasslib.Entry <span class="cov8" title="1">{
+        var entries []gokeepasslib.Entry
+        if db == nil || db.Content == nil || db.Content.Root == nil </span><span class="cov8" title="1">{
+                return entries
+        }</span>
+        <span class="cov8" title="1">collectEntries(&amp;entries, db.Content.Root.Groups)
+        return entries</span>
+}
+
+// collectEntries - вспомогательная рекурсивная функция для сбора записей.
+func collectEntries(entries *[]gokeepasslib.Entry, groups []gokeepasslib.Group) <span class="cov8" title="1">{
+        for _, group := range groups </span><span class="cov8" title="1">{
+                *entries = append(*entries, group.Entries...)
+                collectEntries(entries, group.Groups)
+        }</span>
+}
+
+// TODO: Добавить функции для сохранения, добавления, редактирования, удаления записей.
+
+// CreateDatabase создает новую базу данных KDBX с указанным паролем.
+// Пока это только заглушка для тестов, которая всегда возвращает ошибку.
+func CreateDatabase(filePath string, password string) (*gokeepasslib.Database, error) <span class="cov8" title="1">{
+        return nil, fmt.Errorf("функция CreateDatabase еще не реализована")
+}</span>
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package tui
+
+import (
+        "encoding/hex"
+        "fmt"
+        "log/slog"
+        "os"
+
+        "github.com/charmbracelet/bubbles/list"
+        "github.com/charmbracelet/bubbles/textinput"
+        tea "github.com/charmbracelet/bubbletea"
+        "github.com/charmbracelet/lipgloss"
+        "github.com/tobischo/gokeepasslib/v3"
+
+        "github.com/maynagashev/gophkeeper/internal/kdbx"
+)
+
+// Состояния (экраны) приложения.
 type screenState int
 
 const (
         welcomeScreen       screenState = iota // Приветственный экран
         passwordInputScreen                    // Экран ввода пароля
-        // TODO: Добавить другие экраны (список записей, детали записи и т.д.)
+        entryListScreen                        // Экран списка записей
+        // TODO: Добавить другие экраны (детали записи и т.д.)
 )
+
+// entryItem представляет элемент списка записей.
+// Реализует интерфейс list.Item.
+type entryItem struct {
+        entry gokeepasslib.Entry
+}
+
+func (i entryItem) Title() string <span class="cov0" title="0">{
+        // Пытаемся получить значение поля "Title"
+        title := i.entry.GetTitle()
+        if title == "" </span><span class="cov0" title="0">{
+                // Если Title пустой, используем Username
+                title = i.entry.GetContent("UserName")
+        }</span>
+        <span class="cov0" title="0">if title == "" </span><span class="cov0" title="0">{
+                // Если и Username пустой, используем UUID
+                title = hex.EncodeToString(i.entry.UUID[:])
+        }</span>
+        <span class="cov0" title="0">return title</span>
+}
+
+func (i entryItem) Description() string <span class="cov0" title="0">{
+        // В описании можно показать Username или URL
+        username := i.entry.GetContent("UserName")
+        url := i.entry.GetContent("URL")
+        if username != "" &amp;&amp; url != "" </span><span class="cov0" title="0">{
+                return fmt.Sprintf("User: %s | URL: %s", username, url)
+        }</span> else<span class="cov0" title="0"> if username != "" </span><span class="cov0" title="0">{
+                return fmt.Sprintf("User: %s", username)
+        }</span> else<span class="cov0" title="0"> if url != "" </span><span class="cov0" title="0">{
+                return fmt.Sprintf("URL: %s", url)
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+func (i entryItem) FilterValue() string <span class="cov0" title="0">{ return i.Title() }</span>
 
 // Модель представляет состояние TUI приложения.
 type model struct {
-        state         screenState     // Текущее состояние (экран)
-        passwordInput textinput.Model // Поле ввода для пароля
-        // TODO: Добавить поля для хранения данных KDBX
+        state         screenState            // Текущее состояние (экран)
+        passwordInput textinput.Model        // Поле ввода для пароля
+        db            *gokeepasslib.Database // Объект открытой базы KDBX
+        kdbxPath      string                 // Путь к KDBX файлу (пока захардкожен)
+        err           error                  // Последняя ошибка для отображения
+        entryList     list.Model             // Компонент списка записей
 }
 
 // initialModel создает начальное состояние модели.
 func initialModel() model <span class="cov0" title="0">{
-        // Создаем поле ввода для пароля
+        // Поле ввода пароля
         ti := textinput.New()
         ti.Placeholder = "Мастер-пароль"
-        ti.Focus() // Сразу фокусируемся на поле
+        ti.Focus()
         ti.CharLimit = 156
         ti.Width = 20
-        ti.EchoMode = textinput.EchoPassword // Скрываем вводимые символы
+        ti.EchoMode = textinput.EchoPassword
+
+        // Компонент списка
+        delegate := list.NewDefaultDelegate()
+        // Настроим цвета для лучшей видимости
+        delegate.Styles.NormalTitle = delegate.Styles.NormalTitle.
+                Foreground(lipgloss.Color("252")). // Светло-серый для обычного заголовка
+                Background(lipgloss.Color("235"))  // Темный фон для контраста
+
+        delegate.Styles.NormalDesc = delegate.Styles.NormalDesc.
+                Foreground(lipgloss.Color("245")). // Темно-серый для обычного описания
+                Background(lipgloss.Color("235"))  // Темный фон для контраста
+
+        delegate.Styles.SelectedTitle = delegate.Styles.SelectedTitle.
+                Foreground(lipgloss.Color("212")). // Яркий розовый для выделенного заголовка
+                Background(lipgloss.Color("237")). // Чуть светлее фон для выделения
+                BorderLeftForeground(lipgloss.Color("212"))
+
+        delegate.Styles.SelectedDesc = delegate.Styles.SelectedDesc.
+                Foreground(lipgloss.Color("240")). // Светло-серый для выделенного описания
+                Background(lipgloss.Color("237")). // Чуть светлее фон для выделения
+                BorderLeftForeground(lipgloss.Color("212"))
+
+        l := list.New([]list.Item{}, delegate, 0, 0)
+        l.Title = "Записи"
+        // Убираем стандартные подсказки Quit и Help, т.к. мы их переопределим
+        l.SetShowHelp(false)
+        l.SetShowStatusBar(true) // Оставляем статус-бар (X items)
+        l.SetFilteringEnabled(true)
+        l.Styles.Title = list.DefaultStyles().Title.Copy().Bold(true)
+        l.Styles.PaginationStyle = list.DefaultStyles().PaginationStyle.Copy()
+        l.Styles.HelpStyle = list.DefaultStyles().HelpStyle.Copy()
 
         return model{
-                state:         welcomeScreen, // Начинаем с приветственного экрана
+                state:         welcomeScreen,
                 passwordInput: ti,
+                kdbxPath:      "example/test.kdbx",
+                entryList:     l,
         }
 }</span>
 
 // Init - команда, выполняемая при запуске приложения.
 func (m model) Init() tea.Cmd <span class="cov0" title="0">{
-        // Мигание курсора в поле ввода
         return textinput.Blink
 }</span>
 
-// Update обрабатывает входящие сообщения (события клавиатуры, мыши, команды).
+// Структура для сообщения об успешном открытии файла
+type dbOpenedMsg struct {
+        db *gokeepasslib.Database
+}
+
+// Структура для сообщения об ошибке
+type errMsg struct {
+        err error
+}
+
+// Команда для асинхронного открытия файла
+func openKdbxCmd(path, password string) tea.Cmd <span class="cov0" title="0">{
+        return func() tea.Msg </span><span class="cov0" title="0">{
+                db, err := kdbx.OpenFile(path, password)
+                if err != nil </span><span class="cov0" title="0">{
+                        return errMsg{err: err}
+                }</span>
+                <span class="cov0" title="0">return dbOpenedMsg{db: db}</span>
+        }
+}
+
+// Update обрабатывает входящие сообщения.
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
         var cmd tea.Cmd
+        var cmds []tea.Cmd // Собираем команды
 
         switch msg := msg.(type) </span>{
-        // Обработка нажатия клавиш
+        // == Глобальные сообщения (не зависят от экрана) ==
+        case tea.WindowSizeMsg:<span class="cov0" title="0">
+                // Обновляем размеры компонентов
+                m.entryList.SetSize(msg.Width, msg.Height)
+                m.passwordInput.Width = msg.Width - 4 // Оставляем отступы
+                return m, nil</span>
+
+        case dbOpenedMsg:<span class="cov0" title="0">
+                m.db = msg.db
+                m.err = nil
+                prevState := m.state // Сохраняем предыдущее состояние
+                m.state = entryListScreen
+                slog.Info("База KDBX успешно открыта", "path", m.kdbxPath)
+
+                entries := kdbx.GetAllEntries(m.db)
+                slog.Debug("Записи, полученные из KDBX", "count", len(entries))
+
+                items := make([]list.Item, len(entries))
+                for i, entry := range entries </span><span class="cov0" title="0">{
+                        items[i] = entryItem{entry: entry}
+                }</span>
+
+                // Перед установкой элементов, проверим их количество
+                <span class="cov0" title="0">slog.Debug("Элементы, подготовленные для списка", "count", len(items))
+                m.entryList.SetItems(items)
+
+                // Проверим количество элементов в списке после установки
+                slog.Debug("Элементы в списке после SetItems", "count", len(m.entryList.Items()))
+
+                // Установим размер списка явно (например, 80x24 или другой подходящий размер терминала)
+                // Это обеспечит правильное отображение до первого реального сообщения о размере окна
+                m.entryList.SetWidth(80)  // Стандартная ширина терминала
+                m.entryList.SetHeight(24) // Стандартная высота терминала
+
+                m.entryList.Title = fmt.Sprintf("Записи в '%s' (%d)", m.kdbxPath, len(items))
+
+                // Явно очищаем экран при переходе на список записей
+                cmds := []tea.Cmd{}
+                if prevState != entryListScreen </span><span class="cov0" title="0">{
+                        cmds = append(cmds, tea.ClearScreen)
+                }</span>
+
+                <span class="cov0" title="0">return m, tea.Batch(cmds...)</span>
+
+        case errMsg:<span class="cov0" title="0">
+                m.err = msg.err
+                slog.Error("Ошибка при работе с KDBX", "error", m.err)
+                m.passwordInput.Blur() // Снимаем фокус, чтобы показать ошибку
+                return m, nil</span>
+
+        // Обработка нажатия клавиш делегируется состоянию
         case tea.KeyMsg:<span class="cov0" title="0">
-                switch m.state </span>{
-                case welcomeScreen:<span class="cov0" title="0">
-                        switch msg.String() </span>{
-                        case "ctrl+c", "q":<span class="cov0" title="0">
+                // Сочетание Ctrl+C всегда приводит к выходу
+                if msg.Type == tea.KeyCtrlC </span><span class="cov0" title="0">{
+                        return m, tea.Quit
+                }</span>
+        }
+
+        // == Обновление компонентов в зависимости от состояния ==
+        <span class="cov0" title="0">switch m.state </span>{
+        case welcomeScreen:<span class="cov0" title="0">
+                // Обработка клавиш для приветственного экрана
+                if keyMsg, ok := msg.(tea.KeyMsg); ok </span><span class="cov0" title="0">{
+                        switch keyMsg.String() </span>{
+                        case "q":<span class="cov0" title="0">
                                 return m, tea.Quit</span>
                         case "enter":<span class="cov0" title="0">
-                                // Переход на экран ввода пароля
                                 m.state = passwordInputScreen
-                                return m, nil</span> // Дополнительных команд не требуется
+                                m.passwordInput.Focus()
+                                // Добавляем явную очистку экрана при переходе
+                                cmds = append(cmds, textinput.Blink, tea.ClearScreen)</span>
                         }
-                case passwordInputScreen:<span class="cov0" title="0">
-                        switch msg.String() </span>{
-                        case "ctrl+c":<span class="cov0" title="0">
-                                return m, tea.Quit</span>
+                }
+
+        case passwordInputScreen:<span class="cov0" title="0">
+                // Сначала обновляем поле ввода
+                m.passwordInput, cmd = m.passwordInput.Update(msg)
+                cmds = append(cmds, cmd)
+
+                // Обработка клавиш для экрана ввода пароля
+                if keyMsg, ok := msg.(tea.KeyMsg); ok </span><span class="cov0" title="0">{
+                        // Если была ошибка, любое нажатие ее скрывает
+                        if m.err != nil </span><span class="cov0" title="0">{
+                                m.err = nil
+                                m.passwordInput.Focus() // Возвращаем фокус
+                                cmds = append(cmds, textinput.Blink)
+                                // Не обрабатываем другие клавиши в этом цикле
+                                break</span> // Выходим из switch keyMsg
+                        }
+
+                        <span class="cov0" title="0">switch keyMsg.String() </span>{
                         case "enter":<span class="cov0" title="0">
-                                // TODO: Проверить пароль и открыть KDBX файл
-                                fmt.Printf("Введен пароль: %s\n", m.passwordInput.Value()) // Пока просто выводим
-                                // TODO: Перейти на экран списка записей при успехе
-                                return m, tea.Quit</span> // Пока выходим после ввода пароля
+                                password := m.passwordInput.Value()
+                                m.passwordInput.Blur()
+                                m.passwordInput.Reset()
+                                cmds = append(cmds, openKdbxCmd(m.kdbxPath, password))</span>
                         }
-                        // Обновляем состояние поля ввода пароля
-                        <span class="cov0" title="0">m.passwordInput, cmd = m.passwordInput.Update(msg)
-                        return m, cmd</span>
+                }
+
+        case entryListScreen:<span class="cov0" title="0">
+                // Сначала обновляем список
+                m.entryList, cmd = m.entryList.Update(msg)
+                cmds = append(cmds, cmd)
+
+                // Обработка клавиш для экрана списка
+                if keyMsg, ok := msg.(tea.KeyMsg); ok </span><span class="cov0" title="0">{
+                        switch keyMsg.String() </span>{
+                        case "q":<span class="cov0" title="0">
+                                // Выход по 'q', если не активен режим фильтрации
+                                if m.entryList.FilterState() == list.Unfiltered </span><span class="cov0" title="0">{
+                                        return m, tea.Quit
+                                }</span>
+                                // TODO: Обработка Enter для выбора записи
+                        }
                 }
         }
 
-        // Если сообщение не обработано для текущего состояния,
-        // возможно, оно предназначено для компонента (например, textinput)
-        // Обновляем поле ввода пароля, если мы на соответствующем экране
-        <span class="cov0" title="0">if m.state == passwordInputScreen </span><span class="cov0" title="0">{
-                m.passwordInput, cmd = m.passwordInput.Update(msg)
-                return m, cmd
-        }</span>
-
-        <span class="cov0" title="0">return m, nil</span>
+        // Возвращаем модель и собранные команды
+        <span class="cov0" title="0">return m, tea.Batch(cmds...)</span>
 }
 
 // View отрисовывает пользовательский интерфейс.
 func (m model) View() string <span class="cov0" title="0">{
         switch m.state </span>{
         case welcomeScreen:<span class="cov0" title="0">
-                // Приветственное сообщение с кратким описанием
                 s := "Добро пожаловать в GophKeeper!\n\n"
                 s += "Это безопасный менеджер паролей для командной строки,\n"
                 s += "совместимый с форматом KDBX (KeePass).\n\n"
                 s += "Нажмите Enter для продолжения или Ctrl+C/q для выхода.\n"
                 return s</span>
         case passwordInputScreen:<span class="cov0" title="0">
-                // Экран ввода пароля
-                s := "Введите мастер-пароль для открытия базы данных:\n\n"
-                s += m.passwordInput.View() // Отображаем поле ввода
-                s += "\n\n(Нажмите Enter для подтверждения или Ctrl+C для выхода)\n"
+                s := "Введите мастер-пароль для открытия базы данных: " + m.kdbxPath + "\n\n"
+                s += m.passwordInput.View() + "\n\n"
+                if m.err != nil </span><span class="cov0" title="0">{
+                        s := fmt.Sprintf("\nОшибка: %s\n\n(Нажмите любую клавишу для продолжения)", m.err)
+                        return s + s // Возвращаем основной текст + текст ошибки
+                }</span>
+                <span class="cov0" title="0">s += "(Нажмите Enter для подтверждения или Ctrl+C для выхода)\n"
                 return s</span>
+        case entryListScreen:<span class="cov0" title="0">
+                // Временно возвращаем простую строку для теста очистки экрана
+                // return "ЭКРАН СПИСКА ЗАПИСЕЙ\n\n(Нажмите q для выхода)"
+                return m.entryList.View()</span>
         default:<span class="cov0" title="0">
                 return "Неизвестное состояние!"</span>
         }
@@ -198,9 +477,10 @@ func (m model) View() string <span class="cov0" title="0">{
 
 // Start запускает TUI приложение.
 func Start() <span class="cov0" title="0">{
-        p := tea.NewProgram(initialModel())
+        // Используем FullAltScreen для корректной работы списка
+        p := tea.NewProgram(initialModel(), tea.WithAltScreen())
         if _, err := p.Run(); err != nil </span><span class="cov0" title="0">{
-                fmt.Printf("Ошибка при запуске TUI: %v", err)
+                slog.Error("Ошибка при запуске TUI", "error", err)
                 os.Exit(1)
         }</span>
 }

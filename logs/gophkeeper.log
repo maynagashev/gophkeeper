@@ -1,0 +1,14 @@
+{"time":"2025-04-07T22:30:12.403850168+07:00","level":"INFO","msg":"Логгер инициализирован, запись в gophkeeper.log"}
+{"time":"2025-04-07T22:31:11.455557571+07:00","level":"INFO","msg":"База KDBX успешно открыта","path":"example/test.kdbx"}
+{"time":"2025-04-07T22:31:11.455713242+07:00","level":"DEBUG","msg":"Записи, полученные из KDBX","count":2}
+{"time":"2025-04-07T22:31:11.455745794+07:00","level":"DEBUG","msg":"Элементы, подготовленные для списка","count":2}
+{"time":"2025-04-07T22:31:11.456087638+07:00","level":"DEBUG","msg":"Элементы в списке после SetItems","count":2}
+{"time":"2025-04-07T22:34:20.138298914+07:00","level":"INFO","msg":"Логгер инициализирован, запись в gophkeeper.log"}
+{"time":"2025-04-07T22:34:24.975936057+07:00","level":"ERROR","msg":"Ошибка при работе с KDBX","error":"ошибка дешифрования файла 'example/test.kdbx': Wrong password? HMAC-SHA256 of header mismatching"}
+{"time":"2025-04-07T22:34:31.977625966+07:00","level":"ERROR","msg":"Ошибка при работе с KDBX","error":"ошибка дешифрования файла 'example/test.kdbx': Wrong password? HMAC-SHA256 of header mismatching"}
+{"time":"2025-04-07T22:34:35.535577016+07:00","level":"ERROR","msg":"Ошибка при работе с KDBX","error":"ошибка дешифрования файла 'example/test.kdbx': Wrong password? HMAC-SHA256 of header mismatching"}
+{"time":"2025-04-07T22:34:40.258354925+07:00","level":"ERROR","msg":"Ошибка при работе с KDBX","error":"ошибка дешифрования файла 'example/test.kdbx': Wrong password? HMAC-SHA256 of header mismatching"}
+{"time":"2025-04-07T22:34:46.544838406+07:00","level":"INFO","msg":"База KDBX успешно открыта","path":"example/test.kdbx"}
+{"time":"2025-04-07T22:34:46.544986297+07:00","level":"DEBUG","msg":"Записи, полученные из KDBX","count":2}
+{"time":"2025-04-07T22:34:46.545020204+07:00","level":"DEBUG","msg":"Элементы, подготовленные для списка","count":2}
+{"time":"2025-04-07T22:34:46.545157106+07:00","level":"DEBUG","msg":"Элементы в списке после SetItems","count":2}
