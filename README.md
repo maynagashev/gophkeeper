@@ -8,4 +8,5 @@
 
 - [Техническое задание](docs/specification.md)
 - [Архитектура](ARCHITECTURE.md)
+- [План реализации](docs/plan.md)
 - [API для взаимодействия клиента и сервера](docs/api.md)

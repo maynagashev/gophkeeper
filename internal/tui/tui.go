@@ -1,14 +1,14 @@
 package tui
 
 import (
-	"fmt"
+	"log/slog"
 	"os"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-// Состояния (экраны) приложения
+// Состояния (экраны) приложения.
 type screenState int
 
 const (
@@ -50,12 +50,11 @@ func (m model) Init() tea.Cmd {
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
-	switch msg := msg.(type) {
 	// Обработка нажатия клавиш
-	case tea.KeyMsg:
+	if keyMsg, ok := msg.(tea.KeyMsg); ok {
 		switch m.state {
 		case welcomeScreen:
-			switch msg.String() {
+			switch keyMsg.String() {
 			case "ctrl+c", "q":
 				return m, tea.Quit
 			case "enter":
@@ -64,17 +63,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil // Дополнительных команд не требуется
 			}
 		case passwordInputScreen:
-			switch msg.String() {
+			switch keyMsg.String() {
 			case "ctrl+c":
 				return m, tea.Quit
 			case "enter":
 				// TODO: Проверить пароль и открыть KDBX файл
-				fmt.Printf("Введен пароль: %s\n", m.passwordInput.Value()) // Пока просто выводим
+				slog.Debug("Password entered")
 				// TODO: Перейти на экран списка записей при успехе
 				return m, tea.Quit // Пока выходим после ввода пароля
 			}
 			// Обновляем состояние поля ввода пароля
-			m.passwordInput, cmd = m.passwordInput.Update(msg)
+			m.passwordInput, cmd = m.passwordInput.Update(keyMsg)
 			return m, cmd
 		}
 	}
@@ -83,6 +82,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// возможно, оно предназначено для компонента (например, textinput)
 	// Обновляем поле ввода пароля, если мы на соответствующем экране
 	if m.state == passwordInputScreen {
+		// Мы должны обновить поле ввода с исходным сообщением 'msg',
+		// а не только с 'keyMsg', так как могут быть другие типы сообщений,
+		// которые textinput может обрабатывать.
+		// Однако, если мы уже обработали KeyMsg выше, то повторное обновление здесь
+		// может быть не нужно или даже вредно, если KeyMsg уже обновил состояние.
+		// Текущая логика обновления в конце может быть немного запутанной.
+		// Давайте пока оставим этот блок как есть, но возможно, его нужно будет пересмотреть.
 		m.passwordInput, cmd = m.passwordInput.Update(msg)
 		return m, cmd
 	}
@@ -115,7 +121,7 @@ func (m model) View() string {
 func Start() {
 	p := tea.NewProgram(initialModel())
 	if _, err := p.Run(); err != nil {
-		fmt.Printf("Ошибка при запуске TUI: %v", err)
+		slog.Error("Error starting TUI", "error", err)
 		os.Exit(1)
 	}
 }
