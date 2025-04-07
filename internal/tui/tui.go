@@ -22,6 +22,7 @@ const (
 	welcomeScreen       screenState = iota // Приветственный экран
 	passwordInputScreen                    // Экран ввода пароля
 	entryListScreen                        // Экран списка записей
+	entryDetailScreen                      // Экран деталей записи
 	// TODO: Добавить другие экраны (детали записи и т.д.)
 )
 
@@ -30,6 +31,11 @@ const (
 	defaultListWidth    = 80 // Стандартная ширина терминала для списка
 	defaultListHeight   = 24 // Стандартная высота терминала для списка
 	passwordInputOffset = 4  // Отступ для поля ввода пароля
+
+	keyEnter = "enter" // Клавиша Enter
+	keyQuit  = "q"     // Клавиша выхода
+	keyBack  = "b"     // Клавиша возврата
+	keyEsc   = "esc"   // Клавиша Escape
 )
 
 // entryItem представляет элемент списка записей.
@@ -78,6 +84,7 @@ type model struct {
 	kdbxPath      string                 // Путь к KDBX файлу (пока захардкожен)
 	err           error                  // Последняя ошибка для отображения
 	entryList     list.Model             // Компонент списка записей
+	selectedEntry *entryItem             // Выбранная запись для детального просмотра
 }
 
 // initialModel создает начальное состояние модели.
@@ -193,6 +200,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.updatePasswordInputScreen(msg)
 	case entryListScreen:
 		return m.updateEntryListScreen(msg)
+	case entryDetailScreen:
+		return m.updateEntryDetailScreen(msg)
 	default:
 		// Для неизвестных состояний возвращаем модель без изменений и команд
 		return m, nil
@@ -206,12 +215,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m *model) updateWelcomeScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 	if keyMsg, ok := msg.(tea.KeyMsg); ok {
-		if keyMsg.String() == "q" {
+		switch keyMsg.String() {
+		case keyQuit:
 			return m, tea.Quit
-		} else if keyMsg.String() == "enter" {
+		case keyEnter:
 			m.state = passwordInputScreen
 			m.passwordInput.Focus()
-			// Добавляем явную очистку экрана при переходе
 			cmds = append(cmds, textinput.Blink, tea.ClearScreen)
 		}
 	}
@@ -235,7 +244,7 @@ func (m *model) updatePasswordInputScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.passwordInput.Focus() // Возвращаем фокус
 			cmds = append(cmds, textinput.Blink)
 			// Не обрабатываем другие клавиши в этом цикле
-		} else if keyMsg.String() == "enter" {
+		} else if keyMsg.String() == keyEnter {
 			password := m.passwordInput.Value()
 			m.passwordInput.Blur()
 			m.passwordInput.Reset()
@@ -256,15 +265,40 @@ func (m *model) updateEntryListScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// Обработка клавиш для экрана списка
 	if keyMsg, ok := msg.(tea.KeyMsg); ok {
-		if keyMsg.String() == "q" {
+		switch keyMsg.String() {
+		case keyQuit:
 			// Выход по 'q', если не активен режим фильтрации
 			if m.entryList.FilterState() == list.Unfiltered {
 				return m, tea.Quit
 			}
-			// TODO: Обработка Enter для выбора записи
+		case keyEnter:
+			selectedItem := m.entryList.SelectedItem()
+			if selectedItem != nil {
+				// Убеждаемся, что это наш тип entryItem
+				if item, isEntryItem := selectedItem.(entryItem); isEntryItem {
+					m.selectedEntry = &item
+					m.state = entryDetailScreen
+					slog.Info("Переход к деталям записи", "title", item.Title())
+					cmds = append(cmds, tea.ClearScreen)
+				}
+			}
 		}
 	}
 	return m, tea.Batch(cmds...)
+}
+
+// updateEntryDetailScreen обрабатывает сообщения для экрана деталей записи.
+func (m *model) updateEntryDetailScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
+	if keyMsg, ok := msg.(tea.KeyMsg); ok {
+		switch keyMsg.String() {
+		case keyEsc, keyBack:
+			m.state = entryListScreen
+			m.selectedEntry = nil // Сбрасываем выбранную запись
+			slog.Info("Возврат к списку записей")
+			return m, tea.ClearScreen
+		}
+	}
+	return m, nil
 }
 
 // handleDBOpenedMsg обрабатывает сообщение об успешном открытии базы.
@@ -324,12 +358,31 @@ func (m model) View() string {
 		s += "(Нажмите Enter для подтверждения или Ctrl+C для выхода)\n"
 		return s
 	case entryListScreen:
-		// Временно возвращаем простую строку для теста очистки экрана
-		// return "ЭКРАН СПИСКА ЗАПИСЕЙ\n\n(Нажмите q для выхода)"
 		return m.entryList.View()
+	case entryDetailScreen:
+		return m.viewEntryDetailScreen()
 	default:
 		return "Неизвестное состояние!"
 	}
+}
+
+// viewEntryDetailScreen отрисовывает экран деталей записи.
+func (m model) viewEntryDetailScreen() string {
+	if m.selectedEntry == nil {
+		return "Ошибка: Запись не выбрана!" // Такого не должно быть, но на всякий случай
+	}
+
+	s := fmt.Sprintf("Детали записи: %s\n\n", m.selectedEntry.Title())
+	for _, val := range m.selectedEntry.entry.Values {
+		// Пока не будем показывать пароли
+		if val.Key == "Password" {
+			s += fmt.Sprintf("%s: ********\n", val.Key)
+		} else {
+			s += fmt.Sprintf("%s: %s\n", val.Key, val.Value.Content)
+		}
+	}
+	s += "\n(Нажмите Esc или b для возврата к списку)"
+	return s
 }
 
 // Start запускает TUI приложение.
