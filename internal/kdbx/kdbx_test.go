@@ -12,13 +12,13 @@ import (
 	"github.com/tobischo/gokeepasslib/v3"
 )
 
-// Константы для тестирования
+// Константы для тестирования.
 const (
-	testPassword    = "qwe"
+	testPassword    = "test"
 	invalidPassword = "wrongpassword"
 )
 
-// Вспомогательная функция для получения пути относительно корня проекта
+// Вспомогательная функция для получения пути относительно корня проекта.
 func getProjectPath(relPath string) string {
 	_, filename, _, _ := runtime.Caller(0)
 	// Путь к директории пакета kdbx
@@ -33,10 +33,16 @@ var (
 	nonExistentPath = getProjectPath("testdata/nonexistent.kdbx")
 )
 
+// skipIfTestFileNotExist пропускает тест, если тестовый файл не существует.
+func skipIfTestFileNotExist(t *testing.T) {
+	if _, err := os.Stat(testFilePath); os.IsNotExist(err) {
+		t.Skipf("Тестовый файл не найден по пути %s, пропускаем тест", testFilePath)
+	}
+}
+
 func TestOpenFile(t *testing.T) {
-	// Подготовка: проверяем, что тестовый файл существует
-	_, err := os.Stat(testFilePath)
-	require.NoError(t, err, "Тестовый файл не найден по пути %s", testFilePath)
+	// Проверяем доступность тестового файла
+	skipIfTestFileNotExist(t)
 
 	// Тест 1: Успешное открытие файла с правильным паролем
 	t.Run("Success_With_Correct_Password", func(t *testing.T) {
@@ -46,7 +52,7 @@ func TestOpenFile(t *testing.T) {
 
 		// Дополнительная проверка: бд должна содержать какие-то записи
 		entries := GetAllEntries(db)
-		assert.Greater(t, len(entries), 0, "База данных должна содержать как минимум одну запись")
+		assert.NotEmpty(t, entries, "База данных должна содержать как минимум одну запись")
 	})
 
 	// Тест 2: Ошибка при неправильном пароле
@@ -67,6 +73,9 @@ func TestOpenFile(t *testing.T) {
 }
 
 func TestGetAllEntries(t *testing.T) {
+	// Проверяем доступность тестового файла
+	skipIfTestFileNotExist(t)
+
 	// Тест 1: Успешное получение записей из базы данных
 	t.Run("Success_Get_Entries", func(t *testing.T) {
 		// Сначала открываем базу данных

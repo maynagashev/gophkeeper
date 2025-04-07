@@ -1,6 +1,7 @@
 package kdbx
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -62,5 +63,5 @@ func collectEntries(entries *[]gokeepasslib.Entry, groups []gokeepasslib.Group) 
 // CreateDatabase создает новую базу данных KDBX с указанным паролем.
 // Пока это только заглушка для тестов, которая всегда возвращает ошибку.
 func CreateDatabase(filePath string, password string) (*gokeepasslib.Database, error) {
-	return nil, fmt.Errorf("функция CreateDatabase еще не реализована")
+	return nil, errors.New("функция CreateDatabase еще не реализована")
 }

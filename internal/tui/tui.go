@@ -125,17 +125,17 @@ func (m model) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-// Структура для сообщения об успешном открытии файла
+// Структура для сообщения об успешном открытии файла.
 type dbOpenedMsg struct {
 	db *gokeepasslib.Database
 }
 
-// Структура для сообщения об ошибке
+// Структура для сообщения об ошибке.
 type errMsg struct {
 	err error
 }
 
-// Команда для асинхронного открытия файла
+// Команда для асинхронного открытия файла.
 func openKdbxCmd(path, password string) tea.Cmd {
 	return func() tea.Msg {
 		db, err := kdbx.OpenFile(path, password)
