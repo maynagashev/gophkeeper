@@ -1,6 +1,7 @@
 package kdbx
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -63,25 +64,29 @@ func collectEntries(entries *[]gokeepasslib.Entry, groups []gokeepasslib.Group) 
 // CreateDatabase создает новую базу данных KDBX с указанным паролем.
 // Пока это только заглушка для тестов, которая всегда возвращает ошибку.
 func CreateDatabase(_ string, _ string) (*gokeepasslib.Database, error) {
-	return nil, fmt.Errorf("функция CreateDatabase еще не реализована")
+	return nil, errors.New("функция CreateDatabase еще не реализована")
 }
 
 // SaveFile кодирует и сохраняет базу данных KDBX в указанный файл.
 func SaveFile(db *gokeepasslib.Database, filePath string, password string) error {
 	if db == nil {
-		return fmt.Errorf("база данных не инициализирована (nil)")
+		return errors.New("база данных не инициализирована (nil)")
 	}
 
 	// Устанавливаем учетные данные, если их нет (нужны для сохранения)
 	if db.Credentials == nil {
 		if password == "" {
-			return fmt.Errorf("пароль не может быть пустым при сохранении")
+			return errors.New("пароль не может быть пустым при сохранении")
 		}
 		db.Credentials = gokeepasslib.NewPasswordCredentials(password)
 	}
 
 	// Важно: перед сохранением нужно заблокировать защищенные поля!
-	db.LockProtectedEntries()
+	err := db.LockProtectedEntries()
+	if err != nil {
+		// Логируем ошибку, но не прерываем сохранение, если не критично
+		slog.Warn("Не удалось заблокировать поля перед сохранением", "error", err)
+	}
 
 	// Открываем файл для записи (перезаписываем существующий)
 	file, err := os.Create(filePath)
@@ -92,8 +97,8 @@ func SaveFile(db *gokeepasslib.Database, filePath string, password string) error
 
 	// Кодируем и записываем БД в файл
 	keepassEncoder := gokeepasslib.NewEncoder(file)
-	if err := keepassEncoder.Encode(db); err != nil {
-		return fmt.Errorf("ошибка кодирования и записи БД в файл '%s': %w", filePath, err)
+	if encodeErr := keepassEncoder.Encode(db); encodeErr != nil {
+		return fmt.Errorf("ошибка кодирования и записи БД в файл '%s': %w", filePath, encodeErr)
 	}
 
 	// Разблокируем обратно после сохранения (если нужно продолжить работу)

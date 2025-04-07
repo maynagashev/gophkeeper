@@ -185,14 +185,14 @@ func openKdbxCmd(path, password string) tea.Cmd {
 	}
 }
 
-// Структуры для сообщений о сохранении
+// Структуры для сообщений о сохранении.
 type dbSavedMsg struct{}
 
 type dbSaveErrorMsg struct {
 	err error
 }
 
-// Команда для асинхронного сохранения файла
+// Команда для асинхронного сохранения файла.
 func saveKdbxCmd(db *gokeepasslib.Database, path, password string) tea.Cmd {
 	return func() tea.Msg {
 		err := kdbx.SaveFile(db, path, password)
@@ -204,6 +204,8 @@ func saveKdbxCmd(db *gokeepasslib.Database, path, password string) tea.Cmd {
 }
 
 // Update обрабатывает входящие сообщения.
+//
+//nolint:gocognit,funlen // Снизим сложность и длину в будущем рефакторинге
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// var cmd tea.Cmd
 	// var cmds []tea.Cmd // Собираем команды
@@ -220,10 +222,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.handleDBOpenedMsg(msg)
 
 	case errMsg:
-		m.err = msg.err
-		slog.Error("Ошибка при работе с KDBX", "error", m.err)
-		m.passwordInput.Blur() // Снимаем фокус, чтобы показать ошибку
-		return m, nil
+		return m.handleErrorMsg(msg)
 
 	case dbSavedMsg:
 		m.savingStatus = "Сохранено успешно!"
@@ -489,34 +488,7 @@ func (m *model) updateEntryEditScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case keyEnter:
 			// Сохранение изменений
-			if m.selectedEntry != nil && m.editingEntry != nil {
-
-				// 1. Создаем финальную обновленную запись на основе editingEntry
-				finalUpdatedEntry := deepCopyEntry(*m.editingEntry) // Используем deepCopy на всякий случай
-				// Обновляем время модификации
-				now := w.Now()
-				finalUpdatedEntry.Times.LastModificationTime = &now
-
-				// 2. Создаем новый элемент списка с обновленной записью
-				newSelectedItem := entryItem{entry: finalUpdatedEntry}
-
-				// 3. Обновляем элемент в списке list.Model
-				idx := m.entryList.Index()
-				updateCmd := m.entryList.SetItem(idx, newSelectedItem) // Передаем новый элемент
-				cmds = append(cmds, updateCmd)
-
-				// 4. Обновляем selectedEntry в модели, чтобы он указывал на новый элемент
-				m.selectedEntry = &newSelectedItem
-
-				// 5. Возвращаемся к деталям и очищаем состояние редактирования
-				m.state = entryDetailScreen
-				m.editingEntry = nil
-				m.editInputs = nil
-				slog.Info("Изменения сохранены, возврат к деталям записи")
-				// Добавим ClearScreen к другим командам
-				cmds = append(cmds, tea.ClearScreen)
-				return m, tea.Batch(cmds...)
-			}
+			return m.saveEntryChanges()
 		}
 	} // конец if keyMsg, ok := msg.(tea.KeyMsg)
 
@@ -555,6 +527,41 @@ func (m *model) updateEntryEditScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.editingEntry.Values = append(m.editingEntry.Values, valueData)
 	}
 
+	return m, tea.Batch(cmds...)
+}
+
+// saveEntryChanges применяет изменения из editingEntry к selectedEntry и списку.
+func (m *model) saveEntryChanges() (tea.Model, tea.Cmd) {
+	var cmds []tea.Cmd
+	if m.selectedEntry == nil || m.editingEntry == nil {
+		slog.Warn("Попытка сохранить изменения без выбранной или редактируемой записи")
+		return m, nil // Ничего не делаем
+	}
+
+	// 1. Создаем финальную обновленную запись на основе editingEntry
+	finalUpdatedEntry := deepCopyEntry(*m.editingEntry) // Используем deepCopy на всякий случай
+	// Обновляем время модификации
+	now := w.Now()
+	finalUpdatedEntry.Times.LastModificationTime = &now
+
+	// 2. Создаем новый элемент списка с обновленной записью
+	newSelectedItem := entryItem{entry: finalUpdatedEntry}
+
+	// 3. Обновляем элемент в списке list.Model
+	idx := m.entryList.Index()
+	updateCmd := m.entryList.SetItem(idx, newSelectedItem) // Передаем новый элемент
+	cmds = append(cmds, updateCmd)
+
+	// 4. Обновляем selectedEntry в модели, чтобы он указывал на новый элемент
+	m.selectedEntry = &newSelectedItem
+
+	// 5. Возвращаемся к деталям и очищаем состояние редактирования
+	m.state = entryDetailScreen
+	m.editingEntry = nil
+	m.editInputs = nil
+	slog.Info("Изменения сохранены, возврат к деталям записи")
+	// Добавим ClearScreen к другим командам
+	cmds = append(cmds, tea.ClearScreen)
 	return m, tea.Batch(cmds...)
 }
 
@@ -610,29 +617,56 @@ func (m *model) handleDBOpenedMsg(msg dbOpenedMsg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(dbOpenedCmds...)
 }
 
+// handleErrorMsg обрабатывает сообщение об ошибке.
+func (m *model) handleErrorMsg(msg errMsg) (tea.Model, tea.Cmd) {
+	m.err = msg.err
+	slog.Error("Ошибка при работе с KDBX", "error", m.err)
+	m.passwordInput.Blur() // Снимаем фокус, чтобы показать ошибку
+	return m, nil
+}
+
 // View отрисовывает пользовательский интерфейс.
 func (m model) View() string {
 	var mainContent string
+	var help string
+
 	switch m.state {
 	case welcomeScreen:
 		mainContent = m.viewWelcomeScreen()
+		help = "(Enter - продолжить, Ctrl+C/q - выход)"
 	case passwordInputScreen:
 		mainContent = m.viewPasswordInputScreen()
+		help = "(Enter - подтвердить, Ctrl+C - выход)"
 	case entryListScreen:
 		mainContent = m.entryList.View()
+		help = "(↑/↓ - навигация, Enter - детали, / - поиск, Ctrl+S - сохр., q - выход)"
 	case entryDetailScreen:
 		mainContent = m.viewEntryDetailScreen()
+		help = "(e - ред., Ctrl+S - сохр., Esc/b - назад)" // Уже добавлено в viewEntryDetailScreen
 	case entryEditScreen:
 		mainContent = m.viewEntryEditScreen()
+		help = "(Tab/↑/↓ - навигация, Enter - сохр., Esc/b - отмена)" // Обновим и здесь
 	default:
 		mainContent = "Неизвестное состояние!"
 	}
 
 	// Добавляем статус сохранения, если он есть
+	statusLine := ""
 	if m.savingStatus != "" && m.state != welcomeScreen && m.state != passwordInputScreen {
-		return mainContent + "\n\n" + m.savingStatus
+		statusLine = "\n" + m.savingStatus
 	}
-	return mainContent
+
+	// Собираем финальный вывод
+	// Для list.View уже есть отступ снизу, для остальных добавляем
+	if m.state == entryListScreen {
+		return mainContent + help + statusLine
+	}
+	// Для детального и редактирования - help уже внутри view-функций
+	if m.state == entryDetailScreen || m.state == entryEditScreen {
+		return mainContent + statusLine
+	}
+
+	return mainContent + "\n" + help + statusLine
 }
 
 // viewWelcomeScreen отрисовывает экран приветствия.
@@ -662,16 +696,44 @@ func (m model) viewEntryDetailScreen() string {
 		return "Ошибка: Запись не выбрана!" // Такого не должно быть, но на всякий случай
 	}
 
-	s := fmt.Sprintf("Детали записи: %s\n\n", m.selectedEntry.Title())
+	// Определяем желаемый порядок полей
+	desiredOrder := []string{"Title", "UserName", "Password", "URL", "Notes"}
+	// Собираем значения в map для быстрого доступа
+	valuesMap := make(map[string]gokeepasslib.ValueData)
 	for _, val := range m.selectedEntry.entry.Values {
-		// Пока не будем показывать пароли
-		if val.Key == "Password" {
-			s += fmt.Sprintf("%s: ********\n", val.Key)
+		valuesMap[val.Key] = val
+	}
+
+	s := fmt.Sprintf("Детали записи: %s\n\n", m.selectedEntry.Title())
+
+	// Выводим поля в заданном порядке
+	for _, key := range desiredOrder {
+		if val, ok := valuesMap[key]; ok {
+			// Пока не будем показывать пароли
+			if val.Key == fieldNamePassword {
+				s += fmt.Sprintf("%s: ********\n", val.Key)
+			} else {
+				s += fmt.Sprintf("%s: %s\n", val.Key, val.Value.Content)
+			}
+			// Удаляем из карты, чтобы потом вывести оставшиеся (нестандартные) поля
+			delete(valuesMap, key)
 		} else {
-			s += fmt.Sprintf("%s: %s\n", val.Key, val.Value.Content)
+			// Если поля нет в записи, можно вывести прочерк или ничего
+			s += fmt.Sprintf("%s: \n", key)
 		}
 	}
-	s += "\n(Нажмите Esc или b для возврата к списку)"
+
+	// Выводим остальные (нестандартные) поля, если они есть
+	if len(valuesMap) > 0 {
+		s += "\n--- Дополнительные поля ---\n"
+		for _, val := range m.selectedEntry.entry.Values {
+			if _, existsInMap := valuesMap[val.Key]; existsInMap {
+				s += fmt.Sprintf("%s: %s\n", val.Key, val.Value.Content)
+			}
+		}
+	}
+
+	// s += "\n(e - ред., Ctrl+S - сохр., Esc/b - назад)" // Убрали, т.к. добавляется в View
 	return s
 }
 
@@ -690,7 +752,7 @@ func (m model) viewEntryEditScreen() string {
 		}
 		s += fmt.Sprintf("%s%s: %s\n", focusIndicator, input.Placeholder, input.View())
 	}
-	s += "\n(Tab/Shift+Tab - навигация, Esc/b - отмена)"
+	// s += "\n(Tab/Shift+Tab - навигация, Esc/b - отмена)" // Убрали, т.к. добавляется в View
 	// TODO: Добавить подсказку про Enter для сохранения
 	return s
 }
