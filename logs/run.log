@@ -1,45 +1,892 @@
-[?25l[?2004hДобро пожаловать в GophKeeper!
+[?25l[?1049h[2J[H[?25l[?2004h[HДобро пожаловать в GophKeeper!
 
 Это безопасный менеджер паролей для командной строки,
 совместимый с форматом KDBX (KeePass).
 
 Нажмите Enter для продолжения или Ctrl+C/q для выхода.
-[D[6AВведите мастер-пароль для открытия базы данных: example/test.kdbx
+[7;H[2J[H[HВведите мастер-пароль для открытия базы данных: example/test.kdbx
 
 > Мастер-пароль        
 
 (Нажмите Enter для подтверждения или Ctrl+C для выхода)
-[J[D[5A
+[J[6;H[H
 
 > *                    
 
 
-[D[5A
+[6;H[H
 
 > **                   
 
 
-[D[5A
+[6;H[H
 
 > ***                  
 
 
-[D[5A
+[6;H[H
 
 > ****                 
 
 
-[D[5A
+[6;H[H
 
 > *****                
 
 
-[D[5A
+[6;H[H
 
 > ******               
 
 
-[D[5AБаза 'example/test.kdbx' успешно открыта!
-Содержит 1 групп и 0 записей.
+[6;H[H
 
-(Нажмите Ctrl+C для выхода)[J[D[2K[?2004l[?25h[?1002l[?1003l[?1006l
+> Мастер-пароль        
+
+
+[6;H[H
+Ошибка: ошибка дешифрования файла 'example/test.kdbx': Wrong password? HMAC-SHA256 of header mismatching
+
+(Нажмите любую клавишу для продолжения)
+Ошибка: ошибка дешифрования файла 'example/test.kdbx': Wrong password? HMAC-SHA256 of header mismatching
+
+(Нажмите любую клавишу для продолжения)[7;H[HВведите мастер-пароль для открытия базы данных: example/test.kdbx
+
+> Мастер-пароль        
+
+(Нажмите Enter для подтверждения или Ctrl+C для выхода)
+[J[6;H[H
+Ошибка: ошибка дешифрования файла 'example/test.kdbx': Wrong password? HMAC-SHA256 of header mismatching
+
+(Нажмите любую клавишу для продолжения)
+Ошибка: ошибка дешифрования файла 'example/test.kdbx': Wrong password? HMAC-SHA256 of header mismatching
+
+(Нажмите любую клавишу для продолжения)[7;H[HВведите мастер-пароль для открытия базы данных: example/test.kdbx
+
+> Мастер-пароль        
+
+(Нажмите Enter для подтверждения или Ctrl+C для выхода)
+[J[6;H[H
+Ошибка: ошибка дешифрования файла 'example/test.kdbx': Wrong password? HMAC-SHA256 of header mismatching
+
+(Нажмите любую клавишу для продолжения)
+Ошибка: ошибка дешифрования файла 'example/test.kdbx': Wrong password? HMAC-SHA256 of header mismatching
+
+(Нажмите любую клавишу для продолжения)[7;H[HВведите мастер-пароль для открытия базы данных: example/test.kdbx
+
+> Мастер-пароль        
+
+(Нажмите Enter для подтверждения или Ctrl+C для выхода)
+[J[6;H[H
+
+> *                    
+
+
+[6;H[H
+
+> **                   
+
+
+[6;H[H
+
+> ***                  
+
+
+[6;H[H
+
+> ****                 
+
+
+[6;H[H
+
+> *****                
+
+
+[6;H[H
+
+> Мастер-пароль        
+
+
+[6;H[H
+Ошибка: ошибка дешифрования файла 'example/test.kdbx': Wrong password? HMAC-SHA256 of header mismatching
+
+(Нажмите любую клавишу для продолжения)
+Ошибка: ошибка дешифрования файла 'example/test.kdbx': Wrong password? HMAC-SHA256 of header mismatching
+
+(Нажмите любую клавишу для продолжения)[7;H[HВведите мастер-пароль для открытия базы данных: example/test.kdbx
+
+> Мастер-пароль        
+
+(Нажмите Enter для подтверждения или Ctrl+C для выхода)
+[J[6;H[H
+
+> *                    
+
+
+[6;H[H
+
+> **                   
+
+
+[6;H[H
+
+> ***                  
+
+
+[6;H[H
+
+> ****                 
+
+
+[6;H[H
+
+> *****                
+
+
+[6;H[H
+
+> ******               
+
+
+[6;H[H
+
+> Мастер-пароль        
+
+
+[6;H[2J[H[H   Записи в 'example/test.kdbx' (2)                
+                                                   
+  2 items                                          
+                                                   
+│ mail@example.com                                 
+│ User: mail@example.com | URL: https://example.com
+                                                   
+  test entry 2                                     
+  User: user1                                      
+                                                   
+                                                   
+                                                   
+                                                   
+                                                   
+                                                   
+                                                   
+                                                   
+                                                   
+                                                   
+                                                   
+                                                   
+                                                   
+                                                   
+                                                   [24;H[H
+
+
+
+  mail@example.com                                 
+  User: mail@example.com | URL: https://example.com
+
+│ test entry 2                                     
+│ User: user1                                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+│ mail@example.com                                 
+│ User: mail@example.com | URL: https://example.com
+
+  test entry 2                                     
+  User: user1                                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+  mail@example.com                                 
+  User: mail@example.com | URL: https://example.com
+
+│ test entry 2                                     
+│ User: user1                                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+│ mail@example.com                                 
+│ User: mail@example.com | URL: https://example.com
+
+  test entry 2                                     
+  User: user1                                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+  mail@example.com                                 
+  User: mail@example.com | URL: https://example.com
+
+│ test entry 2                                     
+│ User: user1                                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+│ mail@example.com                                 
+│ User: mail@example.com | URL: https://example.com
+
+  test entry 2                                     
+  User: user1                                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+  mail@example.com                                 
+  User: mail@example.com | URL: https://example.com
+
+│ test entry 2                                     
+│ User: user1                                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+│ mail@example.com                                 
+│ User: mail@example.com | URL: https://example.com
+
+  test entry 2                                     
+  User: user1                                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+  mail@example.com                                 
+  User: mail@example.com | URL: https://example.com
+
+│ test entry 2                                     
+│ User: user1                                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+│ mail@example.com                                 
+│ User: mail@example.com | URL: https://example.com
+
+  test entry 2                                     
+  User: user1                                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+  mail@example.com                                 
+  User: mail@example.com | URL: https://example.com
+
+│ test entry 2                                     
+│ User: user1                                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+│ mail@example.com                                 
+│ User: mail@example.com | URL: https://example.com
+
+  test entry 2                                     
+  User: user1                                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+  mail@example.com                                 
+  User: mail@example.com | URL: https://example.com
+
+│ test entry 2                                     
+│ User: user1                                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+│ mail@example.com                                 
+│ User: mail@example.com | URL: https://example.com
+
+  test entry 2                                     
+  User: user1                                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+  mail@example.com                                 
+  User: mail@example.com | URL: https://example.com
+
+│ test entry 2                                     
+│ User: user1                                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+│ mail@example.com                                 
+│ User: mail@example.com | URL: https://example.com
+
+  test entry 2                                     
+  User: user1                                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+  mail@example.com                                 
+  User: mail@example.com | URL: https://example.com
+
+│ test entry 2                                     
+│ User: user1                                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+│ mail@example.com                                 
+│ User: mail@example.com | URL: https://example.com
+
+  test entry 2                                     
+  User: user1                                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+  mail@example.com                                 
+  User: mail@example.com | URL: https://example.com
+
+│ test entry 2                                     
+│ User: user1                                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+│ mail@example.com                                 
+│ User: mail@example.com | URL: https://example.com
+
+  test entry 2                                     
+  User: user1                                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+  mail@example.com                                 
+  User: mail@example.com | URL: https://example.com
+
+│ test entry 2                                     
+│ User: user1                                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+│ mail@example.com                                 
+│ User: mail@example.com | URL: https://example.com
+
+  test entry 2                                     
+  User: user1                                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+  mail@example.com                                 
+  User: mail@example.com | URL: https://example.com
+
+│ test entry 2                                     
+│ User: user1                                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+│ mail@example.com                                 
+│ User: mail@example.com | URL: https://example.com
+
+  test entry 2                                     
+  User: user1                                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+  mail@example.com                                 
+  User: mail@example.com | URL: https://example.com
+
+│ test entry 2                                     
+│ User: user1                                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+│ mail@example.com                                 
+│ User: mail@example.com | URL: https://example.com
+
+  test entry 2                                     
+  User: user1                                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+  mail@example.com                                 
+  User: mail@example.com | URL: https://example.com
+
+│ test entry 2                                     
+│ User: user1                                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+│ mail@example.com                                 
+│ User: mail@example.com | URL: https://example.com
+
+  test entry 2                                     
+  User: user1                                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+  mail@example.com                                 
+  User: mail@example.com | URL: https://example.com
+
+│ test entry 2                                     
+│ User: user1                                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+│ mail@example.com                                 
+│ User: mail@example.com | URL: https://example.com
+
+  test entry 2                                     
+  User: user1                                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+  mail@example.com                                 
+  User: mail@example.com | URL: https://example.com
+
+│ test entry 2                                     
+│ User: user1                                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H

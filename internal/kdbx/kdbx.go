@@ -39,4 +39,22 @@ func OpenFile(filePath string, password string) (*gokeepasslib.Database, error) 
 	return db, nil
 }
 
+// GetAllEntries рекурсивно обходит все группы и возвращает плоский список всех записей.
+func GetAllEntries(db *gokeepasslib.Database) []gokeepasslib.Entry {
+	var entries []gokeepasslib.Entry
+	if db == nil || db.Content == nil || db.Content.Root == nil {
+		return entries
+	}
+	collectEntries(&entries, db.Content.Root.Groups)
+	return entries
+}
+
+// collectEntries - вспомогательная рекурсивная функция для сбора записей.
+func collectEntries(entries *[]gokeepasslib.Entry, groups []gokeepasslib.Group) {
+	for _, group := range groups {
+		*entries = append(*entries, group.Entries...)
+		collectEntries(entries, group.Groups)
+	}
+}
+
 // TODO: Добавить функции для сохранения, добавления, редактирования, удаления записей.
