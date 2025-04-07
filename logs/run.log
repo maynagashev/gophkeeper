@@ -80,94 +80,23 @@
 
 
 
-[24;H[H
-
-
-
-│ mail@example.com                                 
-│ User: mail@example.com | URL: https://example.com
-
-  test entry 2                                     
-  User: user1                                      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[24;H[H
-
-
-
-  mail@example.com                                 
-  User: mail@example.com | URL: https://example.com
-
-│ test entry 2                                     
-│ User: user1                                      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[24;H[H
-
-
-
-│ mail@example.com                                 
-│ User: mail@example.com | URL: https://example.com
-
-  test entry 2                                     
-  User: user1                                      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[24;H[2J[H[HДетали записи: mail@example.com
+[24;H[2J[H[HДетали записи: test entry 2
 
 Notes: 
 Password: ********
-Title: mail@example.com
-URL: https://example.com
-UserName: mail@example.com
+Title: test entry 2
+URL: 
+UserName: user1
 
 (Нажмите Esc или b для возврата к списку)[J[9;H[2J[H[H   Записи в 'example/test.kdbx' (2)                
                                                    
   2 items                                          
                                                    
-│ mail@example.com                                 
-│ User: mail@example.com | URL: https://example.com
+  mail@example.com                                 
+  User: mail@example.com | URL: https://example.com
                                                    
-  test entry 2                                     
-  User: user1                                      
-                                                   
-                                                   
+│ test entry 2                                     
+│ User: user1                                      
                                                    
                                                    
                                                    
@@ -180,4 +109,627 @@ UserName: mail@example.com
                                                    
                                                    
                                                    
-                                                   [24;H[2K[?2004l[?25h[?1002l[?1003l[?1006l[?1049l[?25h
+                                                   
+                                                   
+                                                   [24;H[H  Filter:                                                                       
+                                                                                
+  2 items                                                                       
+                                                                                
+  mail@example.com                                                              
+  User: mail@example.com | URL: https://example.com                             
+                                                                                
+  test entry 2                                                                  
+  User: user1                                                                   
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                [24;H[H  Filter: u                                                                     
+
+  Nothing matched • 2 filtered                                                  
+
+                                                                                
+                                                                                
+
+                                                                                
+                                                                                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H  Filter: us                                                                    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H  Filter: use                                                                   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H  Filter: user                                                                  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H  Filter: use                                                                   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H  Filter: us                                                                    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H  Filter: u                                                                     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H  Filter:                                                                       
+
+  2 items                                                                       
+
+  mail@example.com                                                              
+  User: mail@example.com | URL: https://example.com                             
+
+  test entry 2                                                                  
+  User: user1                                                                   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H  Filter: t                                                                     
+
+  1 item • 1 filtered                                                           
+
+  test entry 2                                                                  
+  User: user1                                                                   
+
+                                                                                
+                                                                                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H  Filter: te                                                                    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H  Filter: t                                                                     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H  Filter:                                                                       
+
+  2 items                                                                       
+
+  mail@example.com                                                              
+  User: mail@example.com | URL: https://example.com                             
+
+  test entry 2                                                                  
+  User: user1                                                                   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H  Filter: e                                                                     
+
+
+
+  test entry 2                                                                  
+  User: user1                                                                   
+
+  mail@example.com                                                              
+  User: mail@example.com | URL: https://example.com                             
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H  Filter: en                                                                    
+
+  1 item • 1 filtered                                                           
+
+
+
+
+                                                                                
+                                                                                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H  Filter: ent                                                                   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H  Filter: en                                                                    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H  Filter: e                                                                     
+
+  2 items                                                                       
+
+
+
+
+  mail@example.com                                                              
+  User: mail@example.com | URL: https://example.com                             
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H  Filter:                                                                       
+
+
+
+  mail@example.com                                                              
+  User: mail@example.com | URL: https://example.com                             
+
+  test entry 2                                                                  
+  User: user1                                                                   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H  Filter: ,                                                                     
+
+  Nothing matched • 2 filtered                                                  
+
+                                                                                
+                                                                                
+
+                                                                                
+                                                                                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H  Filter: ,a                                                                    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H  Filter: ,                                                                     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H  Filter:                                                                       
+
+  2 items                                                                       
+
+  mail@example.com                                                              
+  User: mail@example.com | URL: https://example.com                             
+
+  test entry 2                                                                  
+  User: user1                                                                   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H  Filter: m                                                                     
+
+  1 item • 1 filtered                                                           
+
+
+
+
+                                                                                
+                                                                                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H  Filter: ma                                                                    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H  Filter: mai                                                                   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H  Filter: mail                                                                  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H
