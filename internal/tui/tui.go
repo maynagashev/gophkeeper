@@ -1,11 +1,15 @@
 package tui
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/tobischo/gokeepasslib/v3"
+
+	"github.com/maynagashev/gophkeeper/internal/kdbx"
 )
 
 // Состояния (экраны) приложения.
@@ -14,14 +18,18 @@ type screenState int
 const (
 	welcomeScreen       screenState = iota // Приветственный экран
 	passwordInputScreen                    // Экран ввода пароля
-	// TODO: Добавить другие экраны (список записей, детали записи и т.д.)
+	entryListScreen                        // Экран списка записей (TODO)
+	// TODO: Добавить другие экраны (детали записи и т.д.)
 )
 
 // Модель представляет состояние TUI приложения.
 type model struct {
-	state         screenState     // Текущее состояние (экран)
-	passwordInput textinput.Model // Поле ввода для пароля
-	// TODO: Добавить поля для хранения данных KDBX
+	state         screenState            // Текущее состояние (экран)
+	passwordInput textinput.Model        // Поле ввода для пароля
+	db            *gokeepasslib.Database // Объект открытой базы KDBX
+	kdbxPath      string                 // Путь к KDBX файлу (пока захардкожен)
+	err           error                  // Последняя ошибка для отображения
+	// TODO: Добавить поля для списка записей, выбранной записи и т.д.
 }
 
 // initialModel создает начальное состояние модели.
@@ -37,6 +45,7 @@ func initialModel() model {
 	return model{
 		state:         welcomeScreen, // Начинаем с приветственного экрана
 		passwordInput: ti,
+		kdbxPath:      "example/test.kdbx", // TODO: Сделать путь настраиваемым
 	}
 }
 
@@ -46,49 +55,76 @@ func (m model) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-// Update обрабатывает входящие сообщения (события клавиатуры, мыши, команды).
+// Структура для сообщения об успешном открытии файла
+type dbOpenedMsg struct {
+	db *gokeepasslib.Database
+}
+
+// Структура для сообщения об ошибке
+type errMsg struct {
+	err error
+}
+
+// Команда для асинхронного открытия файла
+func openKdbxCmd(path, password string) tea.Cmd {
+	return func() tea.Msg {
+		db, err := kdbx.OpenFile(path, password)
+		if err != nil {
+			return errMsg{err: err}
+		}
+		return dbOpenedMsg{db: db}
+	}
+}
+
+// Update обрабатывает входящие сообщения.
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
+	switch msg := msg.(type) {
+	// Сообщение об успешном открытии KDBX
+	case dbOpenedMsg:
+		m.db = msg.db
+		m.err = nil               // Сбрасываем ошибку
+		m.state = entryListScreen // Переходим к списку записей (пока заглушка)
+		slog.Info("База KDBX успешно открыта", "path", m.kdbxPath)
+		// TODO: Реализовать экран списка записей
+		return m, tea.Quit // Временно выходим
+
+	// Сообщение об ошибке
+	case errMsg:
+		m.err = msg.err
+		slog.Error("Ошибка при работе с KDBX", "error", m.err)
+		// Остаемся на экране ввода пароля, чтобы показать ошибку
+		return m, nil
+
 	// Обработка нажатия клавиш
-	if keyMsg, ok := msg.(tea.KeyMsg); ok {
+	case tea.KeyMsg:
 		switch m.state {
 		case welcomeScreen:
-			switch keyMsg.String() {
+			switch msg.String() {
 			case "ctrl+c", "q":
 				return m, tea.Quit
 			case "enter":
-				// Переход на экран ввода пароля
 				m.state = passwordInputScreen
-				return m, nil // Дополнительных команд не требуется
+				return m, textinput.Blink // Начать мигание курсора при переходе
 			}
 		case passwordInputScreen:
-			switch keyMsg.String() {
+			switch msg.String() {
 			case "ctrl+c":
 				return m, tea.Quit
 			case "enter":
-				// TODO: Проверить пароль и открыть KDBX файл
-				slog.Debug("Password entered")
-				// TODO: Перейти на экран списка записей при успехе
-				return m, tea.Quit // Пока выходим после ввода пароля
+				// Запускаем команду асинхронного открытия файла
+				password := m.passwordInput.Value()
+				return m, openKdbxCmd(m.kdbxPath, password)
 			}
 			// Обновляем состояние поля ввода пароля
-			m.passwordInput, cmd = m.passwordInput.Update(keyMsg)
+			m.passwordInput, cmd = m.passwordInput.Update(msg)
 			return m, cmd
 		}
 	}
 
-	// Если сообщение не обработано для текущего состояния,
-	// возможно, оно предназначено для компонента (например, textinput)
 	// Обновляем поле ввода пароля, если мы на соответствующем экране
 	if m.state == passwordInputScreen {
-		// Мы должны обновить поле ввода с исходным сообщением 'msg',
-		// а не только с 'keyMsg', так как могут быть другие типы сообщений,
-		// которые textinput может обрабатывать.
-		// Однако, если мы уже обработали KeyMsg выше, то повторное обновление здесь
-		// может быть не нужно или даже вредно, если KeyMsg уже обновил состояние.
-		// Текущая логика обновления в конце может быть немного запутанной.
-		// Давайте пока оставим этот блок как есть, но возможно, его нужно будет пересмотреть.
 		m.passwordInput, cmd = m.passwordInput.Update(msg)
 		return m, cmd
 	}
@@ -100,18 +136,30 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) View() string {
 	switch m.state {
 	case welcomeScreen:
-		// Приветственное сообщение с кратким описанием
 		s := "Добро пожаловать в GophKeeper!\n\n"
 		s += "Это безопасный менеджер паролей для командной строки,\n"
 		s += "совместимый с форматом KDBX (KeePass).\n\n"
 		s += "Нажмите Enter для продолжения или Ctrl+C/q для выхода.\n"
 		return s
 	case passwordInputScreen:
-		// Экран ввода пароля
-		s := "Введите мастер-пароль для открытия базы данных:\n\n"
-		s += m.passwordInput.View() // Отображаем поле ввода
-		s += "\n\n(Нажмите Enter для подтверждения или Ctrl+C для выхода)\n"
+		s := "Введите мастер-пароль для открытия базы данных: " + m.kdbxPath + "\n\n"
+		s += m.passwordInput.View() + "\n\n"
+		// Отображаем ошибку, если она есть
+		if m.err != nil {
+			s += "Ошибка: " + m.err.Error() + "\n\n"
+		}
+		s += "(Нажмите Enter для подтверждения или Ctrl+C для выхода)\n"
 		return s
+	case entryListScreen:
+		// Заглушка для экрана списка записей
+		entryCount := 0
+		if m.db != nil && m.db.Content != nil && m.db.Content.Root != nil {
+			for _, group := range m.db.Content.Root.Groups {
+				entryCount += len(group.Entries)
+			}
+		}
+		return fmt.Sprintf("База '%s' успешно открыта!\nСодержит %d групп и %d записей.\n\n(Нажмите Ctrl+C для выхода)",
+			m.kdbxPath, len(m.db.Content.Root.Groups), entryCount)
 	default:
 		return "Неизвестное состояние!"
 	}
@@ -121,7 +169,7 @@ func (m model) View() string {
 func Start() {
 	p := tea.NewProgram(initialModel())
 	if _, err := p.Run(); err != nil {
-		slog.Error("Error starting TUI", "error", err)
+		slog.Error("Ошибка при запуске TUI", "error", err)
 		os.Exit(1)
 	}
 }
