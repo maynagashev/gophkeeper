@@ -25,6 +25,13 @@ const (
 	// TODO: Добавить другие экраны (детали записи и т.д.)
 )
 
+// Константы для TUI.
+const (
+	defaultListWidth    = 80 // Стандартная ширина терминала для списка
+	defaultListHeight   = 24 // Стандартная высота терминала для списка
+	passwordInputOffset = 4  // Отступ для поля ввода пароля
+)
+
 // entryItem представляет элемент списка записей.
 // Реализует интерфейс list.Item.
 type entryItem struct {
@@ -49,14 +56,16 @@ func (i entryItem) Description() string {
 	// В описании можно показать Username или URL
 	username := i.entry.GetContent("UserName")
 	url := i.entry.GetContent("URL")
-	if username != "" && url != "" {
+	switch {
+	case username != "" && url != "":
 		return fmt.Sprintf("User: %s | URL: %s", username, url)
-	} else if username != "" {
+	case username != "":
 		return fmt.Sprintf("User: %s", username)
-	} else if url != "" {
+	case url != "":
 		return fmt.Sprintf("URL: %s", url)
+	default:
+		return ""
 	}
-	return ""
 }
 
 func (i entryItem) FilterValue() string { return i.Title() }
@@ -108,9 +117,9 @@ func initialModel() model {
 	l.SetShowHelp(false)
 	l.SetShowStatusBar(true) // Оставляем статус-бар (X items)
 	l.SetFilteringEnabled(true)
-	l.Styles.Title = list.DefaultStyles().Title.Copy().Bold(true)
-	l.Styles.PaginationStyle = list.DefaultStyles().PaginationStyle.Copy()
-	l.Styles.HelpStyle = list.DefaultStyles().HelpStyle.Copy()
+	l.Styles.Title = list.DefaultStyles().Title.Bold(true)
+	l.Styles.PaginationStyle = list.DefaultStyles().PaginationStyle
+	l.Styles.HelpStyle = list.DefaultStyles().HelpStyle
 
 	return model{
 		state:         welcomeScreen,
@@ -148,53 +157,19 @@ func openKdbxCmd(path, password string) tea.Cmd {
 
 // Update обрабатывает входящие сообщения.
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
-	var cmds []tea.Cmd // Собираем команды
+	// var cmd tea.Cmd
+	// var cmds []tea.Cmd // Собираем команды
 
 	switch msg := msg.(type) {
 	// == Глобальные сообщения (не зависят от экрана) ==
 	case tea.WindowSizeMsg:
 		// Обновляем размеры компонентов
 		m.entryList.SetSize(msg.Width, msg.Height)
-		m.passwordInput.Width = msg.Width - 4 // Оставляем отступы
+		m.passwordInput.Width = msg.Width - passwordInputOffset
 		return m, nil
 
 	case dbOpenedMsg:
-		m.db = msg.db
-		m.err = nil
-		prevState := m.state // Сохраняем предыдущее состояние
-		m.state = entryListScreen
-		slog.Info("База KDBX успешно открыта", "path", m.kdbxPath)
-
-		entries := kdbx.GetAllEntries(m.db)
-		slog.Debug("Записи, полученные из KDBX", "count", len(entries))
-
-		items := make([]list.Item, len(entries))
-		for i, entry := range entries {
-			items[i] = entryItem{entry: entry}
-		}
-
-		// Перед установкой элементов, проверим их количество
-		slog.Debug("Элементы, подготовленные для списка", "count", len(items))
-		m.entryList.SetItems(items)
-
-		// Проверим количество элементов в списке после установки
-		slog.Debug("Элементы в списке после SetItems", "count", len(m.entryList.Items()))
-
-		// Установим размер списка явно (например, 80x24 или другой подходящий размер терминала)
-		// Это обеспечит правильное отображение до первого реального сообщения о размере окна
-		m.entryList.SetWidth(80)  // Стандартная ширина терминала
-		m.entryList.SetHeight(24) // Стандартная высота терминала
-
-		m.entryList.Title = fmt.Sprintf("Записи в '%s' (%d)", m.kdbxPath, len(items))
-
-		// Явно очищаем экран при переходе на список записей
-		cmds := []tea.Cmd{}
-		if prevState != entryListScreen {
-			cmds = append(cmds, tea.ClearScreen)
-		}
-
-		return m, tea.Batch(cmds...)
+		return m.handleDBOpenedMsg(msg)
 
 	case errMsg:
 		m.err = msg.err
@@ -213,64 +188,121 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// == Обновление компонентов в зависимости от состояния ==
 	switch m.state {
 	case welcomeScreen:
-		// Обработка клавиш для приветственного экрана
-		if keyMsg, ok := msg.(tea.KeyMsg); ok {
-			switch keyMsg.String() {
-			case "q":
-				return m, tea.Quit
-			case "enter":
-				m.state = passwordInputScreen
-				m.passwordInput.Focus()
-				// Добавляем явную очистку экрана при переходе
-				cmds = append(cmds, textinput.Blink, tea.ClearScreen)
-			}
-		}
-
+		return m.updateWelcomeScreen(msg)
 	case passwordInputScreen:
-		// Сначала обновляем поле ввода
-		m.passwordInput, cmd = m.passwordInput.Update(msg)
-		cmds = append(cmds, cmd)
-
-		// Обработка клавиш для экрана ввода пароля
-		if keyMsg, ok := msg.(tea.KeyMsg); ok {
-			// Если была ошибка, любое нажатие ее скрывает
-			if m.err != nil {
-				m.err = nil
-				m.passwordInput.Focus() // Возвращаем фокус
-				cmds = append(cmds, textinput.Blink)
-				// Не обрабатываем другие клавиши в этом цикле
-				break // Выходим из switch keyMsg
-			}
-
-			switch keyMsg.String() {
-			case "enter":
-				password := m.passwordInput.Value()
-				m.passwordInput.Blur()
-				m.passwordInput.Reset()
-				cmds = append(cmds, openKdbxCmd(m.kdbxPath, password))
-			}
-		}
-
+		return m.updatePasswordInputScreen(msg)
 	case entryListScreen:
-		// Сначала обновляем список
-		m.entryList, cmd = m.entryList.Update(msg)
-		cmds = append(cmds, cmd)
-
-		// Обработка клавиш для экрана списка
-		if keyMsg, ok := msg.(tea.KeyMsg); ok {
-			switch keyMsg.String() {
-			case "q":
-				// Выход по 'q', если не активен режим фильтрации
-				if m.entryList.FilterState() == list.Unfiltered {
-					return m, tea.Quit
-				}
-				// TODO: Обработка Enter для выбора записи
-			}
-		}
+		return m.updateEntryListScreen(msg)
+	default:
+		// Для неизвестных состояний возвращаем модель без изменений и команд
+		return m, nil
 	}
 
 	// Возвращаем модель и собранные команды
+	// return m, tea.Batch(cmds...)
+}
+
+// updateWelcomeScreen обрабатывает сообщения для экрана приветствия.
+func (m *model) updateWelcomeScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmds []tea.Cmd
+	if keyMsg, ok := msg.(tea.KeyMsg); ok {
+		if keyMsg.String() == "q" {
+			return m, tea.Quit
+		} else if keyMsg.String() == "enter" {
+			m.state = passwordInputScreen
+			m.passwordInput.Focus()
+			// Добавляем явную очистку экрана при переходе
+			cmds = append(cmds, textinput.Blink, tea.ClearScreen)
+		}
+	}
 	return m, tea.Batch(cmds...)
+}
+
+// updatePasswordInputScreen обрабатывает сообщения для экрана ввода пароля.
+func (m *model) updatePasswordInputScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+	var cmds []tea.Cmd
+
+	// Сначала обновляем поле ввода
+	m.passwordInput, cmd = m.passwordInput.Update(msg)
+	cmds = append(cmds, cmd)
+
+	// Обработка клавиш для экрана ввода пароля
+	if keyMsg, ok := msg.(tea.KeyMsg); ok {
+		// Если была ошибка, любое нажатие ее скрывает
+		if m.err != nil {
+			m.err = nil
+			m.passwordInput.Focus() // Возвращаем фокус
+			cmds = append(cmds, textinput.Blink)
+			// Не обрабатываем другие клавиши в этом цикле
+		} else if keyMsg.String() == "enter" {
+			password := m.passwordInput.Value()
+			m.passwordInput.Blur()
+			m.passwordInput.Reset()
+			cmds = append(cmds, openKdbxCmd(m.kdbxPath, password))
+		}
+	}
+	return m, tea.Batch(cmds...)
+}
+
+// updateEntryListScreen обрабатывает сообщения для экрана списка записей.
+func (m *model) updateEntryListScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+	var cmds []tea.Cmd
+
+	// Сначала обновляем список
+	m.entryList, cmd = m.entryList.Update(msg)
+	cmds = append(cmds, cmd)
+
+	// Обработка клавиш для экрана списка
+	if keyMsg, ok := msg.(tea.KeyMsg); ok {
+		if keyMsg.String() == "q" {
+			// Выход по 'q', если не активен режим фильтрации
+			if m.entryList.FilterState() == list.Unfiltered {
+				return m, tea.Quit
+			}
+			// TODO: Обработка Enter для выбора записи
+		}
+	}
+	return m, tea.Batch(cmds...)
+}
+
+// handleDBOpenedMsg обрабатывает сообщение об успешном открытии базы.
+func (m *model) handleDBOpenedMsg(msg dbOpenedMsg) (tea.Model, tea.Cmd) {
+	m.db = msg.db
+	m.err = nil
+	prevState := m.state // Сохраняем предыдущее состояние
+	m.state = entryListScreen
+	slog.Info("База KDBX успешно открыта", "path", m.kdbxPath)
+
+	entries := kdbx.GetAllEntries(m.db)
+	slog.Debug("Записи, полученные из KDBX", "count", len(entries))
+
+	items := make([]list.Item, len(entries))
+	for i, entry := range entries {
+		items[i] = entryItem{entry: entry}
+	}
+
+	// Перед установкой элементов, проверим их количество
+	slog.Debug("Элементы, подготовленные для списка", "count", len(items))
+	m.entryList.SetItems(items)
+
+	// Проверим количество элементов в списке после установки
+	slog.Debug("Элементы в списке после SetItems", "count", len(m.entryList.Items()))
+
+	// Установим размер списка явно
+	m.entryList.SetWidth(defaultListWidth)
+	m.entryList.SetHeight(defaultListHeight)
+
+	m.entryList.Title = fmt.Sprintf("Записи в '%s' (%d)", m.kdbxPath, len(items))
+
+	// Явно очищаем экран при переходе на список записей
+	dbOpenedCmds := []tea.Cmd{}
+	if prevState != entryListScreen {
+		dbOpenedCmds = append(dbOpenedCmds, tea.ClearScreen)
+	}
+
+	return m, tea.Batch(dbOpenedCmds...)
 }
 
 // View отрисовывает пользовательский интерфейс.
@@ -286,8 +318,8 @@ func (m model) View() string {
 		s := "Введите мастер-пароль для открытия базы данных: " + m.kdbxPath + "\n\n"
 		s += m.passwordInput.View() + "\n\n"
 		if m.err != nil {
-			s := fmt.Sprintf("\nОшибка: %s\n\n(Нажмите любую клавишу для продолжения)", m.err)
-			return s + s // Возвращаем основной текст + текст ошибки
+			errMsgStr := fmt.Sprintf("\nОшибка: %s\n\n(Нажмите любую клавишу для продолжения)", m.err)
+			return s + errMsgStr // Возвращаем основной текст + текст ошибки
 		}
 		s += "(Нажмите Enter для подтверждения или Ctrl+C для выхода)\n"
 		return s

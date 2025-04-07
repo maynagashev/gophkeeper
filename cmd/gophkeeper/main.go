@@ -7,9 +7,13 @@ import (
 	"github.com/maynagashev/gophkeeper/internal/tui"
 )
 
+const (
+	logFilePermissions = 0666
+)
+
 func main() {
 	// Настройка логирования в файл
-	logFile, err := os.OpenFile("logs/gophkeeper.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	logFile, err := os.OpenFile("logs/gophkeeper.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, logFilePermissions)
 	if err != nil {
 		panic("Не удалось открыть лог-файл: " + err.Error())
 	}
@@ -23,7 +27,7 @@ func main() {
 	// Устанавливаем созданный логгер как стандартный
 	slog.SetDefault(logger)
 
-	slog.Info("Логгер инициализирован, запись в gophkeeper.log")
+	slog.Info("Логгер инициализирован, запись в logs/gophkeeper.log")
 
 	// Запуск TUI
 	tui.Start()
