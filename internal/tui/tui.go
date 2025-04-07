@@ -245,6 +245,29 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+s":
 			// Сохраняем только из списка или деталей (не при редактировании)
 			if (m.state == entryListScreen || m.state == entryDetailScreen) && m.db != nil {
+				m.savingStatus = "Подготовка к сохранению..."
+				slog.Info("Начало обновления m.db перед сохранением")
+
+				// Проходим по всем элементам в списке интерфейса
+				items := m.entryList.Items()
+				updatedCount := 0
+				for _, item := range items {
+					if listItem, ok := item.(entryItem); ok {
+						// Находим соответствующую запись в m.db по UUID
+						dbEntryPtr := findEntryInDB(m.db, listItem.entry.UUID)
+						if dbEntryPtr != nil {
+							// Обновляем найденную запись данными из элемента списка
+							// Создаем копию перед присваиванием, чтобы не менять listItem
+							entryToSave := deepCopyEntry(listItem.entry)
+							*dbEntryPtr = entryToSave
+							updatedCount++
+						} else {
+							slog.Warn("Запись из списка не найдена в m.db", "uuid", listItem.entry.UUID)
+						}
+					}
+				}
+				slog.Info("Обновление m.db завершено", "updated_count", updatedCount)
+
 				m.savingStatus = "Сохранение..."
 				slog.Info("Запуск сохранения KDBX", "path", m.kdbxPath)
 				// Используем сохраненный пароль
@@ -680,4 +703,35 @@ func Start() {
 		slog.Error("Ошибка при запуске TUI", "error", err)
 		os.Exit(1)
 	}
+}
+
+// --- Вспомогательные функции ---
+
+// findEntryInDB рекурсивно ищет запись по UUID в базе данных.
+// Возвращает указатель на найденную запись или nil.
+func findEntryInDB(db *gokeepasslib.Database, uuid gokeepasslib.UUID) *gokeepasslib.Entry {
+	if db == nil || db.Content == nil || db.Content.Root == nil {
+		return nil
+	}
+	return findEntryInGroups(db.Content.Root.Groups, uuid)
+}
+
+// findEntryInGroups рекурсивно ищет запись по UUID в срезе групп.
+// Возвращает указатель на найденную запись или nil.
+func findEntryInGroups(groups []gokeepasslib.Group, uuid gokeepasslib.UUID) *gokeepasslib.Entry {
+	for i := range groups { // Используем индекс, чтобы получить указатель на элемент среза
+		group := &groups[i]
+		// Ищем в записях текущей группы
+		for j := range group.Entries {
+			entry := &group.Entries[j]
+			if entry.UUID == uuid {
+				return entry // Нашли!
+			}
+		}
+		// Ищем рекурсивно в подгруппах
+		if entry := findEntryInGroups(group.Groups, uuid); entry != nil {
+			return entry // Нашли в подгруппе
+		}
+	}
+	return nil // Не нашли
 }

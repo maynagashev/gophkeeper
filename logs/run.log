@@ -34,206 +34,44 @@
 > Мастер-пароль        
 
 
+[6;H[H
+
+
+
+
+Ошибка: ошибка дешифрования файла 'example/test.kdbx': Wrong password? HMAC-SHA256 of header mismatching
+
+(Нажмите любую клавишу для продолжения)[8;H[H
+
+
+
+(Нажмите Enter для подтверждения или Ctrl+C для выхода)
+[J[6;H[H
+
+> *                    
+
+
+[6;H[H
+
+> **                   
+
+
+[6;H[H
+
+> ***                  
+
+
+[6;H[H
+
+> ****                 
+
+
+[6;H[H
+
+> Мастер-пароль        
+
+
 [6;H[2J[H[H   Записи в 'example/test.kdbx' (2)                
-                                                   
-  2 items                                          
-                                                   
-│ mail@example.com                                 
-│ User: mail@example.com | URL: https://example.com
-                                                   
-  test entry 2                                     
-  User: user1                                      
-                                                   
-                                                   
-                                                   
-                                                   
-                                                   
-                                                   
-                                                   
-                                                   
-                                                   
-                                                   
-                                                   
-                                                   
-                                                   
-                                                   
-                                                   [24;H[2J[H[HДетали записи: mail@example.com
-
-Notes: 
-Password: ********
-Title: mail@example.com
-URL: https://example.com
-UserName: mail@example.com
-
-(Нажмите Esc или b для возврата к списку)[J[9;H[2J[H[HРедактирование записи: mail@example.com
-
-> Title: > mail@example.com 
-  UserName: > mail@example.com 
-  Password: > ******** 
-  URL: > https://example.com 
-  Notes: > Notes
-
-(Tab/Shift+Tab - навигация, Esc/b - отмена)[9;H[2J[H[HДетали записи: mail@example.com
-
-Notes: 
-Password: ********
-Title: mail@example.com
-URL: https://example.com
-UserName: mail@example.com
-
-(Нажмите Esc или b для возврата к списку)[9;H[2J[H[HРедактирование записи: mail@example.com
-
-> Title: > mail@example.com 
-  UserName: > mail@example.com 
-  Password: > ******** 
-  URL: > https://example.com 
-  Notes: > Notes
-
-(Tab/Shift+Tab - навигация, Esc/b - отмена)[9;H[H
-
-  Title: > mail@example.com 
-> UserName: > mail@example.com 
-
-
-
-
-[9;H[H
-
-
-  UserName: > mail@example.com 
-> Password: > ******** 
-
-
-
-[9;H[H
-
-
-
-  Password: > ******** 
-> URL: > https://example.com 
-
-
-[9;H[H
-
-
-
-
-  URL: > https://example.com 
-> Notes: > Notes
-
-[9;H[H
-
-
-
-
-
-> Notes: > e 
-
-[9;H[H
-
-
-
-
-
-> Notes: > Notes
-
-[9;H[H
-
-
-
-
-
-> Notes: >   
-
-[9;H[H
-
-
-
-
-
-> Notes: >  2 
-
-[9;H[H
-
-
-
-
-
-> Notes: >   
-
-[9;H[H
-
-
-
-
-
-> Notes: > Notes
-
-[9;H[H
-
-
-
-
-
-> Notes: > N 
-
-[9;H[H
-
-
-
-
-
-> Notes: > No 
-
-[9;H[H
-
-
-
-
-
-> Notes: > Not 
-
-[9;H[H
-
-
-
-
-
-> Notes: > Note 
-
-[9;H[H
-
-
-
-
-
-> Notes: > Notes 
-
-[9;H[H
-
-
-
-
-
-> Notes: > Notes  
-
-[9;H[H
-
-
-
-
-
-> Notes: > Notes 2 
-
-[9;H[2J[H[HДетали записи: mail@example.com
-
-Notes: Notes 2
-Password: ********
-Title: mail@example.com
-URL: https://example.com
-UserName: mail@example.com
-
-(Нажмите Esc или b для возврата к списку)[9;H[2J[H[H   Записи в 'example/test.kdbx' (2)                
                                                    
   2 items                                          
                                                    
@@ -295,7 +133,23 @@ UserName: user1
   URL: > URL
   Notes: > Notes
 
-(Tab/Shift+Tab - навигация, Esc/b - отмена)[9;H[HРедактирование записи: test entry 
+(Tab/Shift+Tab - навигация, Esc/b - отмена)[9;H[H
+
+> Title: > test entry 2
+
+
+
+
+
+[9;H[H
+
+> Title: > test entry 2 
+
+
+
+
+
+[9;H[HРедактирование записи: test entry 
 
 > Title: > test entry  
 
@@ -320,6 +174,26 @@ URL:
 UserName: user1
 
 (Нажмите Esc или b для возврата к списку)[9;H[H
+
+
+
+
+
+
+
+
+
+Сохранение...[11;H[H
+
+
+
+
+
+
+
+
+
+Сохранено успешно![11;H[H
 
 
 
