@@ -3,53 +3,86 @@
 Это безопасный менеджер паролей для командной строки,
 совместимый с форматом KDBX (KeePass).
 
-Нажмите Enter для продолжения или Ctrl+C/q для выхода.
 
-(Enter - продолжить, Ctrl+C/q - выход)[8;H[2J[H[HВведите мастер-пароль для открытия базы данных: example/test.kdbx
+(Enter - продолжить, Ctrl+C/q - выход)[7;H[2J[H[HВведите мастер-пароль для открытия базы данных: example/test.kdbx
 
 > Мастер-пароль        
 
-(Нажмите Enter для подтверждения или Ctrl+C для выхода)
 
-(Enter - подтвердить, Ctrl+C - выход)[J[7;H[H
+(Enter - подтвердить, Ctrl+C - выход)[J[6;H[H
 
 > *                    
 
 
-
-[7;H[H
+[6;H[H
 
 > **                   
 
 
-
-[7;H[H
+[6;H[H
 
 > ***                  
 
 
-
-[7;H[H
+[6;H[H
 
 > ****                 
 
 
-
-[7;H[H
+[6;H[H
 
 > Мастер-пароль        
 
 
+[6;H[H
 
-[7;H[2J[H[H   Записи в 'example/test.kdbx' (2)                
+
+
+
+Ошибка: ошибка дешифрования файла 'example/test.kdbx': Wrong password? HMAC-SHA256 of header mismatching
+
+(Нажмите любую клавишу для продолжения)
+(Enter - подтвердить, Ctrl+C - выход)[9;H[H
+
+
+
+
+(Enter - подтвердить, Ctrl+C - выход)[J[6;H[H
+
+> *                    
+
+
+[6;H[H
+
+> **                   
+
+
+[6;H[H
+
+> ***                  
+
+
+[6;H[H
+
+> ****                 
+
+
+[6;H[H
+
+> Мастер-пароль        
+
+
+[6;H[2J[H[H   Записи в 'example/test.kdbx' (3)                
                                                    
-  2 items                                          
+  3 items                                          
                                                    
 │ mail@example.com                                 
 │ User: mail@example.com | URL: https://example.com
                                                    
-  test entry 4                                     
-  User: user1                                      
+  test entry 5                                     
+  User: user1 | URL: https://localhost             
+                                                   
+  test new                                         
                                                    
                                                    
                                                    
@@ -62,255 +95,4 @@
                                                    
                                                    
                                                    
-                                                   
-                                                   
-                                                   (↑/↓ - навигация, Enter - детали, / - поиск, Ctrl+S - сохр., q - выход)[24;H[H
-
-
-
-  mail@example.com                                 
-  User: mail@example.com | URL: https://example.com
-
-│ test entry 4                                     
-│ User: user1                                      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[24;H[2J[H[HДетали записи: test entry 4
-
-Title: test entry 4
-UserName: user1
-Password: ********
-URL: 
-Notes: 
-[J[8;H[2J[H[HРедактирование записи: test entry 4
-
-> Title: > test entry 4 
-  UserName: > user1 
-  Password: > ********* 
-  URL: > URL
-  Notes: > Notes
-[8;H[H
-
-  Title: > test entry 4 
-> UserName: > user1 
-
-
-
-[8;H[H
-
-
-  UserName: > user1 
-> Password: > ********* 
-
-
-[8;H[H
-
-
-
-  Password: > ********* 
-> URL: > URL
-
-[8;H[H
-
-
-
-
-> URL: > h 
-
-[8;H[H
-
-
-
-
-> URL: > ht 
-
-[8;H[H
-
-
-
-
-> URL: > htt 
-
-[8;H[H
-
-
-
-
-> URL: > http 
-
-[8;H[H
-
-
-
-
-> URL: > https 
-
-[8;H[H
-
-
-
-
-> URL: > https: 
-
-[8;H[H
-
-
-
-
-> URL: > https:/ 
-
-[8;H[H
-
-
-
-
-> URL: > https:// 
-
-[8;H[H
-
-
-
-
-> URL: > https://l 
-
-[8;H[H
-
-
-
-
-> URL: > https://lo 
-
-[8;H[H
-
-
-
-
-> URL: > https://loc 
-
-[8;H[H
-
-
-
-
-> URL: > https://loca 
-
-[8;H[H
-
-
-
-
-> URL: > https://local 
-
-[8;H[H
-
-
-
-
-> URL: > https://localh 
-
-[8;H[H
-
-
-
-
-> URL: > https://localho 
-
-[8;H[H
-
-
-
-
-> URL: > https://localhos 
-
-[8;H[H
-
-
-
-
-> URL: > https://localhost 
-
-[8;H[H
-
-
-
-
-> URL: > https://localhost. 
-
-[8;H[H
-
-
-
-
-> URL: > https://localhost 
-
-[8;H[H
-
-
-
-> Password: > ********* 
-  URL: > https://localhost 
-
-[8;H[H
-
-
-> UserName: > user1 
-  Password: > ********* 
-
-
-[8;H[H
-
-> Title: > test entry 4 
-  UserName: > user1 
-
-
-
-[8;H[HРедактирование записи: test entry 
-
-> Title: > test entry  
-
-
-
-
-[8;H[HРедактирование записи: test entry 5
-
-> Title: > test entry 5 
-
-
-
-
-[8;H[2J[H[HДетали записи: test entry 5
-
-Title: test entry 5
-UserName: user1
-Password: ********
-URL: https://localhost
-Notes: 
-[8;H[H
-
-
-
-
-
-
-
-Сохранение...[9;H[H
-
-
-
-
-
-
-
-Сохранено успешно![9;H
+                                                   (↑/↓ - навигация, Enter - детали, / - поиск, a - добавить, Ctrl+S - сохр., q - выход)[24;H

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"time"
 
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -25,6 +26,7 @@ const (
 	entryListScreen                        // Экран списка записей
 	entryDetailScreen                      // Экран деталей записи
 	entryEditScreen                        // Экран редактирования записи
+	entryAddScreen                         // Экран добавления новой записи
 	// TODO: Добавить другие экраны (детали записи и т.д.)
 )
 
@@ -51,6 +53,7 @@ const (
 	keyBack  = "b"     // Клавиша возврата
 	keyEsc   = "esc"   // Клавиша Escape
 	keyEdit  = "e"     // Клавиша редактирования
+	keyAdd   = "a"     // Клавиша добавления
 )
 
 // entryItem представляет элемент списка записей.
@@ -105,7 +108,11 @@ type model struct {
 	// Поля для редактирования записи
 	editingEntry *gokeepasslib.Entry // Копия записи, которую редактируем
 	editInputs   []textinput.Model   // Поля ввода для редактирования
-	focusedField int                 // Индекс активного поля ввода
+	focusedField int                 // Индекс активного поля ввода (для редактирования)
+
+	// Поля для добавления записи
+	addInputs       []textinput.Model // Поля ввода для новой записи
+	focusedFieldAdd int               // Индекс активного поля ввода (для добавления)
 
 	savingStatus string // Статус операции сохранения файла
 }
@@ -288,6 +295,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.updateEntryDetailScreen(msg)
 	case entryEditScreen:
 		return m.updateEntryEditScreen(msg)
+	case entryAddScreen:
+		return m.updateEntryAddScreen(msg)
 	default:
 		// Для неизвестных состояний возвращаем модель без изменений и команд
 		return m, nil
@@ -370,6 +379,12 @@ func (m *model) updateEntryListScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 					cmds = append(cmds, tea.ClearScreen)
 				}
 			}
+		case keyAdd:
+			// Переход к добавлению новой записи
+			m.prepareAddScreen()
+			m.state = entryAddScreen
+			slog.Info("Переход к добавлению новой записи")
+			return m, tea.ClearScreen
 		}
 	}
 	return m, tea.Batch(cmds...)
@@ -541,8 +556,8 @@ func (m *model) saveEntryChanges() (tea.Model, tea.Cmd) {
 	// 1. Создаем финальную обновленную запись на основе editingEntry
 	finalUpdatedEntry := deepCopyEntry(*m.editingEntry) // Используем deepCopy на всякий случай
 	// Обновляем время модификации
-	now := w.Now()
-	finalUpdatedEntry.Times.LastModificationTime = &now
+	now := time.Now()
+	finalUpdatedEntry.Times.LastModificationTime = &w.TimeWrapper{Time: now} // Создаем обертку и берем указатель
 
 	// 2. Создаем новый элемент списка с обновленной записью
 	newSelectedItem := entryItem{entry: finalUpdatedEntry}
@@ -573,6 +588,117 @@ func (m *model) updateFocus() []tea.Cmd {
 			cmds[i] = m.editInputs[i].Focus()
 		} else {
 			m.editInputs[i].Blur()
+		}
+	}
+	return cmds
+}
+
+// updateEntryAddScreen обрабатывает сообщения для экрана добавления записи.
+//
+//nolint:gocognit,nestif // Сложность из-за обработки разных клавиш и навигации
+func (m *model) updateEntryAddScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmds []tea.Cmd
+
+	// Обрабатываем только KeyMsg
+	if keyMsg, ok := msg.(tea.KeyMsg); ok {
+		switch keyMsg.String() {
+		case keyEsc, keyBack:
+			// Отмена добавления
+			m.state = entryListScreen
+			m.addInputs = nil // Очищаем поля ввода
+			slog.Info("Отмена добавления, возврат к списку")
+			return m, tea.ClearScreen
+
+		case "tab", "down":
+			// Переход к следующему полю
+			m.focusedFieldAdd = (m.focusedFieldAdd + 1) % numEditableFields
+			cmds = m.updateFocusAdd()
+			return m, tea.Batch(cmds...)
+
+		case "shift+tab", "up":
+			// Переход к предыдущему полю
+			m.focusedFieldAdd = (m.focusedFieldAdd - 1 + numEditableFields) % numEditableFields
+			cmds = m.updateFocusAdd()
+			return m, tea.Batch(cmds...)
+
+		case keyEnter:
+			// Создание новой записи (пока только в памяти)
+			newEntry := gokeepasslib.NewEntry()
+			now := time.Now() // Получаем текущее время один раз
+			// Создаем обертки и берем указатели
+			creationTime := w.TimeWrapper{Time: now}
+			modificationTime := w.TimeWrapper{Time: now}
+			accessTime := w.TimeWrapper{Time: now}
+			newEntry.Times.CreationTime = &creationTime
+			newEntry.Times.LastModificationTime = &modificationTime
+			newEntry.Times.LastAccessTime = &accessTime
+
+			for _, input := range m.addInputs {
+				fieldName := input.Placeholder
+				newValue := input.Value()
+				if newValue != "" { // Добавляем поле, только если оно не пустое
+					valueData := gokeepasslib.ValueData{
+						Key:   fieldName,
+						Value: gokeepasslib.V{Content: newValue},
+					}
+					if fieldName == fieldNamePassword {
+						valueData.Value.Protected = w.NewBoolWrapper(true)
+					}
+					newEntry.Values = append(newEntry.Values, valueData)
+				}
+			}
+
+			// Добавляем newEntry в m.db (в корневую группу или первую подгруппу)
+			if m.db != nil && m.db.Content != nil && m.db.Content.Root != nil {
+				if len(m.db.Content.Root.Groups) > 0 {
+					// Добавляем в первую группу
+					m.db.Content.Root.Groups[0].Entries = append(m.db.Content.Root.Groups[0].Entries, newEntry)
+				} else {
+					// Если групп нет, добавляем в корневую псевдо-группу (не совсем правильно для KDBX, но для демо)
+					// Правильнее было бы создать группу по умолчанию, если ее нет.
+					slog.Warn("Корневая группа не найдена, добавляем запись напрямую в root (может быть некорректно)")
+					// m.db.Content.Root.Entries = append(m.db.Content.Root.Entries, newEntry) // У Root нет Entries
+					// Пока просто не добавляем в db если нет групп
+					slog.Error("Не удалось добавить запись в m.db: нет групп")
+				}
+			} else {
+				slog.Error("Не удалось добавить запись в m.db: база данных или Root не инициализированы")
+			}
+
+			// Добавляем newEntry в m.entryList
+			newItem := entryItem{entry: newEntry}
+			// Добавляем в конец списка
+			insertCmd := m.entryList.InsertItem(len(m.entryList.Items()), newItem)
+			// Обновляем заголовок списка
+			m.entryList.Title = fmt.Sprintf("Записи в '%s' (%d)", m.kdbxPath, len(m.entryList.Items()))
+
+			slog.Info("Новая запись добавлена", "title", newEntry.GetTitle())
+
+			// Возвращаемся к списку
+			m.state = entryListScreen
+			m.addInputs = nil
+			// Добавляем команду обновления списка к команде очистки экрана
+			return m, tea.Batch(tea.ClearScreen, insertCmd)
+		}
+	} // конец if keyMsg, ok := msg.(tea.KeyMsg)
+
+	// Если сообщение не KeyMsg или было обработано выше (кроме навигации/Enter/Esc),
+	// обновляем активное поле ввода.
+	var cmd tea.Cmd
+	m.addInputs[m.focusedFieldAdd], cmd = m.addInputs[m.focusedFieldAdd].Update(msg)
+	cmds = append(cmds, cmd)
+
+	return m, tea.Batch(cmds...)
+}
+
+// updateFocusAdd обновляет фокус полей ввода для экрана добавления.
+func (m *model) updateFocusAdd() []tea.Cmd {
+	cmds := make([]tea.Cmd, len(m.addInputs))
+	for i := range len(m.addInputs) {
+		if i == m.focusedFieldAdd {
+			cmds[i] = m.addInputs[i].Focus()
+		} else {
+			m.addInputs[i].Blur()
 		}
 	}
 	return cmds
@@ -639,13 +765,16 @@ func (m model) View() string {
 		help = "(Enter - подтвердить, Ctrl+C - выход)"
 	case entryListScreen:
 		mainContent = m.entryList.View()
-		help = "(↑/↓ - навигация, Enter - детали, / - поиск, Ctrl+S - сохр., q - выход)"
+		help = "(↑/↓ - навигация, Enter - детали, / - поиск, a - добавить, Ctrl+S - сохр., q - выход)"
 	case entryDetailScreen:
 		mainContent = m.viewEntryDetailScreen()
 		help = "(e - ред., Ctrl+S - сохр., Esc/b - назад)" // Уже добавлено в viewEntryDetailScreen
 	case entryEditScreen:
 		mainContent = m.viewEntryEditScreen()
 		help = "(Tab/↑/↓ - навигация, Enter - сохр., Esc/b - отмена)" // Обновим и здесь
+	case entryAddScreen:
+		mainContent = m.viewEntryAddScreen()
+		help = "(Enter - добавить, Ctrl+C - выход)"
 	default:
 		mainContent = "Неизвестное состояние!"
 	}
@@ -661,11 +790,12 @@ func (m model) View() string {
 	if m.state == entryListScreen {
 		return mainContent + help + statusLine
 	}
-	// Для детального и редактирования - help уже внутри view-функций
-	if m.state == entryDetailScreen || m.state == entryEditScreen {
-		return mainContent + statusLine
+	// Для детального, редактирования и добавления - добавляем отступ и подсказку
+	if m.state == entryDetailScreen || m.state == entryEditScreen || m.state == entryAddScreen {
+		return mainContent + "\n" + help + statusLine
 	}
 
+	// Для остальных (welcome, password input)
 	return mainContent + "\n" + help + statusLine
 }
 
@@ -674,7 +804,6 @@ func (m model) viewWelcomeScreen() string {
 	s := "Добро пожаловать в GophKeeper!\n\n"
 	s += "Это безопасный менеджер паролей для командной строки,\n"
 	s += "совместимый с форматом KDBX (KeePass).\n\n"
-	s += "Нажмите Enter для продолжения или Ctrl+C/q для выхода.\n"
 	return s
 }
 
@@ -686,7 +815,6 @@ func (m model) viewPasswordInputScreen() string {
 		errMsgStr := fmt.Sprintf("\nОшибка: %s\n\n(Нажмите любую клавишу для продолжения)", m.err)
 		return s + errMsgStr // Возвращаем основной текст + текст ошибки
 	}
-	s += "(Нажмите Enter для подтверждения или Ctrl+C для выхода)\n"
 	return s
 }
 
@@ -757,6 +885,21 @@ func (m model) viewEntryEditScreen() string {
 	return s
 }
 
+// viewEntryAddScreen отрисовывает экран добавления новой записи.
+func (m model) viewEntryAddScreen() string {
+	s := "Добавление новой записи\n\n"
+	s += "Введите данные для новой записи:\n"
+	for i, input := range m.addInputs {
+		focusIndicator := "  "
+		if m.focusedFieldAdd == i {
+			focusIndicator = "> "
+		}
+		s += fmt.Sprintf("%s%s: %s\n", focusIndicator, input.Placeholder, input.View())
+	}
+	// s += "(Enter - добавить, Ctrl+C - выход)\n" // Убрали, т.к. добавляется в View
+	return s
+}
+
 // Start запускает TUI приложение.
 func Start() {
 	// Используем FullAltScreen для корректной работы списка
@@ -796,4 +939,30 @@ func findEntryInGroups(groups []gokeepasslib.Group, uuid gokeepasslib.UUID) *gok
 		}
 	}
 	return nil // Не нашли
+}
+
+// prepareAddScreen инициализирует поля для экрана добавления.
+func (m *model) prepareAddScreen() {
+	m.addInputs = make([]textinput.Model, numEditableFields)
+	m.focusedFieldAdd = editableFieldTitle // Начинаем с поля Title
+
+	placeholders := map[int]string{
+		editableFieldTitle:    "Title",
+		editableFieldUserName: "UserName",
+		editableFieldPassword: "Password",
+		editableFieldURL:      "URL",
+		editableFieldNotes:    "Notes",
+	}
+
+	for i := range numEditableFields {
+		m.addInputs[i] = textinput.New()
+		m.addInputs[i].Placeholder = placeholders[i]
+		// Первое поле делаем активным
+		if i == m.focusedFieldAdd {
+			m.addInputs[i].Focus()
+		}
+	}
+
+	// Настроим поле пароля
+	m.addInputs[editableFieldPassword].EchoMode = textinput.EchoPassword
 }

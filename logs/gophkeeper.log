@@ -185,3 +185,43 @@
 {"time":"2025-04-08T01:39:35.580174526+07:00","level":"INFO","msg":"Обновление m.db завершено","updated_count":2}
 {"time":"2025-04-08T01:39:35.580201563+07:00","level":"INFO","msg":"Запуск сохранения KDBX","path":"example/test.kdbx"}
 {"time":"2025-04-08T01:39:36.307004824+07:00","level":"INFO","msg":"База KDBX успешно сохранена","path":"example/test.kdbx"}
+{"time":"2025-04-08T12:39:32.673744761+07:00","level":"INFO","msg":"Логгер инициализирован, запись в logs/gophkeeper.log"}
+{"time":"2025-04-08T12:39:36.797154883+07:00","level":"INFO","msg":"База KDBX успешно открыта","path":"example/test.kdbx"}
+{"time":"2025-04-08T12:39:36.797294602+07:00","level":"DEBUG","msg":"Записи, полученные из KDBX","count":2}
+{"time":"2025-04-08T12:39:36.797317739+07:00","level":"DEBUG","msg":"Элементы, подготовленные для списка","count":2}
+{"time":"2025-04-08T12:39:36.797492496+07:00","level":"DEBUG","msg":"Элементы в списке после SetItems","count":2}
+{"time":"2025-04-08T12:40:26.574298968+07:00","level":"INFO","msg":"Переход к добавлению новой записи"}
+{"time":"2025-04-08T12:42:03.255743001+07:00","level":"INFO","msg":"Отмена добавления, возврат к списку"}
+{"time":"2025-04-08T12:42:07.282169892+07:00","level":"INFO","msg":"Логгер инициализирован, запись в logs/gophkeeper.log"}
+{"time":"2025-04-08T12:42:11.904774839+07:00","level":"ERROR","msg":"Ошибка при работе с KDBX","error":"ошибка дешифрования файла 'example/test.kdbx': Wrong password? HMAC-SHA256 of header mismatching"}
+{"time":"2025-04-08T12:42:17.254393172+07:00","level":"ERROR","msg":"Ошибка при работе с KDBX","error":"ошибка дешифрования файла 'example/test.kdbx': Wrong password? HMAC-SHA256 of header mismatching"}
+{"time":"2025-04-08T12:42:21.154270529+07:00","level":"ERROR","msg":"Ошибка при работе с KDBX","error":"ошибка дешифрования файла 'example/test.kdbx': Wrong password? HMAC-SHA256 of header mismatching"}
+{"time":"2025-04-08T12:42:27.346115512+07:00","level":"ERROR","msg":"Ошибка при работе с KDBX","error":"ошибка дешифрования файла 'example/test.kdbx': Wrong password? HMAC-SHA256 of header mismatching"}
+{"time":"2025-04-08T12:42:27.754388939+07:00","level":"ERROR","msg":"Ошибка при работе с KDBX","error":"ошибка дешифрования файла 'example/test.kdbx': Wrong password? HMAC-SHA256 of header mismatching"}
+{"time":"2025-04-08T12:42:30.372020922+07:00","level":"ERROR","msg":"Ошибка при работе с KDBX","error":"ошибка дешифрования файла 'example/test.kdbx': Wrong password? HMAC-SHA256 of header mismatching"}
+{"time":"2025-04-08T12:42:33.342861125+07:00","level":"INFO","msg":"База KDBX успешно открыта","path":"example/test.kdbx"}
+{"time":"2025-04-08T12:42:33.343059168+07:00","level":"DEBUG","msg":"Записи, полученные из KDBX","count":2}
+{"time":"2025-04-08T12:42:33.343096539+07:00","level":"DEBUG","msg":"Элементы, подготовленные для списка","count":2}
+{"time":"2025-04-08T12:42:33.343352635+07:00","level":"DEBUG","msg":"Элементы в списке после SetItems","count":2}
+{"time":"2025-04-08T12:42:38.498135847+07:00","level":"INFO","msg":"Переход к деталям записи","title":"test entry 5"}
+{"time":"2025-04-08T12:42:43.442845607+07:00","level":"INFO","msg":"Возврат к списку записей"}
+{"time":"2025-04-08T12:42:47.434016903+07:00","level":"INFO","msg":"Переход к добавлению новой записи"}
+{"time":"2025-04-08T12:43:03.692393345+07:00","level":"INFO","msg":"Новая запись создана (в памяти)","title":"test new"}
+{"time":"2025-04-08T12:44:33.435985796+07:00","level":"INFO","msg":"Логгер инициализирован, запись в logs/gophkeeper.log"}
+{"time":"2025-04-08T12:44:38.953786677+07:00","level":"INFO","msg":"База KDBX успешно открыта","path":"example/test.kdbx"}
+{"time":"2025-04-08T12:44:38.953945979+07:00","level":"DEBUG","msg":"Записи, полученные из KDBX","count":2}
+{"time":"2025-04-08T12:44:38.953971981+07:00","level":"DEBUG","msg":"Элементы, подготовленные для списка","count":2}
+{"time":"2025-04-08T12:44:38.954166445+07:00","level":"DEBUG","msg":"Элементы в списке после SetItems","count":2}
+{"time":"2025-04-08T12:44:41.224691509+07:00","level":"INFO","msg":"Переход к добавлению новой записи"}
+{"time":"2025-04-08T12:44:45.37183193+07:00","level":"INFO","msg":"Новая запись добавлена","title":"test new"}
+{"time":"2025-04-08T12:44:49.877079884+07:00","level":"INFO","msg":"Начало обновления m.db перед сохранением"}
+{"time":"2025-04-08T12:44:49.877159358+07:00","level":"INFO","msg":"Обновление m.db завершено","updated_count":3}
+{"time":"2025-04-08T12:44:49.87717727+07:00","level":"INFO","msg":"Запуск сохранения KDBX","path":"example/test.kdbx"}
+{"time":"2025-04-08T12:44:50.719564175+07:00","level":"INFO","msg":"База KDBX успешно сохранена","path":"example/test.kdbx"}
+{"time":"2025-04-08T12:46:37.911191118+07:00","level":"INFO","msg":"Логгер инициализирован, запись в logs/gophkeeper.log"}
+{"time":"2025-04-08T12:55:10.389553972+07:00","level":"INFO","msg":"Логгер инициализирован, запись в logs/gophkeeper.log"}
+{"time":"2025-04-08T12:55:17.725027889+07:00","level":"ERROR","msg":"Ошибка при работе с KDBX","error":"ошибка дешифрования файла 'example/test.kdbx': Wrong password? HMAC-SHA256 of header mismatching"}
+{"time":"2025-04-08T12:55:23.599839646+07:00","level":"INFO","msg":"База KDBX успешно открыта","path":"example/test.kdbx"}
+{"time":"2025-04-08T12:55:23.600230038+07:00","level":"DEBUG","msg":"Записи, полученные из KDBX","count":3}
+{"time":"2025-04-08T12:55:23.60033942+07:00","level":"DEBUG","msg":"Элементы, подготовленные для списка","count":3}
+{"time":"2025-04-08T12:55:23.600532992+07:00","level":"DEBUG","msg":"Элементы в списке после SetItems","count":3}
