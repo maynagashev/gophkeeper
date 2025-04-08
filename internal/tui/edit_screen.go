@@ -5,11 +5,27 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/tobischo/gokeepasslib/v3"
 	w "github.com/tobischo/gokeepasslib/v3/wrappers"
 )
+
+const (
+	attachmentListHeightDivisor = 2 // Делитель для высоты списка вложений
+)
+
+// attachmentItem представляет элемент списка вложений для выбора/удаления.
+// Реализует интерфейс list.Item.
+type attachmentItem struct {
+	name string
+	id   int // ID из BinaryReference (Value.ID)
+}
+
+func (i attachmentItem) Title() string       { return i.name }
+func (i attachmentItem) Description() string { return fmt.Sprintf("ID: %d", i.id) }
+func (i attachmentItem) FilterValue() string { return i.name }
 
 // prepareEditScreen инициализирует поля для экрана редактирования.
 func (m *model) prepareEditScreen() {
@@ -49,82 +65,97 @@ func (m *model) prepareEditScreen() {
 // updateEntryEditScreen обрабатывает сообщения для экрана редактирования записи.
 func (m *model) updateEntryEditScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
-
-	// Обрабатываем только KeyMsg
-	if keyMsg, ok := msg.(tea.KeyMsg); ok {
-		switch keyMsg.String() {
-		case keyEsc, keyBack:
-			// Отмена редактирования
-			m.state = entryDetailScreen
-			m.editingEntry = nil // Сбрасываем редактируемую запись
-			m.editInputs = nil   // Очищаем поля ввода
-			slog.Info("Отмена редактирования, возврат к деталям записи")
-			return m, tea.ClearScreen
-
-		case "tab", "down":
-			// Переход к следующему полю
-			m.focusedField = (m.focusedField + 1) % numEditableFields
-			cmds = m.updateFocus()
-			return m, tea.Batch(cmds...)
-
-		case "shift+tab", "up":
-			// Переход к предыдущему полю
-			m.focusedField = (m.focusedField - 1 + numEditableFields) % numEditableFields
-			cmds = m.updateFocus()
-			return m, tea.Batch(cmds...)
-
-		case keyEnter:
-			// Сохранение изменений
-			return m.saveEntryChanges()
-
-		case "ctrl+o": // Добавить вложение (заглушка)
-			slog.Info("Обработка Ctrl+O: Добавить вложение (пока не реализовано)")
-			// TODO: Реализовать логику добавления вложения
-			return m, nil // Пока ничего не делаем
-
-		case "ctrl+d": // Удалить вложение (заглушка)
-			slog.Info("Обработка Ctrl+D: Удалить вложение (пока не реализовано)")
-			// TODO: Реализовать логику удаления вложения
-			return m, nil // Пока ничего не делаем
-		}
-	} // конец if keyMsg, ok := msg.(tea.KeyMsg)
-
-	// Если сообщение не KeyMsg или было обработано выше (кроме навигации/Enter/Esc/Ctrl+O/Ctrl+D),
-	// обновляем активное поле ввода.
 	var cmd tea.Cmd
-	m.editInputs[m.focusedField], cmd = m.editInputs[m.focusedField].Update(msg)
-	cmds = append(cmds, cmd)
 
-	// Обновляем соответствующее поле в копии записи
-	fieldName := m.editInputs[m.focusedField].Placeholder
-	newValue := m.editInputs[m.focusedField].Value()
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		// Обработка нажатий клавиш делегируется отдельной функции
+		return m.handleEditScreenKeys(msg)
 
-	// Ищем существующее значение или создаем новое
-	found := false
-	for i := range m.editingEntry.Values {
-		if m.editingEntry.Values[i].Key == fieldName {
-			m.editingEntry.Values[i].Value.Content = newValue
-			// Обработка Protected для поля Password
-			if fieldName == fieldNamePassword {
-				m.editingEntry.Values[i].Value.Protected = w.NewBoolWrapper(newValue != "")
+	default:
+		// Обработка других сообщений (например, обновление поля ввода)
+		m.editInputs[m.focusedField], cmd = m.editInputs[m.focusedField].Update(msg)
+		cmds = append(cmds, cmd)
+
+		// Обновляем поле в editingEntry
+		fieldName := m.editInputs[m.focusedField].Placeholder
+		newValue := m.editInputs[m.focusedField].Value()
+		found := false
+		for i := range m.editingEntry.Values {
+			if m.editingEntry.Values[i].Key == fieldName {
+				m.editingEntry.Values[i].Value.Content = newValue
+				if fieldName == fieldNamePassword {
+					m.editingEntry.Values[i].Value.Protected = w.NewBoolWrapper(newValue != "")
+				}
+				found = true
+				break
 			}
-			found = true
-			break
 		}
+		if !found {
+			valueData := gokeepasslib.ValueData{
+				Key:   fieldName,
+				Value: gokeepasslib.V{Content: newValue},
+			}
+			if fieldName == fieldNamePassword {
+				valueData.Value.Protected = w.NewBoolWrapper(newValue != "")
+			}
+			m.editingEntry.Values = append(m.editingEntry.Values, valueData)
+		}
+		return m, tea.Batch(cmds...)
 	}
-	// Если значение не найдено, добавляем новое
-	if !found {
-		valueData := gokeepasslib.ValueData{
-			Key:   fieldName,
-			Value: gokeepasslib.V{Content: newValue},
-		}
-		if fieldName == fieldNamePassword {
-			valueData.Value.Protected = w.NewBoolWrapper(newValue != "")
-		}
-		m.editingEntry.Values = append(m.editingEntry.Values, valueData)
-	}
+}
 
-	return m, tea.Batch(cmds...)
+// handleEditScreenKeys обрабатывает нажатия клавиш на экране редактирования.
+func (m *model) handleEditScreenKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch msg.String() {
+	case keyEsc, keyBack:
+		m.state = entryDetailScreen
+		m.editingEntry = nil
+		m.editInputs = nil
+		slog.Info("Отмена редактирования, возврат к деталям записи")
+		return m, tea.ClearScreen
+
+	case "tab", "down":
+		m.focusedField = (m.focusedField + 1) % numEditableFields
+		cmds := m.updateFocus()
+		return m, tea.Batch(cmds...)
+
+	case "shift+tab", "up":
+		m.focusedField = (m.focusedField - 1 + numEditableFields) % numEditableFields
+		cmds := m.updateFocus()
+		return m, tea.Batch(cmds...)
+
+	case keyEnter:
+		return m.saveEntryChanges()
+
+	case "ctrl+o":
+		slog.Info("Обработка Ctrl+O: Добавить вложение (пока не реализовано)")
+		return m, nil
+
+	case "ctrl+d":
+		return m.handleAttachmentDeleteAction()
+
+	default:
+		// Если не специальная клавиша - ничего не делаем (поле ввода обновится в Update по msg)
+		return m, nil
+	}
+}
+
+// handleAttachmentDeleteAction обрабатывает действие удаления вложения.
+func (m *model) handleAttachmentDeleteAction() (tea.Model, tea.Cmd) {
+	if m.editingEntry != nil && len(m.editingEntry.Binaries) > 0 {
+		slog.Info("Переход к экрану удаления вложения")
+		items := make([]list.Item, len(m.editingEntry.Binaries))
+		for i, binRef := range m.editingEntry.Binaries {
+			items[i] = attachmentItem{name: binRef.Name, id: binRef.Value.ID}
+		}
+		m.attachmentList.SetItems(items)
+		m.attachmentList.SetSize(defaultListWidth, defaultListHeight/attachmentListHeightDivisor)
+		m.state = attachmentListDeleteScreen
+		return m, tea.ClearScreen
+	}
+	slog.Info("Нет вложений для удаления")
+	return m, nil
 }
 
 // saveEntryChanges применяет изменения из editingEntry к selectedEntry и списку.

@@ -13,12 +13,13 @@ import (
 type screenState int
 
 const (
-	welcomeScreen       screenState = iota // Приветственный экран
-	passwordInputScreen                    // Экран ввода пароля
-	entryListScreen                        // Экран списка записей
-	entryDetailScreen                      // Экран деталей записи
-	entryEditScreen                        // Экран редактирования записи
-	entryAddScreen                         // Экран добавления новой записи
+	welcomeScreen              screenState = iota // Приветственный экран
+	passwordInputScreen                           // Экран ввода пароля
+	entryListScreen                               // Экран списка записей
+	entryDetailScreen                             // Экран деталей записи
+	entryEditScreen                               // Экран редактирования записи
+	entryAddScreen                                // Экран добавления новой записи
+	attachmentListDeleteScreen                    // Экран выбора вложения для удаления
 )
 
 // Поля, доступные для редактирования.
@@ -130,13 +131,13 @@ type model struct {
 	focusedField int                 // Индекс активного поля ввода
 
 	// Поля для добавления записи
-	addInputs       []textinput.Model // Поля ввода для новой записи
-	focusedFieldAdd int               // Индекс активного поля ввода
-	// Временное хранилище для вложений новой записи
+	addInputs           []textinput.Model // Поля ввода для новой записи
+	focusedFieldAdd     int               // Индекс активного поля ввода
 	newEntryAttachments []struct {
 		Name    string
 		Content []byte
-	}
+	} // Временное хранилище для вложений новой записи
 
-	savingStatus string // Статус операции сохранения файла
+	attachmentList list.Model // Список вложений для удаления
+	savingStatus   string     // Статус операции сохранения файла
 }

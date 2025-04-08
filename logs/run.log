@@ -11,6 +11,19 @@
 
 (Enter - подтвердить, Ctrl+C - выход)[J[6;H[H
 
+
+
+
+Ошибка: ошибка дешифрования файла 'example/test.kdbx': Wrong password? HMAC-SHA256 of header mismatching
+
+(Нажмите любую клавишу для продолжения)
+(Enter - подтвердить, Ctrl+C - выход)[9;H[H
+
+
+
+
+(Enter - подтвердить, Ctrl+C - выход)[J[6;H[H
+
 > *                    
 
 
@@ -48,110 +61,7 @@
                                                    
                                                    
   test binary                                      
-  [A:1]                                            
                                                    
-                                                   
-                                                   
-                                                   
-                                                   
-                                                   
-                                                   
-                                                   
-                                                   (↑/↓ - навигация, Enter - детали, / - поиск, a - добавить, Ctrl+S - сохр., q - выход)[24;H[H
-
-
-
-  mail@example.com                                 
-  User: mail@example.com | URL: https://example.com
-
-│ test entry 5                                     
-│ User: user1 | URL: https://localhost             
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[24;H[H
-
-
-
-
-
-
-  test entry 5                                     
-  User: user1 | URL: https://localhost             
-
-│ test new2                                        
-│                                                  
-
-
-
-
-
-
-
-
-
-
-
-[24;H[H
-
-
-
-
-
-
-
-
-
-  test new2                                        
-                                                   
-
-│ test binary                                      
-│ [A:1]                                            
-
-
-
-
-
-
-
-
-[24;H[2J[H[HДетали записи: test binary
-
-Title: test binary
-UserName: 
-Password: ********
-URL: 
-Notes: 
-
---- Вложения ---
-- d23-the-mandalorian-poster.webp (50614 байт)
-
-(e - ред., Ctrl+S - сохр., Esc/b - назад)[J[12;H[2J[H[H   Записи в 'example/test.kdbx' (4)                
-                                                   
-  4 items                                          
-                                                   
-  mail@example.com                                 
-  User: mail@example.com | URL: https://example.com
-                                                   
-  test entry 5                                     
-  User: user1 | URL: https://localhost             
-                                                   
-  test new2                                        
-                                                   
-                                                   
-│ test binary                                      
-│ [A:1]                                            
                                                    
                                                    
                                                    

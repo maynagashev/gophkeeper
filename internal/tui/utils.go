@@ -28,6 +28,16 @@ func deepCopyEntry(original gokeepasslib.Entry) gokeepasslib.Entry {
 		}
 	}
 
+	// Копируем срез ссылок на бинарные данные (BinaryReference)
+	// Сами структуры BinaryReference содержат простые типы (Name, Value.ID),
+	// поэтому достаточно поверхностного копирования среза.
+	if original.Binaries != nil {
+		newEntry.Binaries = make([]gokeepasslib.BinaryReference, len(original.Binaries))
+		copy(newEntry.Binaries, original.Binaries)
+	}
+
+	// TODO: Добавить копирование History, если оно будет редактироваться
+
 	return newEntry
 }
 

@@ -52,11 +52,20 @@ func initialModel() model {
 	l.Styles.PaginationStyle = list.DefaultStyles().PaginationStyle
 	l.Styles.HelpStyle = list.DefaultStyles().HelpStyle
 
+	// Список вложений для удаления
+	attachmentDelList := list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
+	attachmentDelList.Title = "Выберите вложение для удаления"
+	attachmentDelList.SetShowHelp(false)
+	attachmentDelList.SetShowStatusBar(false)
+	attachmentDelList.SetFilteringEnabled(false) // Фильтрация не нужна
+	attachmentDelList.Styles.Title = list.DefaultStyles().Title.Bold(true)
+
 	return model{
-		state:         welcomeScreen,
-		passwordInput: ti,
-		kdbxPath:      "example/test.kdbx",
-		entryList:     l,
+		state:          welcomeScreen,
+		passwordInput:  ti,
+		kdbxPath:       "example/test.kdbx",
+		entryList:      l,
+		attachmentList: attachmentDelList,
 	}
 }
 
@@ -152,6 +161,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.updateEntryEditScreen(msg)
 	case entryAddScreen:
 		return m.updateEntryAddScreen(msg)
+	case attachmentListDeleteScreen:
+		return m.updateAttachmentListDeleteScreen(msg)
 	default:
 		// Для неизвестных состояний возвращаем модель без изменений и команд
 		return m, nil
@@ -185,6 +196,9 @@ func (m model) View() string {
 	case entryAddScreen:
 		mainContent = m.viewEntryAddScreen()
 		help = "(Tab/↑/↓, Enter - доб., ^O - влож+, Esc - отмена)"
+	case attachmentListDeleteScreen:
+		mainContent = m.viewAttachmentListDeleteScreen()
+		help = "(↑/↓ - навигация, Enter/d - удалить, Esc/b - отмена)"
 	default:
 		mainContent = "Неизвестное состояние!"
 	}
