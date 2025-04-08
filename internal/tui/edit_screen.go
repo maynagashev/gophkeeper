@@ -76,10 +76,20 @@ func (m *model) updateEntryEditScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case keyEnter:
 			// Сохранение изменений
 			return m.saveEntryChanges()
+
+		case "ctrl+o": // Добавить вложение (заглушка)
+			slog.Info("Обработка Ctrl+O: Добавить вложение (пока не реализовано)")
+			// TODO: Реализовать логику добавления вложения
+			return m, nil // Пока ничего не делаем
+
+		case "ctrl+d": // Удалить вложение (заглушка)
+			slog.Info("Обработка Ctrl+D: Удалить вложение (пока не реализовано)")
+			// TODO: Реализовать логику удаления вложения
+			return m, nil // Пока ничего не делаем
 		}
 	} // конец if keyMsg, ok := msg.(tea.KeyMsg)
 
-	// Если сообщение не KeyMsg или было обработано выше (кроме навигации/Enter/Esc),
+	// Если сообщение не KeyMsg или было обработано выше (кроме навигации/Enter/Esc/Ctrl+O/Ctrl+D),
 	// обновляем активное поле ввода.
 	var cmd tea.Cmd
 	m.editInputs[m.focusedField], cmd = m.editInputs[m.focusedField].Update(msg)
@@ -172,15 +182,25 @@ func (m model) viewEntryEditScreen() string {
 	}
 
 	s := "Редактирование записи: " + m.editingEntry.GetTitle() + "\n\n"
+	// Отображаем поля ввода
 	for i, input := range m.editInputs {
-		// Добавляем индикатор фокуса
 		focusIndicator := "  "
 		if m.focusedField == i {
-			focusIndicator = "> " // Или другой индикатор, например, стиль
+			focusIndicator = "> "
 		}
 		s += fmt.Sprintf("%s%s: %s\n", focusIndicator, input.Placeholder, input.View())
 	}
-	// s += "\n(Tab/Shift+Tab - навигация, Esc/b - отмена)" // Убрали, т.к. добавляется в View
-	// TODO: Добавить подсказку про Enter для сохранения
+
+	// Отображаем вложения
+	s += "\n--- Вложения ---\n"
+	if len(m.editingEntry.Binaries) == 0 {
+		s += "(Нет вложений)\n"
+	} else {
+		for i, binaryRef := range m.editingEntry.Binaries {
+			// TODO: Добавить индикатор выбора для удаления?
+			s += fmt.Sprintf(" [%d] %s\n", i, binaryRef.Name)
+		}
+	}
+
 	return s
 }

@@ -132,6 +132,11 @@ type model struct {
 	// Поля для добавления записи
 	addInputs       []textinput.Model // Поля ввода для новой записи
 	focusedFieldAdd int               // Индекс активного поля ввода
+	// Временное хранилище для вложений новой записи
+	newEntryAttachments []struct {
+		Name    string
+		Content []byte
+	}
 
 	savingStatus string // Статус операции сохранения файла
 }

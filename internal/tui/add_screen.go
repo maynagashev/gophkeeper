@@ -37,9 +37,58 @@ func (m *model) prepareAddScreen() {
 	m.addInputs[editableFieldPassword].EchoMode = textinput.EchoPassword
 }
 
+// createEntryFromInputs создает новую запись gokeepasslib.Entry на основе
+// данных из полей ввода (inputs) и временных вложений (attachments).
+// Также добавляет бинарные данные в базу (db).
+func createEntryFromInputs(db *gokeepasslib.Database, inputs []textinput.Model, attachments []struct {
+	Name    string
+	Content []byte
+}) gokeepasslib.Entry {
+	newEntry := gokeepasslib.NewEntry()
+	now := time.Now()
+	creationTime := w.TimeWrapper{Time: now}
+	modificationTime := w.TimeWrapper{Time: now}
+	accessTime := w.TimeWrapper{Time: now}
+	newEntry.Times.CreationTime = &creationTime
+	newEntry.Times.LastModificationTime = &modificationTime
+	newEntry.Times.LastAccessTime = &accessTime
+
+	// Добавляем обычные поля
+	for _, input := range inputs {
+		fieldName := input.Placeholder
+		newValue := input.Value()
+		if newValue != "" {
+			valueData := gokeepasslib.ValueData{
+				Key:   fieldName,
+				Value: gokeepasslib.V{Content: newValue},
+			}
+			if fieldName == fieldNamePassword {
+				valueData.Value.Protected = w.NewBoolWrapper(true)
+			}
+			newEntry.Values = append(newEntry.Values, valueData)
+		}
+	}
+
+	// Добавляем вложения
+	if db != nil && len(attachments) > 0 {
+		for _, att := range attachments {
+			binary := db.AddBinary(att.Content)
+			if binary == nil {
+				slog.Error("Не удалось добавить бинарные данные в базу", "name", att.Name)
+				continue
+			}
+			binaryRef := binary.CreateReference(att.Name)
+			newEntry.Binaries = append(newEntry.Binaries, binaryRef)
+			slog.Info("Добавлено вложение к новой записи", "name", att.Name, "binary_id", binary.ID)
+		}
+	}
+
+	return newEntry
+}
+
 // updateEntryAddScreen обрабатывает сообщения для экрана добавления записи.
 //
-//nolint:gocognit,nestif // Сложность из-за обработки разных клавиш и навигации
+//nolint:nestif // Сложность из-за обработки разных клавиш и навигации
 func (m *model) updateEntryAddScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 
@@ -66,43 +115,15 @@ func (m *model) updateEntryAddScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Batch(cmds...)
 
 		case keyEnter:
-			// Создание новой записи (пока только в памяти)
-			newEntry := gokeepasslib.NewEntry()
-			now := time.Now() // Получаем текущее время один раз
-			// Создаем обертки и берем указатели
-			creationTime := w.TimeWrapper{Time: now}
-			modificationTime := w.TimeWrapper{Time: now}
-			accessTime := w.TimeWrapper{Time: now}
-			newEntry.Times.CreationTime = &creationTime
-			newEntry.Times.LastModificationTime = &modificationTime
-			newEntry.Times.LastAccessTime = &accessTime
+			// Создаем запись из введенных данных и вложений
+			newEntry := createEntryFromInputs(m.db, m.addInputs, m.newEntryAttachments)
+			m.newEntryAttachments = nil // Очищаем временное хранилище
 
-			for _, input := range m.addInputs {
-				fieldName := input.Placeholder
-				newValue := input.Value()
-				if newValue != "" { // Добавляем поле, только если оно не пустое
-					valueData := gokeepasslib.ValueData{
-						Key:   fieldName,
-						Value: gokeepasslib.V{Content: newValue},
-					}
-					if fieldName == fieldNamePassword {
-						valueData.Value.Protected = w.NewBoolWrapper(true)
-					}
-					newEntry.Values = append(newEntry.Values, valueData)
-				}
-			}
-
-			// Добавляем newEntry в m.db (в корневую группу или первую подгруппу)
+			// Добавляем newEntry в m.db (в первую группу)
 			if m.db != nil && m.db.Content != nil && m.db.Content.Root != nil {
 				if len(m.db.Content.Root.Groups) > 0 {
-					// Добавляем в первую группу
 					m.db.Content.Root.Groups[0].Entries = append(m.db.Content.Root.Groups[0].Entries, newEntry)
 				} else {
-					// Если групп нет, добавляем в корневую псевдо-группу (не совсем правильно для KDBX, но для демо)
-					// Правильнее было бы создать группу по умолчанию, если ее нет.
-					slog.Warn("Корневая группа не найдена, добавляем запись напрямую в root (может быть некорректно)")
-					// m.db.Content.Root.Entries = append(m.db.Content.Root.Entries, newEntry) // У Root нет Entries
-					// Пока просто не добавляем в db если нет групп
 					slog.Error("Не удалось добавить запись в m.db: нет групп")
 				}
 			} else {
@@ -111,18 +132,24 @@ func (m *model) updateEntryAddScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			// Добавляем newEntry в m.entryList
 			newItem := entryItem{entry: newEntry}
-			// Добавляем в конец списка
 			insertCmd := m.entryList.InsertItem(len(m.entryList.Items()), newItem)
-			// Обновляем заголовок списка
 			m.entryList.Title = fmt.Sprintf("Записи в '%s' (%d)", m.kdbxPath, len(m.entryList.Items()))
-
 			slog.Info("Новая запись добавлена", "title", newEntry.GetTitle())
 
 			// Возвращаемся к списку
 			m.state = entryListScreen
 			m.addInputs = nil
-			// Добавляем команду обновления списка к команде очистки экрана
 			return m, tea.Batch(tea.ClearScreen, insertCmd)
+
+		case "ctrl+o": // Добавить вложение (заглушка)
+			slog.Info("Обработка Ctrl+O (Add Screen): Добавить вложение (пока не реализовано)")
+			// TODO: Реализовать логику добавления вложения во временный список m.newEntryAttachments
+			// Временно добавим тестовое вложение для проверки отображения
+			m.newEntryAttachments = append(m.newEntryAttachments, struct {
+				Name    string
+				Content []byte
+			}{"test.txt", []byte("это тестовый файл")})
+			return m, nil // Пока ничего не делаем
 		}
 	} // конец if keyMsg, ok := msg.(tea.KeyMsg)
 
@@ -159,6 +186,17 @@ func (m model) viewEntryAddScreen() string {
 		}
 		s += fmt.Sprintf("%s%s: %s\n", focusIndicator, input.Placeholder, input.View())
 	}
+
+	// Отображаем добавляемые вложения
+	s += "\n--- Вложения для добавления ---\n"
+	if len(m.newEntryAttachments) == 0 {
+		s += "(Нет вложений)\n"
+	} else {
+		for i, att := range m.newEntryAttachments {
+			s += fmt.Sprintf(" [%d] %s (%d байт)\n", i, att.Name, len(att.Content))
+		}
+	}
+
 	// s += "(Enter - добавить, Ctrl+C - выход)\n" // Убрали, т.к. добавляется в View
 	return s
 }

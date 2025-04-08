@@ -178,13 +178,13 @@ func (m model) View() string {
 		help = "(↑/↓ - навигация, Enter - детали, / - поиск, a - добавить, Ctrl+S - сохр., q - выход)"
 	case entryDetailScreen:
 		mainContent = m.viewEntryDetailScreen()
-		help = "(e - ред., Ctrl+S - сохр., Esc/b - назад)" // Уже добавлено в viewEntryDetailScreen
+		help = "(e - ред., Ctrl+S - сохр., Esc/b - назад)"
 	case entryEditScreen:
 		mainContent = m.viewEntryEditScreen()
-		help = "(Tab/↑/↓ - навигация, Enter - сохр., Esc/b - отмена)" // Обновим и здесь
+		help = "(Tab/↑/↓, Enter - сохр., Esc - отмена, ^O - влож+, ^D - влож-)"
 	case entryAddScreen:
 		mainContent = m.viewEntryAddScreen()
-		help = "(Enter - добавить, Ctrl+C - выход)"
+		help = "(Tab/↑/↓, Enter - доб., ^O - влож+, Esc - отмена)"
 	default:
 		mainContent = "Неизвестное состояние!"
 	}
