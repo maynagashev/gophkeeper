@@ -1,7 +1,6 @@
 package tui
 
 import (
-	"encoding/hex"
 	"fmt"
 	"log/slog"
 	"os"
@@ -16,106 +15,6 @@ import (
 
 	"github.com/maynagashev/gophkeeper/internal/kdbx"
 )
-
-// Состояния (экраны) приложения.
-type screenState int
-
-const (
-	welcomeScreen       screenState = iota // Приветственный экран
-	passwordInputScreen                    // Экран ввода пароля
-	entryListScreen                        // Экран списка записей
-	entryDetailScreen                      // Экран деталей записи
-	entryEditScreen                        // Экран редактирования записи
-	entryAddScreen                         // Экран добавления новой записи
-	// TODO: Добавить другие экраны (детали записи и т.д.)
-)
-
-// Поля, доступные для редактирования.
-const (
-	editableFieldTitle = iota
-	editableFieldUserName
-	editableFieldPassword
-	editableFieldURL
-	editableFieldNotes
-	numEditableFields // Количество редактируемых полей
-
-	fieldNamePassword = "Password"
-)
-
-// Константы для TUI.
-const (
-	defaultListWidth    = 80 // Стандартная ширина терминала для списка
-	defaultListHeight   = 24 // Стандартная высота терминала для списка
-	passwordInputOffset = 4  // Отступ для поля ввода пароля
-
-	keyEnter = "enter" // Клавиша Enter
-	keyQuit  = "q"     // Клавиша выхода
-	keyBack  = "b"     // Клавиша возврата
-	keyEsc   = "esc"   // Клавиша Escape
-	keyEdit  = "e"     // Клавиша редактирования
-	keyAdd   = "a"     // Клавиша добавления
-)
-
-// entryItem представляет элемент списка записей.
-// Реализует интерфейс list.Item.
-type entryItem struct {
-	entry gokeepasslib.Entry
-}
-
-func (i entryItem) Title() string {
-	// Пытаемся получить значение поля "Title"
-	title := i.entry.GetTitle()
-	if title == "" {
-		// Если Title пустой, используем Username
-		title = i.entry.GetContent("UserName")
-	}
-	if title == "" {
-		// Если и Username пустой, используем UUID
-		title = hex.EncodeToString(i.entry.UUID[:])
-	}
-	return title
-}
-
-func (i entryItem) Description() string {
-	// В описании можно показать Username или URL
-	username := i.entry.GetContent("UserName")
-	url := i.entry.GetContent("URL")
-	switch {
-	case username != "" && url != "":
-		return fmt.Sprintf("User: %s | URL: %s", username, url)
-	case username != "":
-		return fmt.Sprintf("User: %s", username)
-	case url != "":
-		return fmt.Sprintf("URL: %s", url)
-	default:
-		return ""
-	}
-}
-
-func (i entryItem) FilterValue() string { return i.Title() }
-
-// Модель представляет состояние TUI приложения.
-type model struct {
-	state         screenState            // Текущее состояние (экран)
-	passwordInput textinput.Model        // Поле ввода для пароля
-	password      string                 // Сохраненный в памяти пароль от базы (для применения изменений)
-	db            *gokeepasslib.Database // Объект открытой базы KDBX
-	kdbxPath      string                 // Путь к KDBX файлу (пока захардкожен)
-	err           error                  // Последняя ошибка для отображения
-	entryList     list.Model             // Компонент списка записей
-	selectedEntry *entryItem             // Выбранная запись для детального просмотра
-
-	// Поля для редактирования записи
-	editingEntry *gokeepasslib.Entry // Копия записи, которую редактируем
-	editInputs   []textinput.Model   // Поля ввода для редактирования
-	focusedField int                 // Индекс активного поля ввода (для редактирования)
-
-	// Поля для добавления записи
-	addInputs       []textinput.Model // Поля ввода для новой записи
-	focusedFieldAdd int               // Индекс активного поля ввода (для добавления)
-
-	savingStatus string // Статус операции сохранения файла
-}
 
 // initialModel создает начальное состояние модели.
 func initialModel() model {
@@ -169,45 +68,6 @@ func initialModel() model {
 // Init - команда, выполняемая при запуске приложения.
 func (m model) Init() tea.Cmd {
 	return textinput.Blink
-}
-
-// Структура для сообщения об успешном открытии файла.
-type dbOpenedMsg struct {
-	db *gokeepasslib.Database
-}
-
-// Структура для сообщения об ошибке.
-type errMsg struct {
-	err error
-}
-
-// Команда для асинхронного открытия файла.
-func openKdbxCmd(path, password string) tea.Cmd {
-	return func() tea.Msg {
-		db, err := kdbx.OpenFile(path, password)
-		if err != nil {
-			return errMsg{err: err}
-		}
-		return dbOpenedMsg{db: db}
-	}
-}
-
-// Структуры для сообщений о сохранении.
-type dbSavedMsg struct{}
-
-type dbSaveErrorMsg struct {
-	err error
-}
-
-// Команда для асинхронного сохранения файла.
-func saveKdbxCmd(db *gokeepasslib.Database, path, password string) tea.Cmd {
-	return func() tea.Msg {
-		err := kdbx.SaveFile(db, path, password)
-		if err != nil {
-			return dbSaveErrorMsg{err: err}
-		}
-		return dbSavedMsg{}
-	}
 }
 
 // Update обрабатывает входящие сообщения.
@@ -306,22 +166,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// return m, tea.Batch(cmds...)
 }
 
-// updateWelcomeScreen обрабатывает сообщения для экрана приветствия.
-func (m *model) updateWelcomeScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmds []tea.Cmd
-	if keyMsg, ok := msg.(tea.KeyMsg); ok {
-		switch keyMsg.String() {
-		case keyQuit:
-			return m, tea.Quit
-		case keyEnter:
-			m.state = passwordInputScreen
-			m.passwordInput.Focus()
-			cmds = append(cmds, textinput.Blink, tea.ClearScreen)
-		}
-	}
-	return m, tea.Batch(cmds...)
-}
-
 // updatePasswordInputScreen обрабатывает сообщения для экрана ввода пароля.
 func (m *model) updatePasswordInputScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
@@ -409,34 +253,6 @@ func (m *model) updateEntryDetailScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 	return m, nil
-}
-
-// deepCopyEntry создает глубокую копию записи gokeepasslib.Entry.
-func deepCopyEntry(original gokeepasslib.Entry) gokeepasslib.Entry {
-	newEntry := gokeepasslib.NewEntry()
-
-	// Копируем UUID
-	copy(newEntry.UUID[:], original.UUID[:])
-
-	// Копируем основные поля (простые типы копируются по значению)
-	newEntry.Times = original.Times
-	newEntry.Tags = original.Tags             // Строки неизменяемы, можно копировать напрямую
-	newEntry.CustomData = original.CustomData // Тоже карта строк, копируем
-	// TODO: Добавить копирование других полей при необходимости (AutoType, History, CustomIcons)
-
-	// Глубокое копирование среза Values
-	if original.Values != nil {
-		newEntry.Values = make([]gokeepasslib.ValueData, len(original.Values))
-		for i, val := range original.Values {
-			newValue := gokeepasslib.ValueData{
-				Key:   val.Key,
-				Value: gokeepasslib.V{Content: val.Value.Content, Protected: val.Value.Protected},
-			}
-			newEntry.Values[i] = newValue
-		}
-	}
-
-	return newEntry
 }
 
 // prepareEditScreen инициализирует поля для экрана редактирования.
@@ -799,14 +615,6 @@ func (m model) View() string {
 	return mainContent + "\n" + help + statusLine
 }
 
-// viewWelcomeScreen отрисовывает экран приветствия.
-func (m model) viewWelcomeScreen() string {
-	s := "Добро пожаловать в GophKeeper!\n\n"
-	s += "Это безопасный менеджер паролей для командной строки,\n"
-	s += "совместимый с форматом KDBX (KeePass).\n\n"
-	return s
-}
-
 // viewPasswordInputScreen отрисовывает экран ввода пароля.
 func (m model) viewPasswordInputScreen() string {
 	s := "Введите мастер-пароль для открытия базы данных: " + m.kdbxPath + "\n\n"
@@ -908,37 +716,6 @@ func Start() {
 		slog.Error("Ошибка при запуске TUI", "error", err)
 		os.Exit(1)
 	}
-}
-
-// --- Вспомогательные функции ---
-
-// findEntryInDB рекурсивно ищет запись по UUID в базе данных.
-// Возвращает указатель на найденную запись или nil.
-func findEntryInDB(db *gokeepasslib.Database, uuid gokeepasslib.UUID) *gokeepasslib.Entry {
-	if db == nil || db.Content == nil || db.Content.Root == nil {
-		return nil
-	}
-	return findEntryInGroups(db.Content.Root.Groups, uuid)
-}
-
-// findEntryInGroups рекурсивно ищет запись по UUID в срезе групп.
-// Возвращает указатель на найденную запись или nil.
-func findEntryInGroups(groups []gokeepasslib.Group, uuid gokeepasslib.UUID) *gokeepasslib.Entry {
-	for i := range groups { // Используем индекс, чтобы получить указатель на элемент среза
-		group := &groups[i]
-		// Ищем в записях текущей группы
-		for j := range group.Entries {
-			entry := &group.Entries[j]
-			if entry.UUID == uuid {
-				return entry // Нашли!
-			}
-		}
-		// Ищем рекурсивно в подгруппах
-		if entry := findEntryInGroups(group.Groups, uuid); entry != nil {
-			return entry // Нашли в подгруппе
-		}
-	}
-	return nil // Не нашли
 }
 
 // prepareAddScreen инициализирует поля для экрана добавления.

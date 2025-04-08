@@ -34,44 +34,6 @@
 > Мастер-пароль        
 
 
-[6;H[H
-
-
-
-
-Ошибка: ошибка дешифрования файла 'example/test.kdbx': Wrong password? HMAC-SHA256 of header mismatching
-
-(Нажмите любую клавишу для продолжения)
-(Enter - подтвердить, Ctrl+C - выход)[9;H[H
-
-
-
-
-(Enter - подтвердить, Ctrl+C - выход)[J[6;H[H
-
-> *                    
-
-
-[6;H[H
-
-> **                   
-
-
-[6;H[H
-
-> ***                  
-
-
-[6;H[H
-
-> ****                 
-
-
-[6;H[H
-
-> Мастер-пароль        
-
-
 [6;H[2J[H[H   Записи в 'example/test.kdbx' (3)                
                                                    
   3 items                                          
@@ -95,4 +57,278 @@
                                                    
                                                    
                                                    
-                                                   (↑/↓ - навигация, Enter - детали, / - поиск, a - добавить, Ctrl+S - сохр., q - выход)[24;H
+                                                   (↑/↓ - навигация, Enter - детали, / - поиск, a - добавить, Ctrl+S - сохр., q - выход)[24;H[H
+
+
+
+  mail@example.com                                 
+  User: mail@example.com | URL: https://example.com
+
+│ test entry 5                                     
+│ User: user1 | URL: https://localhost             
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+
+
+
+  test entry 5                                     
+  User: user1 | URL: https://localhost             
+
+│ test new                                         
+│                                                  
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+
+
+
+│ test entry 5                                     
+│ User: user1 | URL: https://localhost             
+
+  test new                                         
+                                                   
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+│ mail@example.com                                 
+│ User: mail@example.com | URL: https://example.com
+
+  test entry 5                                     
+  User: user1 | URL: https://localhost             
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+  mail@example.com                                 
+  User: mail@example.com | URL: https://example.com
+
+│ test entry 5                                     
+│ User: user1 | URL: https://localhost             
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+
+
+
+  test entry 5                                     
+  User: user1 | URL: https://localhost             
+
+│ test new                                         
+│                                                  
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+│ mail@example.com                                 
+│ User: mail@example.com | URL: https://example.com
+
+
+
+
+  test new                                         
+                                                   
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+  mail@example.com                                 
+  User: mail@example.com | URL: https://example.com
+
+
+
+
+│ test new                                         
+│                                                  
+
+
+
+
+
+
+
+
+
+
+
+[24;H[2J[H[HДетали записи: test new
+
+Title: test new
+UserName: 
+Password: 
+URL: 
+Notes: 
+
+(e - ред., Ctrl+S - сохр., Esc/b - назад)[J[9;H[2J[H[HРедактирование записи: test new
+
+> Title: > test new 
+  UserName: > UserName
+  Password: > Password
+  URL: > URL
+  Notes: > Notes
+
+(Tab/↑/↓ - навигация, Enter - сохр., Esc/b - отмена)[9;H[H
+
+  Title: > test new 
+> UserName: > UserName
+
+
+
+
+[9;H[H
+
+> Title: > test new 
+  UserName: > UserName
+
+
+
+
+[9;H[HРедактирование записи: test new2
+
+> Title: > test new2 
+
+
+
+
+
+[9;H[2J[H[HДетали записи: test new2
+
+Title: test new2
+UserName: 
+Password: 
+URL: 
+Notes: 
+
+(e - ред., Ctrl+S - сохр., Esc/b - назад)[9;H[H
+
+
+
+
+
+
+
+
+Сохранение...[10;H[H
+
+
+
+
+
+
+
+
+Сохранено успешно![10;H[2J[H[H   Записи в 'example/test.kdbx' (3)                
+                                                   
+  3 items                                          
+                                                   
+  mail@example.com                                 
+  User: mail@example.com | URL: https://example.com
+                                                   
+  test entry 5                                     
+  User: user1 | URL: https://localhost             
+                                                   
+│ test new2                                        
+│                                                  
+                                                   
+                                                   
+                                                   
+                                                   
+                                                   
+                                                   
+                                                   
+                                                   
+                                                   
+                                                   
+                                                   
+                                                   (↑/↓ - навигация, Enter - детали, / - поиск, a - добавить, Ctrl+S - сохр., q - выход)
+Сохранено успешно![25;H[2K[?2004l[?25h[?1002l[?1003l[?1006l[?1049l[?25h
