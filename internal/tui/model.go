@@ -1,0 +1,150 @@
+package tui
+
+import (
+	"encoding/hex"
+	"fmt"
+
+	"github.com/charmbracelet/bubbles/list"
+	"github.com/charmbracelet/bubbles/textinput"
+	"github.com/tobischo/gokeepasslib/v3"
+)
+
+// Состояния (экраны) приложения.
+type screenState int
+
+const (
+	welcomeScreen              screenState = iota // Приветственный экран
+	passwordInputScreen                           // Экран ввода пароля
+	entryListScreen                               // Экран списка записей
+	entryDetailScreen                             // Экран деталей записи
+	entryEditScreen                               // Экран редактирования записи
+	entryAddScreen                                // Экран добавления новой записи
+	attachmentListDeleteScreen                    // Экран выбора вложения для удаления
+	attachmentPathInputScreen                     // Экран ввода пути к добавляемому вложению
+)
+
+// Поля, доступные для редактирования.
+const (
+	editableFieldTitle = iota
+	editableFieldUserName
+	editableFieldPassword
+	editableFieldURL
+	editableFieldNotes
+	numEditableFields // Количество редактируемых полей
+
+	fieldNamePassword = "Password"
+)
+
+// Константы для TUI.
+const (
+	defaultListWidth    = 80 // Стандартная ширина терминала для списка
+	defaultListHeight   = 24 // Стандартная высота терминала для списка
+	passwordInputOffset = 4  // Отступ для поля ввода пароля
+
+	keyEnter = "enter" // Клавиша Enter
+	keyQuit  = "q"     // Клавиша выхода
+	keyBack  = "b"     // Клавиша возврата
+	keyEsc   = "esc"   // Клавиша Escape
+	keyEdit  = "e"     // Клавиша редактирования
+	keyAdd   = "a"     // Клавиша добавления
+)
+
+// entryItem представляет элемент списка записей.
+// Реализует интерфейс list.Item.
+type entryItem struct {
+	entry gokeepasslib.Entry
+}
+
+func (i entryItem) Title() string {
+	// Пытаемся получить значение поля "Title"
+	title := i.entry.GetTitle()
+	if title == "" {
+		// Если Title пустой, используем Username
+		title = i.entry.GetContent("UserName")
+	}
+	if title == "" {
+		// Если и Username пустой, используем UUID
+		title = hex.EncodeToString(i.entry.UUID[:])
+	}
+	return title
+}
+
+func (i entryItem) Description() string {
+	// В описании можно показать Username или URL
+	username := i.entry.GetContent("UserName")
+	url := i.entry.GetContent("URL")
+	var desc string // Объявляем переменную без инициализации
+	switch {
+	case username != "" && url != "":
+		desc = fmt.Sprintf("User: %s | URL: %s", username, url)
+	case username != "":
+		desc = fmt.Sprintf("User: %s", username)
+	case url != "":
+		desc = fmt.Sprintf("URL: %s", url)
+	default:
+		desc = ""
+	}
+
+	// Добавляем индикатор наличия вложений
+	if len(i.entry.Binaries) > 0 {
+		if desc != "" {
+			desc += " " // Добавляем пробел, если описание уже есть
+		}
+		desc += fmt.Sprintf("[A:%d]", len(i.entry.Binaries)) // Показываем количество вложений
+	}
+
+	return desc
+}
+
+func (i entryItem) FilterValue() string { return i.Title() }
+
+// Структура для сообщения об успешном открытии файла.
+type dbOpenedMsg struct {
+	db *gokeepasslib.Database
+}
+
+// Структура для сообщения об ошибке.
+type errMsg struct {
+	err error
+}
+
+// Структуры для сообщений о сохранении.
+type dbSavedMsg struct{}
+
+type dbSaveErrorMsg struct {
+	err error
+}
+
+// model представляет состояние TUI приложения.
+type model struct {
+	state         screenState            // Текущее состояние (экран)
+	passwordInput textinput.Model        // Поле ввода для пароля
+	password      string                 // Сохраненный в памяти пароль от базы
+	db            *gokeepasslib.Database // Объект открытой базы KDBX
+	kdbxPath      string                 // Путь к KDBX файлу
+	err           error                  // Последняя ошибка для отображения
+	entryList     list.Model             // Компонент списка записей
+	selectedEntry *entryItem             // Выбранная запись для детального просмотра
+
+	// Поля для редактирования записи
+	editingEntry *gokeepasslib.Entry // Копия записи, которую редактируем
+	editInputs   []textinput.Model   // Поля ввода для редактирования
+	focusedField int                 // Индекс активного поля ввода
+
+	// Поля для добавления записи
+	addInputs           []textinput.Model // Поля ввода для новой записи
+	focusedFieldAdd     int               // Индекс активного поля ввода
+	newEntryAttachments []struct {
+		Name    string
+		Content []byte
+	} // Временное хранилище для вложений новой записи
+
+	attachmentList list.Model // Список вложений для удаления
+
+	// Поля для добавления вложения через путь
+	previousScreenState screenState     // Экран, с которого перешли на ввод пути
+	attachmentPathInput textinput.Model // Поле ввода пути к файлу
+	attachmentError     error           // Ошибка при добавлении вложения
+
+	savingStatus string // Статус операции сохранения файла
+}

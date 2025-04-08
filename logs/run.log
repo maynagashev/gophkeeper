@@ -3,53 +3,52 @@
 Это безопасный менеджер паролей для командной строки,
 совместимый с форматом KDBX (KeePass).
 
-Нажмите Enter для продолжения или Ctrl+C/q для выхода.
 
-(Enter - продолжить, Ctrl+C/q - выход)[8;H[2J[H[HВведите мастер-пароль для открытия базы данных: example/test.kdbx
+(Enter - продолжить, Ctrl+C/q - выход)[7;H[2J[H[HВведите мастер-пароль для открытия базы данных: example/test.kdbx
 
 > Мастер-пароль        
 
-(Нажмите Enter для подтверждения или Ctrl+C для выхода)
 
-(Enter - подтвердить, Ctrl+C - выход)[J[7;H[H
+(Enter - подтвердить, Ctrl+C - выход)[J[6;H[H
 
 > *                    
 
 
-
-[7;H[H
+[6;H[H
 
 > **                   
 
 
-
-[7;H[H
+[6;H[H
 
 > ***                  
 
 
-
-[7;H[H
+[6;H[H
 
 > ****                 
 
 
-
-[7;H[H
+[6;H[H
 
 > Мастер-пароль        
 
 
-
-[7;H[2J[H[H   Записи в 'example/test.kdbx' (2)                
+[6;H[2J[H[H   Записи в 'example/test.kdbx' (4)                
                                                    
-  2 items                                          
+  4 items                                          
                                                    
 │ mail@example.com                                 
 │ User: mail@example.com | URL: https://example.com
                                                    
-  test entry 4                                     
-  User: user1                                      
+  test entry 5                                     
+  User: user1 | URL: https://localhost             
+                                                   
+  test new2                                        
+                                                   
+                                                   
+  test binary                                      
+  [A:1]                                            
                                                    
                                                    
                                                    
@@ -58,21 +57,15 @@
                                                    
                                                    
                                                    
-                                                   
-                                                   
-                                                   
-                                                   
-                                                   
-                                                   
-                                                   (↑/↓ - навигация, Enter - детали, / - поиск, Ctrl+S - сохр., q - выход)[24;H[H
+                                                   (↑/↓ - навигация, Enter - детали, / - поиск, a - добавить, Ctrl+S - сохр., q - выход)[24;H[H
 
 
 
   mail@example.com                                 
   User: mail@example.com | URL: https://example.com
 
-│ test entry 4                                     
-│ User: user1                                      
+│ test entry 5                                     
+│ User: user1 | URL: https://localhost             
 
 
 
@@ -87,217 +80,199 @@
 
 
 
-[24;H[2J[H[HДетали записи: test entry 4
+[24;H[H
 
-Title: test entry 4
-UserName: user1
+
+
+
+
+
+  test entry 5                                     
+  User: user1 | URL: https://localhost             
+
+│ test new2                                        
+│                                                  
+
+
+
+
+
+
+
+
+
+
+
+[24;H[H
+
+
+
+
+
+
+
+
+
+  test new2                                        
+                                                   
+
+│ test binary                                      
+│ [A:1]                                            
+
+
+
+
+
+
+
+
+[24;H[2J[H[HДетали записи: test binary
+
+Title: test binary
+UserName: 
 Password: ********
 URL: 
 Notes: 
-[J[8;H[2J[H[HРедактирование записи: test entry 4
 
-> Title: > test entry 4 
-  UserName: > user1 
-  Password: > ********* 
+--- Вложения ---
+- d23-the-mandalorian-poster.webp (50614 байт)
+
+(e - ред., Ctrl+S - сохр., Esc/b - назад)[J[12;H[2J[H[HРедактирование записи: test binary
+
+> Title: > test binary 
+  UserName: > UserName
+  Password: > Password
   URL: > URL
   Notes: > Notes
-[8;H[H
 
-  Title: > test entry 4 
-> UserName: > user1 
+--- Вложения ---
+ [0] d23-the-mandalorian-poster.webp
 
+(Tab/↑/↓, Enter - сохр., Esc - отмена, ^O - влож+, ^D - влож-)[12;H[2J[H[HВведите полный путь к файлу для добавления вложения:
 
+> /path/to/your/file                                                           
 
-[8;H[H
 
+(Enter - подтвердить, Esc - отмена)[J[6;H[H
 
-  UserName: > user1 
-> Password: > ********* 
+> /                                                                            
 
 
-[8;H[H
+[6;H[H
 
+> /t                                                                           
 
 
-  Password: > ********* 
-> URL: > URL
+[6;H[H
 
-[8;H[H
+> /te                                                                          
 
 
+[6;H[H
 
+> /tes                                                                         
 
-> URL: > h 
 
-[8;H[H
+[6;H[H
 
+> /test                                                                        
 
 
+[6;H[H
 
-> URL: > ht 
+> /tes                                                                         
 
-[8;H[H
 
+[6;H[H
 
+> /te                                                                          
 
 
-> URL: > htt 
+[6;H[H
 
-[8;H[H
+> /t                                                                           
 
 
+[6;H[H
 
+> /                                                                            
 
-> URL: > http 
 
-[8;H[H
+[6;H[H
 
+> /path/to/your/file                                                           
 
 
+[6;H[H
 
-> URL: > https 
+> /home/dev/Dropbox/Images/                                                    
 
-[8;H[H
 
+[6;H[H
 
+> /home/dev/Dropbox/Images/S                                                   
 
 
-> URL: > https: 
+[6;H[H
 
-[8;H[H
+> /home/dev/Dropbox/Images/Si                                                  
 
 
+[6;H[H
 
+> /home/dev/Dropbox/Images/Sin                                                 
 
-> URL: > https:/ 
 
-[8;H[H
+[6;H[H
 
+> /home/dev/Dropbox/Images/Sink                                                
 
 
+[6;H[H
 
-> URL: > https:// 
+> /home/dev/Dropbox/Images/Sink.                                               
 
-[8;H[H
 
+[6;H[H
 
+> /home/dev/Dropbox/Images/Sink.p                                              
 
 
-> URL: > https://l 
+[6;H[H
 
-[8;H[H
+> /home/dev/Dropbox/Images/Sink.pn                                             
 
 
+[6;H[H
 
+> /home/dev/Dropbox/Images/Sink.png                                            
 
-> URL: > https://lo 
 
-[8;H[H
+[6;H[2J[H[HРедактирование записи: test binary
 
+> Title: > test binary 
+  UserName: > UserName
+  Password: > Password
+  URL: > URL
+  Notes: > Notes
 
+--- Вложения ---
+ [0] d23-the-mandalorian-poster.webp
+ [1] Sink.png
 
+(Tab/↑/↓, Enter - сохр., Esc - отмена, ^O - влож+, ^D - влож-)[13;H[2J[H[HДетали записи: test binary
 
-> URL: > https://loc 
-
-[8;H[H
-
-
-
-
-> URL: > https://loca 
-
-[8;H[H
-
-
-
-
-> URL: > https://local 
-
-[8;H[H
-
-
-
-
-> URL: > https://localh 
-
-[8;H[H
-
-
-
-
-> URL: > https://localho 
-
-[8;H[H
-
-
-
-
-> URL: > https://localhos 
-
-[8;H[H
-
-
-
-
-> URL: > https://localhost 
-
-[8;H[H
-
-
-
-
-> URL: > https://localhost. 
-
-[8;H[H
-
-
-
-
-> URL: > https://localhost 
-
-[8;H[H
-
-
-
-> Password: > ********* 
-  URL: > https://localhost 
-
-[8;H[H
-
-
-> UserName: > user1 
-  Password: > ********* 
-
-
-[8;H[H
-
-> Title: > test entry 4 
-  UserName: > user1 
-
-
-
-[8;H[HРедактирование записи: test entry 
-
-> Title: > test entry  
-
-
-
-
-[8;H[HРедактирование записи: test entry 5
-
-> Title: > test entry 5 
-
-
-
-
-[8;H[2J[H[HДетали записи: test entry 5
-
-Title: test entry 5
-UserName: user1
+Title: test binary
+UserName: 
 Password: ********
-URL: https://localhost
+URL: 
 Notes: 
-[8;H[H
+
+--- Вложения ---
+- d23-the-mandalorian-poster.webp (50614 байт)
+- Sink.png (36668 байт)
+
+(e - ред., Ctrl+S - сохр., Esc/b - назад)[13;H[H
 
 
 
@@ -305,7 +280,12 @@ Notes:
 
 
 
-Сохранение...[9;H[H
+
+
+
+
+
+Сохранение...[14;H[H
 
 
 
@@ -313,4 +293,59 @@ Notes:
 
 
 
-Сохранено успешно![9;H
+
+
+
+
+
+Сохранено успешно![14;H[H
+
+
+
+
+
+
+
+
+
+
+
+
+Сохранение...[14;H[H
+
+
+
+
+
+
+
+
+
+
+
+
+Сохранено успешно![14;H[2J[H[H   Записи в 'example/test.kdbx' (4)                
+                                                   
+  4 items                                          
+                                                   
+  mail@example.com                                 
+  User: mail@example.com | URL: https://example.com
+                                                   
+  test entry 5                                     
+  User: user1 | URL: https://localhost             
+                                                   
+  test new2                                        
+                                                   
+                                                   
+│ test binary                                      
+│ [A:2]                                            
+                                                   
+                                                   
+                                                   
+                                                   
+                                                   
+                                                   
+                                                   
+                                                   
+                                                   (↑/↓ - навигация, Enter - детали, / - поиск, a - добавить, Ctrl+S - сохр., q - выход)
+Сохранено успешно![25;H[2K[?2004l[?25h[?1002l[?1003l[?1006l[?1049l[?25h
