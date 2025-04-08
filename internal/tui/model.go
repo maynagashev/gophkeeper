@@ -71,16 +71,27 @@ func (i entryItem) Description() string {
 	// В описании можно показать Username или URL
 	username := i.entry.GetContent("UserName")
 	url := i.entry.GetContent("URL")
+	var desc string // Объявляем переменную без инициализации
 	switch {
 	case username != "" && url != "":
-		return fmt.Sprintf("User: %s | URL: %s", username, url)
+		desc = fmt.Sprintf("User: %s | URL: %s", username, url)
 	case username != "":
-		return fmt.Sprintf("User: %s", username)
+		desc = fmt.Sprintf("User: %s", username)
 	case url != "":
-		return fmt.Sprintf("URL: %s", url)
+		desc = fmt.Sprintf("URL: %s", url)
 	default:
-		return ""
+		desc = ""
 	}
+
+	// Добавляем индикатор наличия вложений
+	if len(i.entry.Binaries) > 0 {
+		if desc != "" {
+			desc += " " // Добавляем пробел, если описание уже есть
+		}
+		desc += fmt.Sprintf("[A:%d]", len(i.entry.Binaries)) // Показываем количество вложений
+	}
+
+	return desc
 }
 
 func (i entryItem) FilterValue() string { return i.Title() }
