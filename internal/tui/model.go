@@ -20,6 +20,7 @@ const (
 	entryEditScreen                               // Экран редактирования записи
 	entryAddScreen                                // Экран добавления новой записи
 	attachmentListDeleteScreen                    // Экран выбора вложения для удаления
+	attachmentPathInputScreen                     // Экран ввода пути к добавляемому вложению
 )
 
 // Поля, доступные для редактирования.
@@ -139,5 +140,11 @@ type model struct {
 	} // Временное хранилище для вложений новой записи
 
 	attachmentList list.Model // Список вложений для удаления
-	savingStatus   string     // Статус операции сохранения файла
+
+	// Поля для добавления вложения через путь
+	previousScreenState screenState     // Экран, с которого перешли на ввод пути
+	attachmentPathInput textinput.Model // Поле ввода пути к файлу
+	attachmentError     error           // Ошибка при добавлении вложения
+
+	savingStatus string // Статус операции сохранения файла
 }

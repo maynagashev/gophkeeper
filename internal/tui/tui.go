@@ -60,12 +60,19 @@ func initialModel() model {
 	attachmentDelList.SetFilteringEnabled(false) // Фильтрация не нужна
 	attachmentDelList.Styles.Title = list.DefaultStyles().Title.Bold(true)
 
+	// Поле ввода пути к файлу вложения
+	pathInput := textinput.New()
+	pathInput.Placeholder = "/path/to/your/file"
+	pathInput.CharLimit = 4096                               // Ограничение на длину пути
+	pathInput.Width = defaultListWidth - passwordInputOffset // Используем ту же ширину, что и пароль
+
 	return model{
-		state:          welcomeScreen,
-		passwordInput:  ti,
-		kdbxPath:       "example/test.kdbx",
-		entryList:      l,
-		attachmentList: attachmentDelList,
+		state:               welcomeScreen,
+		passwordInput:       ti,
+		kdbxPath:            "example/test.kdbx",
+		entryList:           l,
+		attachmentList:      attachmentDelList,
+		attachmentPathInput: pathInput,
 	}
 }
 
@@ -163,6 +170,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.updateEntryAddScreen(msg)
 	case attachmentListDeleteScreen:
 		return m.updateAttachmentListDeleteScreen(msg)
+	case attachmentPathInputScreen:
+		return m.updateAttachmentPathInputScreen(msg)
 	default:
 		// Для неизвестных состояний возвращаем модель без изменений и команд
 		return m, nil
@@ -199,13 +208,20 @@ func (m model) View() string {
 	case attachmentListDeleteScreen:
 		mainContent = m.viewAttachmentListDeleteScreen()
 		help = "(↑/↓ - навигация, Enter/d - удалить, Esc/b - отмена)"
+	case attachmentPathInputScreen:
+		mainContent = m.viewAttachmentPathInputScreen()
+		help = "(Enter - подтвердить, Esc - отмена)"
 	default:
 		mainContent = "Неизвестное состояние!"
 	}
 
-	// Добавляем статус сохранения, если он есть
+	// Добавляем статус сохранения, если он есть и мы не на определенных экранах
 	statusLine := ""
-	if m.savingStatus != "" && m.state != welcomeScreen && m.state != passwordInputScreen {
+	displayStatus := m.savingStatus != "" &&
+		m.state != welcomeScreen &&
+		m.state != passwordInputScreen &&
+		m.state != attachmentPathInputScreen
+	if displayStatus {
 		statusLine = "\n" + m.savingStatus
 	}
 

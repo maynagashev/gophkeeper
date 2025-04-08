@@ -129,8 +129,14 @@ func (m *model) handleEditScreenKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m.saveEntryChanges()
 
 	case "ctrl+o":
-		slog.Info("Обработка Ctrl+O: Добавить вложение (пока не реализовано)")
-		return m, nil
+		slog.Info("Переход к экрану ввода пути для добавления вложения")
+		m.previousScreenState = m.state // Запоминаем текущий экран (entryEditScreen)
+		m.state = attachmentPathInputScreen
+		m.attachmentPathInput.Reset()
+		m.attachmentPathInput.Focus()
+		m.attachmentError = nil // Сбрасываем предыдущую ошибку
+		// Добавляем очистку экрана
+		return m, tea.Batch(textinput.Blink, tea.ClearScreen)
 
 	case "ctrl+d":
 		return m.handleAttachmentDeleteAction()

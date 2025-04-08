@@ -141,15 +141,15 @@ func (m *model) updateEntryAddScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.addInputs = nil
 			return m, tea.Batch(tea.ClearScreen, insertCmd)
 
-		case "ctrl+o": // Добавить вложение (заглушка)
-			slog.Info("Обработка Ctrl+O (Add Screen): Добавить вложение (пока не реализовано)")
-			// TODO: Реализовать логику добавления вложения во временный список m.newEntryAttachments
-			// Временно добавим тестовое вложение для проверки отображения
-			m.newEntryAttachments = append(m.newEntryAttachments, struct {
-				Name    string
-				Content []byte
-			}{"test.txt", []byte("это тестовый файл")})
-			return m, nil // Пока ничего не делаем
+		case "ctrl+o": // Добавить вложение
+			slog.Info("Переход к экрану ввода пути для добавления вложения")
+			m.previousScreenState = m.state // Запоминаем текущий экран (entryAddScreen)
+			m.state = attachmentPathInputScreen
+			m.attachmentPathInput.Reset()
+			m.attachmentPathInput.Focus()
+			m.attachmentError = nil // Сбрасываем предыдущую ошибку
+			// Добавляем очистку экрана
+			return m, tea.Batch(textinput.Blink, tea.ClearScreen)
 		}
 	} // конец if keyMsg, ok := msg.(tea.KeyMsg)
 
