@@ -4,7 +4,7 @@ import (
 	"github.com/tobischo/gokeepasslib/v3"
 )
 
-// deepCopyEntry создает глубокую копию записи
+// deepCopyEntry создает глубокую копию записи.
 func deepCopyEntry(original gokeepasslib.Entry) gokeepasslib.Entry {
 	newEntry := gokeepasslib.NewEntry()
 
@@ -31,7 +31,7 @@ func deepCopyEntry(original gokeepasslib.Entry) gokeepasslib.Entry {
 	return newEntry
 }
 
-// findEntryInDB ищет запись по UUID в базе данных
+// findEntryInDB ищет запись по UUID в базе данных.
 func findEntryInDB(db *gokeepasslib.Database, uuid gokeepasslib.UUID) *gokeepasslib.Entry {
 	if db == nil || db.Content == nil || db.Content.Root == nil {
 		return nil
@@ -39,7 +39,7 @@ func findEntryInDB(db *gokeepasslib.Database, uuid gokeepasslib.UUID) *gokeepass
 	return findEntryInGroups(db.Content.Root.Groups, uuid)
 }
 
-// findEntryInGroups рекурсивно ищет запись по UUID
+// findEntryInGroups рекурсивно ищет запись по UUID.
 func findEntryInGroups(groups []gokeepasslib.Group, uuid gokeepasslib.UUID) *gokeepasslib.Entry {
 	for i := range groups {
 		group := &groups[i]

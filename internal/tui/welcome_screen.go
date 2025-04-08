@@ -5,7 +5,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-// updateWelcomeScreen обрабатывает сообщения для экрана приветствия
+// updateWelcomeScreen обрабатывает сообщения для экрана приветствия.
 func (m *model) updateWelcomeScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 	if keyMsg, ok := msg.(tea.KeyMsg); ok {
@@ -21,7 +21,7 @@ func (m *model) updateWelcomeScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(cmds...)
 }
 
-// viewWelcomeScreen отрисовывает экран приветствия
+// viewWelcomeScreen отрисовывает экран приветствия.
 func (m model) viewWelcomeScreen() string {
 	s := "Добро пожаловать в GophKeeper!\n\n"
 	s += "Это безопасный менеджер паролей для командной строки,\n"

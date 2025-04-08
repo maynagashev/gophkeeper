@@ -7,7 +7,7 @@ import (
 	"github.com/maynagashev/gophkeeper/internal/kdbx"
 )
 
-// openKdbxCmd асинхронно открывает файл базы
+// openKdbxCmd асинхронно открывает файл базы.
 func openKdbxCmd(path, password string) tea.Cmd {
 	return func() tea.Msg {
 		db, err := kdbx.OpenFile(path, password)
@@ -18,7 +18,7 @@ func openKdbxCmd(path, password string) tea.Cmd {
 	}
 }
 
-// saveKdbxCmd асинхронно сохраняет файл базы
+// saveKdbxCmd асинхронно сохраняет файл базы.
 func saveKdbxCmd(db *gokeepasslib.Database, path, password string) tea.Cmd {
 	return func() tea.Msg {
 		err := kdbx.SaveFile(db, path, password)

@@ -9,7 +9,7 @@ import (
 	"github.com/tobischo/gokeepasslib/v3"
 )
 
-// Состояния (экраны) приложения
+// Состояния (экраны) приложения.
 type screenState int
 
 const (
@@ -21,7 +21,7 @@ const (
 	entryAddScreen                         // Экран добавления новой записи
 )
 
-// Поля, доступные для редактирования
+// Поля, доступные для редактирования.
 const (
 	editableFieldTitle = iota
 	editableFieldUserName
@@ -33,7 +33,7 @@ const (
 	fieldNamePassword = "Password"
 )
 
-// Константы для TUI
+// Константы для TUI.
 const (
 	defaultListWidth    = 80 // Стандартная ширина терминала для списка
 	defaultListHeight   = 24 // Стандартная высота терминала для списка
@@ -102,7 +102,7 @@ type dbSaveErrorMsg struct {
 	err error
 }
 
-// model представляет состояние TUI приложения
+// model представляет состояние TUI приложения.
 type model struct {
 	state         screenState            // Текущее состояние (экран)
 	passwordInput textinput.Model        // Поле ввода для пароля
