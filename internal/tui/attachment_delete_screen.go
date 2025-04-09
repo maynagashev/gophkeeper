@@ -9,6 +9,13 @@ import (
 
 // updateAttachmentListDeleteScreen обрабатывает сообщения для экрана удаления вложений.
 func (m *model) updateAttachmentListDeleteScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
+	// Если в режиме ReadOnly, сразу возвращаемся к редактированию
+	if m.readOnlyMode {
+		slog.Warn("Попытка доступа к экрану удаления вложения в режиме Read-Only.")
+		m.state = entryEditScreen
+		return m, tea.ClearScreen
+	}
+
 	var cmds []tea.Cmd
 
 	// Если есть активный запрос на подтверждение, обрабатываем его

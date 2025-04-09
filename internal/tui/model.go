@@ -151,8 +151,9 @@ type model struct {
 	kdbxPath            string // Путь к файлу KDBX
 	password            string // Сохраненный мастер-пароль
 	db                  *gokeepasslib.Database
-	fileLock            *flock.Flock        //nolint:unused // Используется в будущей задаче блокировки файла
-	lockAcquired        bool                //nolint:unused // Используется в будущей задаче блокировки файла
+	fileLock            *flock.Flock        // Объект блокировки файла
+	lockAcquired        bool                // Флаг: удалось ли получить блокировку
+	readOnlyMode        bool                // Флаг: приложение в режиме только для чтения
 	passwordInput       textinput.Model     // Поле ввода пароля для существующего файла
 	entryList           list.Model          // Список записей
 	selectedEntry       *entryItem          // Выбранная запись для просмотра/редактирования

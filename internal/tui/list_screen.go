@@ -20,6 +20,7 @@ func (m *model) updateEntryListScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 	cmds = append(cmds, cmd)
 
 	// Обработка клавиш для экрана списка
+	//nolint:nestif // Вложенность из-за разных клавиш
 	if keyMsg, ok := msg.(tea.KeyMsg); ok {
 		switch keyMsg.String() {
 		case keyQuit:
@@ -39,11 +40,13 @@ func (m *model) updateEntryListScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 		case keyAdd:
-			// Переход к добавлению новой записи
-			m.prepareAddScreen()
-			m.state = entryAddScreen
-			slog.Info("Переход к добавлению новой записи")
-			return m, tea.ClearScreen
+			// Переход к добавлению новой записи (только если не Read-Only)
+			if !m.readOnlyMode {
+				m.prepareAddScreen()
+				m.state = entryAddScreen
+				slog.Info("Переход к добавлению новой записи")
+				return m, tea.ClearScreen
+			}
 		}
 	}
 	return m, tea.Batch(cmds...)

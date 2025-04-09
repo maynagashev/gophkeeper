@@ -104,6 +104,13 @@ func createEntryFromInputs(db *gokeepasslib.Database, inputs []textinput.Model, 
 //
 //nolint:nestif // Сложность из-за обработки разных клавиш и навигации
 func (m *model) updateEntryAddScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
+	// Если в режиме ReadOnly, сразу возвращаемся к списку
+	if m.readOnlyMode {
+		slog.Warn("Попытка доступа к экрану добавления в режиме Read-Only.")
+		m.state = entryListScreen
+		return m, tea.ClearScreen
+	}
+
 	var cmds []tea.Cmd
 
 	// Обрабатываем только KeyMsg

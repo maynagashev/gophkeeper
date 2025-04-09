@@ -23,7 +23,8 @@ func (m *model) updateEntryDetailScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 			slog.Info("Возврат к списку записей")
 			return m, tea.ClearScreen
 		case keyEdit:
-			if m.selectedEntry != nil {
+			// Переход к редактированию (только если не Read-Only)
+			if !m.readOnlyMode && m.selectedEntry != nil {
 				m.prepareEditScreen()
 				m.state = entryEditScreen
 				slog.Info("Переход к редактированию записи", "title", m.selectedEntry.Title())

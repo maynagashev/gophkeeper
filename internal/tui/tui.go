@@ -10,6 +10,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/gofrs/flock"
 )
 
 const statusMessageTimeout = 2 * time.Second // Время отображения статусных сообщений
@@ -140,8 +141,8 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c":
 			return m, tea.Quit
 		case "ctrl+s":
-			// Сохраняем только из списка или деталей (не при редактировании)
-			if (m.state == entryListScreen || m.state == entryDetailScreen) && m.db != nil {
+			// Сохраняем только из списка или деталей и если не Read-Only
+			if !m.readOnlyMode && (m.state == entryListScreen || m.state == entryDetailScreen) && m.db != nil {
 				m.savingStatus = "Подготовка к сохранению..."
 				slog.Info("Начало обновления m.db перед сохранением")
 
@@ -258,14 +259,19 @@ func (m *model) View() string {
 		mainContent = "Неизвестное состояние!"
 	}
 
-	// Добавляем статус сохранения, если он есть и мы не на определенных экранах
+	// Добавляем статус сохранения или Read-Only, если он есть и мы не на определенных экранах
 	statusLine := ""
-	displayStatus := m.savingStatus != "" &&
+	readOnlyIndicator := ""
+	if m.readOnlyMode {
+		readOnlyIndicator = " [Read-Only]"
+	}
+	displayStatus := (m.savingStatus != "" || m.readOnlyMode) &&
 		m.state != welcomeScreen &&
 		m.state != passwordInputScreen &&
+		m.state != newKdbxPasswordScreen &&
 		m.state != attachmentPathInputScreen
 	if displayStatus {
-		statusLine = "\n" + m.savingStatus
+		statusLine = "\n" + m.savingStatus + readOnlyIndicator
 	}
 
 	// Собираем финальный вывод
@@ -287,19 +293,53 @@ func Start(kdbxPath string) {
 	// Создаем начальную модель
 	m := initialModel(kdbxPath) // Передаем путь в initialModel
 
+	// --- Реализация flock ---
+	lockPath := kdbxPath + ".lock"
+	m.fileLock = flock.New(lockPath)
+	var flockErr error
+	m.lockAcquired, flockErr = m.fileLock.TryLock()
+
+	if flockErr != nil {
+		// Критическая ошибка при попытке блокировки
+		slog.Error("Критическая ошибка при попытке блокировки файла", "lockPath", lockPath, "error", flockErr)
+		fmt.Fprintf(os.Stderr, "Ошибка блокировки файла %s: %v\n", lockPath, flockErr)
+		// Попробуем разблокировать перед выходом
+		_ = m.fileLock.Unlock()
+		os.Exit(1)
+	}
+
+	if m.lockAcquired {
+		slog.Info("Эксклюзивная блокировка файла получена.", "lockPath", lockPath)
+		// Регистрируем разблокировку при выходе ИЗ ФУНКЦИИ START
+		defer func() {
+			if errUnlock := m.fileLock.Unlock(); errUnlock != nil {
+				slog.Error("Ошибка при снятии блокировки файла", "lockPath", lockPath, "error", errUnlock)
+			} else {
+				slog.Info("Блокировка файла снята.", "lockPath", lockPath)
+			}
+		}()
+	} else {
+		m.readOnlyMode = true
+		slog.Warn("Блокировка не получена (файл используется?). Read-Only.", "lockPath", lockPath)
+	}
+	// --- Конец реализации flock ---
+
 	// Проверяем, существует ли файл KDBX
-	if _, err := os.Stat(m.kdbxPath); os.IsNotExist(err) {
+	if _, errStat := os.Stat(m.kdbxPath); os.IsNotExist(errStat) {
 		// Файл не существует, переходим на экран создания пароля
 		slog.Info("Файл KDBX не найден, переходим к созданию нового.", "path", m.kdbxPath)
 		m.state = newKdbxPasswordScreen
-		// Устанавливаем фокус на первое поле ввода нового пароля
 		m.newPasswordInput1.Focus()
 		m.newPasswordInput2.Blur()
-	} else if err != nil {
+	} else if errStat != nil {
 		// Другая ошибка при доступе к файлу
-		slog.Error("Ошибка при проверке файла KDBX", "path", m.kdbxPath, "error", err)
-		// Отобразим ошибку в TUI? Пока просто выйдем
-		fmt.Fprintf(os.Stderr, "Ошибка доступа к файлу %s: %v\n", m.kdbxPath, err)
+		slog.Error("Ошибка при проверке файла KDBX", "path", m.kdbxPath, "error", errStat)
+		fmt.Fprintf(os.Stderr, "Ошибка доступа к файлу %s: %v\n", m.kdbxPath, errStat)
+		// Разблокируем файл перед выходом
+		if m.lockAcquired {
+			_ = m.fileLock.Unlock()
+		}
+		//nolint:gocritic // Unlock вызывается вручную перед выходом
 		os.Exit(1)
 	} else {
 		// Файл существует, оставляем начальное состояние (welcomeScreen -> passwordInputScreen)
@@ -307,9 +347,14 @@ func Start(kdbxPath string) {
 	}
 
 	// Используем FullAltScreen для корректной работы списка
-	p := tea.NewProgram(&m, tea.WithAltScreen()) // Передаем указатель на модель '&m'
-	if _, err := p.Run(); err != nil {
-		slog.Error("Ошибка при запуске TUI", "error", err)
+	p := tea.NewProgram(&m, tea.WithAltScreen()) // Передаем указатель на модель
+	if _, errRun := p.Run(); errRun != nil {
+		slog.Error("Ошибка при запуске TUI", "error", errRun)
+		// Разблокируем файл перед выходом
+		if m.lockAcquired {
+			_ = m.fileLock.Unlock()
+		}
 		os.Exit(1)
 	}
+	// Успешный выход ПОСЛЕ defer Unlock
 }

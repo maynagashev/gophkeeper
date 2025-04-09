@@ -93,6 +93,8 @@ func (m *model) updateEntryEditScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 // handleEditScreenKeys обрабатывает нажатия клавиш на экране редактирования.
+//
+//nolint:gocognit,funlen // Сложность и длина будут снижены при рефакторинге
 func (m *model) handleEditScreenKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case keyEsc, keyBack:
@@ -113,57 +115,64 @@ func (m *model) handleEditScreenKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m, tea.Batch(cmds...)
 
 	case keyEnter:
-		return m.saveEntryChanges()
+		if !m.readOnlyMode {
+			return m.saveEntryChanges()
+		}
+		return m, nil
 
 	case "ctrl+o":
-		slog.Info("Переход к экрану ввода пути для добавления вложения")
-		m.previousScreenState = m.state // Запоминаем текущий экран (entryEditScreen)
-		m.state = attachmentPathInputScreen
-		m.attachmentPathInput.Reset()
-		m.attachmentPathInput.Focus()
-		m.attachmentError = nil // Сбрасываем предыдущую ошибку
-		// Добавляем очистку экрана
-		return m, tea.Batch(textinput.Blink, tea.ClearScreen)
+		if !m.readOnlyMode {
+			slog.Info("Переход к экрану ввода пути для добавления вложения")
+			m.previousScreenState = m.state
+			m.state = attachmentPathInputScreen
+			m.attachmentPathInput.Reset()
+			m.attachmentPathInput.Focus()
+			m.attachmentError = nil
+			return m, tea.Batch(textinput.Blink, tea.ClearScreen)
+		}
+		return m, nil
 
 	case "ctrl+d":
-		return m.handleAttachmentDeleteAction()
+		if !m.readOnlyMode {
+			return m.handleAttachmentDeleteAction()
+		}
+		return m, nil
 
 	default:
-		// Обработка обычных клавиш - обновление поля ввода
-		var cmds []tea.Cmd
-		var cmd tea.Cmd
+		//nolint:nestif // Вложенность из-за readOnlyMode
+		if !m.readOnlyMode {
+			var cmds []tea.Cmd
+			var cmd tea.Cmd
 
-		// Обновляем модель поля ввода
-		m.editInputs[m.focusedField], cmd = m.editInputs[m.focusedField].Update(msg)
-		cmds = append(cmds, cmd)
+			m.editInputs[m.focusedField], cmd = m.editInputs[m.focusedField].Update(msg)
+			cmds = append(cmds, cmd)
 
-		// Обновляем соответствующее поле в editingEntry
-		fieldName := m.editInputs[m.focusedField].Placeholder
-		newValue := m.editInputs[m.focusedField].Value()
-		found := false
-		for i := range m.editingEntry.Values {
-			if m.editingEntry.Values[i].Key == fieldName {
-				m.editingEntry.Values[i].Value.Content = newValue
-				if fieldName == fieldNamePassword || fieldName == fieldNameCVV || fieldName == fieldNamePIN {
-					// Обновляем Protected флаг для маскируемых полей
-					m.editingEntry.Values[i].Value.Protected = w.NewBoolWrapper(newValue != "")
+			fieldName := m.editInputs[m.focusedField].Placeholder
+			newValue := m.editInputs[m.focusedField].Value()
+			found := false
+			for i := range m.editingEntry.Values {
+				if m.editingEntry.Values[i].Key == fieldName {
+					m.editingEntry.Values[i].Value.Content = newValue
+					if fieldName == fieldNamePassword || fieldName == fieldNameCVV || fieldName == fieldNamePIN {
+						m.editingEntry.Values[i].Value.Protected = w.NewBoolWrapper(newValue != "")
+					}
+					found = true
+					break
 				}
-				found = true
-				break
 			}
+			if !found {
+				valueData := gokeepasslib.ValueData{
+					Key:   fieldName,
+					Value: gokeepasslib.V{Content: newValue},
+				}
+				if fieldName == fieldNamePassword || fieldName == fieldNameCVV || fieldName == fieldNamePIN {
+					valueData.Value.Protected = w.NewBoolWrapper(newValue != "")
+				}
+				m.editingEntry.Values = append(m.editingEntry.Values, valueData)
+			}
+			return m, tea.Batch(cmds...)
 		}
-		if !found {
-			// Если поля нет, добавляем его
-			valueData := gokeepasslib.ValueData{
-				Key:   fieldName,
-				Value: gokeepasslib.V{Content: newValue},
-			}
-			if fieldName == fieldNamePassword || fieldName == fieldNameCVV || fieldName == fieldNamePIN {
-				valueData.Value.Protected = w.NewBoolWrapper(newValue != "")
-			}
-			m.editingEntry.Values = append(m.editingEntry.Values, valueData)
-		}
-		return m, tea.Batch(cmds...)
+		return m, nil
 	}
 }
 
