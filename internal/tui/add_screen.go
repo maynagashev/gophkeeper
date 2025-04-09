@@ -16,25 +16,37 @@ func (m *model) prepareAddScreen() {
 	m.addInputs = make([]textinput.Model, numEditableFields)
 	m.focusedFieldAdd = editableFieldTitle // Начинаем с поля Title
 
+	// Используем константы имен полей как плейсхолдеры
 	placeholders := map[int]string{
-		editableFieldTitle:    "Title",
-		editableFieldUserName: "UserName",
-		editableFieldPassword: "Password",
-		editableFieldURL:      "URL",
-		editableFieldNotes:    "Notes",
+		editableFieldTitle:          fieldNameTitle,
+		editableFieldUserName:       fieldNameUserName,
+		editableFieldPassword:       fieldNamePassword,
+		editableFieldURL:            fieldNameURL,
+		editableFieldNotes:          fieldNameNotes,
+		editableFieldCardNumber:     fieldNameCardNumber,
+		editableFieldCardHolderName: fieldNameCardHolderName,
+		editableFieldExpiryDate:     fieldNameExpiryDate,
+		editableFieldCVV:            fieldNameCVV,
+		editableFieldPIN:            fieldNamePIN,
 	}
 
 	for i := range numEditableFields {
 		m.addInputs[i] = textinput.New()
 		m.addInputs[i].Placeholder = placeholders[i]
+
+		// Настраиваем маскирование для чувствительных полей
+		switch i {
+		case editableFieldPassword, editableFieldCVV, editableFieldPIN:
+			m.addInputs[i].EchoMode = textinput.EchoPassword
+		case editableFieldCardNumber:
+			// Пока оставляем обычным
+		}
+
 		// Первое поле делаем активным
 		if i == m.focusedFieldAdd {
 			m.addInputs[i].Focus()
 		}
 	}
-
-	// Настроим поле пароля
-	m.addInputs[editableFieldPassword].EchoMode = textinput.EchoPassword
 }
 
 // createEntryFromInputs создает новую запись gokeepasslib.Entry на основе
@@ -179,6 +191,7 @@ func (m *model) updateFocusAdd() []tea.Cmd {
 func (m model) viewEntryAddScreen() string {
 	s := "Добавление новой записи\n\n"
 	s += "Введите данные для новой записи:\n"
+	// Отображаем все поля ввода (включая поля карты)
 	for i, input := range m.addInputs {
 		focusIndicator := "  "
 		if m.focusedFieldAdd == i {

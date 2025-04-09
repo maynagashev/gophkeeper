@@ -8,6 +8,11 @@ import (
 	"github.com/tobischo/gokeepasslib/v3"
 )
 
+const (
+	minCardLengthForMask = 9 // Минимальная длина номера карты для маскирования (4 + 4 + 1 символ между ними)
+	visibleCardDigits    = 4 // Количество видимых цифр с каждой стороны
+)
+
 // updateEntryDetailScreen обрабатывает сообщения для экрана деталей записи.
 func (m *model) updateEntryDetailScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if keyMsg, ok := msg.(tea.KeyMsg); ok {
@@ -33,23 +38,39 @@ func (m *model) updateEntryDetailScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 // Он также удаляет отображенные поля из переданной карты valuesMap.
 func renderStandardFields(_ gokeepasslib.Entry, valuesMap map[string]gokeepasslib.ValueData) string {
 	s := ""
-	desiredOrder := []string{"Title", "UserName", "Password", "URL", "Notes"}
+	// Включаем поля карты в стандартный порядок
+	desiredOrder := []string{
+		"Title", "UserName", "Password", "URL", "Notes",
+		fieldNameCardNumber, fieldNameCardHolderName, fieldNameExpiryDate, fieldNameCVV, fieldNamePIN,
+	}
 	// Не создаем новую карту, используем переданную
 
 	for _, key := range desiredOrder {
 		if val, ok := valuesMap[key]; ok {
-			if val.Key == fieldNamePassword {
-				s += fmt.Sprintf("%s: ********\n", val.Key)
-			} else {
-				s += fmt.Sprintf("%s: %s\n", val.Key, val.Value.Content)
+			valueContent := val.Value.Content
+			// Маскируем чувствительные поля
+			switch val.Key {
+			case fieldNamePassword, fieldNameCVV, fieldNamePIN:
+				valueContent = "********"
+			case fieldNameCardNumber:
+				valueContent = maskCardNumber(valueContent)
 			}
+			s += fmt.Sprintf("%s: %s\n", val.Key, valueContent)
+
 			// Удаляем из карты, чтобы она осталась для renderCustomFields
 			delete(valuesMap, key)
-		} else {
-			s += fmt.Sprintf("%s: \n", key)
 		}
 	}
 	return s
+}
+
+// maskCardNumber маскирует номер карты, оставляя видимыми первые visibleCardDigits цифры с каждой стороны.
+func maskCardNumber(number string) string {
+	length := len(number)
+	if length < minCardLengthForMask {
+		return "********" // Слишком короткий номер для маскирования
+	}
+	return fmt.Sprintf("%s********%s", number[:visibleCardDigits], number[length-visibleCardDigits:])
 }
 
 // renderCustomFields форматирует дополнительные (нестандартные) поля записи.

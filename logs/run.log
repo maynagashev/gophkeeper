@@ -34,9 +34,9 @@
 > Мастер-пароль        
 
 
-[6;H[2J[H[H   Записи в 'example/test.kdbx' (4)                
+[6;H[2J[H[H   Записи в 'example/test.kdbx' (5)                
                                                    
-  4 items                                          
+  5 items                                          
                                                    
 │ mail@example.com                                 
 │ User: mail@example.com | URL: https://example.com
@@ -48,9 +48,9 @@
                                                    
                                                    
   test binary                                      
-  [A:1]                                            
+  [A:2]                                            
                                                    
-                                                   
+  82bea24a7763a46781424fb941874f02                 
                                                    
                                                    
                                                    
@@ -117,7 +117,7 @@
                                                    
 
 │ test binary                                      
-│ [A:1]                                            
+│ [A:2]                                            
 
 
 
@@ -126,166 +126,699 @@
 
 
 
-[24;H[2J[H[HДетали записи: test binary
+[24;H[H
 
-Title: test binary
-UserName: 
-Password: ********
+
+
+
+
+
+
+
+
+
+
+
+  test binary                                      
+  [A:2]                                            
+
+│ 82bea24a7763a46781424fb941874f02                 
+│                                                  
+
+
+
+
+
+[24;H[2J[H[HДетали записи: 82bea24a7763a46781424fb941874f02
+
+Title: 
 URL: 
 Notes: 
+CardNumber: 1231********3123
+CardHolderName: Eugene
+ExpiryDate: 
 
---- Вложения ---
-- d23-the-mandalorian-poster.webp (50614 байт)
+(e - ред., Ctrl+S - сохр., Esc/b - назад)[J[10;H[2J[H[HРедактирование записи: 
 
-(e - ред., Ctrl+S - сохр., Esc/b - назад)[J[12;H[2J[H[HРедактирование записи: test binary
-
-> Title: > test binary 
+> Title: > Title
   UserName: > UserName
   Password: > Password
   URL: > URL
   Notes: > Notes
+  CardNumber: > 123123123123 
+  CardHolderName: > Eugene 
+  ExpiryDate: > ExpiryDate
+  CVV: > CVV
+  PIN: > PIN
 
 --- Вложения ---
- [0] d23-the-mandalorian-poster.webp
+(Нет вложений)
 
-(Tab/↑/↓, Enter - сохр., Esc - отмена, ^O - влож+, ^D - влож-)[12;H[2J[H[HВведите полный путь к файлу для добавления вложения:
+(Tab/↑/↓, Enter - сохр., Esc - отмена, ^O - влож+, ^D - влож-)[17;H[HРедактирование записи: 1
 
-> /path/to/your/file                                                           
-
-
-(Enter - подтвердить, Esc - отмена)[J[6;H[H
-
-> /                                                                            
+> Title: > 1 
 
 
-[6;H[H
-
-> /t                                                                           
 
 
-[6;H[H
-
-> /te                                                                          
 
 
-[6;H[H
-
-> /tes                                                                         
 
 
-[6;H[H
-
-> /test                                                                        
 
 
-[6;H[H
-
-> /tes                                                                         
 
 
-[6;H[H
 
-> /te                                                                          
+[17;H[HРедактирование записи: 12
 
-
-[6;H[H
-
-> /t                                                                           
+> Title: > 12 
 
 
-[6;H[H
-
-> /                                                                            
 
 
-[6;H[H
-
-> /path/to/your/file                                                           
 
 
-[6;H[H
-
-> /home/dev/Dropbox/Images/                                                    
 
 
-[6;H[H
-
-> /home/dev/Dropbox/Images/S                                                   
 
 
-[6;H[H
-
-> /home/dev/Dropbox/Images/Si                                                  
 
 
-[6;H[H
 
-> /home/dev/Dropbox/Images/Sin                                                 
+[17;H[HРедактирование записи: 123
 
-
-[6;H[H
-
-> /home/dev/Dropbox/Images/Sink                                                
+> Title: > 123 
 
 
-[6;H[H
-
-> /home/dev/Dropbox/Images/Sink.                                               
 
 
-[6;H[H
-
-> /home/dev/Dropbox/Images/Sink.p                                              
 
 
-[6;H[H
-
-> /home/dev/Dropbox/Images/Sink.pn                                             
 
 
-[6;H[H
-
-> /home/dev/Dropbox/Images/Sink.png                                            
 
 
-[6;H[2J[H[HРедактирование записи: test binary
 
-> Title: > test binary 
+
+
+[17;H[HРедактирование записи: 1231
+
+> Title: > 1231 
+
+
+
+
+
+
+
+
+
+
+
+
+
+[17;H[HРедактирование записи: 12312
+
+> Title: > 12312 
+
+
+
+
+
+
+
+
+
+
+
+
+
+[17;H[HРедактирование записи: 123123
+
+> Title: > 123123 
+
+
+
+
+
+
+
+
+
+
+
+
+
+[17;H[HРедактирование записи: 12312
+
+> Title: > 12312 
+
+
+
+
+
+
+
+
+
+
+
+
+
+[17;H[HРедактирование записи: 1231
+
+> Title: > 1231 
+
+
+
+
+
+
+
+
+
+
+
+
+
+[17;H[HРедактирование записи: 123
+
+> Title: > 123 
+
+
+
+
+
+
+
+
+
+
+
+
+
+[17;H[HРедактирование записи: 12
+
+> Title: > 12 
+
+
+
+
+
+
+
+
+
+
+
+
+
+[17;H[HРедактирование записи: 1
+
+> Title: > 1 
+
+
+
+
+
+
+
+
+
+
+
+
+
+[17;H[HРедактирование записи: 
+
+> Title: > Title
+
+
+
+
+
+
+
+
+
+
+
+
+
+[17;H[HРедактирование записи: T
+
+> Title: > T 
+
+
+
+
+
+
+
+
+
+
+
+
+
+[17;H[HРедактирование записи: TC
+
+> Title: > TC 
+
+
+
+
+
+
+
+
+
+
+
+
+
+[17;H[HРедактирование записи: TCS
+
+> Title: > TCS 
+
+
+
+
+
+
+
+
+
+
+
+
+
+[17;H[HРедактирование записи: TCS 
+
+> Title: > TCS  
+
+
+
+
+
+
+
+
+
+
+
+
+
+[17;H[2J[H[HДетали записи: 82bea24a7763a46781424fb941874f02
+
+Title: 
+URL: 
+Notes: 
+CardNumber: 1231********3123
+CardHolderName: Eugene
+ExpiryDate: 
+
+(e - ред., Ctrl+S - сохр., Esc/b - назад)[J[10;H[2J[H[HРедактирование записи: 
+
+> Title: > Title
   UserName: > UserName
   Password: > Password
   URL: > URL
   Notes: > Notes
+  CardNumber: > 123123123123 
+  CardHolderName: > Eugene 
+  ExpiryDate: > ExpiryDate
+  CVV: > CVV
+  PIN: > PIN
 
 --- Вложения ---
- [0] d23-the-mandalorian-poster.webp
- [1] Sink.png
+(Нет вложений)
 
-(Tab/↑/↓, Enter - сохр., Esc - отмена, ^O - влож+, ^D - влож-)[13;H[2J[H[HДетали записи: test binary
+(Tab/↑/↓, Enter - сохр., Esc - отмена, ^O - влож+, ^D - влож-)[17;H[HРедактирование записи: V
 
-Title: test binary
-UserName: 
-Password: ********
+> Title: > V 
+
+
+
+
+
+
+
+
+
+
+
+
+
+[17;H[HРедактирование записи: Vi
+
+> Title: > Vi 
+
+
+
+
+
+
+
+
+
+
+
+
+
+[17;H[HРедактирование записи: Vis
+
+> Title: > Vis 
+
+
+
+
+
+
+
+
+
+
+
+
+
+[17;H[HРедактирование записи: Visa
+
+> Title: > Visa 
+
+
+
+
+
+
+
+
+
+
+
+
+
+[17;H[H
+
+  Title: > Visa 
+> UserName: > UserName
+
+
+
+
+
+
+
+
+
+
+
+
+[17;H[H
+
+
+  UserName: > UserName
+> Password: > Password
+
+
+
+
+
+
+
+
+
+
+
+[17;H[H
+
+
+
+  Password: > Password
+> URL: > URL
+
+
+
+
+
+
+
+
+
+
+[17;H[H
+
+
+
+
+  URL: > URL
+> Notes: > Notes
+
+
+
+
+
+
+
+
+
+[17;H[H
+
+
+
+
+
+  Notes: > Notes
+> CardNumber: > 123123123123 
+
+
+
+
+
+
+
+
+[17;H[H
+
+
+
+
+
+
+  CardNumber: > 123123123123 
+> CardHolderName: > Eugene 
+
+
+
+
+
+
+
+[17;H[H
+
+
+
+
+
+
+
+  CardHolderName: > Eugene 
+> ExpiryDate: > ExpiryDate
+
+
+
+
+
+
+[17;H[H
+
+
+
+
+
+
+
+
+  ExpiryDate: > ExpiryDate
+> CVV: > CVV
+
+
+
+
+
+[17;H[H
+
+
+
+
+
+
+
+
+
+  CVV: > CVV
+> PIN: > PIN
+
+
+
+
+[17;H[H
+
+
+
+
+
+
+
+
+
+> CVV: > CVV
+  PIN: > PIN
+
+
+
+
+[17;H[H
+
+
+
+
+
+
+
+
+
+> CVV: > * 
+
+
+
+
+
+[17;H[H
+
+
+
+
+
+
+
+
+
+> CVV: > ** 
+
+
+
+
+
+[17;H[H
+
+
+
+
+
+
+
+
+
+> CVV: > *** 
+
+
+
+
+
+[17;H[H
+
+
+
+
+
+
+
+
+
+  CVV: > *** 
+> PIN: > PIN
+
+
+
+
+[17;H[H
+
+
+
+
+
+
+
+
+
+
+> PIN: > * 
+
+
+
+
+[17;H[H
+
+
+
+
+
+
+
+
+
+
+> PIN: > ** 
+
+
+
+
+[17;H[H
+
+
+
+
+
+
+
+
+
+
+> PIN: > *** 
+
+
+
+
+[17;H[H
+
+
+
+
+
+
+
+
+
+
+> PIN: > **** 
+
+
+
+
+[17;H[2J[H[HДетали записи: Visa
+
+Title: Visa
 URL: 
 Notes: 
+CardNumber: 1231********3123
+CardHolderName: Eugene
+ExpiryDate: 
+CVV: ********
+PIN: ********
 
---- Вложения ---
-- d23-the-mandalorian-poster.webp (50614 байт)
-- Sink.png (36668 байт)
-
-(e - ред., Ctrl+S - сохр., Esc/b - назад)[13;H[H
-
-
-
-
-
-
-
-
-
-
-
-
-Сохранение...[14;H[H
+(e - ред., Ctrl+S - сохр., Esc/b - назад)[J[12;H[H
 
 
 
@@ -297,9 +830,7 @@ Notes:
 
 
 
-
-Сохранено успешно![14;H[H
-
+Сохранение...[13;H[H
 
 
 
@@ -311,7 +842,7 @@ Notes:
 
 
 
-Сохранение...[14;H[H
+Сохранено успешно![13;H[H
 
 
 
@@ -322,11 +853,9 @@ Notes:
 
 
 
-
-
-Сохранено успешно![14;H[2J[H[H   Записи в 'example/test.kdbx' (4)                
+[J[12;H[2J[H[H   Записи в 'example/test.kdbx' (5)                
                                                    
-  4 items                                          
+  5 items                                          
                                                    
   mail@example.com                                 
   User: mail@example.com | URL: https://example.com
@@ -337,15 +866,79 @@ Notes:
   test new2                                        
                                                    
                                                    
-│ test binary                                      
-│ [A:2]                                            
+  test binary                                      
+  [A:2]                                            
+                                                   
+│ Visa                                             
+│                                                  
                                                    
                                                    
                                                    
                                                    
                                                    
-                                                   
-                                                   
-                                                   
-                                                   (↑/↓ - навигация, Enter - детали, / - поиск, a - добавить, Ctrl+S - сохр., q - выход)
-Сохранено успешно![25;H[2K[?2004l[?25h[?1002l[?1003l[?1006l[?1049l[?25h
+                                                   (↑/↓ - навигация, Enter - детали, / - поиск, a - добавить, Ctrl+S - сохр., q - выход)[24;H[2J[H[HДетали записи: Visa
+
+Title: Visa
+URL: 
+Notes: 
+CardNumber: 1231********3123
+CardHolderName: Eugene
+ExpiryDate: 
+CVV: ********
+PIN: ********
+
+(e - ред., Ctrl+S - сохр., Esc/b - назад)[J[12;H[2J[H[HРедактирование записи: Visa
+
+> Title: > Visa 
+  UserName: > UserName
+  Password: > Password
+  URL: > URL
+  Notes: > Notes
+  CardNumber: > 123123123123 
+  CardHolderName: > Eugene 
+  ExpiryDate: > ExpiryDate
+  CVV: > *** 
+  PIN: > **** 
+
+--- Вложения ---
+(Нет вложений)
+
+(Tab/↑/↓, Enter - сохр., Esc - отмена, ^O - влож+, ^D - влож-)[17;H[2J[H[HДетали записи: Visa
+
+Title: Visa
+URL: 
+Notes: 
+CardNumber: 1231********3123
+CardHolderName: Eugene
+ExpiryDate: 
+CVV: ********
+PIN: ********
+
+(e - ред., Ctrl+S - сохр., Esc/b - назад)[J[12;H[2J[H[HРедактирование записи: Visa
+
+> Title: > Visa 
+  UserName: > UserName
+  Password: > Password
+  URL: > URL
+  Notes: > Notes
+  CardNumber: > 123123123123 
+  CardHolderName: > Eugene 
+  ExpiryDate: > ExpiryDate
+  CVV: > *** 
+  PIN: > **** 
+
+--- Вложения ---
+(Нет вложений)
+
+(Tab/↑/↓, Enter - сохр., Esc - отмена, ^O - влож+, ^D - влож-)[17;H[2J[H[HДетали записи: Visa
+
+Title: Visa
+URL: 
+Notes: 
+CardNumber: 1231********3123
+CardHolderName: Eugene
+ExpiryDate: 
+CVV: ********
+PIN: ********
+
+(e - ред., Ctrl+S - сохр., Esc/b - назад)[J[12;H

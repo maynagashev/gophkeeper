@@ -26,14 +26,34 @@ const (
 
 // Поля, доступные для редактирования.
 const (
+	// Стандартные поля.
 	editableFieldTitle = iota
 	editableFieldUserName
 	editableFieldPassword
 	editableFieldURL
 	editableFieldNotes
-	numEditableFields // Количество редактируемых полей
+	// Поля карты.
+	editableFieldCardNumber
+	editableFieldCardHolderName
+	editableFieldExpiryDate
+	editableFieldCVV
+	editableFieldPIN
+	// Конец списка.
+	numEditableFields // Общее количество редактируемых полей
+)
 
-	fieldNamePassword = "Password"
+// Имена полей (используются как плейсхолдеры и ключи в KDBX).
+const (
+	fieldNameTitle          = "Title"
+	fieldNameUserName       = "UserName"
+	fieldNamePassword       = "Password"
+	fieldNameURL            = "URL"
+	fieldNameNotes          = "Notes"
+	fieldNameCardNumber     = "CardNumber"
+	fieldNameCardHolderName = "CardHolderName"
+	fieldNameExpiryDate     = "ExpiryDate"
+	fieldNameCVV            = "CVV"
+	fieldNamePIN            = "PIN"
 )
 
 // Константы для TUI.
