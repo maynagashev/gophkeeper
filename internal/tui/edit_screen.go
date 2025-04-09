@@ -3,6 +3,7 @@ package tui
 import (
 	"fmt"
 	"log/slog"
+	"strings"
 	"time"
 
 	"github.com/charmbracelet/bubbles/list"
@@ -218,45 +219,29 @@ func (m *model) saveEntryChanges() (tea.Model, tea.Cmd) {
 	return m, tea.Batch(cmds...)
 }
 
-// updateFocus обновляет фокус полей ввода и возвращает команды Blink.
-func (m *model) updateFocus() []tea.Cmd {
-	cmds := make([]tea.Cmd, len(m.editInputs))
-	for i := range len(m.editInputs) {
-		if i == m.focusedField {
-			cmds[i] = m.editInputs[i].Focus()
-		} else {
-			m.editInputs[i].Blur()
-		}
-	}
-	return cmds
-}
-
 // viewEntryEditScreen отрисовывает экран редактирования записи.
-func (m model) viewEntryEditScreen() string {
-	if m.editingEntry == nil || len(m.editInputs) == 0 {
-		return "Ошибка: Нет данных для редактирования!"
-	}
-
-	s := "Редактирование записи: " + m.editingEntry.GetTitle() + "\n\n"
+func (m *model) viewEntryEditScreen() string {
+	var s strings.Builder
+	s.WriteString("Редактирование записи: " + m.editingEntry.GetTitle() + "\n\n")
 	// Отображаем все поля ввода (включая поля карты)
 	for i, input := range m.editInputs {
 		focusIndicator := "  "
 		if m.focusedField == i {
 			focusIndicator = "> "
 		}
-		s += fmt.Sprintf("%s%s: %s\n", focusIndicator, input.Placeholder, input.View())
+		s.WriteString(fmt.Sprintf("%s%s: %s\n", focusIndicator, input.Placeholder, input.View()))
 	}
 
 	// Отображаем вложения
-	s += "\n--- Вложения ---\n"
+	s.WriteString("\n--- Вложения ---\n")
 	if len(m.editingEntry.Binaries) == 0 {
-		s += "(Нет вложений)\n"
+		s.WriteString("(Нет вложений)\n")
 	} else {
 		for i, binaryRef := range m.editingEntry.Binaries {
 			// TODO: Добавить индикатор выбора для удаления?
-			s += fmt.Sprintf(" [%d] %s\n", i, binaryRef.Name)
+			s.WriteString(fmt.Sprintf(" [%d] %s\n", i, binaryRef.Name))
 		}
 	}
 
-	return s
+	return s.String()
 }

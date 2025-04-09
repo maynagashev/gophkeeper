@@ -155,9 +155,9 @@ func renderAttachments(db *gokeepasslib.Database, entry gokeepasslib.Entry) stri
 }
 
 // viewEntryDetailScreen отрисовывает экран деталей записи.
-func (m model) viewEntryDetailScreen() string {
+func (m *model) viewEntryDetailScreen() string {
 	if m.selectedEntry == nil {
-		return "Ошибка: Запись не выбрана!"
+		return "Ошибка: запись не выбрана."
 	}
 
 	s := fmt.Sprintf("Детали записи: %s\n\n", m.selectedEntry.Title())

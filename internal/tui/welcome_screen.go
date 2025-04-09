@@ -21,10 +21,7 @@ func (m *model) updateWelcomeScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(cmds...)
 }
 
-// viewWelcomeScreen отрисовывает экран приветствия.
-func (m model) viewWelcomeScreen() string {
-	s := "Добро пожаловать в GophKeeper!\n\n"
-	s += "Это безопасный менеджер паролей для командной строки,\n"
-	s += "совместимый с форматом KDBX (KeePass).\n\n"
-	return s
+// viewWelcomeScreen отрисовывает приветственный экран.
+func (m *model) viewWelcomeScreen() string {
+	return "Добро пожаловать в GophKeeper!\n\nНажмите Enter для продолжения..."
 }

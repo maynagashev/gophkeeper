@@ -69,6 +69,20 @@ func initialModel() model {
 	pathInput.CharLimit = 4096                               // Ограничение на длину пути
 	pathInput.Width = defaultListWidth - passwordInputOffset // Используем ту же ширину, что и пароль
 
+	// Поля для ввода нового пароля
+	newPass1 := textinput.New()
+	newPass1.Placeholder = "Новый мастер-пароль"
+	newPass1.Focus() // Фокус на первом поле
+	newPass1.CharLimit = 156
+	newPass1.Width = 20
+	newPass1.EchoMode = textinput.EchoPassword
+
+	newPass2 := textinput.New()
+	newPass2.Placeholder = "Подтвердите пароль"
+	newPass2.CharLimit = 156
+	newPass2.Width = 20
+	newPass2.EchoMode = textinput.EchoPassword
+
 	return model{
 		state:               welcomeScreen,
 		passwordInput:       ti,
@@ -76,18 +90,22 @@ func initialModel() model {
 		entryList:           l,
 		attachmentList:      attachmentDelList,
 		attachmentPathInput: pathInput,
+		// Инициализируем поля для нового KDBX
+		newPasswordInput1:       newPass1,
+		newPasswordInput2:       newPass2,
+		newPasswordFocusedField: 0, // Фокус на первом поле
 	}
 }
 
 // Init - команда, выполняемая при запуске приложения.
-func (m model) Init() tea.Cmd {
+func (m *model) Init() tea.Cmd {
 	return textinput.Blink
 }
 
 // Update обрабатывает входящие сообщения.
 //
 //nolint:gocognit,funlen // Снизим сложность и длину в будущем рефакторинге
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd // Собираем команды
 
 	switch msg := msg.(type) {
@@ -164,6 +182,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		updatedModel, stateCmd = m.updateWelcomeScreen(msg)
 	case passwordInputScreen:
 		updatedModel, stateCmd = m.updatePasswordInputScreen(msg)
+	case newKdbxPasswordScreen:
+		updatedModel, stateCmd = m.updateNewKdbxPasswordScreen(msg)
 	case entryListScreen:
 		updatedModel, stateCmd = m.updateEntryListScreen(msg)
 	case entryDetailScreen:
@@ -202,7 +222,7 @@ func (m *model) setStatusMessage(status string) (tea.Model, tea.Cmd) {
 }
 
 // View отрисовывает пользовательский интерфейс.
-func (m model) View() string {
+func (m *model) View() string {
 	var mainContent string
 	var help string
 
@@ -213,6 +233,9 @@ func (m model) View() string {
 	case passwordInputScreen:
 		mainContent = m.viewPasswordInputScreen()
 		help = "(Enter - подтвердить, Ctrl+C - выход)"
+	case newKdbxPasswordScreen:
+		mainContent = m.viewNewKdbxPasswordScreen()
+		help = "(Tab - сменить поле, Enter - создать, Esc/Ctrl+C - выход)"
 	case entryListScreen:
 		mainContent = m.entryList.View()
 		help = "(↑/↓ - навигация, Enter - детали, / - поиск, a - добавить, Ctrl+S - сохр., q - выход)"
@@ -261,8 +284,30 @@ func (m model) View() string {
 
 // Start запускает TUI приложение.
 func Start() {
+	// Создаем начальную модель
+	m := initialModel()
+
+	// Проверяем, существует ли файл KDBX
+	if _, err := os.Stat(m.kdbxPath); os.IsNotExist(err) {
+		// Файл не существует, переходим на экран создания пароля
+		slog.Info("Файл KDBX не найден, переходим к созданию нового.", "path", m.kdbxPath)
+		m.state = newKdbxPasswordScreen
+		// Устанавливаем фокус на первое поле ввода нового пароля
+		m.newPasswordInput1.Focus()
+		m.newPasswordInput2.Blur()
+	} else if err != nil {
+		// Другая ошибка при доступе к файлу
+		slog.Error("Ошибка при проверке файла KDBX", "path", m.kdbxPath, "error", err)
+		// Отобразим ошибку в TUI? Пока просто выйдем
+		fmt.Fprintf(os.Stderr, "Ошибка доступа к файлу %s: %v\n", m.kdbxPath, err)
+		os.Exit(1)
+	} else {
+		// Файл существует, оставляем начальное состояние (welcomeScreen -> passwordInputScreen)
+		slog.Info("Файл KDBX найден, запуск стандартного TUI.", "path", m.kdbxPath)
+	}
+
 	// Используем FullAltScreen для корректной работы списка
-	p := tea.NewProgram(initialModel(), tea.WithAltScreen())
+	p := tea.NewProgram(&m, tea.WithAltScreen()) // Передаем указатель на модель '&m'
 	if _, err := p.Run(); err != nil {
 		slog.Error("Ошибка при запуске TUI", "error", err)
 		os.Exit(1)

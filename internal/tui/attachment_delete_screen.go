@@ -99,7 +99,7 @@ func (m *model) performAttachmentDelete() (tea.Model, tea.Cmd) {
 }
 
 // viewAttachmentListDeleteScreen отрисовывает экран удаления вложений.
-func (m model) viewAttachmentListDeleteScreen() string {
+func (m *model) viewAttachmentListDeleteScreen() string {
 	var s string
 	if m.confirmationPrompt != "" {
 		// Отображаем только промпт подтверждения
