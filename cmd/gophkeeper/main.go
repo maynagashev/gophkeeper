@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log/slog"
 	"os"
 
@@ -8,27 +9,57 @@ import (
 )
 
 const (
-	logFilePermissions = 0666
+	// Имя переменной окружения для пути к файлу KDBX.
+	dbPathEnvVar = "GOPHKEEPER_DB_PATH"
+	// Путь к файлу KDBX по умолчанию.
+	defaultDBPath = "gophkeeper.kdbx"
 )
 
 func main() {
-	// Настройка логирования в файл
-	logFile, err := os.OpenFile("logs/gophkeeper.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, logFilePermissions)
-	if err != nil {
-		panic("Не удалось открыть лог-файл: " + err.Error())
+	// Настройка логирования
+	logHandler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug})
+	slog.SetDefault(slog.New(logHandler))
+
+	// Определение флага для пути к KDBX файлу
+	kdbxPathFlag := flag.String("db", defaultDBPath, "Путь к файлу базы данных KDBX (переопределяет "+dbPathEnvVar+")")
+
+	// Парсинг флагов командной строки
+	flag.Parse()
+
+	// Определение финального пути к файлу KDBX
+	finalPath := defaultDBPath
+	source := "по умолчанию"
+
+	// 1. Проверяем переменную окружения
+	if envPath := os.Getenv(dbPathEnvVar); envPath != "" {
+		finalPath = envPath
+		source = "переменная окружения (" + dbPathEnvVar + ")"
 	}
-	defer logFile.Close()
 
-	// Создаем JSON обработчик, пишущий в файл
-	// Уровень Debug, чтобы видеть все наши отладочные сообщения
-	logger := slog.New(slog.NewJSONHandler(logFile, &slog.HandlerOptions{
-		Level: slog.LevelDebug,
-	}))
-	// Устанавливаем созданный логгер как стандартный
-	slog.SetDefault(logger)
+	// 2. Проверяем, был ли флаг установлен явно
+	dbFlagPresent := false
+	flag.Visit(func(f *flag.Flag) {
+		if f.Name == "db" {
+			dbFlagPresent = true
+		}
+	})
 
-	slog.Info("Логгер инициализирован, запись в logs/gophkeeper.log")
+	if dbFlagPresent {
+		finalPath = *kdbxPathFlag
+		source = "флаг -db"
+	}
 
-	// Запуск TUI
-	tui.Start()
+	// Проверка, что итоговый путь не пустой
+	if finalPath == "" {
+		slog.Error(
+			"Путь к файлу базы данных не может быть пустым",
+			"проверьте", "флаг -db и переменную окружения "+dbPathEnvVar,
+		)
+		os.Exit(1)
+	}
+
+	slog.Info("Запуск GophKeeper", "db_path", finalPath, "source", source)
+
+	// Запускаем TUI, передавая финальный путь
+	tui.Start(finalPath)
 }

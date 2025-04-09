@@ -15,7 +15,7 @@ import (
 const statusMessageTimeout = 2 * time.Second // Время отображения статусных сообщений
 
 // initialModel создает начальное состояние модели.
-func initialModel() model {
+func initialModel(kdbxPath string) model {
 	// Поле ввода пароля
 	ti := textinput.New()
 	ti.Placeholder = "Мастер-пароль"
@@ -86,7 +86,7 @@ func initialModel() model {
 	return model{
 		state:               welcomeScreen,
 		passwordInput:       ti,
-		kdbxPath:            "example/test.kdbx",
+		kdbxPath:            kdbxPath,
 		entryList:           l,
 		attachmentList:      attachmentDelList,
 		attachmentPathInput: pathInput,
@@ -283,9 +283,9 @@ func (m *model) View() string {
 }
 
 // Start запускает TUI приложение.
-func Start() {
+func Start(kdbxPath string) {
 	// Создаем начальную модель
-	m := initialModel()
+	m := initialModel(kdbxPath) // Передаем путь в initialModel
 
 	// Проверяем, существует ли файл KDBX
 	if _, err := os.Stat(m.kdbxPath); os.IsNotExist(err) {
