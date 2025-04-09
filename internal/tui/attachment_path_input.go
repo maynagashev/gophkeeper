@@ -89,7 +89,8 @@ func (m *model) handleAttachmentPathConfirm() (tea.Model, tea.Cmd) {
 	// Возвращаемся на предыдущий экран
 	m.state = m.previousScreenState
 	m.attachmentPathInput.Blur()
-	m.attachmentError = nil // Очищаем ошибку после успеха
+	m.attachmentError = nil                                            // Очищаем ошибку после успеха
+	m.savingStatus = fmt.Sprintf("Вложение '%s' добавлено.", fileName) // Устанавливаем статус
 	return m, tea.ClearScreen
 }
 

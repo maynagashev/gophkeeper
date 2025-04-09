@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"time"
 
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
+
+const statusMessageTimeout = 2 * time.Second // Время отображения статусных сообщений
 
 // initialModel создает начальное состояние модели.
 func initialModel() model {
@@ -85,8 +88,7 @@ func (m model) Init() tea.Cmd {
 //
 //nolint:gocognit,funlen // Снизим сложность и длину в будущем рефакторинге
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	// var cmd tea.Cmd
-	// var cmds []tea.Cmd // Собираем команды
+	var cmds []tea.Cmd // Собираем команды
 
 	switch msg := msg.(type) {
 	// == Глобальные сообщения (не зависят от экрана) ==
@@ -103,14 +105,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.handleErrorMsg(msg)
 
 	case dbSavedMsg:
-		m.savingStatus = "Сохранено успешно!"
-		slog.Info("База KDBX успешно сохранена", "path", m.kdbxPath)
-		// Можно добавить таймер для скрытия сообщения через пару секунд
-		return m, nil
+		return m.setStatusMessage("Сохранено успешно!")
 
 	case dbSaveErrorMsg:
-		m.savingStatus = fmt.Sprintf("Ошибка сохранения: %v", msg.err)
-		slog.Error("Ошибка сохранения KDBX", "path", m.kdbxPath, "error", msg.err)
+		return m.setStatusMessage(fmt.Sprintf("Ошибка сохранения: %v", msg.err))
+
+	case clearStatusMsg:
+		m.savingStatus = ""
+		m.statusTimer = nil
 		return m, nil
 
 	// Обработка нажатия клавиш делегируется состоянию
@@ -155,30 +157,48 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	// == Обновление компонентов в зависимости от состояния ==
+	var updatedModel tea.Model
+	var stateCmd tea.Cmd
 	switch m.state {
 	case welcomeScreen:
-		return m.updateWelcomeScreen(msg)
+		updatedModel, stateCmd = m.updateWelcomeScreen(msg)
 	case passwordInputScreen:
-		return m.updatePasswordInputScreen(msg)
+		updatedModel, stateCmd = m.updatePasswordInputScreen(msg)
 	case entryListScreen:
-		return m.updateEntryListScreen(msg)
+		updatedModel, stateCmd = m.updateEntryListScreen(msg)
 	case entryDetailScreen:
-		return m.updateEntryDetailScreen(msg)
+		updatedModel, stateCmd = m.updateEntryDetailScreen(msg)
 	case entryEditScreen:
-		return m.updateEntryEditScreen(msg)
+		updatedModel, stateCmd = m.updateEntryEditScreen(msg)
 	case entryAddScreen:
-		return m.updateEntryAddScreen(msg)
+		updatedModel, stateCmd = m.updateEntryAddScreen(msg)
 	case attachmentListDeleteScreen:
-		return m.updateAttachmentListDeleteScreen(msg)
+		updatedModel, stateCmd = m.updateAttachmentListDeleteScreen(msg)
 	case attachmentPathInputScreen:
-		return m.updateAttachmentPathInputScreen(msg)
+		updatedModel, stateCmd = m.updateAttachmentPathInputScreen(msg)
 	default:
-		// Для неизвестных состояний возвращаем модель без изменений и команд
-		return m, nil
+		// Неизвестное состояние - возвращаем как есть
+		updatedModel = m
 	}
+	cmds = append(cmds, stateCmd)
 
-	// Возвращаем модель и собранные команды
-	// return m, tea.Batch(cmds...)
+	return updatedModel, tea.Batch(cmds...)
+}
+
+// setStatusMessage устанавливает статусное сообщение и запускает таймер для его очистки.
+func (m *model) setStatusMessage(status string) (tea.Model, tea.Cmd) {
+	m.savingStatus = status
+	// Если таймер уже есть, останавливаем его
+	if m.statusTimer != nil {
+		m.statusTimer.Stop()
+		// Мы не можем повторно использовать старый таймер, поэтому обнуляем
+		m.statusTimer = nil
+	}
+	// Запускаем команду для очистки статуса через заданное время
+	cmd := clearStatusCmd(statusMessageTimeout)
+	// Примечание: Мы не сохраняем сам таймер, так как tea.Tick управляет им.
+	// Если нужно будет отменять таймер до его срабатывания, понадобится другой подход.
+	return m, cmd
 }
 
 // View отрисовывает пользовательский интерфейс.

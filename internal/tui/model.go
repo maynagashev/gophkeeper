@@ -3,6 +3,7 @@ package tui
 import (
 	"encoding/hex"
 	"fmt"
+	"time"
 
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -141,10 +142,19 @@ type model struct {
 
 	attachmentList list.Model // Список вложений для удаления
 
+	// Поля для подтверждения удаления вложения
+	confirmationPrompt string          // Текст запроса подтверждения
+	itemToDelete       *attachmentItem // Вложение, выбранное для удаления
+
 	// Поля для добавления вложения через путь
 	previousScreenState screenState     // Экран, с которого перешли на ввод пути
 	attachmentPathInput textinput.Model // Поле ввода пути к файлу
 	attachmentError     error           // Ошибка при добавлении вложения
 
-	savingStatus string // Статус операции сохранения файла
+	// Статус и таймер для его очистки
+	savingStatus string      // Статус операции сохранения/добавления/удаления
+	statusTimer  *time.Timer // Таймер для автоматической очистки статуса
 }
+
+// Сообщение для очистки статуса.
+type clearStatusMsg struct{}
