@@ -4,21 +4,48 @@ import (
 	"flag"
 	"log/slog"
 	"os"
+	"path/filepath"
 
 	"github.com/maynagashev/gophkeeper/internal/tui"
 )
 
 const (
+	logDir             = "logs"
+	logFileName        = "gophkeeper.log"
+	logFilePermissions = 0666
 	// Имя переменной окружения для пути к файлу KDBX.
 	dbPathEnvVar = "GOPHKEEPER_DB_PATH"
 	// Путь к файлу KDBX по умолчанию.
 	defaultDBPath = "gophkeeper.kdbx"
 )
 
+// setupLogging настраивает логирование в файл logs/gophkeeper.log.
+func setupLogging() {
+	// Создаем директорию logs, если ее нет
+	if err := os.MkdirAll(logDir, os.ModePerm); err != nil {
+		// Используем panic, так как без логов продолжать нет смысла
+		panic("Не удалось создать директорию для логов: " + err.Error())
+	}
+	logPath := filepath.Join(logDir, logFileName)
+	logFile, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, logFilePermissions)
+	if err != nil {
+		panic("Не удалось открыть лог-файл: " + err.Error())
+	}
+	// Важно: Не закрываем logFile здесь через defer, иначе он закроется
+	// сразу после выхода из setupLogging. Файл должен оставаться открытым
+	// на время работы приложения. Его закроет ОС при завершении процесса.
+	// Либо можно вернуть *os.File и закрывать его в main через defer.
+	// Пока оставим так, для простоты.
+
+	// Используем NewTextHandler для читаемости логов
+	logHandler := slog.NewTextHandler(logFile, &slog.HandlerOptions{Level: slog.LevelDebug})
+	slog.SetDefault(slog.New(logHandler))
+	slog.Info("Логгер инициализирован", "path", logPath)
+}
+
 func main() {
 	// Настройка логирования
-	logHandler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug})
-	slog.SetDefault(slog.New(logHandler))
+	setupLogging()
 
 	// Определение флага для пути к KDBX файлу
 	kdbxPathFlag := flag.String("db", defaultDBPath, "Путь к файлу базы данных KDBX (переопределяет "+dbPathEnvVar+")")

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -69,7 +71,12 @@ func (m *model) updateNewKdbxPasswordScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// Создаем пустую базу данных
 			m.db = gokeepasslib.NewDatabase()
 			// По умолчанию gokeepasslib.NewDatabase() создает KDBX 4
-			m.db.Content.Meta.DatabaseName = "Новая база" // Можно сделать имя по умолчанию
+
+			// Используем имя файла (без расширения) как имя базы данных
+			baseName := filepath.Base(m.kdbxPath)
+			dbName := strings.TrimSuffix(baseName, filepath.Ext(baseName))
+			m.db.Content.Meta.DatabaseName = dbName
+
 			// Устанавливаем пароль
 			m.db.Credentials = gokeepasslib.NewPasswordCredentials(m.password)
 
@@ -116,8 +123,18 @@ func (m *model) viewNewKdbxPasswordScreen() string {
 	errorStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
 
 	s := "Создание нового файла KDBX: " + m.kdbxPath + "\n\n"
-	s += m.newPasswordInput1.View() + "\n"
-	s += m.newPasswordInput2.View() + "\n\n"
+
+	// Добавляем индикатор фокуса
+	focusIndicator1 := "  "
+	focusIndicator2 := "  "
+	if m.newPasswordFocusedField == 0 {
+		focusIndicator1 = "> "
+	} else {
+		focusIndicator2 = "> "
+	}
+
+	s += focusIndicator1 + m.newPasswordInput1.View() + "\n"
+	s += focusIndicator2 + m.newPasswordInput2.View() + "\n\n"
 
 	if m.confirmPasswordError != "" {
 		s += errorStyle.Render(m.confirmPasswordError) + "\n"
