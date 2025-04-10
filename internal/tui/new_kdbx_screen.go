@@ -12,6 +12,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/maynagashev/gophkeeper/internal/kdbx"
 	"github.com/tobischo/gokeepasslib/v3"
 	"github.com/tobischo/gokeepasslib/v3/wrappers"
 )
@@ -79,9 +80,18 @@ func (m *model) updateNewKdbxPasswordScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.db.Content.Root = &gokeepasslib.RootData{
 					Groups: []gokeepasslib.Group{
 						{
-							Name:  "General",
-							UUID:  gokeepasslib.NewUUID(),
-							Times: gokeepasslib.TimeData{CreationTime: &wrappers.TimeWrapper{Time: time.Now(), Formatted: false}, LastModificationTime: &wrappers.TimeWrapper{Time: time.Now(), Formatted: false}},
+							Name: "General",
+							UUID: gokeepasslib.NewUUID(),
+							Times: gokeepasslib.TimeData{
+								CreationTime: &wrappers.TimeWrapper{
+									Time:      time.Now(),
+									Formatted: false,
+								},
+								LastModificationTime: &wrappers.TimeWrapper{
+									Time:      time.Now(),
+									Formatted: false,
+								},
+							},
 						},
 					},
 				}
@@ -115,11 +125,25 @@ func (m *model) updateNewKdbxPasswordScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 			slog.Info("Новый файл KDBX успешно создан и сохранен", "path", m.kdbxPath)
-			// Переходим к списку (он будет пуст)
+			// Переходим к списку
 			m.state = entryListScreen
-			// Инициализируем список (может быть пустым)
-			m.entryList.SetItems([]list.Item{}) // Убедимся, что список пуст
-			m.entryList.Title = fmt.Sprintf("Записи (%s)", m.kdbxPath)
+
+			// Загружаем записи из свежесозданной базы данных
+			entries := kdbx.GetAllEntries(m.db)
+			slog.Debug("Записи, полученные из новой KDBX", "count", len(entries))
+			items := make([]list.Item, len(entries))
+			for i, entry := range entries {
+				items[i] = entryItem{entry: entry}
+			}
+			slog.Debug("Элементы, подготовленные для списка", "count", len(items))
+			m.entryList.SetItems(items) // Устанавливаем элементы в список
+
+			// Устанавливаем размер списка явно (как при открытии существующей базы)
+			m.entryList.SetWidth(defaultListWidth)
+			m.entryList.SetHeight(defaultListHeight)
+
+			// Обновляем заголовок списка, включая количество элементов
+			m.entryList.Title = fmt.Sprintf("Записи в '%s' (%d)", m.kdbxPath, len(items))
 			return m, tea.ClearScreen // Очищаем экран перед показом списка
 		}
 
