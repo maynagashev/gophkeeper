@@ -534,3 +534,16 @@ time=2025-04-10T16:49:25.284+07:00 level=DEBUG msg="Элементы, подго
 time=2025-04-10T16:49:43.517+07:00 level=INFO msg="Переход к деталям записи" title="Sample Entry"
 time=2025-04-10T16:49:46.900+07:00 level=INFO msg="Возврат к списку записей"
 time=2025-04-10T16:49:48.001+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:51:03.801+07:00 level=INFO msg="Логгер инициализирован" path=logs/gophkeeper.log
+time=2025-04-10T16:51:03.801+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию"
+time=2025-04-10T16:51:03.804+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:51:03.804+07:00 level=INFO msg="Файл KDBX не найден, переходим к созданию нового." path=gophkeeper.kdbx
+time=2025-04-10T16:53:00.043+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:53:02.678+07:00 level=INFO msg="Логгер инициализирован" path=logs/gophkeeper.log
+time=2025-04-10T16:53:02.678+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию"
+time=2025-04-10T16:53:02.680+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:53:02.680+07:00 level=INFO msg="Файл KDBX не найден, переходим к созданию нового." path=gophkeeper.kdbx
+time=2025-04-10T16:53:06.569+07:00 level=INFO msg="Пароли совпадают, создаем новую базу KDBX" path=gophkeeper.kdbx
+time=2025-04-10T16:53:06.580+07:00 level=INFO msg="Новый файл KDBX успешно создан и сохранен" path=gophkeeper.kdbx
+time=2025-04-10T16:53:06.581+07:00 level=DEBUG msg="Записи, полученные из новой KDBX" count=1
+time=2025-04-10T16:53:06.581+07:00 level=DEBUG msg="Элементы, подготовленные для списка" count=1

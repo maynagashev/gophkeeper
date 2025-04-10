@@ -49,6 +49,23 @@ func (m *model) updateNewKdbxPasswordScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Batch(cmds...)
 
 		case keyEnter:
+			// Если фокус на первом поле, переключаем на второе (если первый пароль не пуст)
+			if m.newPasswordFocusedField == 0 {
+				if m.newPasswordInput1.Value() == "" {
+					m.confirmPasswordError = "Пароль не может быть пустым!"
+					return m, nil
+				}
+				// Переключаем фокус на второе поле
+				m.newPasswordFocusedField = 1
+				m.confirmPasswordError = "" // Сбрасываем ошибку
+				m.newPasswordInput1.Blur()
+				m.newPasswordInput2.Focus()
+				cmd = textinput.Blink
+				cmds = append(cmds, cmd)
+				return m, tea.Batch(cmds...)
+			}
+
+			// Если фокус на втором поле, проверяем и создаем базу
 			pass1 := m.newPasswordInput1.Value()
 			pass2 := m.newPasswordInput2.Value()
 
