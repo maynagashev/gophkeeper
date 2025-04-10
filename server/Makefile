@@ -14,12 +14,12 @@ MIGRATE_IMAGE=migrate/migrate:v4.17.1
 .PHONY: run build clean test lint db-up migrate-up migrate-down migrate-force
 
 # Цель по умолчанию (пока просто сборка)
-default: build
+default: run
 
-# Запуск сервера (пока не реализовано)
+# Запуск сервера
 run:
-	@echo "Запуск GophKeeper сервера... (пока не реализовано)"
-	# @go run ./cmd/server/main.go
+	@echo "Запуск GophKeeper сервера..."
+	@go run ./cmd/server/main.go | tee ./logs/server.log
 
 # Сборка сервера
 build:

@@ -2,26 +2,28 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 
-	"github.com/maynagashev/gophkeeper/server/internal/models" // Импортируем наши модели
+	"github.com/maynagashev/gophkeeper/server/internal/models"   // Импортируем наши модели
+	"github.com/maynagashev/gophkeeper/server/internal/services" // Импортируем пакет сервисов
 )
 
 // AuthService определяет интерфейс для сервиса аутентификации.
 // Это позволит нам легко подменять реализацию (например, для тестов).
-type AuthService interface {
-	Register(username, password string) error
-	Login(username, password string) (string, error) // Возвращает JWT токен или ошибку
-}
+// type AuthService interface { // Удаляем этот интерфейс отсюда
+// 	Register(username, password string) error
+// 	Login(username, password string) (string, error) // Возвращает JWT токен или ошибку
+// }
 
 // AuthHandler обрабатывает HTTP-запросы, связанные с аутентификацией.
 type AuthHandler struct {
-	service AuthService // Зависимость от интерфейса, а не конкретной реализации
+	service services.AuthService // Используем интерфейс из пакета services
 }
 
 // NewAuthHandler создает новый экземпляр AuthHandler.
-func NewAuthHandler(s AuthService) *AuthHandler {
+func NewAuthHandler(s services.AuthService) *AuthHandler { // Принимаем интерфейс из пакета services
 	return &AuthHandler{service: s}
 }
 
@@ -44,12 +46,25 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("[AuthHandler] Попытка регистрации пользователя: %s", req.Username)
 
-	// TODO: Вызвать h.service.Register(req.Username, req.Password)
+	// Вызываем сервис
+	err := h.service.Register(req.Username, req.Password)
+	if err != nil {
+		// Обрабатываем ошибки от сервиса
+		if errors.Is(err, services.ErrUsernameTaken) {
+			log.Printf("[AuthHandler] Ошибка регистрации (имя занято): %s", req.Username)
+			http.Error(w, err.Error(), http.StatusConflict) // 409 Conflict
+		} else {
+			// Другие ошибки считаем внутренними
+			log.Printf("[AuthHandler] Внутренняя ошибка при регистрации '%s': %v", req.Username, err)
+			http.Error(w, "Внутренняя ошибка сервера", http.StatusInternalServerError)
+		}
+		return
+	}
 
-	// Пока просто возвращаем успешный статус
-	w.WriteHeader(http.StatusCreated) // 201 Created
-	_, _ = w.Write([]byte("Пользователь успешно зарегистрирован (заглушка)\n"))
-	log.Printf("[AuthHandler] Успешная регистрация (заглушка) для: %s", req.Username)
+	// Возвращаем успешный статус
+	w.WriteHeader(http.StatusCreated)                                // 201 Created
+	_, _ = w.Write([]byte("Пользователь успешно зарегистрирован\n")) // Убираем "(заглушка)"
+	log.Printf("[AuthHandler] Успешная регистрация для: %s", req.Username)
 }
 
 // Login обрабатывает запрос на вход пользователя.
@@ -71,20 +86,31 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("[AuthHandler] Попытка входа пользователя: %s", req.Username)
 
-	// TODO: Вызвать h.service.Login(req.Username, req.Password)
-	// TODO: Получить токен и отправить его в ответе
+	// Вызываем сервис
+	token, err := h.service.Login(req.Username, req.Password)
+	if err != nil {
+		// Обрабатываем ошибки от сервиса
+		if errors.Is(err, services.ErrInvalidCredentials) {
+			log.Printf("[AuthHandler] Ошибка входа (неверные данные): %s", req.Username)
+			http.Error(w, err.Error(), http.StatusUnauthorized) // 401 Unauthorized
+		} else {
+			// Другие ошибки считаем внутренними
+			log.Printf("[AuthHandler] Внутренняя ошибка при входе '%s': %v", req.Username, err)
+			http.Error(w, "Внутренняя ошибка сервера", http.StatusInternalServerError)
+		}
+		return
+	}
 
-	// Пока просто возвращаем заглушку токена
+	// Возвращаем токен
 	resp := models.LoginResponse{
-		Token: "fake-jwt-token-placeholder",
+		Token: token, // Используем реальный токен от сервиса
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK) // 200 OK
-	if err := json.NewEncoder(w).Encode(resp); err != nil {
+	if err = json.NewEncoder(w).Encode(resp); err != nil {
 		log.Printf("[AuthHandler] Ошибка кодирования ответа входа: %v", err)
-		// Клиент уже получил статус 200, сложно что-то изменить
 		return
 	}
-	log.Printf("[AuthHandler] Успешный вход (заглушка) для: %s", req.Username)
+	log.Printf("[AuthHandler] Успешный вход для: %s", req.Username)
 }

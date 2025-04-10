@@ -1,15 +1,19 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-
+	_ "github.com/lib/pq" // Драйвер PostgreSQL
 	"github.com/maynagashev/gophkeeper/server/internal/handlers"
+	"github.com/maynagashev/gophkeeper/server/internal/repository"
+	"github.com/maynagashev/gophkeeper/server/internal/services"
 )
 
 const (
@@ -17,72 +21,100 @@ const (
 	defaultWriteTimeout = 10 * time.Second
 	defaultIdleTimeout  = 30 * time.Second
 	defaultServerPort   = "8080"
+
+	// Переменные окружения для БД (значения по умолчанию из Makefile/docker-compose).
+	envDBUser     = "POSTGRES_USER"
+	envDBPass     = "POSTGRES_PASSWORD" //nolint:gosec // Ложное срабатывание, это имя переменной окружения
+	envDBName     = "POSTGRES_DB"
+	envDBHost     = "POSTGRES_HOST"
+	envDBPort     = "POSTGRES_PORT"
+	defaultDBUser = "gophkeeper"
+	defaultDBPass = "secret"
+	defaultDBName = "gophkeeper"
+	defaultDBHost = "localhost"
+	defaultDBPort = "5433"
 )
-
-// Временная заглушка для AuthService.
-type dummyAuthService struct{}
-
-func (s *dummyAuthService) Register(username string, _ string) error {
-	log.Printf("[DummyService] Попытка регистрации: %s", username)
-	// Ничего не делаем, всегда успешно
-	return nil
-}
-
-func (s *dummyAuthService) Login(username string, _ string) (string, error) {
-	log.Printf("[DummyService] Попытка входа: %s", username)
-	// Возвращаем фейковый токен
-	return "dummy-jwt-from-service", nil
-}
-
-// --- Конец заглушки ---
 
 // main - точка входа для сервера GophKeeper.
 func main() {
 	log.Println("Запуск сервера GophKeeper...")
 
-	// Создаем новый роутер
-	r := chi.NewRouter()
+	// --- Инициализация зависимостей --- //
 
-	// Используем стандартные middleware для логирования, восстановления после паник и т.д.
-	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
-	r.Use(middleware.Logger)    // Логирование запросов
-	r.Use(middleware.Recoverer) // Восстановление после паник
-
-	// Базовый маршрут для проверки работы сервера
-	r.Get("/ping", func(w http.ResponseWriter, _ *http.Request) {
-		_, err := w.Write([]byte("pong\n"))
-		if err != nil {
-			log.Printf("Ошибка записи ответа: %v", err)
+	// 1. Подключение к БД
+	dsn := getDSNFromEnv()
+	db, err := repository.NewPostgresDB(dsn)
+	if err != nil {
+		log.Fatalf("Ошибка инициализации БД: %v", err)
+	}
+	defer func() {
+		if err = db.Close(); err != nil {
+			log.Printf("Ошибка закрытия соединения с БД: %v", err)
 		}
-	})
+	}()
+	log.Println("Соединение с БД успешно установлено.")
 
-	// Создаем экземпляры зависимостей (пока с заглушками)
-	authService := &dummyAuthService{}
+	// 2. Создание репозитория
+	userRepo := repository.NewPostgresUserRepository(db)
+
+	// 3. Создание сервиса
+	authService := services.NewAuthService(userRepo)
+
+	// 4. Создание обработчика
 	authHandler := handlers.NewAuthHandler(authService)
 
-	// Маршруты API
-	r.Route("/api/user", func(r chi.Router) {
-		r.Post("/register", authHandler.Register) // POST /api/user/register
-		r.Post("/login", authHandler.Login)       // POST /api/user/login
+	// --- Настройка роутера --- //
+	r := chi.NewRouter()
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+
+	// Маршруты
+	r.Get("/ping", func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte("pong\n"))
 	})
 
-	// Задаем порт сервера (можно вынести в конфигурацию)
-	port := defaultServerPort
-	log.Printf("Сервер слушает на порту %s", port)
+	r.Route("/api/user", func(r chi.Router) {
+		r.Post("/register", authHandler.Register)
+		r.Post("/login", authHandler.Login)
+	})
 
-	// Создаем и настраиваем HTTP-сервер с таймаутами
+	// --- Запуск сервера --- //
+	port := getEnv("SERVER_PORT", defaultServerPort)
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%s", port),
 		Handler:      r,
-		ReadTimeout:  defaultReadTimeout,  // Таймаут чтения запроса
-		WriteTimeout: defaultWriteTimeout, // Таймаут записи ответа
-		IdleTimeout:  defaultIdleTimeout,  // Таймаут простоя соединения
+		ReadTimeout:  defaultReadTimeout,
+		WriteTimeout: defaultWriteTimeout,
+		IdleTimeout:  defaultIdleTimeout,
 	}
 
-	// Запускаем HTTP-сервер
-	log.Printf("Запуск HTTP-сервера на %s", server.Addr)
-	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+	log.Printf("Запуск HTTP-сервера на порту %s", port)
+	if err = server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		//nolint:gocritic // Завершение через Fatalf приемлемо здесь
 		log.Fatalf("Ошибка запуска сервера: %v", err)
 	}
+}
+
+// getDSNFromEnv формирует строку подключения к БД из переменных окружения.
+func getDSNFromEnv() string {
+	user := getEnv(envDBUser, defaultDBUser)
+	password := getEnv(envDBPass, defaultDBPass)
+	host := getEnv(envDBHost, defaultDBHost)
+	port := getEnv(envDBPort, defaultDBPort)
+	dbname := getEnv(envDBName, defaultDBName)
+
+	// sslmode=disable - небезопасно для продакшена, но удобно для локальной разработки с Docker
+	//nolint:nosprintfhostport // DSN - это URL, а не просто host:port
+	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		user, password, host, port, dbname)
+}
+
+// getEnv получает значение переменной окружения или возвращает значение по умолчанию.
+func getEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return fallback
 }
