@@ -1,6 +1,8 @@
 package tui
 
 import (
+	"time"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/tobischo/gokeepasslib/v3"
 
@@ -27,4 +29,11 @@ func saveKdbxCmd(db *gokeepasslib.Database, path, password string) tea.Cmd {
 		}
 		return dbSavedMsg{}
 	}
+}
+
+// clearStatusCmd возвращает команду, которая отправит clearStatusMsg через delay.
+func clearStatusCmd(delay time.Duration) tea.Cmd {
+	return tea.Tick(delay, func(_ time.Time) tea.Msg {
+		return clearStatusMsg{}
+	})
 }

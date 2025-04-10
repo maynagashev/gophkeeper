@@ -3,9 +3,12 @@ package tui
 import (
 	"encoding/hex"
 	"fmt"
+	"sync"
+	"time"
 
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
+	"github.com/gofrs/flock"
 	"github.com/tobischo/gokeepasslib/v3"
 )
 
@@ -21,18 +24,39 @@ const (
 	entryAddScreen                                // Экран добавления новой записи
 	attachmentListDeleteScreen                    // Экран выбора вложения для удаления
 	attachmentPathInputScreen                     // Экран ввода пути к добавляемому вложению
+	newKdbxPasswordScreen                         // Экран ввода пароля для нового KDBX файла
 )
 
 // Поля, доступные для редактирования.
 const (
+	// Стандартные поля.
 	editableFieldTitle = iota
 	editableFieldUserName
 	editableFieldPassword
 	editableFieldURL
 	editableFieldNotes
-	numEditableFields // Количество редактируемых полей
+	// Поля карты.
+	editableFieldCardNumber
+	editableFieldCardHolderName
+	editableFieldExpiryDate
+	editableFieldCVV
+	editableFieldPIN
+	// Конец списка.
+	numEditableFields // Общее количество редактируемых полей
+)
 
-	fieldNamePassword = "Password"
+// Имена полей (используются как плейсхолдеры и ключи в KDBX).
+const (
+	fieldNameTitle          = "Title"
+	fieldNameUserName       = "UserName"
+	fieldNamePassword       = "Password"
+	fieldNameURL            = "URL"
+	fieldNameNotes          = "Notes"
+	fieldNameCardNumber     = "CardNumber"
+	fieldNameCardHolderName = "CardHolderName"
+	fieldNameExpiryDate     = "ExpiryDate"
+	fieldNameCVV            = "CVV"
+	fieldNamePIN            = "PIN"
 )
 
 // Константы для TUI.
@@ -41,13 +65,19 @@ const (
 	defaultListHeight   = 24 // Стандартная высота терминала для списка
 	passwordInputOffset = 4  // Отступ для поля ввода пароля
 
-	keyEnter = "enter" // Клавиша Enter
-	keyQuit  = "q"     // Клавиша выхода
-	keyBack  = "b"     // Клавиша возврата
-	keyEsc   = "esc"   // Клавиша Escape
-	keyEdit  = "e"     // Клавиша редактирования
-	keyAdd   = "a"     // Клавиша добавления
+	keyEnter    = "enter" // Клавиша Enter
+	keyQuit     = "q"     // Клавиша выхода
+	keyBack     = "b"     // Клавиша возврата
+	keyEsc      = "esc"   // Клавиша Escape
+	keyEdit     = "e"     // Клавиша редактирования
+	keyAdd      = "a"     // Клавиша добавления
+	keyTab      = "tab"
+	keyShiftTab = "shift+tab"
+	keyUp       = "up"
+	keyDown     = "down"
 )
+
+const numNewPasswordFields = 2 // Количество полей на экране создания пароля
 
 // entryItem представляет элемент списка записей.
 // Реализует интерфейс list.Item.
@@ -117,34 +147,46 @@ type dbSaveErrorMsg struct {
 
 // model представляет состояние TUI приложения.
 type model struct {
-	state         screenState            // Текущее состояние (экран)
-	passwordInput textinput.Model        // Поле ввода для пароля
-	password      string                 // Сохраненный в памяти пароль от базы
-	db            *gokeepasslib.Database // Объект открытой базы KDBX
-	kdbxPath      string                 // Путь к KDBX файлу
-	err           error                  // Последняя ошибка для отображения
-	entryList     list.Model             // Компонент списка записей
-	selectedEntry *entryItem             // Выбранная запись для детального просмотра
+	state               screenState
+	kdbxPath            string // Путь к файлу KDBX
+	password            string // Сохраненный мастер-пароль
+	db                  *gokeepasslib.Database
+	fileLock            *flock.Flock        // Объект блокировки файла
+	lockAcquired        bool                // Флаг: удалось ли получить блокировку
+	readOnlyMode        bool                // Флаг: приложение в режиме только для чтения
+	passwordInput       textinput.Model     // Поле ввода пароля для существующего файла
+	entryList           list.Model          // Список записей
+	selectedEntry       *entryItem          // Выбранная запись для просмотра/редактирования
+	detailScroll        int                 //nolint:unused // Задел на будущее для скроллинга деталей
+	editInputs          []textinput.Model   // Поля ввода для редактирования
+	focusedField        int                 // Индекс активного поля при редактировании/добавлении
+	editingEntry        *gokeepasslib.Entry // Копия записи при редактировании/добавлении
+	attachmentList      list.Model          // Список вложений для выбора/удаления
+	attachmentPathInput textinput.Model     // Поле ввода пути для добавления вложения
+	attachmentError     error               // Ошибка при добавлении вложения
+	previousScreenState screenState         // Предыдущее состояние (для возврата)
+	savingStatus        string              // Статус сохранения (отображается внизу)
+	statusTimer         *time.Timer         // Таймер для очистки статуса сохранения
+	width               int                 //nolint:unused // Потенциально для адаптивной верстки
+	height              int                 //nolint:unused // Потенциально для адаптивной верстки
+	listMutex           sync.Mutex          //nolint:unused // Задел на будущее для синхронизации
 
-	// Поля для редактирования записи
-	editingEntry *gokeepasslib.Entry // Копия записи, которую редактируем
-	editInputs   []textinput.Model   // Поля ввода для редактирования
-	focusedField int                 // Индекс активного поля ввода
+	// Поля для создания нового KDBX
+	newPasswordInput1       textinput.Model // Первое поле ввода нового пароля
+	newPasswordInput2       textinput.Model // Второе поле для подтверждения пароля
+	newPasswordFocusedField int             // 0 или 1, указывает на активное поле
+	confirmPasswordError    string          // Сообщение об ошибке несовпадения паролей
 
-	// Поля для добавления записи
-	addInputs           []textinput.Model // Поля ввода для новой записи
-	focusedFieldAdd     int               // Индекс активного поля ввода
+	// Поле для временного хранения вложений при добавлении
 	newEntryAttachments []struct {
 		Name    string
 		Content []byte
-	} // Временное хранилище для вложений новой записи
-
-	attachmentList list.Model // Список вложений для удаления
-
-	// Поля для добавления вложения через путь
-	previousScreenState screenState     // Экран, с которого перешли на ввод пути
-	attachmentPathInput textinput.Model // Поле ввода пути к файлу
-	attachmentError     error           // Ошибка при добавлении вложения
-
-	savingStatus string // Статус операции сохранения файла
+	}
+	// Поля для подтверждения удаления вложения
+	confirmationPrompt string          // Текст запроса подтверждения
+	itemToDelete       *attachmentItem // Вложение, выбранное для удаления
+	err                error           // Последняя ошибка для отображения
 }
+
+// Сообщение для очистки статуса.
+type clearStatusMsg struct{}

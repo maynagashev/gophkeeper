@@ -345,3 +345,205 @@
 {"time":"2025-04-09T02:54:04.8701761+07:00","level":"INFO","msg":"Запуск сохранения KDBX","path":"example/test.kdbx"}
 {"time":"2025-04-09T02:54:05.613029713+07:00","level":"INFO","msg":"База KDBX успешно сохранена","path":"example/test.kdbx"}
 {"time":"2025-04-09T02:59:32.115072885+07:00","level":"INFO","msg":"Возврат к списку записей"}
+{"time":"2025-04-09T17:58:23.972609199+07:00","level":"INFO","msg":"Логгер инициализирован, запись в logs/gophkeeper.log"}
+{"time":"2025-04-09T17:59:12.178206268+07:00","level":"INFO","msg":"База KDBX успешно открыта","path":"example/test.kdbx"}
+{"time":"2025-04-09T17:59:12.178389582+07:00","level":"DEBUG","msg":"Записи, полученные из KDBX","count":4}
+{"time":"2025-04-09T17:59:12.178414545+07:00","level":"DEBUG","msg":"Элементы, подготовленные для списка","count":4}
+{"time":"2025-04-09T17:59:12.178543099+07:00","level":"DEBUG","msg":"Элементы в списке после SetItems","count":4}
+{"time":"2025-04-09T17:59:16.802981831+07:00","level":"INFO","msg":"Переход к добавлению новой записи"}
+{"time":"2025-04-09T18:00:04.073492961+07:00","level":"INFO","msg":"Отмена добавления, возврат к списку"}
+{"time":"2025-04-09T18:00:10.628805837+07:00","level":"INFO","msg":"Переход к деталям записи","title":"test entry 5"}
+{"time":"2025-04-09T18:00:11.054338953+07:00","level":"INFO","msg":"Переход к редактированию записи","title":"test entry 5"}
+{"time":"2025-04-09T18:00:12.957720594+07:00","level":"INFO","msg":"Отмена редактирования, возврат к деталям записи"}
+{"time":"2025-04-09T18:00:14.47458114+07:00","level":"INFO","msg":"Возврат к списку записей"}
+{"time":"2025-04-09T18:04:32.420454349+07:00","level":"INFO","msg":"Логгер инициализирован, запись в logs/gophkeeper.log"}
+{"time":"2025-04-09T18:04:35.808714034+07:00","level":"INFO","msg":"База KDBX успешно открыта","path":"example/test.kdbx"}
+{"time":"2025-04-09T18:04:35.808833374+07:00","level":"DEBUG","msg":"Записи, полученные из KDBX","count":4}
+{"time":"2025-04-09T18:04:35.808858109+07:00","level":"DEBUG","msg":"Элементы, подготовленные для списка","count":4}
+{"time":"2025-04-09T18:04:35.809000419+07:00","level":"DEBUG","msg":"Элементы в списке после SetItems","count":4}
+{"time":"2025-04-09T18:04:40.334630987+07:00","level":"INFO","msg":"Переход к добавлению новой записи"}
+{"time":"2025-04-09T18:04:57.596626832+07:00","level":"INFO","msg":"Новая запись добавлена","title":""}
+{"time":"2025-04-09T18:05:03.813476528+07:00","level":"INFO","msg":"Переход к деталям записи","title":"82bea24a7763a46781424fb941874f02"}
+{"time":"2025-04-09T18:05:04.668839328+07:00","level":"INFO","msg":"Переход к редактированию записи","title":"82bea24a7763a46781424fb941874f02"}
+{"time":"2025-04-09T18:05:10.943348647+07:00","level":"INFO","msg":"Изменения сохранены, возврат к деталям записи"}
+{"time":"2025-04-09T18:05:15.223272236+07:00","level":"INFO","msg":"Переход к редактированию записи","title":"82bea24a7763a46781424fb941874f02"}
+{"time":"2025-04-09T18:05:32.660957023+07:00","level":"INFO","msg":"Отмена редактирования, возврат к деталям записи"}
+{"time":"2025-04-09T18:05:34.139349049+07:00","level":"INFO","msg":"Начало обновления m.db перед сохранением"}
+{"time":"2025-04-09T18:05:34.139653526+07:00","level":"INFO","msg":"Обновление m.db завершено","updated_count":5}
+{"time":"2025-04-09T18:05:34.139685627+07:00","level":"INFO","msg":"Запуск сохранения KDBX","path":"example/test.kdbx"}
+{"time":"2025-04-09T18:05:38.852391703+07:00","level":"INFO","msg":"Переход к редактированию записи","title":"82bea24a7763a46781424fb941874f02"}
+{"time":"2025-04-09T18:05:45.365570324+07:00","level":"INFO","msg":"Отмена редактирования, возврат к деталям записи"}
+{"time":"2025-04-09T18:05:46.670434661+07:00","level":"INFO","msg":"Возврат к списку записей"}
+{"time":"2025-04-09T18:05:48.501184858+07:00","level":"INFO","msg":"Начало обновления m.db перед сохранением"}
+{"time":"2025-04-09T18:05:48.501297106+07:00","level":"INFO","msg":"Обновление m.db завершено","updated_count":5}
+{"time":"2025-04-09T18:05:48.50132222+07:00","level":"INFO","msg":"Запуск сохранения KDBX","path":"example/test.kdbx"}
+{"time":"2025-04-09T18:05:53.331005941+07:00","level":"INFO","msg":"Логгер инициализирован, запись в logs/gophkeeper.log"}
+{"time":"2025-04-09T18:06:00.41310046+07:00","level":"INFO","msg":"База KDBX успешно открыта","path":"example/test.kdbx"}
+{"time":"2025-04-09T18:06:00.413231075+07:00","level":"DEBUG","msg":"Записи, полученные из KDBX","count":5}
+{"time":"2025-04-09T18:06:00.413260216+07:00","level":"DEBUG","msg":"Элементы, подготовленные для списка","count":5}
+{"time":"2025-04-09T18:06:00.413408486+07:00","level":"DEBUG","msg":"Элементы в списке после SetItems","count":5}
+{"time":"2025-04-09T18:06:05.657041282+07:00","level":"INFO","msg":"Переход к деталям записи","title":"82bea24a7763a46781424fb941874f02"}
+{"time":"2025-04-09T18:06:08.432318136+07:00","level":"INFO","msg":"Переход к редактированию записи","title":"82bea24a7763a46781424fb941874f02"}
+{"time":"2025-04-09T18:06:13.057479458+07:00","level":"INFO","msg":"Изменения сохранены, возврат к деталям записи"}
+{"time":"2025-04-09T18:06:14.161642865+07:00","level":"INFO","msg":"Переход к редактированию записи","title":"82bea24a7763a46781424fb941874f02"}
+{"time":"2025-04-09T18:06:22.401892475+07:00","level":"INFO","msg":"Изменения сохранены, возврат к деталям записи"}
+{"time":"2025-04-09T18:06:24.433655327+07:00","level":"INFO","msg":"Переход к редактированию записи","title":"82bea24a7763a46781424fb941874f02"}
+{"time":"2025-04-09T18:06:27.463939739+07:00","level":"INFO","msg":"Отмена редактирования, возврат к деталям записи"}
+{"time":"2025-04-09T18:06:28.793804196+07:00","level":"INFO","msg":"Возврат к списку записей"}
+{"time":"2025-04-09T18:06:31.340287097+07:00","level":"INFO","msg":"Переход к деталям записи","title":"test binary"}
+{"time":"2025-04-09T18:06:31.655214478+07:00","level":"INFO","msg":"Переход к редактированию записи","title":"test binary"}
+{"time":"2025-04-09T18:06:34.573549997+07:00","level":"INFO","msg":"Изменения сохранены, возврат к деталям записи"}
+{"time":"2025-04-09T18:06:35.597384623+07:00","level":"INFO","msg":"Переход к редактированию записи","title":"test binary"}
+{"time":"2025-04-09T18:06:36.198630587+07:00","level":"INFO","msg":"Изменения сохранены, возврат к деталям записи"}
+{"time":"2025-04-09T18:06:59.993504945+07:00","level":"INFO","msg":"Переход к редактированию записи","title":"test binary"}
+{"time":"2025-04-09T18:08:44.741492852+07:00","level":"INFO","msg":"Отмена редактирования, возврат к деталям записи"}
+{"time":"2025-04-09T18:08:45.250404685+07:00","level":"INFO","msg":"Возврат к списку записей"}
+{"time":"2025-04-09T18:08:48.119459689+07:00","level":"INFO","msg":"Логгер инициализирован, запись в logs/gophkeeper.log"}
+{"time":"2025-04-09T18:08:51.59708392+07:00","level":"INFO","msg":"База KDBX успешно открыта","path":"example/test.kdbx"}
+{"time":"2025-04-09T18:08:51.597242292+07:00","level":"DEBUG","msg":"Записи, полученные из KDBX","count":5}
+{"time":"2025-04-09T18:08:51.597291285+07:00","level":"DEBUG","msg":"Элементы, подготовленные для списка","count":5}
+{"time":"2025-04-09T18:08:51.597509633+07:00","level":"DEBUG","msg":"Элементы в списке после SetItems","count":5}
+{"time":"2025-04-09T18:08:54.318589702+07:00","level":"INFO","msg":"Переход к деталям записи","title":"82bea24a7763a46781424fb941874f02"}
+{"time":"2025-04-09T18:08:55.568104686+07:00","level":"INFO","msg":"Переход к редактированию записи","title":"82bea24a7763a46781424fb941874f02"}
+{"time":"2025-04-09T18:09:06.630036605+07:00","level":"INFO","msg":"Отмена редактирования, возврат к деталям записи"}
+{"time":"2025-04-09T18:09:08.037326472+07:00","level":"INFO","msg":"Переход к редактированию записи","title":"82bea24a7763a46781424fb941874f02"}
+{"time":"2025-04-09T18:09:26.149132744+07:00","level":"INFO","msg":"Изменения сохранены, возврат к деталям записи"}
+{"time":"2025-04-09T18:09:27.891503857+07:00","level":"INFO","msg":"Начало обновления m.db перед сохранением"}
+{"time":"2025-04-09T18:09:27.891703659+07:00","level":"INFO","msg":"Обновление m.db завершено","updated_count":5}
+{"time":"2025-04-09T18:09:27.891729982+07:00","level":"INFO","msg":"Запуск сохранения KDBX","path":"example/test.kdbx"}
+{"time":"2025-04-09T18:10:42.083983051+07:00","level":"INFO","msg":"Возврат к списку записей"}
+{"time":"2025-04-09T18:10:45.508555129+07:00","level":"INFO","msg":"Переход к деталям записи","title":"Visa"}
+{"time":"2025-04-09T18:10:48.363780621+07:00","level":"INFO","msg":"Переход к редактированию записи","title":"Visa"}
+{"time":"2025-04-09T18:10:49.549461987+07:00","level":"INFO","msg":"Отмена редактирования, возврат к деталям записи"}
+{"time":"2025-04-09T18:10:50.61536942+07:00","level":"INFO","msg":"Переход к редактированию записи","title":"Visa"}
+{"time":"2025-04-09T18:10:51.798996725+07:00","level":"INFO","msg":"Изменения сохранены, возврат к деталям записи"}
+{"time":"2025-04-09T18:43:45.412814499+07:00","level":"INFO","msg":"Логгер инициализирован, запись в logs/gophkeeper.log"}
+{"time":"2025-04-09T18:43:45.414626311+07:00","level":"INFO","msg":"Файл KDBX найден, запуск стандартного TUI.","path":"example/test.kdbx"}
+{"time":"2025-04-09T18:43:50.929999687+07:00","level":"INFO","msg":"База KDBX успешно открыта","path":"example/test.kdbx"}
+{"time":"2025-04-09T18:43:50.930120752+07:00","level":"DEBUG","msg":"Записи, полученные из KDBX","count":5}
+{"time":"2025-04-09T18:43:50.930145333+07:00","level":"DEBUG","msg":"Элементы, подготовленные для списка","count":5}
+{"time":"2025-04-09T18:43:50.930334183+07:00","level":"DEBUG","msg":"Элементы в списке после SetItems","count":5}
+{"time":"2025-04-10T01:37:09.065087488+07:00","level":"INFO","msg":"Возврат к списку записей"}
+time=2025-04-10T01:47:04.553+07:00 level=INFO msg="Логгер инициализирован" path=logs/gophkeeper.log
+time=2025-04-10T01:47:04.553+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию"
+time=2025-04-10T01:47:04.556+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T01:47:04.556+07:00 level=INFO msg="Файл KDBX найден, запуск стандартного TUI." path=gophkeeper.kdbx
+time=2025-04-10T01:47:09.601+07:00 level=INFO msg="База KDBX успешно открыта" path=gophkeeper.kdbx
+time=2025-04-10T01:47:09.601+07:00 level=DEBUG msg="Записи, полученные из KDBX" count=2
+time=2025-04-10T01:47:09.601+07:00 level=DEBUG msg="Элементы, подготовленные для списка" count=2
+time=2025-04-10T01:47:09.601+07:00 level=DEBUG msg="Элементы в списке после SetItems" count=2
+time=2025-04-10T01:47:11.983+07:00 level=INFO msg="Переход к деталям записи" title=test
+time=2025-04-10T01:47:13.304+07:00 level=INFO msg="Начало обновления m.db перед сохранением"
+time=2025-04-10T01:47:13.304+07:00 level=INFO msg="Обновление m.db завершено" updated_count=2
+time=2025-04-10T01:47:13.304+07:00 level=INFO msg="Запуск сохранения KDBX" path=gophkeeper.kdbx
+time=2025-04-10T01:50:18.862+07:00 level=INFO msg="Возврат к списку записей"
+time=2025-04-10T01:50:19.333+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T15:39:56.376+07:00 level=INFO msg="Логгер инициализирован" path=logs/gophkeeper.log
+time=2025-04-10T15:39:56.378+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию"
+time=2025-04-10T15:39:56.379+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T15:39:56.379+07:00 level=INFO msg="Файл KDBX не найден, переходим к созданию нового." path=gophkeeper.kdbx
+time=2025-04-10T15:40:06.809+07:00 level=INFO msg="Пароли совпадают, создаем новую базу KDBX" path=gophkeeper.kdbx
+time=2025-04-10T15:40:06.812+07:00 level=INFO msg="Новый файл KDBX успешно создан и сохранен" path=gophkeeper.kdbx
+time=2025-04-10T15:40:10.305+07:00 level=INFO msg="Начало обновления m.db перед сохранением"
+time=2025-04-10T15:40:10.305+07:00 level=INFO msg="Обновление m.db завершено" updated_count=0
+time=2025-04-10T15:40:10.305+07:00 level=INFO msg="Запуск сохранения KDBX" path=gophkeeper.kdbx
+time=2025-04-10T15:41:53.029+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:11:12.862+07:00 level=INFO msg="Логгер инициализирован" path=logs/gophkeeper.log
+time=2025-04-10T16:11:12.863+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию"
+time=2025-04-10T16:11:12.865+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:11:12.865+07:00 level=INFO msg="Файл KDBX найден, запуск стандартного TUI." path=gophkeeper.kdbx
+time=2025-04-10T16:11:17.636+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:11:27.034+07:00 level=INFO msg="Логгер инициализирован" path=logs/gophkeeper.log
+time=2025-04-10T16:11:27.034+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию"
+time=2025-04-10T16:11:27.037+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:11:27.037+07:00 level=INFO msg="Файл KDBX не найден, переходим к созданию нового." path=gophkeeper.kdbx
+time=2025-04-10T16:11:33.582+07:00 level=INFO msg="Пароли совпадают, создаем новую базу KDBX" path=gophkeeper.kdbx
+time=2025-04-10T16:11:33.585+07:00 level=INFO msg="Новый файл KDBX успешно создан и сохранен" path=gophkeeper.kdbx
+time=2025-04-10T16:11:36.003+07:00 level=INFO msg="Начало обновления m.db перед сохранением"
+time=2025-04-10T16:11:36.003+07:00 level=INFO msg="Обновление m.db завершено" updated_count=0
+time=2025-04-10T16:11:36.003+07:00 level=INFO msg="Запуск сохранения KDBX" path=gophkeeper.kdbx
+time=2025-04-10T16:19:33.060+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:23:05.698+07:00 level=INFO msg="Логгер инициализирован" path=logs/gophkeeper.log
+time=2025-04-10T16:23:05.698+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию"
+time=2025-04-10T16:23:05.699+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:23:05.699+07:00 level=INFO msg="Файл KDBX найден, запуск стандартного TUI." path=gophkeeper.kdbx
+time=2025-04-10T16:23:15.738+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:23:17.576+07:00 level=INFO msg="Логгер инициализирован" path=logs/gophkeeper.log
+time=2025-04-10T16:23:17.576+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию"
+time=2025-04-10T16:23:17.579+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:23:17.579+07:00 level=INFO msg="Файл KDBX не найден, переходим к созданию нового." path=gophkeeper.kdbx
+time=2025-04-10T16:23:20.717+07:00 level=INFO msg="Пароли совпадают, создаем новую базу KDBX" path=gophkeeper.kdbx
+time=2025-04-10T16:23:20.724+07:00 level=INFO msg="Новый файл KDBX успешно создан и сохранен" path=gophkeeper.kdbx
+time=2025-04-10T16:23:22.621+07:00 level=INFO msg="Начало обновления m.db перед сохранением"
+time=2025-04-10T16:23:22.621+07:00 level=INFO msg="Обновление m.db завершено" updated_count=0
+time=2025-04-10T16:23:22.621+07:00 level=INFO msg="Запуск сохранения KDBX" path=gophkeeper.kdbx
+time=2025-04-10T16:43:50.038+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:43:52.923+07:00 level=INFO msg="Логгер инициализирован" path=logs/gophkeeper.log
+time=2025-04-10T16:43:52.923+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию"
+time=2025-04-10T16:43:52.925+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:43:52.925+07:00 level=INFO msg="Файл KDBX найден, запуск стандартного TUI." path=gophkeeper.kdbx
+time=2025-04-10T16:43:56.213+07:00 level=INFO msg="База KDBX успешно открыта" path=gophkeeper.kdbx
+time=2025-04-10T16:43:56.213+07:00 level=DEBUG msg="Записи, полученные из KDBX" count=1
+time=2025-04-10T16:43:56.213+07:00 level=DEBUG msg="Элементы, подготовленные для списка" count=1
+time=2025-04-10T16:43:56.213+07:00 level=DEBUG msg="Элементы в списке после SetItems" count=1
+time=2025-04-10T16:44:00.719+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:44:12.958+07:00 level=INFO msg="Логгер инициализирован" path=logs/gophkeeper.log
+time=2025-04-10T16:44:12.958+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию"
+time=2025-04-10T16:44:12.960+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:44:12.960+07:00 level=INFO msg="Файл KDBX не найден, переходим к созданию нового." path=gophkeeper.kdbx
+time=2025-04-10T16:44:18.198+07:00 level=INFO msg="Пароли совпадают, создаем новую базу KDBX" path=gophkeeper.kdbx
+time=2025-04-10T16:44:18.204+07:00 level=INFO msg="Новый файл KDBX успешно создан и сохранен" path=gophkeeper.kdbx
+time=2025-04-10T16:46:18.499+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:46:20.928+07:00 level=INFO msg="Логгер инициализирован" path=logs/gophkeeper.log
+time=2025-04-10T16:46:20.928+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию"
+time=2025-04-10T16:46:20.930+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:46:20.930+07:00 level=INFO msg="Файл KDBX не найден, переходим к созданию нового." path=gophkeeper.kdbx
+time=2025-04-10T16:46:23.127+07:00 level=INFO msg="Пароли совпадают, создаем новую базу KDBX" path=gophkeeper.kdbx
+time=2025-04-10T16:46:23.134+07:00 level=INFO msg="Новый файл KDBX успешно создан и сохранен" path=gophkeeper.kdbx
+time=2025-04-10T16:46:23.134+07:00 level=DEBUG msg="Записи, полученные из новой KDBX" count=1
+time=2025-04-10T16:46:23.134+07:00 level=DEBUG msg="Элементы, подготовленные для списка" count=1
+time=2025-04-10T16:46:28.480+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:46:33.282+07:00 level=INFO msg="Логгер инициализирован" path=logs/gophkeeper.log
+time=2025-04-10T16:46:33.282+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию"
+time=2025-04-10T16:46:33.284+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:46:33.284+07:00 level=INFO msg="Файл KDBX найден, запуск стандартного TUI." path=gophkeeper.kdbx
+time=2025-04-10T16:46:35.152+07:00 level=INFO msg="База KDBX успешно открыта" path=gophkeeper.kdbx
+time=2025-04-10T16:46:35.152+07:00 level=DEBUG msg="Записи, полученные из KDBX" count=1
+time=2025-04-10T16:46:35.152+07:00 level=DEBUG msg="Элементы, подготовленные для списка" count=1
+time=2025-04-10T16:46:35.152+07:00 level=DEBUG msg="Элементы в списке после SetItems" count=1
+time=2025-04-10T16:46:43.131+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:46:54.955+07:00 level=INFO msg="Логгер инициализирован" path=logs/gophkeeper.log
+time=2025-04-10T16:46:54.955+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию"
+time=2025-04-10T16:46:54.957+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:46:54.957+07:00 level=INFO msg="Файл KDBX не найден, переходим к созданию нового." path=gophkeeper.kdbx
+time=2025-04-10T16:47:07.378+07:00 level=INFO msg="Пароли совпадают, создаем новую базу KDBX" path=gophkeeper.kdbx
+time=2025-04-10T16:47:07.385+07:00 level=INFO msg="Новый файл KDBX успешно создан и сохранен" path=gophkeeper.kdbx
+time=2025-04-10T16:47:07.385+07:00 level=DEBUG msg="Записи, полученные из новой KDBX" count=1
+time=2025-04-10T16:47:07.385+07:00 level=DEBUG msg="Элементы, подготовленные для списка" count=1
+time=2025-04-10T16:49:05.972+07:00 level=INFO msg="Переход к деталям записи" title="Sample Entry"
+time=2025-04-10T16:49:07.323+07:00 level=INFO msg="Возврат к списку записей"
+time=2025-04-10T16:49:07.894+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:49:22.691+07:00 level=INFO msg="Логгер инициализирован" path=logs/gophkeeper.log
+time=2025-04-10T16:49:22.691+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию"
+time=2025-04-10T16:49:22.693+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:49:22.693+07:00 level=INFO msg="Файл KDBX не найден, переходим к созданию нового." path=gophkeeper.kdbx
+time=2025-04-10T16:49:25.278+07:00 level=INFO msg="Пароли совпадают, создаем новую базу KDBX" path=gophkeeper.kdbx
+time=2025-04-10T16:49:25.284+07:00 level=INFO msg="Новый файл KDBX успешно создан и сохранен" path=gophkeeper.kdbx
+time=2025-04-10T16:49:25.284+07:00 level=DEBUG msg="Записи, полученные из новой KDBX" count=1
+time=2025-04-10T16:49:25.284+07:00 level=DEBUG msg="Элементы, подготовленные для списка" count=1
+time=2025-04-10T16:49:43.517+07:00 level=INFO msg="Переход к деталям записи" title="Sample Entry"
+time=2025-04-10T16:49:46.900+07:00 level=INFO msg="Возврат к списку записей"
+time=2025-04-10T16:49:48.001+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:51:03.801+07:00 level=INFO msg="Логгер инициализирован" path=logs/gophkeeper.log
+time=2025-04-10T16:51:03.801+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию"
+time=2025-04-10T16:51:03.804+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:51:03.804+07:00 level=INFO msg="Файл KDBX не найден, переходим к созданию нового." path=gophkeeper.kdbx
+time=2025-04-10T16:53:00.043+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:53:02.678+07:00 level=INFO msg="Логгер инициализирован" path=logs/gophkeeper.log
+time=2025-04-10T16:53:02.678+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию"
+time=2025-04-10T16:53:02.680+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:53:02.680+07:00 level=INFO msg="Файл KDBX не найден, переходим к созданию нового." path=gophkeeper.kdbx
+time=2025-04-10T16:53:06.569+07:00 level=INFO msg="Пароли совпадают, создаем новую базу KDBX" path=gophkeeper.kdbx
+time=2025-04-10T16:53:06.580+07:00 level=INFO msg="Новый файл KDBX успешно создан и сохранен" path=gophkeeper.kdbx
+time=2025-04-10T16:53:06.581+07:00 level=DEBUG msg="Записи, полученные из новой KDBX" count=1
+time=2025-04-10T16:53:06.581+07:00 level=DEBUG msg="Элементы, подготовленные для списка" count=1

@@ -12,6 +12,7 @@ require (
 require (
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/gofrs/flock v0.12.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/sahilm/fuzzy v0.1.1 // indirect
 	github.com/tobischo/argon2 v0.1.0 // indirect

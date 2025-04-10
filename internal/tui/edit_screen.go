@@ -3,6 +3,7 @@ package tui
 import (
 	"fmt"
 	"log/slog"
+	"strings"
 	"time"
 
 	"github.com/charmbracelet/bubbles/list"
@@ -40,72 +41,60 @@ func (m *model) prepareEditScreen() {
 	m.editInputs = make([]textinput.Model, numEditableFields)
 	m.focusedField = editableFieldTitle // Начинаем с поля Title
 
+	// Используем константы имен полей как плейсхолдеры
 	placeholders := map[int]string{
-		editableFieldTitle:    "Title",
-		editableFieldUserName: "UserName",
-		editableFieldPassword: "Password",
-		editableFieldURL:      "URL",
-		editableFieldNotes:    "Notes",
+		editableFieldTitle:          fieldNameTitle,
+		editableFieldUserName:       fieldNameUserName,
+		editableFieldPassword:       fieldNamePassword,
+		editableFieldURL:            fieldNameURL,
+		editableFieldNotes:          fieldNameNotes,
+		editableFieldCardNumber:     fieldNameCardNumber,
+		editableFieldCardHolderName: fieldNameCardHolderName,
+		editableFieldExpiryDate:     fieldNameExpiryDate,
+		editableFieldCVV:            fieldNameCVV,
+		editableFieldPIN:            fieldNamePIN,
 	}
 
 	for i := range numEditableFields {
+		placeholder := placeholders[i]
 		m.editInputs[i] = textinput.New()
-		m.editInputs[i].Placeholder = placeholders[i]
-		m.editInputs[i].SetValue(m.editingEntry.GetContent(placeholders[i]))
+		m.editInputs[i].Placeholder = placeholder
+		// Получаем текущее значение из редактируемой записи
+		m.editInputs[i].SetValue(m.editingEntry.GetContent(placeholder))
+
+		// Настраиваем маскирование для чувствительных полей
+		switch i {
+		case editableFieldPassword, editableFieldCVV, editableFieldPIN:
+			m.editInputs[i].EchoMode = textinput.EchoPassword
+		case editableFieldCardNumber:
+			// TODO: Может быть, использовать EchoPassword или спец. режим?
+			// Пока оставим обычным текстом
+		}
+
 		// Первое поле делаем активным
 		if i == m.focusedField {
 			m.editInputs[i].Focus()
 		}
 	}
-
-	// Настроим поле пароля
-	m.editInputs[editableFieldPassword].EchoMode = textinput.EchoPassword
 }
 
 // updateEntryEditScreen обрабатывает сообщения для экрана редактирования записи.
 func (m *model) updateEntryEditScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmds []tea.Cmd
-	var cmd tea.Cmd
-
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		// Обработка нажатий клавиш делегируется отдельной функции
 		return m.handleEditScreenKeys(msg)
 
 	default:
-		// Обработка других сообщений (например, обновление поля ввода)
-		m.editInputs[m.focusedField], cmd = m.editInputs[m.focusedField].Update(msg)
-		cmds = append(cmds, cmd)
-
-		// Обновляем поле в editingEntry
-		fieldName := m.editInputs[m.focusedField].Placeholder
-		newValue := m.editInputs[m.focusedField].Value()
-		found := false
-		for i := range m.editingEntry.Values {
-			if m.editingEntry.Values[i].Key == fieldName {
-				m.editingEntry.Values[i].Value.Content = newValue
-				if fieldName == fieldNamePassword {
-					m.editingEntry.Values[i].Value.Protected = w.NewBoolWrapper(newValue != "")
-				}
-				found = true
-				break
-			}
-		}
-		if !found {
-			valueData := gokeepasslib.ValueData{
-				Key:   fieldName,
-				Value: gokeepasslib.V{Content: newValue},
-			}
-			if fieldName == fieldNamePassword {
-				valueData.Value.Protected = w.NewBoolWrapper(newValue != "")
-			}
-			m.editingEntry.Values = append(m.editingEntry.Values, valueData)
-		}
-		return m, tea.Batch(cmds...)
+		// Другие сообщения (не KeyMsg) на этом экране пока не обрабатываются
+		// (Логика обновления поля перенесена в handleEditScreenKeys)
+		return m, nil
 	}
 }
 
 // handleEditScreenKeys обрабатывает нажатия клавиш на экране редактирования.
+//
+//nolint:gocognit,funlen // Сложность и длина будут снижены при рефакторинге
 func (m *model) handleEditScreenKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case keyEsc, keyBack:
@@ -126,23 +115,63 @@ func (m *model) handleEditScreenKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m, tea.Batch(cmds...)
 
 	case keyEnter:
-		return m.saveEntryChanges()
+		if !m.readOnlyMode {
+			return m.saveEntryChanges()
+		}
+		return m, nil
 
 	case "ctrl+o":
-		slog.Info("Переход к экрану ввода пути для добавления вложения")
-		m.previousScreenState = m.state // Запоминаем текущий экран (entryEditScreen)
-		m.state = attachmentPathInputScreen
-		m.attachmentPathInput.Reset()
-		m.attachmentPathInput.Focus()
-		m.attachmentError = nil // Сбрасываем предыдущую ошибку
-		// Добавляем очистку экрана
-		return m, tea.Batch(textinput.Blink, tea.ClearScreen)
+		if !m.readOnlyMode {
+			slog.Info("Переход к экрану ввода пути для добавления вложения")
+			m.previousScreenState = m.state
+			m.state = attachmentPathInputScreen
+			m.attachmentPathInput.Reset()
+			m.attachmentPathInput.Focus()
+			m.attachmentError = nil
+			return m, tea.Batch(textinput.Blink, tea.ClearScreen)
+		}
+		return m, nil
 
 	case "ctrl+d":
-		return m.handleAttachmentDeleteAction()
+		if !m.readOnlyMode {
+			return m.handleAttachmentDeleteAction()
+		}
+		return m, nil
 
 	default:
-		// Если не специальная клавиша - ничего не делаем (поле ввода обновится в Update по msg)
+		//nolint:nestif // Вложенность из-за readOnlyMode
+		if !m.readOnlyMode {
+			var cmds []tea.Cmd
+			var cmd tea.Cmd
+
+			m.editInputs[m.focusedField], cmd = m.editInputs[m.focusedField].Update(msg)
+			cmds = append(cmds, cmd)
+
+			fieldName := m.editInputs[m.focusedField].Placeholder
+			newValue := m.editInputs[m.focusedField].Value()
+			found := false
+			for i := range m.editingEntry.Values {
+				if m.editingEntry.Values[i].Key == fieldName {
+					m.editingEntry.Values[i].Value.Content = newValue
+					if fieldName == fieldNamePassword || fieldName == fieldNameCVV || fieldName == fieldNamePIN {
+						m.editingEntry.Values[i].Value.Protected = w.NewBoolWrapper(newValue != "")
+					}
+					found = true
+					break
+				}
+			}
+			if !found {
+				valueData := gokeepasslib.ValueData{
+					Key:   fieldName,
+					Value: gokeepasslib.V{Content: newValue},
+				}
+				if fieldName == fieldNamePassword || fieldName == fieldNameCVV || fieldName == fieldNamePIN {
+					valueData.Value.Protected = w.NewBoolWrapper(newValue != "")
+				}
+				m.editingEntry.Values = append(m.editingEntry.Values, valueData)
+			}
+			return m, tea.Batch(cmds...)
+		}
 		return m, nil
 	}
 }
@@ -199,45 +228,29 @@ func (m *model) saveEntryChanges() (tea.Model, tea.Cmd) {
 	return m, tea.Batch(cmds...)
 }
 
-// updateFocus обновляет фокус полей ввода и возвращает команды Blink.
-func (m *model) updateFocus() []tea.Cmd {
-	cmds := make([]tea.Cmd, len(m.editInputs))
-	for i := range len(m.editInputs) {
-		if i == m.focusedField {
-			cmds[i] = m.editInputs[i].Focus()
-		} else {
-			m.editInputs[i].Blur()
-		}
-	}
-	return cmds
-}
-
 // viewEntryEditScreen отрисовывает экран редактирования записи.
-func (m model) viewEntryEditScreen() string {
-	if m.editingEntry == nil || len(m.editInputs) == 0 {
-		return "Ошибка: Нет данных для редактирования!"
-	}
-
-	s := "Редактирование записи: " + m.editingEntry.GetTitle() + "\n\n"
-	// Отображаем поля ввода
+func (m *model) viewEntryEditScreen() string {
+	var s strings.Builder
+	s.WriteString("Редактирование записи: " + m.editingEntry.GetTitle() + "\n\n")
+	// Отображаем все поля ввода (включая поля карты)
 	for i, input := range m.editInputs {
 		focusIndicator := "  "
 		if m.focusedField == i {
 			focusIndicator = "> "
 		}
-		s += fmt.Sprintf("%s%s: %s\n", focusIndicator, input.Placeholder, input.View())
+		s.WriteString(fmt.Sprintf("%s%s: %s\n", focusIndicator, input.Placeholder, input.View()))
 	}
 
 	// Отображаем вложения
-	s += "\n--- Вложения ---\n"
+	s.WriteString("\n--- Вложения ---\n")
 	if len(m.editingEntry.Binaries) == 0 {
-		s += "(Нет вложений)\n"
+		s.WriteString("(Нет вложений)\n")
 	} else {
 		for i, binaryRef := range m.editingEntry.Binaries {
 			// TODO: Добавить индикатор выбора для удаления?
-			s += fmt.Sprintf(" [%d] %s\n", i, binaryRef.Name)
+			s.WriteString(fmt.Sprintf(" [%d] %s\n", i, binaryRef.Name))
 		}
 	}
 
-	return s
+	return s.String()
 }

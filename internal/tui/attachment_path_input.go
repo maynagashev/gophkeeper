@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -89,18 +90,21 @@ func (m *model) handleAttachmentPathConfirm() (tea.Model, tea.Cmd) {
 	// Возвращаемся на предыдущий экран
 	m.state = m.previousScreenState
 	m.attachmentPathInput.Blur()
-	m.attachmentError = nil // Очищаем ошибку после успеха
+	m.attachmentError = nil                                            // Очищаем ошибку после успеха
+	m.savingStatus = fmt.Sprintf("Вложение '%s' добавлено.", fileName) // Устанавливаем статус
 	return m, tea.ClearScreen
 }
 
-// viewAttachmentPathInputScreen отрисовывает экран ввода пути к файлу.
-func (m model) viewAttachmentPathInputScreen() string {
-	s := "Введите полный путь к файлу для добавления вложения:\n\n"
-	s += m.attachmentPathInput.View() + "\n\n"
+// viewAttachmentPathInputScreen отрисовывает экран ввода пути к файлу вложения.
+func (m *model) viewAttachmentPathInputScreen() string {
+	var b strings.Builder
+	b.WriteString("Введите полный путь к файлу для добавления вложения:\n")
+	b.WriteString(m.attachmentPathInput.View())
+	b.WriteString("\n\n")
 
 	if m.attachmentError != nil {
-		s += fmt.Sprintf("Ошибка: %s\n", m.attachmentError)
+		b.WriteString(fmt.Sprintf("Ошибка: %s\n", m.attachmentError))
 	}
 
-	return s
+	return b.String()
 }

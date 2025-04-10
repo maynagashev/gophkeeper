@@ -1,351 +1,72 @@
-[?25l[?1049h[2J[H[?25l[?2004h[HДобро пожаловать в GophKeeper!
+[?25l[?1049h[2J[H[?25l[?2004h[HСоздание нового файла KDBX: gophkeeper.kdbx
 
-Это безопасный менеджер паролей для командной строки,
-совместимый с форматом KDBX (KeePass).
+> > Новый мастер-пароль  
+  > Подтвердите пароль   
 
 
-(Enter - продолжить, Ctrl+C/q - выход)[7;H[2J[H[HВведите мастер-пароль для открытия базы данных: example/test.kdbx
+(Tab - сменить поле, Enter - создать, Esc/Ctrl+C - выход)[7;H[H
 
-> Мастер-пароль        
+> > *                    
 
 
-(Enter - подтвердить, Ctrl+C - выход)[J[6;H[H
 
-> *                    
+[7;H[H
 
+> > **                   
 
-[6;H[H
 
-> **                   
 
+[7;H[H
 
-[6;H[H
+> > ***                  
 
-> ***                  
 
 
-[6;H[H
+[7;H[H
 
-> ****                 
+  > ***                  
+> > Подтвердите пароль   
 
 
-[6;H[H
+[7;H[H
 
-> Мастер-пароль        
 
+> > *                    
 
-[6;H[2J[H[H   Записи в 'example/test.kdbx' (4)                
-                                                   
-  4 items                                          
-                                                   
-│ mail@example.com                                 
-│ User: mail@example.com | URL: https://example.com
-                                                   
-  test entry 5                                     
-  User: user1 | URL: https://localhost             
-                                                   
-  test new2                                        
-                                                   
-                                                   
-  test binary                                      
-  [A:1]                                            
-                                                   
-                                                   
-                                                   
-                                                   
-                                                   
-                                                   
-                                                   
-                                                   
-                                                   (↑/↓ - навигация, Enter - детали, / - поиск, a - добавить, Ctrl+S - сохр., q - выход)[24;H[H
 
+[7;H[H
 
 
-  mail@example.com                                 
-  User: mail@example.com | URL: https://example.com
+> > **                   
 
-│ test entry 5                                     
-│ User: user1 | URL: https://localhost             
 
+[7;H[H
 
 
+> > ***                  
 
 
-
-
-
-
-
-
-
-
-
-[24;H[H
-
-
-
-
-
-
-  test entry 5                                     
-  User: user1 | URL: https://localhost             
-
-│ test new2                                        
-│                                                  
-
-
-
-
-
-
-
-
-
-
-
-[24;H[H
-
-
-
-
-
-
-
-
-
-  test new2                                        
-                                                   
-
-│ test binary                                      
-│ [A:1]                                            
-
-
-
-
-
-
-
-
-[24;H[2J[H[HДетали записи: test binary
-
-Title: test binary
-UserName: 
-Password: ********
-URL: 
-Notes: 
-
---- Вложения ---
-- d23-the-mandalorian-poster.webp (50614 байт)
-
-(e - ред., Ctrl+S - сохр., Esc/b - назад)[J[12;H[2J[H[HРедактирование записи: test binary
-
-> Title: > test binary 
-  UserName: > UserName
-  Password: > Password
-  URL: > URL
-  Notes: > Notes
-
---- Вложения ---
- [0] d23-the-mandalorian-poster.webp
-
-(Tab/↑/↓, Enter - сохр., Esc - отмена, ^O - влож+, ^D - влож-)[12;H[2J[H[HВведите полный путь к файлу для добавления вложения:
-
-> /path/to/your/file                                                           
-
-
-(Enter - подтвердить, Esc - отмена)[J[6;H[H
-
-> /                                                                            
-
-
-[6;H[H
-
-> /t                                                                           
-
-
-[6;H[H
-
-> /te                                                                          
-
-
-[6;H[H
-
-> /tes                                                                         
-
-
-[6;H[H
-
-> /test                                                                        
-
-
-[6;H[H
-
-> /tes                                                                         
-
-
-[6;H[H
-
-> /te                                                                          
-
-
-[6;H[H
-
-> /t                                                                           
-
-
-[6;H[H
-
-> /                                                                            
-
-
-[6;H[H
-
-> /path/to/your/file                                                           
-
-
-[6;H[H
-
-> /home/dev/Dropbox/Images/                                                    
-
-
-[6;H[H
-
-> /home/dev/Dropbox/Images/S                                                   
-
-
-[6;H[H
-
-> /home/dev/Dropbox/Images/Si                                                  
-
-
-[6;H[H
-
-> /home/dev/Dropbox/Images/Sin                                                 
-
-
-[6;H[H
-
-> /home/dev/Dropbox/Images/Sink                                                
-
-
-[6;H[H
-
-> /home/dev/Dropbox/Images/Sink.                                               
-
-
-[6;H[H
-
-> /home/dev/Dropbox/Images/Sink.p                                              
-
-
-[6;H[H
-
-> /home/dev/Dropbox/Images/Sink.pn                                             
-
-
-[6;H[H
-
-> /home/dev/Dropbox/Images/Sink.png                                            
-
-
-[6;H[2J[H[HРедактирование записи: test binary
-
-> Title: > test binary 
-  UserName: > UserName
-  Password: > Password
-  URL: > URL
-  Notes: > Notes
-
---- Вложения ---
- [0] d23-the-mandalorian-poster.webp
- [1] Sink.png
-
-(Tab/↑/↓, Enter - сохр., Esc - отмена, ^O - влож+, ^D - влож-)[13;H[2J[H[HДетали записи: test binary
-
-Title: test binary
-UserName: 
-Password: ********
-URL: 
-Notes: 
-
---- Вложения ---
-- d23-the-mandalorian-poster.webp (50614 байт)
-- Sink.png (36668 байт)
-
-(e - ред., Ctrl+S - сохр., Esc/b - назад)[13;H[H
-
-
-
-
-
-
-
-
-
-
-
-
-Сохранение...[14;H[H
-
-
-
-
-
-
-
-
-
-
-
-
-Сохранено успешно![14;H[H
-
-
-
-
-
-
-
-
-
-
-
-
-Сохранение...[14;H[H
-
-
-
-
-
-
-
-
-
-
-
-
-Сохранено успешно![14;H[2J[H[H   Записи в 'example/test.kdbx' (4)                
-                                                   
-  4 items                                          
-                                                   
-  mail@example.com                                 
-  User: mail@example.com | URL: https://example.com
-                                                   
-  test entry 5                                     
-  User: user1 | URL: https://localhost             
-                                                   
-  test new2                                        
-                                                   
-                                                   
-│ test binary                                      
-│ [A:2]                                            
-                                                   
-                                                   
-                                                   
-                                                   
-                                                   
-                                                   
-                                                   
-                                                   
-                                                   (↑/↓ - навигация, Enter - детали, / - поиск, a - добавить, Ctrl+S - сохр., q - выход)
-Сохранено успешно![25;H[2K[?2004l[?25h[?1002l[?1003l[?1006l[?1049l[?25h
+[7;H[2J[H[H   Записи в 'gophkeeper.kdbx' (1)   
+                                    
+  1 item                            
+                                    
+│ Sample Entry                      
+│                                   
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    (↑/↓ - навигация, Enter - детали, / - поиск, a - добавить, Ctrl+S - сохр., q - выход)[24;H

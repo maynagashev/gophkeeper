@@ -3,6 +3,7 @@ package tui
 import (
 	"fmt"
 	"log/slog"
+	"strings"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -38,14 +39,15 @@ func (m *model) updatePasswordInputScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 // viewPasswordInputScreen отрисовывает экран ввода пароля.
-func (m model) viewPasswordInputScreen() string {
-	s := "Введите мастер-пароль для открытия базы данных: " + m.kdbxPath + "\n\n"
-	s += m.passwordInput.View() + "\n\n"
+func (m *model) viewPasswordInputScreen() string {
+	var s strings.Builder
+	s.WriteString("Введите мастер-пароль для " + m.kdbxPath + ":\n")
+	s.WriteString(m.passwordInput.View() + "\n\n")
 	if m.err != nil {
 		errMsgStr := fmt.Sprintf("\nОшибка: %s\n\n(Нажмите любую клавишу для продолжения)", m.err)
-		return s + errMsgStr // Возвращаем основной текст + текст ошибки
+		return s.String() + errMsgStr // Возвращаем основной текст + текст ошибки
 	}
-	return s
+	return s.String()
 }
 
 // handleErrorMsg обрабатывает сообщение об ошибке.

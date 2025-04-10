@@ -13,28 +13,42 @@ import (
 
 // prepareAddScreen инициализирует поля для экрана добавления.
 func (m *model) prepareAddScreen() {
-	m.addInputs = make([]textinput.Model, numEditableFields)
-	m.focusedFieldAdd = editableFieldTitle // Начинаем с поля Title
+	m.editInputs = make([]textinput.Model, numEditableFields)
+	m.focusedField = editableFieldTitle // Начинаем с поля Title
+	// Сбрасываем вложения, которые могли остаться от предыдущего добавления
+	m.newEntryAttachments = nil
 
+	// Используем константы имен полей как плейсхолдеры
 	placeholders := map[int]string{
-		editableFieldTitle:    "Title",
-		editableFieldUserName: "UserName",
-		editableFieldPassword: "Password",
-		editableFieldURL:      "URL",
-		editableFieldNotes:    "Notes",
+		editableFieldTitle:          fieldNameTitle,
+		editableFieldUserName:       fieldNameUserName,
+		editableFieldPassword:       fieldNamePassword,
+		editableFieldURL:            fieldNameURL,
+		editableFieldNotes:          fieldNameNotes,
+		editableFieldCardNumber:     fieldNameCardNumber,
+		editableFieldCardHolderName: fieldNameCardHolderName,
+		editableFieldExpiryDate:     fieldNameExpiryDate,
+		editableFieldCVV:            fieldNameCVV,
+		editableFieldPIN:            fieldNamePIN,
 	}
 
 	for i := range numEditableFields {
-		m.addInputs[i] = textinput.New()
-		m.addInputs[i].Placeholder = placeholders[i]
+		m.editInputs[i] = textinput.New()
+		m.editInputs[i].Placeholder = placeholders[i]
+
+		// Настраиваем маскирование для чувствительных полей
+		switch i {
+		case editableFieldPassword, editableFieldCVV, editableFieldPIN:
+			m.editInputs[i].EchoMode = textinput.EchoPassword
+		case editableFieldCardNumber:
+			// Пока оставляем обычным
+		}
+
 		// Первое поле делаем активным
-		if i == m.focusedFieldAdd {
-			m.addInputs[i].Focus()
+		if i == m.focusedField {
+			m.editInputs[i].Focus()
 		}
 	}
-
-	// Настроим поле пароля
-	m.addInputs[editableFieldPassword].EchoMode = textinput.EchoPassword
 }
 
 // createEntryFromInputs создает новую запись gokeepasslib.Entry на основе
@@ -90,6 +104,13 @@ func createEntryFromInputs(db *gokeepasslib.Database, inputs []textinput.Model, 
 //
 //nolint:nestif // Сложность из-за обработки разных клавиш и навигации
 func (m *model) updateEntryAddScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
+	// Если в режиме ReadOnly, сразу возвращаемся к списку
+	if m.readOnlyMode {
+		slog.Warn("Попытка доступа к экрану добавления в режиме Read-Only.")
+		m.state = entryListScreen
+		return m, tea.ClearScreen
+	}
+
 	var cmds []tea.Cmd
 
 	// Обрабатываем только KeyMsg
@@ -98,25 +119,26 @@ func (m *model) updateEntryAddScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case keyEsc, keyBack:
 			// Отмена добавления
 			m.state = entryListScreen
-			m.addInputs = nil // Очищаем поля ввода
+			m.editInputs = nil // Очищаем поля ввода
+			m.newEntryAttachments = nil
 			slog.Info("Отмена добавления, возврат к списку")
 			return m, tea.ClearScreen
 
-		case "tab", "down":
+		case keyTab, keyDown:
 			// Переход к следующему полю
-			m.focusedFieldAdd = (m.focusedFieldAdd + 1) % numEditableFields
-			cmds = m.updateFocusAdd()
+			m.focusedField = (m.focusedField + 1) % numEditableFields
+			cmds = m.updateFocus()
 			return m, tea.Batch(cmds...)
 
-		case "shift+tab", "up":
+		case keyShiftTab, keyUp:
 			// Переход к предыдущему полю
-			m.focusedFieldAdd = (m.focusedFieldAdd - 1 + numEditableFields) % numEditableFields
-			cmds = m.updateFocusAdd()
+			m.focusedField = (m.focusedField - 1 + numEditableFields) % numEditableFields
+			cmds = m.updateFocus()
 			return m, tea.Batch(cmds...)
 
 		case keyEnter:
 			// Создаем запись из введенных данных и вложений
-			newEntry := createEntryFromInputs(m.db, m.addInputs, m.newEntryAttachments)
+			newEntry := createEntryFromInputs(m.db, m.editInputs, m.newEntryAttachments)
 			m.newEntryAttachments = nil // Очищаем временное хранилище
 
 			// Добавляем newEntry в m.db (в первую группу)
@@ -124,7 +146,12 @@ func (m *model) updateEntryAddScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if len(m.db.Content.Root.Groups) > 0 {
 					m.db.Content.Root.Groups[0].Entries = append(m.db.Content.Root.Groups[0].Entries, newEntry)
 				} else {
-					slog.Error("Не удалось добавить запись в m.db: нет групп")
+					// Если нет групп, создаем первую
+					newGroup := gokeepasslib.NewGroup()
+					newGroup.Name = "General"
+					newGroup.Entries = append(newGroup.Entries, newEntry)
+					m.db.Content.Root.Groups = append(m.db.Content.Root.Groups, newGroup)
+					slog.Warn("Группы не найдены, создана новая группа 'General'")
 				}
 			} else {
 				slog.Error("Не удалось добавить запись в m.db: база данных или Root не инициализированы")
@@ -138,7 +165,7 @@ func (m *model) updateEntryAddScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			// Возвращаемся к списку
 			m.state = entryListScreen
-			m.addInputs = nil
+			m.editInputs = nil
 			return m, tea.Batch(tea.ClearScreen, insertCmd)
 
 		case "ctrl+o": // Добавить вложение
@@ -156,32 +183,34 @@ func (m *model) updateEntryAddScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// Если сообщение не KeyMsg или было обработано выше (кроме навигации/Enter/Esc),
 	// обновляем активное поле ввода.
 	var cmd tea.Cmd
-	m.addInputs[m.focusedFieldAdd], cmd = m.addInputs[m.focusedFieldAdd].Update(msg)
+	m.editInputs[m.focusedField], cmd = m.editInputs[m.focusedField].Update(msg)
 	cmds = append(cmds, cmd)
 
 	return m, tea.Batch(cmds...)
 }
 
-// updateFocusAdd обновляет фокус полей ввода для экрана добавления.
-func (m *model) updateFocusAdd() []tea.Cmd {
-	cmds := make([]tea.Cmd, len(m.addInputs))
-	for i := range len(m.addInputs) {
-		if i == m.focusedFieldAdd {
-			cmds[i] = m.addInputs[i].Focus()
+// updateFocus обновляет фокус полей ввода для экрана добавления И редактирования.
+// Переименована из updateFocusAdd.
+func (m *model) updateFocus() []tea.Cmd {
+	cmds := make([]tea.Cmd, len(m.editInputs))
+	for i := range len(m.editInputs) {
+		if i == m.focusedField {
+			cmds[i] = m.editInputs[i].Focus()
 		} else {
-			m.addInputs[i].Blur()
+			m.editInputs[i].Blur()
 		}
 	}
 	return cmds
 }
 
 // viewEntryAddScreen отрисовывает экран добавления новой записи.
-func (m model) viewEntryAddScreen() string {
+func (m *model) viewEntryAddScreen() string {
 	s := "Добавление новой записи\n\n"
 	s += "Введите данные для новой записи:\n"
-	for i, input := range m.addInputs {
+	// Отображаем все поля ввода (включая поля карты)
+	for i, input := range m.editInputs {
 		focusIndicator := "  "
-		if m.focusedFieldAdd == i {
+		if m.focusedField == i {
 			focusIndicator = "> "
 		}
 		s += fmt.Sprintf("%s%s: %s\n", focusIndicator, input.Placeholder, input.View())

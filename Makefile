@@ -16,6 +16,16 @@ build:
 	@go build -o ./bin/gophkeeper ./cmd/gophkeeper/main.go
 	@echo "Клиент собран: ./bin/gophkeeper"
 
+# Запуск с указанием пути через флаг
+run-flag:
+	@echo "Запуск GophKeeper клиента с флагом -db example/test.kdbx..."
+	@go run ./cmd/gophkeeper/main.go -db example/test.kdbx | tee logs/run_flag.log
+
+# Запуск с указанием пути через переменную окружения
+run-env:
+	@echo "Запуск GophKeeper клиента с GOPHKEEPER_DB_PATH=example/test.kdbx..."
+	@GOPHKEEPER_DB_PATH=example/test.kdbx go run ./cmd/gophkeeper/main.go | tee logs/run_env.log
+
 # Очистка
 clean:
 	@echo "Очистка..."

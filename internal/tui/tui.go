@@ -4,15 +4,19 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"time"
 
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/gofrs/flock"
 )
 
+const statusMessageTimeout = 2 * time.Second // Время отображения статусных сообщений
+
 // initialModel создает начальное состояние модели.
-func initialModel() model {
+func initialModel(kdbxPath string) model {
 	// Поле ввода пароля
 	ti := textinput.New()
 	ti.Placeholder = "Мастер-пароль"
@@ -66,27 +70,44 @@ func initialModel() model {
 	pathInput.CharLimit = 4096                               // Ограничение на длину пути
 	pathInput.Width = defaultListWidth - passwordInputOffset // Используем ту же ширину, что и пароль
 
+	// Поля для ввода нового пароля
+	newPass1 := textinput.New()
+	newPass1.Placeholder = "Новый мастер-пароль"
+	newPass1.Focus() // Фокус на первом поле
+	newPass1.CharLimit = 156
+	newPass1.Width = 20
+	newPass1.EchoMode = textinput.EchoPassword
+
+	newPass2 := textinput.New()
+	newPass2.Placeholder = "Подтвердите пароль"
+	newPass2.CharLimit = 156
+	newPass2.Width = 20
+	newPass2.EchoMode = textinput.EchoPassword
+
 	return model{
 		state:               welcomeScreen,
 		passwordInput:       ti,
-		kdbxPath:            "example/test.kdbx",
+		kdbxPath:            kdbxPath,
 		entryList:           l,
 		attachmentList:      attachmentDelList,
 		attachmentPathInput: pathInput,
+		// Инициализируем поля для нового KDBX
+		newPasswordInput1:       newPass1,
+		newPasswordInput2:       newPass2,
+		newPasswordFocusedField: 0, // Фокус на первом поле
 	}
 }
 
 // Init - команда, выполняемая при запуске приложения.
-func (m model) Init() tea.Cmd {
+func (m *model) Init() tea.Cmd {
 	return textinput.Blink
 }
 
 // Update обрабатывает входящие сообщения.
 //
 //nolint:gocognit,funlen // Снизим сложность и длину в будущем рефакторинге
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	// var cmd tea.Cmd
-	// var cmds []tea.Cmd // Собираем команды
+func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmds []tea.Cmd // Собираем команды
 
 	switch msg := msg.(type) {
 	// == Глобальные сообщения (не зависят от экрана) ==
@@ -103,14 +124,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.handleErrorMsg(msg)
 
 	case dbSavedMsg:
-		m.savingStatus = "Сохранено успешно!"
-		slog.Info("База KDBX успешно сохранена", "path", m.kdbxPath)
-		// Можно добавить таймер для скрытия сообщения через пару секунд
-		return m, nil
+		return m.setStatusMessage("Сохранено успешно!")
 
 	case dbSaveErrorMsg:
-		m.savingStatus = fmt.Sprintf("Ошибка сохранения: %v", msg.err)
-		slog.Error("Ошибка сохранения KDBX", "path", m.kdbxPath, "error", msg.err)
+		return m.setStatusMessage(fmt.Sprintf("Ошибка сохранения: %v", msg.err))
+
+	case clearStatusMsg:
+		m.savingStatus = ""
+		m.statusTimer = nil
 		return m, nil
 
 	// Обработка нажатия клавиш делегируется состоянию
@@ -120,8 +141,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c":
 			return m, tea.Quit
 		case "ctrl+s":
-			// Сохраняем только из списка или деталей (не при редактировании)
-			if (m.state == entryListScreen || m.state == entryDetailScreen) && m.db != nil {
+			// Сохраняем только из списка или деталей и если не Read-Only
+			if !m.readOnlyMode && (m.state == entryListScreen || m.state == entryDetailScreen) && m.db != nil {
 				m.savingStatus = "Подготовка к сохранению..."
 				slog.Info("Начало обновления m.db перед сохранением")
 
@@ -155,34 +176,54 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	// == Обновление компонентов в зависимости от состояния ==
+	var updatedModel tea.Model
+	var stateCmd tea.Cmd
 	switch m.state {
 	case welcomeScreen:
-		return m.updateWelcomeScreen(msg)
+		updatedModel, stateCmd = m.updateWelcomeScreen(msg)
 	case passwordInputScreen:
-		return m.updatePasswordInputScreen(msg)
+		updatedModel, stateCmd = m.updatePasswordInputScreen(msg)
+	case newKdbxPasswordScreen:
+		updatedModel, stateCmd = m.updateNewKdbxPasswordScreen(msg)
 	case entryListScreen:
-		return m.updateEntryListScreen(msg)
+		updatedModel, stateCmd = m.updateEntryListScreen(msg)
 	case entryDetailScreen:
-		return m.updateEntryDetailScreen(msg)
+		updatedModel, stateCmd = m.updateEntryDetailScreen(msg)
 	case entryEditScreen:
-		return m.updateEntryEditScreen(msg)
+		updatedModel, stateCmd = m.updateEntryEditScreen(msg)
 	case entryAddScreen:
-		return m.updateEntryAddScreen(msg)
+		updatedModel, stateCmd = m.updateEntryAddScreen(msg)
 	case attachmentListDeleteScreen:
-		return m.updateAttachmentListDeleteScreen(msg)
+		updatedModel, stateCmd = m.updateAttachmentListDeleteScreen(msg)
 	case attachmentPathInputScreen:
-		return m.updateAttachmentPathInputScreen(msg)
+		updatedModel, stateCmd = m.updateAttachmentPathInputScreen(msg)
 	default:
-		// Для неизвестных состояний возвращаем модель без изменений и команд
-		return m, nil
+		// Неизвестное состояние - возвращаем как есть
+		updatedModel = m
 	}
+	cmds = append(cmds, stateCmd)
 
-	// Возвращаем модель и собранные команды
-	// return m, tea.Batch(cmds...)
+	return updatedModel, tea.Batch(cmds...)
+}
+
+// setStatusMessage устанавливает статусное сообщение и запускает таймер для его очистки.
+func (m *model) setStatusMessage(status string) (tea.Model, tea.Cmd) {
+	m.savingStatus = status
+	// Если таймер уже есть, останавливаем его
+	if m.statusTimer != nil {
+		m.statusTimer.Stop()
+		// Мы не можем повторно использовать старый таймер, поэтому обнуляем
+		m.statusTimer = nil
+	}
+	// Запускаем команду для очистки статуса через заданное время
+	cmd := clearStatusCmd(statusMessageTimeout)
+	// Примечание: Мы не сохраняем сам таймер, так как tea.Tick управляет им.
+	// Если нужно будет отменять таймер до его срабатывания, понадобится другой подход.
+	return m, cmd
 }
 
 // View отрисовывает пользовательский интерфейс.
-func (m model) View() string {
+func (m *model) View() string {
 	var mainContent string
 	var help string
 
@@ -193,6 +234,9 @@ func (m model) View() string {
 	case passwordInputScreen:
 		mainContent = m.viewPasswordInputScreen()
 		help = "(Enter - подтвердить, Ctrl+C - выход)"
+	case newKdbxPasswordScreen:
+		mainContent = m.viewNewKdbxPasswordScreen()
+		help = "(Tab - сменить поле, Enter - создать, Esc/Ctrl+C - выход)"
 	case entryListScreen:
 		mainContent = m.entryList.View()
 		help = "(↑/↓ - навигация, Enter - детали, / - поиск, a - добавить, Ctrl+S - сохр., q - выход)"
@@ -215,14 +259,19 @@ func (m model) View() string {
 		mainContent = "Неизвестное состояние!"
 	}
 
-	// Добавляем статус сохранения, если он есть и мы не на определенных экранах
+	// Добавляем статус сохранения или Read-Only, если он есть и мы не на определенных экранах
 	statusLine := ""
-	displayStatus := m.savingStatus != "" &&
+	readOnlyIndicator := ""
+	if m.readOnlyMode {
+		readOnlyIndicator = " [Read-Only]"
+	}
+	displayStatus := (m.savingStatus != "" || m.readOnlyMode) &&
 		m.state != welcomeScreen &&
 		m.state != passwordInputScreen &&
+		m.state != newKdbxPasswordScreen &&
 		m.state != attachmentPathInputScreen
 	if displayStatus {
-		statusLine = "\n" + m.savingStatus
+		statusLine = "\n" + m.savingStatus + readOnlyIndicator
 	}
 
 	// Собираем финальный вывод
@@ -240,11 +289,72 @@ func (m model) View() string {
 }
 
 // Start запускает TUI приложение.
-func Start() {
-	// Используем FullAltScreen для корректной работы списка
-	p := tea.NewProgram(initialModel(), tea.WithAltScreen())
-	if _, err := p.Run(); err != nil {
-		slog.Error("Ошибка при запуске TUI", "error", err)
+func Start(kdbxPath string) {
+	// Создаем начальную модель
+	m := initialModel(kdbxPath) // Передаем путь в initialModel
+
+	// --- Реализация flock ---
+	lockPath := kdbxPath + ".lock"
+	m.fileLock = flock.New(lockPath)
+	var flockErr error
+	m.lockAcquired, flockErr = m.fileLock.TryLock()
+
+	if flockErr != nil {
+		// Критическая ошибка при попытке блокировки
+		slog.Error("Критическая ошибка при попытке блокировки файла", "lockPath", lockPath, "error", flockErr)
+		fmt.Fprintf(os.Stderr, "Ошибка блокировки файла %s: %v\n", lockPath, flockErr)
+		// Попробуем разблокировать перед выходом
+		_ = m.fileLock.Unlock()
 		os.Exit(1)
 	}
+
+	if m.lockAcquired {
+		slog.Info("Эксклюзивная блокировка файла получена.", "lockPath", lockPath)
+		// Регистрируем разблокировку при выходе ИЗ ФУНКЦИИ START
+		defer func() {
+			if errUnlock := m.fileLock.Unlock(); errUnlock != nil {
+				slog.Error("Ошибка при снятии блокировки файла", "lockPath", lockPath, "error", errUnlock)
+			} else {
+				slog.Info("Блокировка файла снята.", "lockPath", lockPath)
+			}
+		}()
+	} else {
+		m.readOnlyMode = true
+		slog.Warn("Блокировка не получена (файл используется?). Read-Only.", "lockPath", lockPath)
+	}
+	// --- Конец реализации flock ---
+
+	// Проверяем, существует ли файл KDBX
+	if _, errStat := os.Stat(m.kdbxPath); os.IsNotExist(errStat) {
+		// Файл не существует, переходим на экран создания пароля
+		slog.Info("Файл KDBX не найден, переходим к созданию нового.", "path", m.kdbxPath)
+		m.state = newKdbxPasswordScreen
+		m.newPasswordInput1.Focus()
+		m.newPasswordInput2.Blur()
+	} else if errStat != nil {
+		// Другая ошибка при доступе к файлу
+		slog.Error("Ошибка при проверке файла KDBX", "path", m.kdbxPath, "error", errStat)
+		fmt.Fprintf(os.Stderr, "Ошибка доступа к файлу %s: %v\n", m.kdbxPath, errStat)
+		// Разблокируем файл перед выходом
+		if m.lockAcquired {
+			_ = m.fileLock.Unlock()
+		}
+		//nolint:gocritic // Unlock вызывается вручную перед выходом
+		os.Exit(1)
+	} else {
+		// Файл существует, оставляем начальное состояние (welcomeScreen -> passwordInputScreen)
+		slog.Info("Файл KDBX найден, запуск стандартного TUI.", "path", m.kdbxPath)
+	}
+
+	// Используем FullAltScreen для корректной работы списка
+	p := tea.NewProgram(&m, tea.WithAltScreen()) // Передаем указатель на модель
+	if _, errRun := p.Run(); errRun != nil {
+		slog.Error("Ошибка при запуске TUI", "error", errRun)
+		// Разблокируем файл перед выходом
+		if m.lockAcquired {
+			_ = m.fileLock.Unlock()
+		}
+		os.Exit(1)
+	}
+	// Успешный выход ПОСЛЕ defer Unlock
 }
