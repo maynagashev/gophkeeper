@@ -438,3 +438,42 @@ time=2025-04-10T01:47:13.304+07:00 level=INFO msg="Обновление m.db з�
 time=2025-04-10T01:47:13.304+07:00 level=INFO msg="Запуск сохранения KDBX" path=gophkeeper.kdbx
 time=2025-04-10T01:50:18.862+07:00 level=INFO msg="Возврат к списку записей"
 time=2025-04-10T01:50:19.333+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T15:39:56.376+07:00 level=INFO msg="Логгер инициализирован" path=logs/gophkeeper.log
+time=2025-04-10T15:39:56.378+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию"
+time=2025-04-10T15:39:56.379+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T15:39:56.379+07:00 level=INFO msg="Файл KDBX не найден, переходим к созданию нового." path=gophkeeper.kdbx
+time=2025-04-10T15:40:06.809+07:00 level=INFO msg="Пароли совпадают, создаем новую базу KDBX" path=gophkeeper.kdbx
+time=2025-04-10T15:40:06.812+07:00 level=INFO msg="Новый файл KDBX успешно создан и сохранен" path=gophkeeper.kdbx
+time=2025-04-10T15:40:10.305+07:00 level=INFO msg="Начало обновления m.db перед сохранением"
+time=2025-04-10T15:40:10.305+07:00 level=INFO msg="Обновление m.db завершено" updated_count=0
+time=2025-04-10T15:40:10.305+07:00 level=INFO msg="Запуск сохранения KDBX" path=gophkeeper.kdbx
+time=2025-04-10T15:41:53.029+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:11:12.862+07:00 level=INFO msg="Логгер инициализирован" path=logs/gophkeeper.log
+time=2025-04-10T16:11:12.863+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию"
+time=2025-04-10T16:11:12.865+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:11:12.865+07:00 level=INFO msg="Файл KDBX найден, запуск стандартного TUI." path=gophkeeper.kdbx
+time=2025-04-10T16:11:17.636+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:11:27.034+07:00 level=INFO msg="Логгер инициализирован" path=logs/gophkeeper.log
+time=2025-04-10T16:11:27.034+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию"
+time=2025-04-10T16:11:27.037+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:11:27.037+07:00 level=INFO msg="Файл KDBX не найден, переходим к созданию нового." path=gophkeeper.kdbx
+time=2025-04-10T16:11:33.582+07:00 level=INFO msg="Пароли совпадают, создаем новую базу KDBX" path=gophkeeper.kdbx
+time=2025-04-10T16:11:33.585+07:00 level=INFO msg="Новый файл KDBX успешно создан и сохранен" path=gophkeeper.kdbx
+time=2025-04-10T16:11:36.003+07:00 level=INFO msg="Начало обновления m.db перед сохранением"
+time=2025-04-10T16:11:36.003+07:00 level=INFO msg="Обновление m.db завершено" updated_count=0
+time=2025-04-10T16:11:36.003+07:00 level=INFO msg="Запуск сохранения KDBX" path=gophkeeper.kdbx
+time=2025-04-10T16:19:33.060+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:23:05.698+07:00 level=INFO msg="Логгер инициализирован" path=logs/gophkeeper.log
+time=2025-04-10T16:23:05.698+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию"
+time=2025-04-10T16:23:05.699+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:23:05.699+07:00 level=INFO msg="Файл KDBX найден, запуск стандартного TUI." path=gophkeeper.kdbx
+time=2025-04-10T16:23:15.738+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:23:17.576+07:00 level=INFO msg="Логгер инициализирован" path=logs/gophkeeper.log
+time=2025-04-10T16:23:17.576+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию"
+time=2025-04-10T16:23:17.579+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-10T16:23:17.579+07:00 level=INFO msg="Файл KDBX не найден, переходим к созданию нового." path=gophkeeper.kdbx
+time=2025-04-10T16:23:20.717+07:00 level=INFO msg="Пароли совпадают, создаем новую базу KDBX" path=gophkeeper.kdbx
+time=2025-04-10T16:23:20.724+07:00 level=INFO msg="Новый файл KDBX успешно создан и сохранен" path=gophkeeper.kdbx
+time=2025-04-10T16:23:22.621+07:00 level=INFO msg="Начало обновления m.db перед сохранением"
+time=2025-04-10T16:23:22.621+07:00 level=INFO msg="Обновление m.db завершено" updated_count=0
+time=2025-04-10T16:23:22.621+07:00 level=INFO msg="Запуск сохранения KDBX" path=gophkeeper.kdbx

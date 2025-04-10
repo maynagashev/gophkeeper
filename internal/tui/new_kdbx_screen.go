@@ -6,12 +6,14 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/tobischo/gokeepasslib/v3"
+	"github.com/tobischo/gokeepasslib/v3/wrappers"
 )
 
 // var errorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("9")) // Красный цвет для ошибок (перенесено в view)
@@ -68,14 +70,29 @@ func (m *model) updateNewKdbxPasswordScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.password = pass1          // Сохраняем пароль в модели
 
 			slog.Info("Пароли совпадают, создаем новую базу KDBX", "path", m.kdbxPath)
-			// Создаем пустую базу данных
-			m.db = gokeepasslib.NewDatabase()
-			// По умолчанию gokeepasslib.NewDatabase() создает KDBX 4
+			// Создаем пустую базу данных KDBX 4.0 с помощью опции
+			m.db = gokeepasslib.NewDatabase(gokeepasslib.WithDatabaseKDBXVersion4())
+
+			// InnerHeader и Root теперь должны быть инициализированы этой опцией,
+			// но на всякий случай проверим и инициализируем Root, если нужно.
+			if m.db.Content.Root == nil {
+				m.db.Content.Root = &gokeepasslib.RootData{
+					Groups: []gokeepasslib.Group{
+						{
+							Name:  "General",
+							UUID:  gokeepasslib.NewUUID(),
+							Times: gokeepasslib.TimeData{CreationTime: &wrappers.TimeWrapper{Time: time.Now(), Formatted: false}, LastModificationTime: &wrappers.TimeWrapper{Time: time.Now(), Formatted: false}},
+						},
+					},
+				}
+			}
 
 			// Используем имя файла (без расширения) как имя базы данных
 			baseName := filepath.Base(m.kdbxPath)
 			dbName := strings.TrimSuffix(baseName, filepath.Ext(baseName))
 			m.db.Content.Meta.DatabaseName = dbName
+			// Устанавливаем Generator (опционально, WithKDBX4 может уже это делать)
+			m.db.Content.Meta.Generator = "GophKeeper"
 
 			// Устанавливаем пароль
 			m.db.Credentials = gokeepasslib.NewPasswordCredentials(m.password)
@@ -90,6 +107,7 @@ func (m *model) updateNewKdbxPasswordScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 			defer file.Close() // Используем defer для гарантированного закрытия
 
 			encoder := gokeepasslib.NewEncoder(file)
+			// УДАЛЕНО: Применение заголовков к кодировщику - делается через NewDatabase
 			if errEncode := encoder.Encode(m.db); errEncode != nil {
 				slog.Error("Ошибка записи в новый файл KDBX", "path", m.kdbxPath, "error", errEncode)
 				m.confirmPasswordError = fmt.Sprintf("Ошибка записи в файл: %v", errEncode)
