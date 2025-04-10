@@ -8,6 +8,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+
+	"github.com/maynagashev/gophkeeper/server/internal/handlers"
 )
 
 const (
@@ -16,6 +18,23 @@ const (
 	defaultIdleTimeout  = 30 * time.Second
 	defaultServerPort   = "8080"
 )
+
+// Временная заглушка для AuthService.
+type dummyAuthService struct{}
+
+func (s *dummyAuthService) Register(username string, _ string) error {
+	log.Printf("[DummyService] Попытка регистрации: %s", username)
+	// Ничего не делаем, всегда успешно
+	return nil
+}
+
+func (s *dummyAuthService) Login(username string, _ string) (string, error) {
+	log.Printf("[DummyService] Попытка входа: %s", username)
+	// Возвращаем фейковый токен
+	return "dummy-jwt-from-service", nil
+}
+
+// --- Конец заглушки ---
 
 // main - точка входа для сервера GophKeeper.
 func main() {
@@ -38,9 +57,15 @@ func main() {
 		}
 	})
 
-	// TODO: Добавить маршруты для регистрации и логина
-	// r.Post("/register", handlers.RegisterUser)
-	// r.Post("/login", handlers.LoginUser)
+	// Создаем экземпляры зависимостей (пока с заглушками)
+	authService := &dummyAuthService{}
+	authHandler := handlers.NewAuthHandler(authService)
+
+	// Маршруты API
+	r.Route("/api/user", func(r chi.Router) {
+		r.Post("/register", authHandler.Register) // POST /api/user/register
+		r.Post("/login", authHandler.Login)       // POST /api/user/login
+	})
 
 	// Задаем порт сервера (можно вынести в конфигурацию)
 	port := defaultServerPort
