@@ -1,0 +1,45 @@
+# docker-compose.yml - Конфигурация для запуска PostgreSQL и MinIO
+
+services:
+  postgres:
+    image: postgres:16-alpine # Используем конкретную версию Alpine для легковесности
+    container_name: gophkeeper-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-gophkeeper} # База данных
+      POSTGRES_USER: ${POSTGRES_USER:-gophkeeper} # Пользователь БД
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secret} # Пароль пользователя БД
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432" # Проброс порта наружу (внешний:внутренний)
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Сохранение данных БД
+    restart: always
+    healthcheck:
+          test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+          interval: 10s
+          timeout: 5s
+          retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: gophkeeper-minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER:-minioadmin} # Логин администратора MinIO
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD:-minioadmin} # Пароль администратора MinIO
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"   # Порт API MinIO
+      - "${MINIO_CONSOLE_PORT:-9001}:9001" # Порт веб-консоли MinIO
+    volumes:
+      - minio_data:/data # Сохранение данных MinIO
+    command: server /data --console-address ":9001"
+    restart: always
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+        interval: 10s
+        timeout: 5s
+        retries: 5
+
+volumes:
+  postgres_data: # Именованный volume для данных PostgreSQL
+    driver: local
+  minio_data:    # Именованный volume для данных MinIO
+    driver: local 
