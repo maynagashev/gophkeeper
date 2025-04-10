@@ -1,50 +1,59 @@
-# Makefile для проекта GophKeeper
+# Корневой Makefile для управления модулями GophKeeper
 
-.PHONY: run build clean
+.PHONY: all build build-client build-server clean clean-client clean-server lint lint-client lint-server test test-client test-server test-coverage
 
-# Цель по умолчанию
-default: run
+# Цель по умолчанию: запустить линтеры и тесты
+all: lint test
 
-# Запуск клиента
-run:
-	@echo "Запуск GophKeeper клиента..."
-	@go run ./cmd/gophkeeper/main.go | tee logs/run.log
+# --- Сборка --- #
+build: build-client build-server
+	@echo "Сборка завершена для всех модулей."
 
-# Сборка клиента
-build:
-	@echo "Сборка GophKeeper клиента..."
-	@go build -o ./bin/gophkeeper ./cmd/gophkeeper/main.go
-	@echo "Клиент собран: ./bin/gophkeeper"
+build-client:
+	@echo "Сборка клиента..."
+	@make -C client build
 
-# Запуск с указанием пути через флаг
-run-flag:
-	@echo "Запуск GophKeeper клиента с флагом -db example/test.kdbx..."
-	@go run ./cmd/gophkeeper/main.go -db example/test.kdbx | tee logs/run_flag.log
+build-server:
+	@echo "Сборка сервера..."
+	@make -C server build
 
-# Запуск с указанием пути через переменную окружения
-run-env:
-	@echo "Запуск GophKeeper клиента с GOPHKEEPER_DB_PATH=example/test.kdbx..."
-	@GOPHKEEPER_DB_PATH=example/test.kdbx go run ./cmd/gophkeeper/main.go | tee logs/run_env.log
+# --- Очистка --- #
+clean: clean-client clean-server
+	@echo "Очистка завершена для всех модулей."
 
-# Очистка
-clean:
-	@echo "Очистка..."
-	@rm -f ./bin/gophkeeper
-	@echo "Очищено."
+clean-client:
+	@echo "Очистка клиента..."
+	@make -C client clean
 
-# Запуск всех тестов
-test:
-	@echo "Запуск всех тестов..."
-	@go test -v ./... | tee logs/test.log
+clean-server:
+	@echo "Очистка сервера..."
+	@make -C server clean
 
-# Тест с генерацией отчёта о покрытии
+# --- Линтинг --- #
+lint: lint-client lint-server
+	@echo "Линтинг завершен для всех модулей."
+
+lint-client:
+	@echo "Линтинг клиента..."
+	@make -C client lint
+
+lint-server:
+	@echo "Линтинг сервера..."
+	@make -C server lint
+
+# --- Тестирование --- #
+test: test-client test-server
+	@echo "Тестирование завершено для всех модулей."
+
+test-client:
+	@echo "Тестирование клиента..."
+	@make -C client test
+
+test-server:
+	@echo "Тестирование сервера..."
+	@make -C server test
+
+# --- Покрытие тестами (только для клиента пока) --- #
 test-coverage:
-	@echo "Запуск тестов с генерацией покрытия..."
-	go test -coverprofile=logs/coverage.out ./...
-	go tool cover -html=logs/coverage.out -o logs/coverage.html
-	go tool cover -func=logs/coverage.out | tee logs/coverage.log
-
-# Линтер
-lint:
-	@echo "Запуск линтера..."
-	golangci-lint run ./... --fix
+	@echo "Генерация отчета о покрытии для клиента..."
+	@make -C client test-coverage

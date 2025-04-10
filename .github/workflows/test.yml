@@ -17,28 +17,25 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
-        go-version: '1.24'
+        go-version: '1.24.2'
         check-latest: true
         
-    - name: Get dependencies
-      run: go mod download
-      
     - name: Show existing test file
       run: |
         ls -la example/
         echo "Используем тестовый файл из репозитория: example/test.kdbx (пароль: test)"
       
-    - name: Run tests
+    - name: Run client tests
       run: make test
       
-    - name: Run tests with coverage
+    - name: Run client tests with coverage
       run: make test-coverage
       
     - name: Archive code coverage results
       uses: actions/upload-artifact@v4
       with:
         name: code-coverage-report
-        path: logs/coverage.html
+        path: client/logs/coverage.html
         
   lint:
     name: Run Linters
@@ -51,12 +48,12 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
-        go-version: '1.24'
+        go-version: '1.24.2'
         
     - name: Install golangci-lint
       run: |
-        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.64.8
+        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.59.1
         golangci-lint --version
         
-    - name: Run golangci-lint
-      run: golangci-lint run --timeout=5m 
+    - name: Run golangci-lint for client
+      run: make lint --timeout=5m 
