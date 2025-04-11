@@ -12,6 +12,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	_ "github.com/lib/pq" // Драйвер PostgreSQL
 	"github.com/maynagashev/gophkeeper/server/internal/handlers"
+	appmiddleware "github.com/maynagashev/gophkeeper/server/internal/middleware"
 	"github.com/maynagashev/gophkeeper/server/internal/repository"
 	"github.com/maynagashev/gophkeeper/server/internal/services"
 )
@@ -54,14 +55,17 @@ func main() {
 	}()
 	log.Println("Соединение с БД успешно установлено.")
 
-	// 2. Создание репозитория
+	// 2. Создание репозиториев
 	userRepo := repository.NewPostgresUserRepository(db)
+	vaultRepo := repository.NewPostgresVaultRepository(db) // Создаем репозиторий хранилищ
 
-	// 3. Создание сервиса
+	// 3. Создание сервисов
 	authService := services.NewAuthService(userRepo)
+	vaultService := services.NewVaultService(vaultRepo) // Создаем сервис хранилищ
 
-	// 4. Создание обработчика
+	// 4. Создание обработчиков
 	authHandler := handlers.NewAuthHandler(authService)
+	vaultHandler := handlers.NewVaultHandler(vaultService) // Создаем обработчик хранилищ
 
 	// --- Настройка роутера --- //
 	r := chi.NewRouter()
@@ -70,14 +74,28 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	// Маршруты
+	// --- Маршруты --- //
 	r.Get("/ping", func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = w.Write([]byte("pong\n"))
 	})
 
+	// Публичные маршруты (регистрация, вход)
 	r.Route("/api/user", func(r chi.Router) {
 		r.Post("/register", authHandler.Register)
 		r.Post("/login", authHandler.Login)
+	})
+
+	// Приватные маршруты (требуют аутентификации)
+	r.Group(func(r chi.Router) {
+		// Применяем middleware аутентификации ко всей группе
+		r.Use(appmiddleware.Authenticator)
+
+		// Маршруты для работы с хранилищем
+		r.Route("/api/vault", func(r chi.Router) {
+			// Используем реальный обработчик
+			r.Get("/", vaultHandler.GetMetadata)
+			// TODO: Добавить POST /upload, GET /download, GET /versions, POST /rollback
+		})
 	})
 
 	// --- Запуск сервера --- //
