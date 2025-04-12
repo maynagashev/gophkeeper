@@ -6,7 +6,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/tobischo/gokeepasslib/v3"
 
-	"github.com/maynagashev/gophkeeper/internal/kdbx"
+	"github.com/maynagashev/gophkeeper/client/internal/kdbx"
 )
 
 // openKdbxCmd асинхронно открывает файл базы.

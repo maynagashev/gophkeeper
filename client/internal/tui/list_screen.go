@@ -7,7 +7,7 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/maynagashev/gophkeeper/internal/kdbx"
+	"github.com/maynagashev/gophkeeper/client/internal/kdbx"
 )
 
 // updateEntryListScreen обрабатывает сообщения для экрана списка записей.

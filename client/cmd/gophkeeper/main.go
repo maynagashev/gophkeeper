@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/maynagashev/gophkeeper/internal/tui"
+	"github.com/maynagashev/gophkeeper/client/internal/tui"
 )
 
 const (
