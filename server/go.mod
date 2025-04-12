@@ -8,6 +8,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/lib/pq v1.10.9
+	github.com/maynagashev/gophkeeper/models v0.0.0-00010101000000-000000000000
 	github.com/minio/minio-go/v7 v7.0.90
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/crypto v0.37.0
@@ -32,3 +33,5 @@ require (
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/maynagashev/gophkeeper/models => ../models

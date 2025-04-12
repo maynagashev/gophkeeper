@@ -11,7 +11,7 @@ import (
 	"log"
 
 	"github.com/google/uuid"
-	"github.com/maynagashev/gophkeeper/server/internal/models"
+	"github.com/maynagashev/gophkeeper/models"
 	"github.com/maynagashev/gophkeeper/server/internal/repository"
 	"github.com/maynagashev/gophkeeper/server/internal/storage"
 )

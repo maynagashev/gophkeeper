@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/maynagashev/gophkeeper/server/internal/models"   // Импортируем наши модели
+	"github.com/maynagashev/gophkeeper/models"                   // Импортируем наши модели
 	"github.com/maynagashev/gophkeeper/server/internal/services" // Импортируем пакет сервисов
 )
 
