@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/tobischo/gokeepasslib/v3"
+	gokeepasslib "github.com/tobischo/gokeepasslib/v3"
 )
 
 // TODO: Реализация работы с KDBX файлами

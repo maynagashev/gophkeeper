@@ -12,8 +12,10 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	_ "github.com/lib/pq" // Драйвер PostgreSQL
 	"github.com/maynagashev/gophkeeper/server/internal/handlers"
+	appmiddleware "github.com/maynagashev/gophkeeper/server/internal/middleware"
 	"github.com/maynagashev/gophkeeper/server/internal/repository"
 	"github.com/maynagashev/gophkeeper/server/internal/services"
+	"github.com/maynagashev/gophkeeper/server/internal/storage" // Добавляем импорт storage
 )
 
 const (
@@ -33,6 +35,17 @@ const (
 	defaultDBName = "gophkeeper"
 	defaultDBHost = "localhost"
 	defaultDBPort = "5433"
+
+	// Переменные окружения для MinIO (значения по умолчанию из docker-compose).
+	envMinioEndpoint     = "MINIO_ENDPOINT"
+	envMinioUser         = "MINIO_USER"
+	envMinioPassword     = "MINIO_PASSWORD"
+	envMinioBucket       = "MINIO_BUCKET"
+	defaultMinioEndpoint = "localhost:9000"
+	defaultMinioUser     = "minioadmin"
+	defaultMinioPassword = "minioadmin"
+	defaultMinioBucket   = "gophkeeper-vaults"
+	minioUseSSL          = false // Для локальной разработки
 )
 
 // main - точка входа для сервера GophKeeper.
@@ -54,14 +67,32 @@ func main() {
 	}()
 	log.Println("Соединение с БД успешно установлено.")
 
-	// 2. Создание репозитория
+	// 2. Инициализация клиента MinIO
+	minioCfg := storage.MinioConfig{
+		Endpoint:        getEnv(envMinioEndpoint, defaultMinioEndpoint),
+		AccessKeyID:     getEnv(envMinioUser, defaultMinioUser),
+		SecretAccessKey: getEnv(envMinioPassword, defaultMinioPassword),
+		UseSSL:          minioUseSSL,
+		BucketName:      getEnv(envMinioBucket, defaultMinioBucket),
+	}
+	fileStorage, err := storage.NewMinioClient(minioCfg)
+	if err != nil {
+		//nolint:gocritic // exitAfterDefer is acceptable here
+		log.Fatalf("Ошибка инициализации клиента MinIO: %v", err)
+	}
+
+	// 3. Создание репозиториев
 	userRepo := repository.NewPostgresUserRepository(db)
+	vaultRepo := repository.NewPostgresVaultRepository(db)
+	vaultVersionRepo := repository.NewPostgresVaultVersionRepository(db)
 
-	// 3. Создание сервиса
+	// 4. Создание сервисов
 	authService := services.NewAuthService(userRepo)
+	vaultService := services.NewVaultService(db.DB, vaultRepo, vaultVersionRepo, fileStorage)
 
-	// 4. Создание обработчика
+	// 5. Создание обработчиков
 	authHandler := handlers.NewAuthHandler(authService)
+	vaultHandler := handlers.NewVaultHandler(vaultService)
 
 	// --- Настройка роутера --- //
 	r := chi.NewRouter()
@@ -70,14 +101,31 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	// Маршруты
+	// --- Маршруты --- //
 	r.Get("/ping", func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = w.Write([]byte("pong\n"))
 	})
 
+	// Публичные маршруты (регистрация, вход)
 	r.Route("/api/user", func(r chi.Router) {
 		r.Post("/register", authHandler.Register)
 		r.Post("/login", authHandler.Login)
+	})
+
+	// Приватные маршруты (требуют аутентификации)
+	r.Group(func(r chi.Router) {
+		// Применяем middleware аутентификации ко всей группе
+		r.Use(appmiddleware.Authenticator)
+
+		// Маршруты для работы с хранилищем
+		r.Route("/api/vault", func(r chi.Router) {
+			r.Get("/", vaultHandler.GetMetadata)
+			r.Post("/upload", vaultHandler.Upload)
+			r.Get("/download", vaultHandler.Download)
+			// Добавляем новые маршруты для версионирования
+			r.Get("/versions", vaultHandler.ListVersions) // Получение списка версий
+			r.Post("/rollback", vaultHandler.Rollback)    // Откат к указанной версии
+		})
 	})
 
 	// --- Запуск сервера --- //
@@ -92,7 +140,6 @@ func main() {
 
 	log.Printf("Запуск HTTP-сервера на порту %s", port)
 	if err = server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		//nolint:gocritic // Завершение через Fatalf приемлемо здесь
 		log.Fatalf("Ошибка запуска сервера: %v", err)
 	}
 }

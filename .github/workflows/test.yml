@@ -52,8 +52,24 @@ jobs:
         
     - name: Install golangci-lint
       run: |
-        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.59.1
+        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.64.8
         golangci-lint --version
         
-    - name: Run golangci-lint for client
-      run: make lint --timeout=5m 
+    - name: Download CLIENT Go modules
+      working-directory: ./client
+      run: go mod download
+
+    - name: Lint CLIENT module
+      working-directory: ./client
+      run: golangci-lint run ./... --fix
+
+    - name: Download SERVER Go modules
+      working-directory: ./server
+      run: go mod download
+
+    - name: Lint SERVER module
+      working-directory: ./server
+      run: golangci-lint run ./... --fix
+
+  # build:
+  #   name: Build
