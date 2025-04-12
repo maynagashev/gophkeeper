@@ -84,10 +84,11 @@ func main() {
 	// 3. Создание репозиториев
 	userRepo := repository.NewPostgresUserRepository(db)
 	vaultRepo := repository.NewPostgresVaultRepository(db)
+	vaultVersionRepo := repository.NewPostgresVaultVersionRepository(db)
 
 	// 4. Создание сервисов
 	authService := services.NewAuthService(userRepo)
-	vaultService := services.NewVaultService(vaultRepo, fileStorage)
+	vaultService := services.NewVaultService(db.DB, vaultRepo, vaultVersionRepo, fileStorage)
 
 	// 5. Создание обработчиков
 	authHandler := handlers.NewAuthHandler(authService)
@@ -121,7 +122,9 @@ func main() {
 			r.Get("/", vaultHandler.GetMetadata)
 			r.Post("/upload", vaultHandler.Upload)
 			r.Get("/download", vaultHandler.Download)
-			// TODO: Добавить GET /versions, POST /rollback
+			// Добавляем новые маршруты для версионирования
+			r.Get("/versions", vaultHandler.ListVersions) // Получение списка версий
+			r.Post("/rollback", vaultHandler.Rollback)    // Откат к указанной версии
 		})
 	})
 

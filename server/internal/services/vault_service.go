@@ -3,12 +3,14 @@ package services
 import (
 	"context"
 	"crypto/sha256"
+	"database/sql"
 	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
 	"log"
 
+	"github.com/google/uuid"
 	"github.com/maynagashev/gophkeeper/server/internal/models"
 	"github.com/maynagashev/gophkeeper/server/internal/repository"
 	"github.com/maynagashev/gophkeeper/server/internal/storage"
@@ -16,50 +18,71 @@ import (
 
 // VaultService определяет интерфейс для сервиса работы с хранилищами.
 type VaultService interface {
-	GetVaultMetadata(userID int64) (*models.Vault, error)
+	GetVaultMetadata(userID int64) (*models.VaultVersion, error)
 	UploadVault(userID int64, reader io.Reader, size int64, contentType string) error
-	DownloadVault(userID int64) (io.ReadCloser, *models.Vault, error)
+	DownloadVault(userID int64) (io.ReadCloser, *models.VaultVersion, error)
+	ListVersions(userID int64, limit, offset int) ([]models.VaultVersion, error)
+	RollbackToVersion(userID int64, versionID int64) error
 }
 
 // vaultService реализует логику работы с хранилищами.
 var _ VaultService = (*vaultService)(nil)
 
 type vaultService struct {
-	vaultRepo   repository.VaultRepository // Зависимость от репозитория хранилищ
-	fileStorage storage.FileStorage        // Зависимость от файлового хранилища (MinIO)
+	db               *sql.DB
+	vaultRepo        repository.VaultRepository
+	vaultVersionRepo repository.VaultVersionRepository
+	fileStorage      storage.FileStorage
 }
 
 // NewVaultService создает новый экземпляр сервиса хранилищ.
-func NewVaultService(vaultRepo repository.VaultRepository, fileStorage storage.FileStorage) VaultService {
-	return &vaultService{vaultRepo: vaultRepo, fileStorage: fileStorage}
+func NewVaultService(
+	db *sql.DB,
+	vaultRepo repository.VaultRepository,
+	vaultVersionRepo repository.VaultVersionRepository,
+	fileStorage storage.FileStorage,
+) VaultService {
+	return &vaultService{
+		db:               db,
+		vaultRepo:        vaultRepo,
+		vaultVersionRepo: vaultVersionRepo,
+		fileStorage:      fileStorage,
+	}
 }
 
-// GetVaultMetadata получает метаданные хранилища для указанного пользователя.
-func (s *vaultService) GetVaultMetadata(userID int64) (*models.Vault, error) {
+// GetVaultMetadata получает метаданные ТЕКУЩЕЙ версии хранилища для пользователя.
+func (s *vaultService) GetVaultMetadata(userID int64) (*models.VaultVersion, error) {
 	ctx := context.Background()
 
-	vault, err := s.vaultRepo.GetVaultByUserID(ctx, userID)
+	_, currentVersion, err := s.vaultRepo.GetVaultWithCurrentVersionByUserID(ctx, userID)
 	if err != nil {
 		if errors.Is(err, repository.ErrVaultNotFound) {
-			log.Printf("[VaultService] Метаданные для пользователя %d не найдены", userID)
-			return nil, ErrVaultNotFound // Возвращаем ошибку сервисного слоя
+			log.Printf("[VaultService] Метаданные (GetVaultWithCurrentVersion) для пользователя %d не найдены", userID)
+			return nil, ErrVaultNotFound
 		}
-		log.Printf("[VaultService] Ошибка репозитория при получении метаданных для пользователя %d: %v", userID, err)
+		log.Printf("[VaultService] Ошибка репозитория при получении хранилища с версией для пользователя %d: %v", userID, err)
 		return nil, errors.New("внутренняя ошибка сервера при получении метаданных")
 	}
 
-	log.Printf("[VaultService] Успешно получены метаданные (ID: %d) для пользователя %d", vault.ID, userID)
-	return vault, nil
+	if currentVersion == nil {
+		// Хранилище есть, но текущей версии нет (например, после неудачного отката)
+		log.Printf("[VaultService] У пользователя %d есть хранилище, но нет текущей версии", userID)
+		return nil, ErrVaultNotFound // Считаем, что метаданных нет
+	}
+
+	log.Printf("[VaultService] Успешно получены метаданные текущей версии (ID: %d)"+
+		" для пользователя %d", currentVersion.ID, userID)
+	return currentVersion, nil
 }
 
-// UploadVault обрабатывает загрузку файла хранилища.
+// UploadVault обрабатывает загрузку файла хранилища, создавая новую версию.
 func (s *vaultService) UploadVault(userID int64, reader io.Reader, size int64, contentType string) error {
 	ctx := context.Background()
 
-	// Генерируем ключ объекта для MinIO (например, user_123/vault.kdbx)
-	objectKey := fmt.Sprintf("user_%d/vault.kdbx", userID)
+	// Генерируем УНИКАЛЬНЫЙ ключ объекта для MinIO
+	objectKey := fmt.Sprintf("user_%d/vault_%s.kdbx", userID, uuid.NewString())
 
-	// Создаем TeeReader для одновременной загрузки в MinIO и расчета хеша
+	// Создаем TeeReader для одновременной загрузки и расчета хеша
 	hash := sha256.New()
 	teeReader := io.TeeReader(reader, hash)
 
@@ -69,83 +92,218 @@ func (s *vaultService) UploadVault(userID int64, reader io.Reader, size int64, c
 		log.Printf("[VaultService] Ошибка загрузки файла в хранилище для пользователя %d: %v", userID, err)
 		return errors.New("внутренняя ошибка сервера при загрузке файла")
 	}
-
-	// Получаем хеш загруженного файла
 	checksum := hex.EncodeToString(hash.Sum(nil))
-	log.Printf("[VaultService] Файл для пользователя %d загружен, SHA256: %s", userID, checksum)
+	log.Printf("[VaultService] Файл для пользователя %d загружен в '%s', SHA256: %s", userID, objectKey, checksum)
 
-	// Проверяем, существует ли уже запись в БД
-	existingVault, err := s.vaultRepo.GetVaultByUserID(ctx, userID)
-	if err != nil && !errors.Is(err, repository.ErrVaultNotFound) {
-		// Ошибка, не связанная с отсутствием записи
-		log.Printf("[VaultService] Ошибка проверки существующих метаданных для пользователя %d: %v", userID, err)
-		return errors.New("внутренняя ошибка сервера при проверке метаданных")
+	// --- Транзакция БД --- //
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		log.Printf("[VaultService] Ошибка начала транзакции для пользователя %d: %v", userID, err)
+		// TODO: Попытаться удалить загруженный файл из MinIO?
+		return errors.New("внутренняя ошибка сервера")
+	}
+	// Гарантируем откат транзакции в случае паники или ошибки
+	defer func() {
+		if p := recover(); p != nil {
+			_ = tx.Rollback()
+			panic(p) // Передаем панику дальше
+		} else if err != nil {
+			log.Printf("[VaultService] Ошибка во время транзакции, откат... Error: %v", err)
+			_ = tx.Rollback()
+			// TODO: Попытаться удалить загруженный файл из MinIO?
+		} else {
+			err = tx.Commit()
+			if err != nil {
+				log.Printf("[VaultService] Ошибка коммита транзакции: %v", err)
+				// TODO: Попытаться удалить загруженный файл из MinIO?
+			}
+		}
+	}()
+
+	// Используем транзакционные репозитории (если они есть) или передаем tx
+	// Пока будем передавать tx в существующие методы репозиториев,
+	// модифицировав их для приема tx или создав tx-варианты.
+	// Сейчас для простоты будем считать, что методы репо могут работать с tx (нужно будет доработать репозитории).
+
+	// 1. Найти или создать Vault для пользователя
+	vaultID, err := s.findOrCreateVault(ctx, userID) // Выносим логику в отдельный метод
+	if err != nil {
+		return err // Ошибка уже залогирована внутри findOrCreateVault
 	}
 
-	vaultData := &models.Vault{
-		UserID:    userID,
+	// 2. Создать запись о новой версии
+	newVersion := &models.VaultVersion{
+		VaultID:   vaultID,
 		ObjectKey: objectKey,
 		Checksum:  &checksum,
 		SizeBytes: &size,
 	}
-
-	if existingVault == nil {
-		// Создаем новую запись в БД
-		log.Printf("[VaultService] Создание новой записи метаданных для пользователя %d", userID)
-		_, err = s.vaultRepo.CreateVault(ctx, vaultData)
-		if err != nil {
-			log.Printf("[VaultService] Ошибка создания метаданных для пользователя %d: %v", userID, err)
-			return errors.New("внутренняя ошибка сервера при создании метаданных")
-		}
-	} else {
-		// Обновляем существующую запись в БД
-		log.Printf("[VaultService] Обновление записи метаданных для пользователя %d", userID)
-		err = s.vaultRepo.UpdateVaultMetadata(ctx, vaultData)
-		if err != nil {
-			log.Printf("[VaultService] Ошибка обновления метаданных для пользователя %d: %v", userID, err)
-			return errors.New("внутренняя ошибка сервера при обновлении метаданных")
-		}
+	versionID, err := s.vaultVersionRepo.CreateVersion(ctx, newVersion) // TODO: Передать tx
+	if err != nil {
+		log.Printf("[VaultService] Ошибка создания версии в транзакции для хранилища %d: %v", vaultID, err)
+		return errors.New("внутренняя ошибка сервера")
 	}
+	log.Printf("[VaultService] Новая версия создана (ID: %d) для хранилища %d", versionID, vaultID)
 
+	// 3. Обновить current_version_id в Vault
+	err = s.vaultRepo.UpdateVaultCurrentVersion(ctx, vaultID, versionID) // TODO: Передать tx
+	if err != nil {
+		log.Printf("[VaultService] Ошибка обновления current_version_id в транзакции для хранилища %d: %v", vaultID, err)
+		return errors.New("внутренняя ошибка сервера")
+	}
+	log.Printf("[VaultService] current_version_id для хранилища %d обновлен на %d", vaultID, versionID)
+
+	// Ошибки нет, defer выполнит Commit
 	log.Printf("[VaultService] Загрузка и обновление метаданных для пользователя %d завершены успешно", userID)
 	return nil
 }
 
-// DownloadVault скачивает файл хранилища.
-// Возвращает io.ReadCloser (который нужно закрыть!), метаданные и ошибку.
-func (s *vaultService) DownloadVault(userID int64) (io.ReadCloser, *models.Vault, error) {
+// findOrCreateVault находит ID существующего хранилища или создает новое.
+// Возвращает ID хранилища или ошибку.
+// Эта функция предполагает, что она вызывается внутри существующей транзакции (передать tx?).
+func (s *vaultService) findOrCreateVault(ctx context.Context, userID int64) (int64, error) {
+	vault, err := s.vaultRepo.GetVaultByUserID(ctx, userID) // TODO: Передать tx
+	if err == nil {
+		// Хранилище найдено
+		log.Printf("[VaultService] Найдено существующее хранилище (ID: %d) для пользователя %d", vault.ID, userID)
+		return vault.ID, nil
+	}
+
+	if !errors.Is(err, repository.ErrVaultNotFound) {
+		// Неожиданная ошибка при поиске
+		log.Printf("[VaultService] Ошибка поиска хранилища в транзакции для пользователя %d: %v", userID, err)
+		return 0, errors.New("внутренняя ошибка сервера")
+	}
+
+	// Хранилище не найдено, создаем новое
+	log.Printf("[VaultService] Хранилище для пользователя %d не найдено, создаем новое.", userID)
+	newVault := &models.Vault{UserID: userID}
+	vaultID, err := s.vaultRepo.CreateVault(ctx, newVault) // TODO: Передать tx
+	if err != nil {
+		log.Printf("[VaultService] Ошибка создания хранилища в транзакции для пользователя %d: %v", userID, err)
+		return 0, errors.New("внутренняя ошибка сервера")
+	}
+	log.Printf("[VaultService] Новое хранилище создано (ID: %d) для пользователя %d", vaultID, userID)
+	return vaultID, nil
+}
+
+// DownloadVault скачивает ТЕКУЩУЮ версию файла хранилища.
+func (s *vaultService) DownloadVault(userID int64) (io.ReadCloser, *models.VaultVersion, error) {
 	ctx := context.Background()
 
-	// Получаем метаданные из БД
-	vault, err := s.vaultRepo.GetVaultByUserID(ctx, userID)
+	// Получаем хранилище и текущую версию одним запросом
+	_, currentVersion, err := s.vaultRepo.GetVaultWithCurrentVersionByUserID(ctx, userID)
 	if err != nil {
 		if errors.Is(err, repository.ErrVaultNotFound) {
-			log.Printf("[VaultService] Запрос на скачивание: метаданные для пользователя %d не найдены", userID)
+			log.Printf("[VaultService] Запрос на скачивание: хранилище или версия для пользователя %d не найдены", userID)
 			return nil, nil, ErrVaultNotFound
 		}
-		log.Printf("[VaultService] Ошибка получения метаданных для скачивания (пользователь %d): %v", userID, err)
+		log.Printf("[VaultService] Ошибка получения хранилища/версии для скачивания (пользователь %d): %v", userID, err)
 		return nil, nil, errors.New("внутренняя ошибка сервера при получении метаданных")
 	}
 
-	// Скачиваем файл из MinIO по ключу из метаданных
-	fileReader, err := s.fileStorage.DownloadFile(ctx, vault.ObjectKey)
+	if currentVersion == nil {
+		log.Printf("[VaultService] Запрос на скачивание: нет текущей активной версии для пользователя %d", userID)
+		return nil, nil, ErrVaultNotFound
+	}
+
+	// Скачиваем файл из MinIO по ключу текущей версии
+	fileReader, err := s.fileStorage.DownloadFile(ctx, currentVersion.ObjectKey)
 	if err != nil {
-		// Обрабатываем ошибку, если объект не найден в хранилище
 		if errors.Is(err, storage.ErrObjectNotFound) {
-			log.Printf("[VaultService] Файл '%s' не найден в хранилище (пользователь %d)", vault.ObjectKey, userID)
-			// Возможно, стоит удалить запись из БД или пометить как невалидную?
-			return nil, nil, ErrVaultNotFound // Возвращаем ту же ошибку для клиента
+			log.Printf("[VaultService] Файл '%s' не найден в хранилище"+
+				" (пользователь %d, версия %d)", currentVersion.ObjectKey, userID, currentVersion.ID)
+			return nil, nil, ErrVaultNotFound
 		}
-		log.Printf("[VaultService] Ошибка скачивания файла '%s'"+
-			" из хранилища (пользователь %d): %v", vault.ObjectKey, userID, err)
+		log.Printf("[VaultService] Ошибка скачивания файла '%s' из хранилища"+
+			" (пользователь %d, версия %d): %v", currentVersion.ObjectKey, userID, currentVersion.ID, err)
 		return nil, nil, errors.New("внутренняя ошибка сервера при скачивании файла")
 	}
 
-	log.Printf("[VaultService] Файл '%s' для пользователя %d готов к скачиванию", vault.ObjectKey, userID)
-	return fileReader, vault, nil
+	log.Printf("[VaultService] Файл '%s' (версия %d) для пользователя %d"+
+		" готов к скачиванию", currentVersion.ObjectKey, currentVersion.ID, userID)
+	return fileReader, currentVersion, nil
+}
+
+// ListVersions возвращает список версий хранилища пользователя.
+func (s *vaultService) ListVersions(userID int64, limit, offset int) ([]models.VaultVersion, error) {
+	ctx := context.Background()
+
+	// Сначала находим ID хранилища пользователя
+	vault, err := s.vaultRepo.GetVaultByUserID(ctx, userID)
+	if err != nil {
+		if errors.Is(err, repository.ErrVaultNotFound) {
+			log.Printf("[VaultService] Запрос списка версий: хранилище для пользователя %d не найдено", userID)
+			return []models.VaultVersion{}, nil // Возвращаем пустой слайс, а не ошибку
+		}
+		log.Printf("[VaultService] Ошибка поиска хранилища для списка версий (пользователь %d): %v", userID, err)
+		return nil, errors.New("внутренняя ошибка сервера")
+	}
+
+	// Получаем список версий для найденного vaultID
+	versions, err := s.vaultVersionRepo.ListVersionsByVaultID(ctx, vault.ID, limit, offset)
+	if err != nil {
+		log.Printf("[VaultService] Ошибка получения списка версий для хранилища %d"+
+			" (пользователь %d): %v", vault.ID, userID, err)
+		return nil, errors.New("внутренняя ошибка сервера")
+	}
+
+	log.Printf("[VaultService] Возвращено %d версий для пользователя %d", len(versions), userID)
+	return versions, nil
+}
+
+// RollbackToVersion откатывает хранилище пользователя к указанной версии.
+func (s *vaultService) RollbackToVersion(userID int64, versionID int64) error {
+	ctx := context.Background()
+
+	// 1. Найти хранилище пользователя
+	vault, err := s.vaultRepo.GetVaultByUserID(ctx, userID)
+	if err != nil {
+		if errors.Is(err, repository.ErrVaultNotFound) {
+			log.Printf("[VaultService] Попытка отката: хранилище для пользователя %d не найдено", userID)
+			return ErrVaultNotFound
+		}
+		log.Printf("[VaultService] Ошибка поиска хранилища для отката (пользователь %d): %v", userID, err)
+		return errors.New("внутренняя ошибка сервера")
+	}
+
+	// 2. Проверить, что указанная версия принадлежит этому хранилищу
+	version, err := s.vaultVersionRepo.GetVersionByID(ctx, versionID)
+	if err != nil {
+		if errors.Is(err, repository.ErrVersionNotFound) {
+			log.Printf("[VaultService] Попытка отката: версия %d не найдена (пользователь %d)", versionID, userID)
+			return ErrVersionNotFound // А возвращаем ошибку сервиса
+		}
+		log.Printf("[VaultService] Ошибка поиска версии %d для отката (пользователь %d): %v", versionID, userID, err)
+		return errors.New("внутренняя ошибка сервера")
+	}
+	if version.VaultID != vault.ID {
+		log.Printf("[VaultService] Попытка отката: версия %d не принадлежит хранилищу %d"+
+			" (пользователь %d)", versionID, vault.ID, userID)
+		return ErrForbidden // Другая ошибка: попытка доступа к чужой версии
+	}
+
+	// 3. Обновить current_version_id в хранилище
+	err = s.vaultRepo.UpdateVaultCurrentVersion(ctx, vault.ID, versionID)
+	if err != nil {
+		// Обрабатываем случай, если хранилище вдруг не нашлось (хотя мы его только что нашли)
+		if errors.Is(err, repository.ErrVaultNotFound) {
+			log.Printf("[VaultService] Ошибка отката: хранилище %d исчезло во время обновления?"+
+				" (пользователь %d)", vault.ID, userID)
+			return ErrVaultNotFound
+		}
+		log.Printf("[VaultService] Ошибка обновления current_version_id при откате"+
+			" для хранилища %d (пользователь %d): %v", vault.ID, userID, err)
+		return errors.New("внутренняя ошибка сервера при откате")
+	}
+
+	log.Printf("[VaultService] Пользователь %d успешно откатил хранилище %d к версии %d", userID, vault.ID, versionID)
+	return nil
 }
 
 // Кастомные ошибки сервиса.
 var (
-	ErrVaultNotFound = errors.New("хранилище не найдено")
+	ErrVaultNotFound   = errors.New("хранилище или его версия не найдены")
+	ErrVersionNotFound = errors.New("указанная версия хранилища не найдена")
+	ErrForbidden       = errors.New("доступ запрещен") // Общая ошибка доступа
 )

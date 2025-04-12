@@ -22,37 +22,36 @@ func NewVaultHandler(vs services.VaultService) *VaultHandler {
 	return &VaultHandler{vaultService: vs}
 }
 
-// GetMetadata обрабатывает GET запрос на получение метаданных хранилища.
+// GetMetadata обрабатывает GET запрос на получение метаданных ТЕКУЩЕЙ версии хранилища.
 func (h *VaultHandler) GetMetadata(w http.ResponseWriter, r *http.Request) {
-	// Получаем ID пользователя из контекста, установленного middleware
 	userID, ok := middleware.GetUserIDFromContext(r.Context())
 	if !ok {
-		log.Printf("[VaultHandler] Не удалось получить userID из контекста")
+		log.Printf("[VaultHandler:GetMetadata] Не удалось получить userID из контекста")
 		http.Error(w, "Внутренняя ошибка сервера", http.StatusInternalServerError)
 		return
 	}
 
-	log.Printf("[VaultHandler] Запрос метаданных от пользователя %d", userID)
+	log.Printf("[VaultHandler:GetMetadata] Запрос метаданных от пользователя %d", userID)
 
-	// Вызываем сервис для получения метаданных
-	vault, err := h.vaultService.GetVaultMetadata(userID)
+	// Вызываем сервис для получения метаданных ТЕКУЩЕЙ версии
+	currentVersion, err := h.vaultService.GetVaultMetadata(userID)
 	if err != nil {
 		if errors.Is(err, services.ErrVaultNotFound) {
-			log.Printf("[VaultHandler] Метаданные не найдены для пользователя %d", userID)
-			http.Error(w, "Хранилище не найдено", http.StatusNotFound) // 404 Not Found
+			log.Printf("[VaultHandler:GetMetadata] Метаданные не найдены для пользователя %d", userID)
+			http.Error(w, "Хранилище не найдено", http.StatusNotFound)
 		} else {
-			log.Printf("[VaultHandler] Внутренняя ошибка при получении метаданных для пользователя %d: %v", userID, err)
+			log.Printf("[VaultHandler:GetMetadata] Внутренняя ошибка "+
+				"при получении метаданных для пользователя %d: %v", userID, err)
 			http.Error(w, "Внутренняя ошибка сервера", http.StatusInternalServerError)
 		}
 		return
 	}
 
-	// Отправляем метаданные в JSON
+	// Отправляем метаданные текущей версии в JSON
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	if err = json.NewEncoder(w).Encode(vault); err != nil {
-		log.Printf("[VaultHandler] Ошибка кодирования ответа с метаданными: %v", err)
-		// Статус уже отправлен, просто логируем
+	if err = json.NewEncoder(w).Encode(currentVersion); err != nil {
+		log.Printf("[VaultHandler:GetMetadata] Ошибка кодирования ответа с метаданными: %v", err)
 	}
 }
 
@@ -99,9 +98,8 @@ func (h *VaultHandler) Upload(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[VaultHandler:Upload] Файл для пользователя %d успешно загружен", userID)
 }
 
-// Download обрабатывает GET запрос на скачивание файла хранилища.
+// Download обрабатывает GET запрос на скачивание ТЕКУЩЕЙ версии файла хранилища.
 func (h *VaultHandler) Download(w http.ResponseWriter, r *http.Request) {
-	// Получаем ID пользователя из контекста
 	userID, ok := middleware.GetUserIDFromContext(r.Context())
 	if !ok {
 		log.Printf("[VaultHandler:Download] Не удалось получить userID из контекста")
@@ -111,43 +109,129 @@ func (h *VaultHandler) Download(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("[VaultHandler:Download] Запрос на скачивание файла от пользователя %d", userID)
 
-	// Вызываем сервис для скачивания
-	fileReader, vaultMeta, err := h.vaultService.DownloadVault(userID)
+	// Вызываем сервис для скачивания ТЕКУЩЕЙ версии
+	fileReader, versionMeta, err := h.vaultService.DownloadVault(userID)
 	if err != nil {
 		if errors.Is(err, services.ErrVaultNotFound) {
-			log.Printf("[VaultHandler:Download] Хранилище не найдено для пользователя %d", userID)
+			log.Printf("[VaultHandler:Download] Хранилище/версия не найдено для пользователя %d", userID)
 			http.Error(w, "Хранилище не найдено", http.StatusNotFound)
 		} else {
-			log.Printf("[VaultHandler:Download] Внутренняя ошибка при скачивании файла для пользователя %d: %v", userID, err)
+			log.Printf("[VaultHandler:Download] Внутренняя ошибка при скачивании "+
+				"файла для пользователя %d: %v", userID, err)
 			http.Error(w, "Внутренняя ошибка сервера при скачивании файла", http.StatusInternalServerError)
 		}
 		return
 	}
-	// Важно закрыть fileReader после завершения запроса
 	defer func() {
-		// Используем отдельную переменную или игнорируем ошибку, если она не критична
 		if closeErr := fileReader.Close(); closeErr != nil {
 			log.Printf("[VaultHandler:Download] Ошибка закрытия fileReader: %v", closeErr)
 		}
 	}()
 
 	// Устанавливаем заголовки для скачивания файла
-	w.Header().Set("Content-Disposition", `attachment; filename="gophkeeper_vault.kdbx"`) // Имя файла для скачивания
-	contentType := "application/octet-stream"                                             // По умолчанию
-	// Можно попытаться установить Content-Type из метаданных, если они есть и надежны
+	w.Header().Set("Content-Disposition", `attachment; filename="gophkeeper_vault.kdbx"`)
+	contentType := "application/octet-stream"
 	w.Header().Set("Content-Type", contentType)
-	if vaultMeta.SizeBytes != nil {
-		w.Header().Set("Content-Length", strconv.FormatInt(*vaultMeta.SizeBytes, 10))
+	if versionMeta.SizeBytes != nil {
+		w.Header().Set("Content-Length", strconv.FormatInt(*versionMeta.SizeBytes, 10))
 	}
 
 	// Копируем данные из fileReader в ResponseWriter
 	_, err = io.Copy(w, fileReader)
 	if err != nil {
 		log.Printf("[VaultHandler:Download] Ошибка копирования данных файла в ответ для пользователя %d: %v", userID, err)
-		// Статус уже, скорее всего, отправлен (200 OK по умолчанию), сложно что-то сделать
-		// Можно попробовать отправить http.StatusInternalServerError, но клиент может его не увидеть
 		return
 	}
 
-	log.Printf("[VaultHandler:Download] Файл для пользователя %d успешно отправлен", userID)
+	log.Printf("[VaultHandler:Download] Файл для пользователя %d (версия %d) успешно отправлен", userID, versionMeta.ID)
+}
+
+// ListVersions обрабатывает GET запрос на получение списка версий хранилища.
+func (h *VaultHandler) ListVersions(w http.ResponseWriter, r *http.Request) {
+	userID, ok := middleware.GetUserIDFromContext(r.Context())
+	if !ok {
+		log.Printf("[VaultHandler:ListVersions] Не удалось получить userID из контекста")
+		http.Error(w, "Внутренняя ошибка сервера", http.StatusInternalServerError)
+		return
+	}
+
+	// Получаем параметры пагинации (простой вариант, без валидации)
+	limitStr := r.URL.Query().Get("limit")
+	offsetStr := r.URL.Query().Get("offset")
+	limit, _ := strconv.Atoi(limitStr)
+	offset, _ := strconv.Atoi(offsetStr)
+	if limit <= 0 || limit > 100 { // Ограничиваем максимальный лимит
+		limit = 20 // Значение по умолчанию
+	}
+	if offset < 0 {
+		offset = 0
+	}
+
+	log.Printf("[VaultHandler:ListVersions] Запрос списка версий от пользователя %d "+
+		"(limit=%d, offset=%d)", userID, limit, offset)
+
+	versions, err := h.vaultService.ListVersions(userID, limit, offset)
+	if err != nil {
+		log.Printf("[VaultHandler:ListVersions] Внутренняя ошибка при получении "+
+			"списка версий для пользователя %d: %v", userID, err)
+		http.Error(w, "Внутренняя ошибка сервера", http.StatusInternalServerError)
+		return
+	}
+
+	// Отправляем список версий в JSON
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err = json.NewEncoder(w).Encode(versions); err != nil {
+		log.Printf("[VaultHandler:ListVersions] Ошибка кодирования ответа со списком версий: %v", err)
+	}
+}
+
+// RollbackRequest представляет тело запроса на откат к версии.
+type RollbackRequest struct {
+	VersionID int64 `json:"version_id"`
+}
+
+// Rollback обрабатывает POST запрос на откат к указанной версии.
+func (h *VaultHandler) Rollback(w http.ResponseWriter, r *http.Request) {
+	userID, ok := middleware.GetUserIDFromContext(r.Context())
+	if !ok {
+		log.Printf("[VaultHandler:Rollback] Не удалось получить userID из контекста")
+		http.Error(w, "Внутренняя ошибка сервера", http.StatusInternalServerError)
+		return
+	}
+
+	// Декодируем тело запроса
+	var req RollbackRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Printf("[VaultHandler:Rollback] Ошибка декодирования запроса на откат: %v", err)
+		http.Error(w, "Неверный формат запроса", http.StatusBadRequest)
+		return
+	}
+
+	if req.VersionID <= 0 {
+		http.Error(w, "Неверный ID версии", http.StatusBadRequest)
+		return
+	}
+
+	log.Printf("[VaultHandler:Rollback] Запрос на откат к версии %d от пользователя %d", req.VersionID, userID)
+
+	err := h.vaultService.RollbackToVersion(userID, req.VersionID)
+	if err != nil {
+		switch {
+		case errors.Is(err, services.ErrVaultNotFound), errors.Is(err, services.ErrVersionNotFound):
+			log.Printf("[VaultHandler:Rollback] Хранилище/версия %d не найдена для пользователя %d", req.VersionID, userID)
+			http.Error(w, "Указанное хранилище или версия не найдены", http.StatusNotFound)
+		case errors.Is(err, services.ErrForbidden):
+			log.Printf("[VaultHandler:Rollback] Попытка отката к чужой версии %d пользователем %d", req.VersionID, userID)
+			http.Error(w, "Доступ запрещен", http.StatusForbidden)
+		default:
+			log.Printf("[VaultHandler:Rollback] Внутренняя ошибка при откате "+
+				"к версии %d для пользователя %d: %v", req.VersionID, userID, err)
+			http.Error(w, "Внутренняя ошибка сервера", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent) // 204 No Content - успешный откат без тела ответа
+	log.Printf("[VaultHandler:Rollback] Успешный откат к версии %d для пользователя %d", req.VersionID, userID)
 }
