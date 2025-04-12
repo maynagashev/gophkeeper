@@ -22,8 +22,8 @@ jobs:
         
     - name: Show existing test file
       run: |
-        ls -la example/
-        echo "Используем тестовый файл из репозитория: example/test.kdbx (пароль: test)"
+        ls -la client/example/
+        echo "Используем тестовый файл из репозитория: client/example/test.kdbx (пароль: test)"
       
     - name: Run client tests
       run: make test
