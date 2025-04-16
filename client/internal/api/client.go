@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io" // Добавляем для будущих методов
 	"net/http"
@@ -120,19 +121,19 @@ func (c *httpClient) Login(ctx context.Context, username, password string) (stri
 	if resp.StatusCode != http.StatusOK {
 		// TODO: Читать тело ответа для получения сообщения об ошибке
 		if resp.StatusCode == http.StatusUnauthorized {
-			return "", fmt.Errorf("неверное имя пользователя или пароль") // Можно вернуть кастомную ошибку
+			return "", errors.New("неверное имя пользователя или пароль") // Можно вернуть кастомную ошибку
 		}
 		return "", fmt.Errorf("ошибка входа на сервере: статус %d", resp.StatusCode)
 	}
 
 	// Декодируем ответ для получения токена
 	var loginResponse models.LoginResponse
-	if err := json.NewDecoder(resp.Body).Decode(&loginResponse); err != nil {
+	if err = json.NewDecoder(resp.Body).Decode(&loginResponse); err != nil {
 		return "", fmt.Errorf("ошибка декодирования ответа на вход: %w", err)
 	}
 
 	if loginResponse.Token == "" {
-		return "", fmt.Errorf("сервер вернул пустой токен")
+		return "", errors.New("сервер вернул пустой токен")
 	}
 
 	// Сохраняем токен в клиенте для последующих запросов
@@ -141,10 +142,10 @@ func (c *httpClient) Login(ctx context.Context, username, password string) (stri
 	return loginResponse.Token, nil
 }
 
-// helper function to add auth header
+// helper function to add auth header.
 func (c *httpClient) setAuthHeader(req *http.Request) error {
 	if c.authToken == "" {
-		return fmt.Errorf("токен аутентификации отсутствует") // Или другая ошибка, сигнализирующая о необходимости логина
+		return errors.New("токен аутентификации отсутствует") // Или другая ошибка, сигнализирующая о необходимости логина
 	}
 	req.Header.Set("Authorization", "Bearer "+c.authToken)
 	return nil
@@ -163,7 +164,7 @@ func (c *httpClient) GetVaultMetadata(ctx context.Context) (*models.VaultVersion
 	}
 
 	// Добавляем заголовок авторизации
-	if err := c.setAuthHeader(req); err != nil {
+	if err = c.setAuthHeader(req); err != nil {
 		return nil, err
 	}
 
@@ -176,17 +177,17 @@ func (c *httpClient) GetVaultMetadata(ctx context.Context) (*models.VaultVersion
 
 	if resp.StatusCode != http.StatusOK {
 		if resp.StatusCode == http.StatusNotFound {
-			return nil, fmt.Errorf("хранилище не найдено на сервере") // Кастомная ошибка
+			return nil, errors.New("хранилище не найдено на сервере") // Кастомная ошибка
 		}
 		if resp.StatusCode == http.StatusUnauthorized {
-			return nil, fmt.Errorf("ошибка авторизации (невалидный или просроченный токен?)")
+			return nil, errors.New("ошибка авторизации (невалидный или просроченный токен?)")
 		}
 		// TODO: Читать тело для деталей
 		return nil, fmt.Errorf("ошибка получения метаданных: статус %d", resp.StatusCode)
 	}
 
 	var metadata models.VaultVersion
-	if err := json.NewDecoder(resp.Body).Decode(&metadata); err != nil {
+	if err = json.NewDecoder(resp.Body).Decode(&metadata); err != nil {
 		return nil, fmt.Errorf("ошибка декодирования метаданных: %w", err)
 	}
 
@@ -209,7 +210,7 @@ func (c *httpClient) UploadVault(ctx context.Context, data io.Reader, size int64
 	// Устанавливаем необходимые заголовки
 	req.Header.Set("Content-Type", "application/octet-stream") // Тип контента для KDBX
 	req.Header.Set("Content-Length", strconv.FormatInt(size, 10))
-	if err := c.setAuthHeader(req); err != nil {
+	if err = c.setAuthHeader(req); err != nil {
 		return err
 	}
 
@@ -222,7 +223,7 @@ func (c *httpClient) UploadVault(ctx context.Context, data io.Reader, size int64
 
 	if resp.StatusCode != http.StatusOK {
 		if resp.StatusCode == http.StatusUnauthorized {
-			return fmt.Errorf("ошибка авторизации при загрузке")
+			return errors.New("ошибка авторизации при загрузке")
 		}
 		// TODO: Читать тело для деталей
 		return fmt.Errorf("ошибка загрузки на сервер: статус %d", resp.StatusCode)
@@ -242,7 +243,7 @@ func (c *httpClient) DownloadVault(ctx context.Context) (io.ReadCloser, *models.
 	if err != nil {
 		return nil, nil, fmt.Errorf("ошибка создания запроса на скачивание: %w", err)
 	}
-	if err := c.setAuthHeader(req); err != nil {
+	if err = c.setAuthHeader(req); err != nil {
 		return nil, nil, err
 	}
 
@@ -256,10 +257,10 @@ func (c *httpClient) DownloadVault(ctx context.Context) (io.ReadCloser, *models.
 	if resp.StatusCode != http.StatusOK {
 		defer resp.Body.Close() // Закрываем тело в случае ошибки
 		if resp.StatusCode == http.StatusNotFound {
-			return nil, nil, fmt.Errorf("хранилище не найдено для скачивания")
+			return nil, nil, errors.New("хранилище не найдено для скачивания")
 		}
 		if resp.StatusCode == http.StatusUnauthorized {
-			return nil, nil, fmt.Errorf("ошибка авторизации при скачивании")
+			return nil, nil, errors.New("ошибка авторизации при скачивании")
 		}
 		// TODO: Читать тело для деталей
 		return nil, nil, fmt.Errorf("ошибка скачивания с сервера: статус %d", resp.StatusCode)
@@ -271,7 +272,7 @@ func (c *httpClient) DownloadVault(ctx context.Context) (io.ReadCloser, *models.
 	// если они нужны после скачивания. Либо сервер должен передавать их, например, в заголовках.
 	// Пока возвращаем nil для метаданных.
 	// Можно было бы распарсить Content-Length, если он есть.
-	var meta *models.VaultVersion = nil // Заглушка
+	var meta *models.VaultVersion // Заглушка
 
 	return resp.Body, meta, nil // Возвращаем тело ответа (io.ReadCloser)
 }
@@ -299,7 +300,7 @@ func (c *httpClient) ListVersions(ctx context.Context, limit, offset int) ([]mod
 	if err != nil {
 		return nil, fmt.Errorf("ошибка создания запроса на список версий: %w", err)
 	}
-	if err := c.setAuthHeader(req); err != nil {
+	if err = c.setAuthHeader(req); err != nil {
 		return nil, err
 	}
 
@@ -312,14 +313,14 @@ func (c *httpClient) ListVersions(ctx context.Context, limit, offset int) ([]mod
 
 	if resp.StatusCode != http.StatusOK {
 		if resp.StatusCode == http.StatusUnauthorized {
-			return nil, fmt.Errorf("ошибка авторизации при получении списка версий")
+			return nil, errors.New("ошибка авторизации при получении списка версий")
 		}
 		// TODO: Читать тело для деталей
 		return nil, fmt.Errorf("ошибка получения списка версий: статус %d", resp.StatusCode)
 	}
 
 	var versions []models.VaultVersion
-	if err := json.NewDecoder(resp.Body).Decode(&versions); err != nil {
+	if err = json.NewDecoder(resp.Body).Decode(&versions); err != nil {
 		return nil, fmt.Errorf("ошибка декодирования списка версий: %w", err)
 	}
 
@@ -345,7 +346,7 @@ func (c *httpClient) RollbackToVersion(ctx context.Context, versionID int64) err
 		return fmt.Errorf("ошибка создания запроса на откат: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
-	if err := c.setAuthHeader(req); err != nil {
+	if err = c.setAuthHeader(req); err != nil {
 		return err
 	}
 
@@ -358,14 +359,14 @@ func (c *httpClient) RollbackToVersion(ctx context.Context, versionID int64) err
 
 	if resp.StatusCode != http.StatusNoContent { // Ожидаем 204 No Content
 		if resp.StatusCode == http.StatusUnauthorized {
-			return fmt.Errorf("ошибка авторизации при откате")
+			return errors.New("ошибка авторизации при откате")
 		}
 		if resp.StatusCode == http.StatusNotFound {
-			return fmt.Errorf("указанная версия или хранилище не найдены для отката")
+			return errors.New("указанная версия или хранилище не найдены для отката")
 		}
 		if resp.StatusCode == http.StatusBadRequest {
 			// TODO: Читать тело ответа
-			return fmt.Errorf("неверный запрос на откат (например, некорректный ID версии)")
+			return errors.New("неверный запрос на откат (например, некорректный ID версии)")
 		}
 		// TODO: Читать тело для деталей
 		return fmt.Errorf("ошибка отката на сервере: статус %d", resp.StatusCode)

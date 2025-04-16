@@ -34,4 +34,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/maynagashev/gophkeeper/models => ../models
+replace github.com/maynagashev/gophkeeper/models => ../models //nolint:gomoddirectives
