@@ -16,9 +16,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	"github.com/maynagashev/gophkeeper/models"
 	"github.com/maynagashev/gophkeeper/server/internal/handlers"
 	"github.com/maynagashev/gophkeeper/server/internal/middleware"
-	"github.com/maynagashev/gophkeeper/server/internal/models"
 	"github.com/maynagashev/gophkeeper/server/internal/services"
 )
 

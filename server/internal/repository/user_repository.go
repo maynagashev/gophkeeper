@@ -9,7 +9,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
-	"github.com/maynagashev/gophkeeper/server/internal/models"
+	"github.com/maynagashev/gophkeeper/models"
 )
 
 // Коды ошибок PostgreSQL.

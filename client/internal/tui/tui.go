@@ -6,204 +6,24 @@ import (
 	"os"
 	"time"
 
-	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/gofrs/flock"
+
+	"github.com/maynagashev/gophkeeper/client/internal/api" // Импортируем пакет API клиента
 )
 
-const statusMessageTimeout = 2 * time.Second // Время отображения статусных сообщений
-
-// initialModel создает начальное состояние модели.
-func initialModel(kdbxPath string) model {
-	// Поле ввода пароля
-	ti := textinput.New()
-	ti.Placeholder = "Мастер-пароль"
-	ti.Focus()
-	ti.CharLimit = 156
-	ti.Width = 20
-	ti.EchoMode = textinput.EchoPassword
-
-	// Компонент списка
-	delegate := list.NewDefaultDelegate()
-	// Настроим цвета для лучшей видимости
-	delegate.Styles.NormalTitle = delegate.Styles.NormalTitle.
-		Foreground(lipgloss.Color("252")). // Светло-серый для обычного заголовка
-		Background(lipgloss.Color("235"))  // Темный фон для контраста
-
-	delegate.Styles.NormalDesc = delegate.Styles.NormalDesc.
-		Foreground(lipgloss.Color("245")). // Темно-серый для обычного описания
-		Background(lipgloss.Color("235"))  // Темный фон для контраста
-
-	delegate.Styles.SelectedTitle = delegate.Styles.SelectedTitle.
-		Foreground(lipgloss.Color("212")). // Яркий розовый для выделенного заголовка
-		Background(lipgloss.Color("237")). // Чуть светлее фон для выделения
-		BorderLeftForeground(lipgloss.Color("212"))
-
-	delegate.Styles.SelectedDesc = delegate.Styles.SelectedDesc.
-		Foreground(lipgloss.Color("240")). // Светло-серый для выделенного описания
-		Background(lipgloss.Color("237")). // Чуть светлее фон для выделения
-		BorderLeftForeground(lipgloss.Color("212"))
-
-	l := list.New([]list.Item{}, delegate, 0, 0)
-	l.Title = "Записи"
-	// Убираем стандартные подсказки Quit и Help, т.к. мы их переопределим
-	l.SetShowHelp(false)
-	l.SetShowStatusBar(true) // Оставляем статус-бар (X items)
-	l.SetFilteringEnabled(true)
-	l.Styles.Title = list.DefaultStyles().Title.Bold(true)
-	l.Styles.PaginationStyle = list.DefaultStyles().PaginationStyle
-	l.Styles.HelpStyle = list.DefaultStyles().HelpStyle
-
-	// Список вложений для удаления
-	attachmentDelList := list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
-	attachmentDelList.Title = "Выберите вложение для удаления"
-	attachmentDelList.SetShowHelp(false)
-	attachmentDelList.SetShowStatusBar(false)
-	attachmentDelList.SetFilteringEnabled(false) // Фильтрация не нужна
-	attachmentDelList.Styles.Title = list.DefaultStyles().Title.Bold(true)
-
-	// Поле ввода пути к файлу вложения
-	pathInput := textinput.New()
-	pathInput.Placeholder = "/path/to/your/file"
-	pathInput.CharLimit = 4096                               // Ограничение на длину пути
-	pathInput.Width = defaultListWidth - passwordInputOffset // Используем ту же ширину, что и пароль
-
-	// Поля для ввода нового пароля
-	newPass1 := textinput.New()
-	newPass1.Placeholder = "Новый мастер-пароль"
-	newPass1.Focus() // Фокус на первом поле
-	newPass1.CharLimit = 156
-	newPass1.Width = 20
-	newPass1.EchoMode = textinput.EchoPassword
-
-	newPass2 := textinput.New()
-	newPass2.Placeholder = "Подтвердите пароль"
-	newPass2.CharLimit = 156
-	newPass2.Width = 20
-	newPass2.EchoMode = textinput.EchoPassword
-
-	return model{
-		state:               welcomeScreen,
-		passwordInput:       ti,
-		kdbxPath:            kdbxPath,
-		entryList:           l,
-		attachmentList:      attachmentDelList,
-		attachmentPathInput: pathInput,
-		// Инициализируем поля для нового KDBX
-		newPasswordInput1:       newPass1,
-		newPasswordInput2:       newPass2,
-		newPasswordFocusedField: 0, // Фокус на первом поле
-	}
-}
+const (
+	statusMessageTimeout     = 2 * time.Second         // Время отображения статусных сообщений
+	defaultServerURL         = "http://localhost:8080" // Временный URL сервера по умолчанию
+	helpStatusHeightOffset   = 2                       // Высота строки помощи и статуса
+	docStyleMarginVertical   = 1
+	docStyleMarginHorizontal = 2
+)
 
 // Init - команда, выполняемая при запуске приложения.
 func (m *model) Init() tea.Cmd {
 	return textinput.Blink
-}
-
-// Update обрабатывает входящие сообщения.
-//
-//nolint:gocognit,funlen // Снизим сложность и длину в будущем рефакторинге
-func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmds []tea.Cmd // Собираем команды
-
-	switch msg := msg.(type) {
-	// == Глобальные сообщения (не зависят от экрана) ==
-	case tea.WindowSizeMsg:
-		// Обновляем размеры компонентов
-		m.entryList.SetSize(msg.Width, msg.Height)
-		m.passwordInput.Width = msg.Width - passwordInputOffset
-		return m, nil
-
-	case dbOpenedMsg:
-		return m.handleDBOpenedMsg(msg)
-
-	case errMsg:
-		return m.handleErrorMsg(msg)
-
-	case dbSavedMsg:
-		return m.setStatusMessage("Сохранено успешно!")
-
-	case dbSaveErrorMsg:
-		return m.setStatusMessage(fmt.Sprintf("Ошибка сохранения: %v", msg.err))
-
-	case clearStatusMsg:
-		m.savingStatus = ""
-		m.statusTimer = nil
-		return m, nil
-
-	// Обработка нажатия клавиш делегируется состоянию
-	case tea.KeyMsg:
-		// Глобальные команды (работают на всех экранах, кроме ввода пароля?)
-		switch msg.String() {
-		case "ctrl+c":
-			return m, tea.Quit
-		case "ctrl+s":
-			// Сохраняем только из списка или деталей и если не Read-Only
-			if !m.readOnlyMode && (m.state == entryListScreen || m.state == entryDetailScreen) && m.db != nil {
-				m.savingStatus = "Подготовка к сохранению..."
-				slog.Info("Начало обновления m.db перед сохранением")
-
-				// Проходим по всем элементам в списке интерфейса
-				items := m.entryList.Items()
-				updatedCount := 0
-				for _, item := range items {
-					if listItem, ok := item.(entryItem); ok {
-						// Находим соответствующую запись в m.db по UUID
-						dbEntryPtr := findEntryInDB(m.db, listItem.entry.UUID)
-						if dbEntryPtr != nil {
-							// Обновляем найденную запись данными из элемента списка
-							// Создаем копию перед присваиванием, чтобы не менять listItem
-							entryToSave := deepCopyEntry(listItem.entry)
-							*dbEntryPtr = entryToSave
-							updatedCount++
-						} else {
-							slog.Warn("Запись из списка не найдена в m.db", "uuid", listItem.entry.UUID)
-						}
-					}
-				}
-				slog.Info("Обновление m.db завершено", "updated_count", updatedCount)
-
-				m.savingStatus = "Сохранение..."
-				slog.Info("Запуск сохранения KDBX", "path", m.kdbxPath)
-				// Используем сохраненный пароль
-				return m, saveKdbxCmd(m.db, m.kdbxPath, m.password)
-			}
-		}
-		// Если не глобальная команда, передаем дальше
-	}
-
-	// == Обновление компонентов в зависимости от состояния ==
-	var updatedModel tea.Model
-	var stateCmd tea.Cmd
-	switch m.state {
-	case welcomeScreen:
-		updatedModel, stateCmd = m.updateWelcomeScreen(msg)
-	case passwordInputScreen:
-		updatedModel, stateCmd = m.updatePasswordInputScreen(msg)
-	case newKdbxPasswordScreen:
-		updatedModel, stateCmd = m.updateNewKdbxPasswordScreen(msg)
-	case entryListScreen:
-		updatedModel, stateCmd = m.updateEntryListScreen(msg)
-	case entryDetailScreen:
-		updatedModel, stateCmd = m.updateEntryDetailScreen(msg)
-	case entryEditScreen:
-		updatedModel, stateCmd = m.updateEntryEditScreen(msg)
-	case entryAddScreen:
-		updatedModel, stateCmd = m.updateEntryAddScreen(msg)
-	case attachmentListDeleteScreen:
-		updatedModel, stateCmd = m.updateAttachmentListDeleteScreen(msg)
-	case attachmentPathInputScreen:
-		updatedModel, stateCmd = m.updateAttachmentPathInputScreen(msg)
-	default:
-		// Неизвестное состояние - возвращаем как есть
-		updatedModel = m
-	}
-	cmds = append(cmds, stateCmd)
-
-	return updatedModel, tea.Batch(cmds...)
 }
 
 // setStatusMessage устанавливает статусное сообщение и запускает таймер для его очистки.
@@ -223,6 +43,8 @@ func (m *model) setStatusMessage(status string) (tea.Model, tea.Cmd) {
 }
 
 // View отрисовывает пользовательский интерфейс.
+//
+//nolint:funlen
 func (m *model) View() string {
 	var mainContent string
 	var help string
@@ -239,7 +61,7 @@ func (m *model) View() string {
 		help = "(Tab - сменить поле, Enter - создать, Esc/Ctrl+C - выход)"
 	case entryListScreen:
 		mainContent = m.entryList.View()
-		help = "(↑/↓ - навигация, Enter - детали, / - поиск, a - добавить, Ctrl+S - сохр., q - выход)"
+		help = "(↑/↓, Enter - детали, / - поиск, a - доб, s - синхр, l - логин, Ctrl+S - сохр, q - вых)"
 	case entryDetailScreen:
 		mainContent = m.viewEntryDetailScreen()
 		help = "(e - ред., Ctrl+S - сохр., Esc/b - назад)"
@@ -255,6 +77,35 @@ func (m *model) View() string {
 	case attachmentPathInputScreen:
 		mainContent = m.viewAttachmentPathInputScreen()
 		help = "(Enter - подтвердить, Esc - отмена)"
+	case syncServerScreen:
+		mainContent = m.viewSyncServerScreen()
+		help = "(↑/↓ - навигация, Enter - выбрать, Esc/b - назад)"
+	case serverURLInputScreen:
+		mainContent = fmt.Sprintf("Введите URL сервера:\n%s", m.serverURLInput.View())
+		help = "(Enter - подтвердить, Esc - назад)"
+	case loginRegisterChoiceScreen:
+		mainContent = "Сервер не настроен или требуется вход.\n\n(Р)егистрация нового пользователя или (В)ход?"
+		help = "(R - регистрация, L - вход, Esc/b - назад)"
+	case loginScreen:
+		mainContent = fmt.Sprintf(`Вход на сервер (%s)
+
+Имя пользователя:
+%s
+
+Пароль:
+%s`,
+			m.serverURL, m.loginUsernameInput.View(), m.loginPasswordInput.View())
+		help = "(Tab - след. поле, Enter - войти, Esc - назад)"
+	case registerScreen:
+		mainContent = fmt.Sprintf(`Регистрация на сервере (%s)
+
+Имя пользователя:
+%s
+
+Пароль:
+%s`,
+			m.serverURL, m.registerUsernameInput.View(), m.registerPasswordInput.View())
+		help = "(Tab - след. поле, Enter - зарегистрироваться, Esc - назад)"
 	default:
 		mainContent = "Неизвестное состояние!"
 	}
@@ -275,23 +126,22 @@ func (m *model) View() string {
 	}
 
 	// Собираем финальный вывод
-	// Для list.View уже есть отступ снизу, для остальных добавляем
-	if m.state == entryListScreen {
-		return mainContent + help + statusLine
-	}
-	// Для детального, редактирования и добавления - добавляем отступ и подсказку
-	if m.state == entryDetailScreen || m.state == entryEditScreen || m.state == entryAddScreen {
-		return mainContent + "\n" + help + statusLine
-	}
-
-	// Для остальных (welcome, password input)
-	return mainContent + "\n" + help + statusLine
+	// Применяем общий стиль к основному контенту
+	styledContent := m.docStyle.Render(mainContent) // Используем стиль из модели
+	// Собираем все вместе
+	return fmt.Sprintf("%s\n%s%s", styledContent, help, statusLine)
 }
 
 // Start запускает TUI приложение.
 func Start(kdbxPath string) {
 	// Создаем начальную модель
-	m := initialModel(kdbxPath) // Передаем путь в initialModel
+	m := initModel(kdbxPath) // Используем initModel из initialization.go
+
+	// --- Инициализация API клиента ---
+	// TODO: Сделать URL конфигурируемым (флаг, env, KDBX)
+	m.apiClient = api.NewHTTPClient(defaultServerURL)
+	m.serverURL = defaultServerURL // Сохраняем URL в модели
+	slog.Info("API клиент инициализирован", "baseURL", defaultServerURL)
 
 	// --- Реализация flock ---
 	lockPath := kdbxPath + ".lock"
@@ -328,7 +178,7 @@ func Start(kdbxPath string) {
 	if _, errStat := os.Stat(m.kdbxPath); os.IsNotExist(errStat) {
 		// Файл не существует, переходим на экран создания пароля
 		slog.Info("Файл KDBX не найден, переходим к созданию нового.", "path", m.kdbxPath)
-		m.state = newKdbxPasswordScreen
+		m.state = newKdbxPasswordScreen // Используем константу в нижнем регистре
 		m.newPasswordInput1.Focus()
 		m.newPasswordInput2.Blur()
 	} else if errStat != nil {
@@ -344,6 +194,7 @@ func Start(kdbxPath string) {
 	} else {
 		// Файл существует, оставляем начальное состояние (welcomeScreen -> passwordInputScreen)
 		slog.Info("Файл KDBX найден, запуск стандартного TUI.", "path", m.kdbxPath)
+		// Состояние по умолчанию welcomeScreen в initModel
 	}
 
 	// Используем FullAltScreen для корректной работы списка
@@ -358,3 +209,156 @@ func Start(kdbxPath string) {
 	}
 	// Успешный выход ПОСЛЕ defer Unlock
 }
+
+// --- Вспомогательные типы и функции ---
+
+// syncMenuItem представляет элемент в меню синхронизации.
+type syncMenuItem struct {
+	title string
+	id    string // Идентификатор для обработки выбора
+}
+
+func (i syncMenuItem) Title() string       { return i.title }
+func (i syncMenuItem) Description() string { return "" } // Описание не нужно
+func (i syncMenuItem) FilterValue() string { return i.title }
+
+// TODO: Перенести update*Screen функции в отдельные файлы или реорганизовать tui.go
+// TODO: Implement updateEntryListScreen function
+// Оставляем только функцию для entryListScreen, так как она была модифицирована
+// Остальные заглушки удалены, так как они дублируют существующие функции
+/* // Удаляем эту функцию, так как она переопределена в list_screen.go
+func (m *model) updateEntryListScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "s":
+			m.state = syncServerScreen
+			// m.syncServerMenu.Focus() // list.Model не имеет Focus()
+			return m, nil
+		case "l":
+			// TODO: Проверить, настроен ли URL и валиден ли токен
+			// Если URL не настроен -> serverUrlInputScreen
+			// Если токен есть, но невалиден -> loginScreen
+			// Если токен валиден -> может быть, просто показать статус?
+			// Пока просто переходим к выбору
+			m.state = loginRegisterChoiceScreen
+			return m, nil
+		// --- Обработка других клавиш списка (Enter, a, /, q и т.д.) ---
+		// ... (нужно будет перенести или скопировать логику из основного Update) ...
+		case keyEnter: // Просмотр деталей
+			selectedItem := m.entryList.SelectedItem()
+			if selectedItem != nil {
+				if entry, ok := selectedItem.(entryItem); ok {
+					m.selectedEntry = &entry
+					m.state = entryDetailScreen
+					m.previousScreenState = entryListScreen // Запоминаем откуда пришли
+					return m, nil
+				}
+			}
+		case keyAdd: // Добавление новой записи
+			if m.readOnlyMode {
+				return m.setStatusMessage("Read-Only режим: добавление запрещено.")
+			}
+			m.state = entryAddScreen
+			m.previousScreenState = entryListScreen
+			// m.initEditInputs(true) // TODO: Убедиться, что эта функция доступна/вызывается правильно
+			return m, textinput.Blink
+		case keyQuit:
+			return m, tea.Quit
+			// Другие клавиши (поиск и т.д.) будут обработаны списком ниже
+		}
+	}
+
+	// Обновляем сам компонент списка
+	var cmd tea.Cmd
+	m.entryList, cmd = m.entryList.Update(msg)
+	return m, cmd
+}
+*/
+
+// --- Функции-заглушки для отображения других экранов были удалены ---
+
+// viewSyncServerScreen отображает экран "Синхронизация и Сервер".
+func (m *model) viewSyncServerScreen() string {
+	serverURLText := m.serverURL // Используем правильное имя переменной
+	if serverURLText == "" {
+		serverURLText = "Не настроен"
+	}
+
+	statusInfo := fmt.Sprintf(
+		"URL Сервера: %s\nСтатус входа: %s\nПоследняя синх.: %s\n",
+		serverURLText,
+		m.loginStatus,
+		m.lastSyncStatus,
+	)
+
+	// Объединяем информацию о статусе и меню действий
+	return statusInfo + "\n" + m.syncServerMenu.View()
+}
+
+// updateSyncServerScreen обрабатывает сообщения для экрана "Синхронизация и Сервер".
+//
+//nolint:gocognit,nestif // TODO: Упростить вложенность и когнитивную сложность
+func (m *model) updateSyncServerScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmds []tea.Cmd
+
+	// Используем if вместо switch т.к. обрабатываем только один тип
+	if keyMsg, ok := msg.(tea.KeyMsg); ok { // Внешний 'ok'
+		switch keyMsg.String() {
+		case keyEnter:
+			selectedItem := m.syncServerMenu.SelectedItem()
+			if item, itemOk := selectedItem.(syncMenuItem); itemOk { // Используем 'itemOk' для внутреннего блока
+				switch item.id {
+				case "configure_url":
+					m.state = serverURLInputScreen
+					// Устанавливаем текущий URL в поле ввода или плейсхолдер
+					if m.serverURL != "" {
+						m.serverURLInput.SetValue(m.serverURL)
+					} else {
+						m.serverURLInput.Placeholder = defaultServerURL
+						m.serverURLInput.SetValue("")
+					}
+					m.serverURLInput.Focus()
+					return m, textinput.Blink
+				case "login_register":
+					if m.serverURL == "" {
+						// Сначала нужно настроить URL
+						m.state = serverURLInputScreen
+						m.serverURLInput.Placeholder = defaultServerURL
+						m.serverURLInput.SetValue("")
+						m.serverURLInput.Focus()
+						return m, textinput.Blink
+					}
+					// URL есть, переходим к выбору Вход/Регистрация (убираем else)
+					m.state = loginRegisterChoiceScreen
+					return m, nil
+				case "sync_now":
+					// TODO: Реализовать логику синхронизации
+					return m.setStatusMessage("TODO: Запуск синхронизации...")
+				case "logout":
+					// TODO: Реализовать логику выхода (очистка токена и т.д.)
+					m.authToken = ""
+					m.loginStatus = "Не выполнен"
+					return m.setStatusMessage("Выход выполнен.")
+					// case "view_versions": // TODO
+				}
+			}
+		case keyEsc, keyBack:
+			// Возврат к списку записей
+			m.state = entryListScreen
+			return m, nil
+		}
+	}
+
+	// Обновляем список меню, если это не было KeyMsg или не обработанное
+	var listCmd tea.Cmd
+	m.syncServerMenu, listCmd = m.syncServerMenu.Update(msg)
+	cmds = append(cmds, listCmd)
+
+	return m, tea.Batch(cmds...)
+}
+
+// TODO: Implement viewServerUrlInputScreen, updateServerUrlInputScreen
+// TODO: Implement viewLoginRegisterChoiceScreen, updateLoginRegisterChoiceScreen
+// TODO: Implement viewLoginScreen, updateLoginScreen
+// TODO: Implement viewRegisterScreen, updateRegisterScreen

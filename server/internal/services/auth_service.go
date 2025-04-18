@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/maynagashev/gophkeeper/server/internal/models"
+	"github.com/maynagashev/gophkeeper/models"
 	"github.com/maynagashev/gophkeeper/server/internal/repository"
 	"golang.org/x/crypto/bcrypt"
 )

@@ -47,6 +47,18 @@ func (m *model) updateEntryListScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 				slog.Info("Переход к добавлению новой записи")
 				return m, tea.ClearScreen
 			}
+		case "s":
+			m.state = syncServerScreen
+			// m.syncServerMenu.Focus() // list.Model не имеет Focus()
+			return m, nil
+		case "l":
+			// TODO: Проверить, настроен ли URL и валиден ли токен
+			// Если URL не настроен -> serverUrlInputScreen
+			// Если токен есть, но невалиден -> loginScreen
+			// Если токен валиден -> может быть, просто показать статус?
+			// Пока просто переходим к выбору
+			m.state = loginRegisterChoiceScreen
+			return m, nil
 		}
 	}
 	return m, tea.Batch(cmds...)

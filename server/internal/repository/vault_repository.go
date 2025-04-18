@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/maynagashev/gophkeeper/server/internal/models"
+	"github.com/maynagashev/gophkeeper/models"
 	// "github.com/lib/pq" // Больше не нужен здесь, т.к. убрали CreateVault/UpdateVaultMetadata с проверкой UNIQUE.
 )
 

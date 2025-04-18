@@ -11,7 +11,7 @@ import (
 
 const (
 	logDir             = "logs"
-	logFileName        = "gophkeeper.log"
+	logFileName        = "client.log"
 	logFilePermissions = 0666
 	// Имя переменной окружения для пути к файлу KDBX.
 	dbPathEnvVar = "GOPHKEEPER_DB_PATH"

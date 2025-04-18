@@ -5,3 +5,6 @@
 /gophkeeper.kdbx
 /gophkeeper.kdbx.lock
 /vendor/
+
+/client/gophkeeper.kdbx
+/client/gophkeeper.kdbx.lock
