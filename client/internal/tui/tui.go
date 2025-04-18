@@ -11,9 +11,17 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/gofrs/flock"
+
+	"github.com/maynagashev/gophkeeper/client/internal/api" // Импортируем пакет API клиента
 )
 
-const statusMessageTimeout = 2 * time.Second // Время отображения статусных сообщений
+const (
+	statusMessageTimeout     = 2 * time.Second         // Время отображения статусных сообщений
+	defaultServerURL         = "http://localhost:8080" // Временный URL сервера по умолчанию
+	helpStatusHeightOffset   = 2                       // Высота строки помощи и статуса
+	docStyleMarginVertical   = 1
+	docStyleMarginHorizontal = 2
+)
 
 // initialModel создает начальное состояние модели.
 func initialModel(kdbxPath string) model {
@@ -84,6 +92,54 @@ func initialModel(kdbxPath string) model {
 	newPass2.Width = 20
 	newPass2.EchoMode = textinput.EchoPassword
 
+	// Меню действий на экране синхронизации
+	syncMenuDelegate := list.NewDefaultDelegate() // Можно настроить стили отдельно
+	syncMenuList := list.New([]list.Item{
+		syncMenuItem{title: "Настроить URL сервера", id: "configure_url"},
+		syncMenuItem{title: "Войти / Зарегистрироваться", id: "login_register"},
+		syncMenuItem{title: "Синхронизировать сейчас", id: "sync_now"},
+		syncMenuItem{title: "Выйти", id: "logout"},
+		// syncMenuItem{title: "Просмотреть версии (TODO)", id: "view_versions"},
+	}, syncMenuDelegate, 0, 0)
+	syncMenuList.Title = "Синхронизация и Сервер"
+	syncMenuList.SetShowHelp(false)
+	syncMenuList.SetShowStatusBar(false)
+	syncMenuList.SetFilteringEnabled(false)
+	syncMenuList.Styles.Title = list.DefaultStyles().Title.Bold(true)
+
+	// Поле ввода URL сервера
+	serverURLInput := textinput.New()
+	serverURLInput.Placeholder = defaultServerURL
+	serverURLInput.CharLimit = 1024
+	serverURLInput.Width = 50 // Примерная ширина
+
+	// Поля для входа
+	loginUserInput := textinput.New()
+	loginUserInput.Placeholder = "Имя пользователя"
+	loginUserInput.CharLimit = 128
+	loginUserInput.Width = 30
+
+	loginPassInput := textinput.New()
+	loginPassInput.Placeholder = "Пароль"
+	loginPassInput.CharLimit = 156
+	loginPassInput.Width = 30
+	loginPassInput.EchoMode = textinput.EchoPassword
+
+	// Поля для регистрации (аналогично)
+	regUserInput := textinput.New()
+	regUserInput.Placeholder = "Имя пользователя"
+	regUserInput.CharLimit = 128
+	regUserInput.Width = 30
+
+	regPassInput := textinput.New()
+	regPassInput.Placeholder = "Пароль"
+	regPassInput.CharLimit = 156
+	regPassInput.Width = 30
+	regPassInput.EchoMode = textinput.EchoPassword
+
+	// Стиль для общего обрамления View
+	docStyle := lipgloss.NewStyle().Margin(docStyleMarginVertical, docStyleMarginHorizontal)
+
 	return model{
 		state:               welcomeScreen,
 		passwordInput:       ti,
@@ -92,9 +148,19 @@ func initialModel(kdbxPath string) model {
 		attachmentList:      attachmentDelList,
 		attachmentPathInput: pathInput,
 		// Инициализируем поля для нового KDBX
-		newPasswordInput1:       newPass1,
-		newPasswordInput2:       newPass2,
-		newPasswordFocusedField: 0, // Фокус на первом поле
+		newPasswordInput1:         newPass1,
+		newPasswordInput2:         newPass2,
+		newPasswordFocusedField:   0, // Фокус на первом поле
+		loginStatus:               "Не выполнен",
+		lastSyncStatus:            "Не синхронизировалось",
+		syncServerMenu:            syncMenuList,
+		serverURLInput:            serverURLInput,
+		loginUsernameInput:        loginUserInput,
+		loginPasswordInput:        loginPassInput,
+		registerUsernameInput:     regUserInput,
+		registerPasswordInput:     regPassInput,
+		loginRegisterFocusedField: 0, // Начинаем с первого поля (URL или username)
+		docStyle:                  docStyle,
 	}
 }
 
@@ -105,7 +171,7 @@ func (m *model) Init() tea.Cmd {
 
 // Update обрабатывает входящие сообщения.
 //
-//nolint:gocognit,funlen // Снизим сложность и длину в будущем рефакторинге
+//nolint:gocognit,funlen,gocyclo // TODO: Рефакторить роутинг и длину функции
 func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd // Собираем команды
 
@@ -113,8 +179,21 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// == Глобальные сообщения (не зависят от экрана) ==
 	case tea.WindowSizeMsg:
 		// Обновляем размеры компонентов
-		m.entryList.SetSize(msg.Width, msg.Height)
+		h, v := m.docStyle.GetFrameSize() // Используем стиль из модели
+		listWidth := msg.Width - h
+		listHeight := msg.Height - v - helpStatusHeightOffset // Используем константу
+
+		m.entryList.SetSize(listWidth, listHeight)
 		m.passwordInput.Width = msg.Width - passwordInputOffset
+		m.syncServerMenu.SetSize(listWidth, listHeight) // Обновляем размер меню синхронизации
+
+		// TODO: Обновить размеры других полей ввода по необходимости
+		m.serverURLInput.Width = listWidth - passwordInputOffset
+		m.loginUsernameInput.Width = listWidth - passwordInputOffset
+		m.loginPasswordInput.Width = listWidth - passwordInputOffset
+		m.registerUsernameInput.Width = listWidth - passwordInputOffset
+		m.registerPasswordInput.Width = listWidth - passwordInputOffset
+
 		return m, nil
 
 	case dbOpenedMsg:
@@ -172,12 +251,13 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, saveKdbxCmd(m.db, m.kdbxPath, m.password)
 			}
 		}
-		// Если не глобальная команда, передаем дальше
+		// Если не глобальная команда, передаем дальше в обработчик текущего экрана
 	}
 
 	// == Обновление компонентов в зависимости от состояния ==
-	var updatedModel tea.Model
+	var updatedModel tea.Model = m // По умолчанию возвращаем текущую модель
 	var stateCmd tea.Cmd
+
 	switch m.state {
 	case welcomeScreen:
 		updatedModel, stateCmd = m.updateWelcomeScreen(msg)
@@ -197,13 +277,97 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		updatedModel, stateCmd = m.updateAttachmentListDeleteScreen(msg)
 	case attachmentPathInputScreen:
 		updatedModel, stateCmd = m.updateAttachmentPathInputScreen(msg)
+	case syncServerScreen:
+		updatedModel, stateCmd = m.updateSyncServerScreen(msg)
+	case serverURLInputScreen:
+		// Обрабатываем Esc и Enter, остальное передаем в textinput
+		if keyMsg, ok := msg.(tea.KeyMsg); ok {
+			switch keyMsg.String() {
+			case keyEsc:
+				m.state = syncServerScreen
+				return m, nil
+			case keyEnter:
+				newURL := m.serverURLInput.Value()
+				if newURL == "" {
+					newURL = m.serverURLInput.Placeholder // Используем плейсхолдер если пусто
+				}
+				// TODO: Добавить валидацию URL?
+				m.serverURL = newURL
+				// Сбрасываем статус, т.к. URL изменился
+				m.loginStatus = "Не выполнен"
+				m.authToken = ""
+				m.apiClient = api.NewHTTPClient(newURL) // Пересоздаем клиент с новым URL
+				slog.Info("URL сервера обновлен", "url", newURL)
+				// Переходим к выбору логина/регистрации
+				m.state = loginRegisterChoiceScreen
+				return m, nil
+			}
+		}
+		// Обновляем поле ввода
+		newInput, cmd := m.serverURLInput.Update(msg)
+		m.serverURLInput = newInput
+		stateCmd = cmd
+	case loginRegisterChoiceScreen:
+		if keyMsg, ok := msg.(tea.KeyMsg); ok {
+			switch keyMsg.String() {
+			case "r", "R":
+				m.state = registerScreen
+				m.registerUsernameInput.Focus()
+				m.loginRegisterFocusedField = 0
+				return m, textinput.Blink
+			case "l", "L":
+				m.state = loginScreen
+				m.loginUsernameInput.Focus()
+				m.loginRegisterFocusedField = 0
+				return m, textinput.Blink
+			case keyEsc, keyBack:
+				m.state = entryListScreen
+				return m, nil
+			}
+		}
+	case loginScreen:
+		var focusedInput *textinput.Model
+		if m.loginRegisterFocusedField == 0 {
+			focusedInput = &m.loginUsernameInput
+		} else {
+			focusedInput = &m.loginPasswordInput
+		}
+		*focusedInput, stateCmd = focusedInput.Update(msg)
+		if keyMsg, ok := msg.(tea.KeyMsg); ok {
+			if keyMsg.String() == keyEsc {
+				m.state = loginRegisterChoiceScreen
+				return m, nil
+			}
+		}
+	case registerScreen:
+		var focusedInput *textinput.Model
+		if m.loginRegisterFocusedField == 0 {
+			focusedInput = &m.registerUsernameInput
+		} else {
+			focusedInput = &m.registerPasswordInput
+		}
+		*focusedInput, stateCmd = focusedInput.Update(msg)
+		if keyMsg, ok := msg.(tea.KeyMsg); ok {
+			if keyMsg.String() == keyEsc {
+				m.state = loginRegisterChoiceScreen
+				return m, nil
+			}
+		}
 	default:
 		// Неизвестное состояние - возвращаем как есть
-		updatedModel = m
+		// updatedModel = m // Уже присвоено по умолчанию
 	}
 	cmds = append(cmds, stateCmd)
 
-	return updatedModel, tea.Batch(cmds...)
+	// Кастуем тип обратно к *model перед возвратом
+	finalModel, ok := updatedModel.(*model)
+	if !ok {
+		// Это не должно произойти, если все update... функции возвращают *model
+		slog.Error("Ошибка каста модели в *model")
+		return m, tea.Quit // Выход в случае серьезной ошибки
+	}
+
+	return finalModel, tea.Batch(cmds...)
 }
 
 // setStatusMessage устанавливает статусное сообщение и запускает таймер для его очистки.
@@ -223,6 +387,8 @@ func (m *model) setStatusMessage(status string) (tea.Model, tea.Cmd) {
 }
 
 // View отрисовывает пользовательский интерфейс.
+//
+//nolint:funlen
 func (m *model) View() string {
 	var mainContent string
 	var help string
@@ -239,7 +405,7 @@ func (m *model) View() string {
 		help = "(Tab - сменить поле, Enter - создать, Esc/Ctrl+C - выход)"
 	case entryListScreen:
 		mainContent = m.entryList.View()
-		help = "(↑/↓ - навигация, Enter - детали, / - поиск, a - добавить, Ctrl+S - сохр., q - выход)"
+		help = "(↑/↓, Enter - детали, / - поиск, a - доб, s - синхр, l - логин, Ctrl+S - сохр, q - вых)"
 	case entryDetailScreen:
 		mainContent = m.viewEntryDetailScreen()
 		help = "(e - ред., Ctrl+S - сохр., Esc/b - назад)"
@@ -255,6 +421,35 @@ func (m *model) View() string {
 	case attachmentPathInputScreen:
 		mainContent = m.viewAttachmentPathInputScreen()
 		help = "(Enter - подтвердить, Esc - отмена)"
+	case syncServerScreen:
+		mainContent = m.viewSyncServerScreen()
+		help = "(↑/↓ - навигация, Enter - выбрать, Esc/b - назад)"
+	case serverURLInputScreen:
+		mainContent = fmt.Sprintf("Введите URL сервера:\n%s", m.serverURLInput.View())
+		help = "(Enter - подтвердить, Esc - назад)"
+	case loginRegisterChoiceScreen:
+		mainContent = "Сервер не настроен или требуется вход.\n\n(Р)егистрация нового пользователя или (В)ход?"
+		help = "(R - регистрация, L - вход, Esc/b - назад)"
+	case loginScreen:
+		mainContent = fmt.Sprintf(`Вход на сервер (%s)
+
+Имя пользователя:
+%s
+
+Пароль:
+%s`,
+			m.serverURL, m.loginUsernameInput.View(), m.loginPasswordInput.View())
+		help = "(Tab - след. поле, Enter - войти, Esc - назад)"
+	case registerScreen:
+		mainContent = fmt.Sprintf(`Регистрация на сервере (%s)
+
+Имя пользователя:
+%s
+
+Пароль:
+%s`,
+			m.serverURL, m.registerUsernameInput.View(), m.registerPasswordInput.View())
+		help = "(Tab - след. поле, Enter - зарегистрироваться, Esc - назад)"
 	default:
 		mainContent = "Неизвестное состояние!"
 	}
@@ -275,23 +470,22 @@ func (m *model) View() string {
 	}
 
 	// Собираем финальный вывод
-	// Для list.View уже есть отступ снизу, для остальных добавляем
-	if m.state == entryListScreen {
-		return mainContent + help + statusLine
-	}
-	// Для детального, редактирования и добавления - добавляем отступ и подсказку
-	if m.state == entryDetailScreen || m.state == entryEditScreen || m.state == entryAddScreen {
-		return mainContent + "\n" + help + statusLine
-	}
-
-	// Для остальных (welcome, password input)
-	return mainContent + "\n" + help + statusLine
+	// Применяем общий стиль к основному контенту
+	styledContent := m.docStyle.Render(mainContent) // Используем стиль из модели
+	// Собираем все вместе
+	return fmt.Sprintf("%s\n%s%s", styledContent, help, statusLine)
 }
 
 // Start запускает TUI приложение.
 func Start(kdbxPath string) {
 	// Создаем начальную модель
 	m := initialModel(kdbxPath) // Передаем путь в initialModel
+
+	// --- Инициализация API клиента ---
+	// TODO: Сделать URL конфигурируемым (флаг, env, KDBX)
+	m.apiClient = api.NewHTTPClient(defaultServerURL)
+	m.serverURL = defaultServerURL // Сохраняем URL в модели
+	slog.Info("API клиент инициализирован", "baseURL", defaultServerURL)
 
 	// --- Реализация flock ---
 	lockPath := kdbxPath + ".lock"
@@ -358,3 +552,156 @@ func Start(kdbxPath string) {
 	}
 	// Успешный выход ПОСЛЕ defer Unlock
 }
+
+// --- Вспомогательные типы и функции ---
+
+// syncMenuItem представляет элемент в меню синхронизации.
+type syncMenuItem struct {
+	title string
+	id    string // Идентификатор для обработки выбора
+}
+
+func (i syncMenuItem) Title() string       { return i.title }
+func (i syncMenuItem) Description() string { return "" } // Описание не нужно
+func (i syncMenuItem) FilterValue() string { return i.title }
+
+// TODO: Перенести update*Screen функции в отдельные файлы или реорганизовать tui.go
+// TODO: Implement updateEntryListScreen function
+// Оставляем только функцию для entryListScreen, так как она была модифицирована
+// Остальные заглушки удалены, так как они дублируют существующие функции
+/* // Удаляем эту функцию, так как она переопределена в list_screen.go
+func (m *model) updateEntryListScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "s":
+			m.state = syncServerScreen
+			// m.syncServerMenu.Focus() // list.Model не имеет Focus()
+			return m, nil
+		case "l":
+			// TODO: Проверить, настроен ли URL и валиден ли токен
+			// Если URL не настроен -> serverUrlInputScreen
+			// Если токен есть, но невалиден -> loginScreen
+			// Если токен валиден -> может быть, просто показать статус?
+			// Пока просто переходим к выбору
+			m.state = loginRegisterChoiceScreen
+			return m, nil
+		// --- Обработка других клавиш списка (Enter, a, /, q и т.д.) ---
+		// ... (нужно будет перенести или скопировать логику из основного Update) ...
+		case keyEnter: // Просмотр деталей
+			selectedItem := m.entryList.SelectedItem()
+			if selectedItem != nil {
+				if entry, ok := selectedItem.(entryItem); ok {
+					m.selectedEntry = &entry
+					m.state = entryDetailScreen
+					m.previousScreenState = entryListScreen // Запоминаем откуда пришли
+					return m, nil
+				}
+			}
+		case keyAdd: // Добавление новой записи
+			if m.readOnlyMode {
+				return m.setStatusMessage("Read-Only режим: добавление запрещено.")
+			}
+			m.state = entryAddScreen
+			m.previousScreenState = entryListScreen
+			// m.initEditInputs(true) // TODO: Убедиться, что эта функция доступна/вызывается правильно
+			return m, textinput.Blink
+		case keyQuit:
+			return m, tea.Quit
+			// Другие клавиши (поиск и т.д.) будут обработаны списком ниже
+		}
+	}
+
+	// Обновляем сам компонент списка
+	var cmd tea.Cmd
+	m.entryList, cmd = m.entryList.Update(msg)
+	return m, cmd
+}
+*/
+
+// --- Функции-заглушки для отображения других экранов были удалены ---
+
+// viewSyncServerScreen отображает экран "Синхронизация и Сервер".
+func (m *model) viewSyncServerScreen() string {
+	serverURLText := m.serverURL // Используем правильное имя переменной
+	if serverURLText == "" {
+		serverURLText = "Не настроен"
+	}
+
+	statusInfo := fmt.Sprintf(
+		"URL Сервера: %s\nСтатус входа: %s\nПоследняя синх.: %s\n",
+		serverURLText,
+		m.loginStatus,
+		m.lastSyncStatus,
+	)
+
+	// Объединяем информацию о статусе и меню действий
+	return statusInfo + "\n" + m.syncServerMenu.View()
+}
+
+// updateSyncServerScreen обрабатывает сообщения для экрана "Синхронизация и Сервер".
+//
+//nolint:gocognit,nestif // TODO: Упростить вложенность и когнитивную сложность
+func (m *model) updateSyncServerScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmds []tea.Cmd
+
+	// Используем if вместо switch т.к. обрабатываем только один тип
+	if keyMsg, ok := msg.(tea.KeyMsg); ok { // Внешний 'ok'
+		switch keyMsg.String() {
+		case keyEnter:
+			selectedItem := m.syncServerMenu.SelectedItem()
+			if item, itemOk := selectedItem.(syncMenuItem); itemOk { // Используем 'itemOk' для внутреннего блока
+				switch item.id {
+				case "configure_url":
+					m.state = serverURLInputScreen
+					// Устанавливаем текущий URL в поле ввода или плейсхолдер
+					if m.serverURL != "" {
+						m.serverURLInput.SetValue(m.serverURL)
+					} else {
+						m.serverURLInput.Placeholder = defaultServerURL
+						m.serverURLInput.SetValue("")
+					}
+					m.serverURLInput.Focus()
+					return m, textinput.Blink
+				case "login_register":
+					if m.serverURL == "" {
+						// Сначала нужно настроить URL
+						m.state = serverURLInputScreen
+						m.serverURLInput.Placeholder = defaultServerURL
+						m.serverURLInput.SetValue("")
+						m.serverURLInput.Focus()
+						return m, textinput.Blink
+					}
+					// URL есть, переходим к выбору Вход/Регистрация (убираем else)
+					m.state = loginRegisterChoiceScreen
+					return m, nil
+				case "sync_now":
+					// TODO: Реализовать логику синхронизации
+					return m.setStatusMessage("TODO: Запуск синхронизации...")
+				case "logout":
+					// TODO: Реализовать логику выхода (очистка токена и т.д.)
+					m.authToken = ""
+					m.loginStatus = "Не выполнен"
+					return m.setStatusMessage("Выход выполнен.")
+					// case "view_versions": // TODO
+				}
+			}
+		case keyEsc, keyBack:
+			// Возврат к списку записей
+			m.state = entryListScreen
+			return m, nil
+		}
+	}
+
+	// Обновляем список меню, если это не было KeyMsg или не обработанное
+	var listCmd tea.Cmd
+	m.syncServerMenu, listCmd = m.syncServerMenu.Update(msg)
+	cmds = append(cmds, listCmd)
+
+	return m, tea.Batch(cmds...)
+}
+
+// TODO: Implement viewServerUrlInputScreen, updateServerUrlInputScreen
+// TODO: Implement viewLoginRegisterChoiceScreen, updateLoginRegisterChoiceScreen
+// TODO: Implement viewLoginScreen, updateLoginScreen
+// TODO: Implement viewRegisterScreen, updateRegisterScreen

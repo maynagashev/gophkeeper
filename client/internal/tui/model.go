@@ -8,7 +8,9 @@ import (
 
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/gofrs/flock"
+	"github.com/maynagashev/gophkeeper/client/internal/api"
 	"github.com/tobischo/gokeepasslib/v3"
 )
 
@@ -25,6 +27,12 @@ const (
 	attachmentListDeleteScreen                    // Экран выбора вложения для удаления
 	attachmentPathInputScreen                     // Экран ввода пути к добавляемому вложению
 	newKdbxPasswordScreen                         // Экран ввода пароля для нового KDBX файла
+	// Новые состояния для синхронизации и сервера.
+	syncServerScreen          screenState = iota // Экран "Синхронизация и Сервер"
+	serverURLInputScreen                         // Экран ввода URL сервера
+	loginRegisterChoiceScreen                    // Экран выбора "Войти или Зарегистрироваться?"
+	loginScreen                                  // Экран ввода данных для входа
+	registerScreen                               // Экран ввода данных для регистрации
 )
 
 // Поля, доступные для редактирования.
@@ -186,6 +194,21 @@ type model struct {
 	confirmationPrompt string          // Текст запроса подтверждения
 	itemToDelete       *attachmentItem // Вложение, выбранное для удаления
 	err                error           // Последняя ошибка для отображения
+
+	// -- Новые поля для интеграции с сервером --
+	apiClient                 api.Client      // Клиент для взаимодействия с API
+	serverURL                 string          // URL сервера
+	authToken                 string          // JWT токен аутентификации
+	loginStatus               string          // Статус входа ("Не выполнен", "Выполнен как...")
+	lastSyncStatus            string          // Статус последней синхронизации
+	syncServerMenu            list.Model      // Меню действий на экране синхронизации
+	serverURLInput            textinput.Model // Поле для ввода URL сервера
+	loginUsernameInput        textinput.Model // Поле для ввода имени пользователя при входе
+	loginPasswordInput        textinput.Model // Поле для ввода пароля при входе
+	registerUsernameInput     textinput.Model // Поле для ввода имени пользователя при регистрации
+	registerPasswordInput     textinput.Model // Поле для ввода пароля при регистрации
+	loginRegisterFocusedField int             // Индекс активного поля на экранах входа/регистрации/URL
+	docStyle                  lipgloss.Style  // Общий стиль для обрамления View
 }
 
 // Сообщение для очистки статуса.

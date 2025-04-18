@@ -1,9 +1,18 @@
 # Корневой Makefile для управления модулями GophKeeper
 
-.PHONY: all build build-client build-server clean clean-client clean-server lint lint-client lint-server test test-client test-server test-coverage
+.PHONY: all server client build build-client build-server clean clean-client clean-server lint lint-client lint-server test test-client test-server test-coverage
 
 # Цель по умолчанию: запустить линтеры и тесты
 all: lint test
+
+# --- Запуск --- #
+server:
+	@echo "Запуск GophKeeper сервера..."
+	@make -C server run
+
+client:
+	@echo "Запуск GophKeeper клиента..."
+	@make -C client run
 
 # --- Сборка --- #
 build: build-client build-server
