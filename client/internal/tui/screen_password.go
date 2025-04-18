@@ -2,7 +2,6 @@ package tui
 
 import (
 	"fmt"
-	"log/slog"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -51,9 +50,10 @@ func (m *model) viewPasswordInputScreen() string {
 }
 
 // handleErrorMsg обрабатывает сообщение об ошибке.
-func (m *model) handleErrorMsg(msg errMsg) (tea.Model, tea.Cmd) {
-	m.err = msg.err
-	slog.Error("Ошибка при работе с KDBX", "error", m.err)
-	m.passwordInput.Blur() // Снимаем фокус, чтобы показать ошибку
-	return m, nil
+func (m *model) handleErrorMsg(msg errMsg) tea.Model /*, tea.Cmd */ {
+	// Устанавливаем статус ошибки и возвращаемся к экрану ввода пароля
+	m.err = msg.err // Сохраняем ошибку в модели
+	m.state = passwordInputScreen
+	m.passwordInput.Focus()
+	return m // , nil // Больше не возвращаем команду
 }
