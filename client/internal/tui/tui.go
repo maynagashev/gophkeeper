@@ -6,10 +6,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/gofrs/flock"
 
 	"github.com/maynagashev/gophkeeper/client/internal/api" // Импортируем пакет API клиента
@@ -22,147 +20,6 @@ const (
 	docStyleMarginVertical   = 1
 	docStyleMarginHorizontal = 2
 )
-
-// initialModel создает начальное состояние модели.
-func initialModel(kdbxPath string) model {
-	// Поле ввода пароля
-	ti := textinput.New()
-	ti.Placeholder = "Мастер-пароль"
-	ti.Focus()
-	ti.CharLimit = 156
-	ti.Width = 20
-	ti.EchoMode = textinput.EchoPassword
-
-	// Компонент списка
-	delegate := list.NewDefaultDelegate()
-	// Настроим цвета для лучшей видимости
-	delegate.Styles.NormalTitle = delegate.Styles.NormalTitle.
-		Foreground(lipgloss.Color("252")). // Светло-серый для обычного заголовка
-		Background(lipgloss.Color("235"))  // Темный фон для контраста
-
-	delegate.Styles.NormalDesc = delegate.Styles.NormalDesc.
-		Foreground(lipgloss.Color("245")). // Темно-серый для обычного описания
-		Background(lipgloss.Color("235"))  // Темный фон для контраста
-
-	delegate.Styles.SelectedTitle = delegate.Styles.SelectedTitle.
-		Foreground(lipgloss.Color("212")). // Яркий розовый для выделенного заголовка
-		Background(lipgloss.Color("237")). // Чуть светлее фон для выделения
-		BorderLeftForeground(lipgloss.Color("212"))
-
-	delegate.Styles.SelectedDesc = delegate.Styles.SelectedDesc.
-		Foreground(lipgloss.Color("240")). // Светло-серый для выделенного описания
-		Background(lipgloss.Color("237")). // Чуть светлее фон для выделения
-		BorderLeftForeground(lipgloss.Color("212"))
-
-	l := list.New([]list.Item{}, delegate, 0, 0)
-	l.Title = "Записи"
-	// Убираем стандартные подсказки Quit и Help, т.к. мы их переопределим
-	l.SetShowHelp(false)
-	l.SetShowStatusBar(true) // Оставляем статус-бар (X items)
-	l.SetFilteringEnabled(true)
-	l.Styles.Title = list.DefaultStyles().Title.Bold(true)
-	l.Styles.PaginationStyle = list.DefaultStyles().PaginationStyle
-	l.Styles.HelpStyle = list.DefaultStyles().HelpStyle
-
-	// Список вложений для удаления
-	attachmentDelList := list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
-	attachmentDelList.Title = "Выберите вложение для удаления"
-	attachmentDelList.SetShowHelp(false)
-	attachmentDelList.SetShowStatusBar(false)
-	attachmentDelList.SetFilteringEnabled(false) // Фильтрация не нужна
-	attachmentDelList.Styles.Title = list.DefaultStyles().Title.Bold(true)
-
-	// Поле ввода пути к файлу вложения
-	pathInput := textinput.New()
-	pathInput.Placeholder = "/path/to/your/file"
-	pathInput.CharLimit = 4096                               // Ограничение на длину пути
-	pathInput.Width = defaultListWidth - passwordInputOffset // Используем ту же ширину, что и пароль
-
-	// Поля для ввода нового пароля
-	newPass1 := textinput.New()
-	newPass1.Placeholder = "Новый мастер-пароль"
-	newPass1.Focus() // Фокус на первом поле
-	newPass1.CharLimit = 156
-	newPass1.Width = 20
-	newPass1.EchoMode = textinput.EchoPassword
-
-	newPass2 := textinput.New()
-	newPass2.Placeholder = "Подтвердите пароль"
-	newPass2.CharLimit = 156
-	newPass2.Width = 20
-	newPass2.EchoMode = textinput.EchoPassword
-
-	// Меню действий на экране синхронизации
-	syncMenuDelegate := list.NewDefaultDelegate() // Можно настроить стили отдельно
-	syncMenuList := list.New([]list.Item{
-		syncMenuItem{title: "Настроить URL сервера", id: "configure_url"},
-		syncMenuItem{title: "Войти / Зарегистрироваться", id: "login_register"},
-		syncMenuItem{title: "Синхронизировать сейчас", id: "sync_now"},
-		syncMenuItem{title: "Выйти", id: "logout"},
-		// syncMenuItem{title: "Просмотреть версии (TODO)", id: "view_versions"},
-	}, syncMenuDelegate, 0, 0)
-	syncMenuList.Title = "Синхронизация и Сервер"
-	syncMenuList.SetShowHelp(false)
-	syncMenuList.SetShowStatusBar(false)
-	syncMenuList.SetFilteringEnabled(false)
-	syncMenuList.Styles.Title = list.DefaultStyles().Title.Bold(true)
-
-	// Поле ввода URL сервера
-	serverURLInput := textinput.New()
-	serverURLInput.Placeholder = defaultServerURL
-	serverURLInput.CharLimit = 1024
-	serverURLInput.Width = 50 // Примерная ширина
-
-	// Поля для входа
-	loginUserInput := textinput.New()
-	loginUserInput.Placeholder = "Имя пользователя"
-	loginUserInput.CharLimit = 128
-	loginUserInput.Width = 30
-
-	loginPassInput := textinput.New()
-	loginPassInput.Placeholder = "Пароль"
-	loginPassInput.CharLimit = 156
-	loginPassInput.Width = 30
-	loginPassInput.EchoMode = textinput.EchoPassword
-
-	// Поля для регистрации (аналогично)
-	regUserInput := textinput.New()
-	regUserInput.Placeholder = "Имя пользователя"
-	regUserInput.CharLimit = 128
-	regUserInput.Width = 30
-
-	regPassInput := textinput.New()
-	regPassInput.Placeholder = "Пароль"
-	regPassInput.CharLimit = 156
-	regPassInput.Width = 30
-	regPassInput.EchoMode = textinput.EchoPassword
-
-	// Стиль для общего обрамления View
-	docStyle := lipgloss.NewStyle().Margin(docStyleMarginVertical, docStyleMarginHorizontal)
-
-	return model{
-		state:               welcomeScreen,
-		passwordInput:       ti,
-		kdbxPath:            kdbxPath,
-		entryList:           l,
-		attachmentList:      attachmentDelList,
-		attachmentPathInput: pathInput,
-		// Инициализируем поля для нового KDBX
-		newPasswordInput1:         newPass1,
-		newPasswordInput2:         newPass2,
-		newPasswordFocusedField:   0, // Фокус на первом поле
-		loginStatus:               "Не выполнен",
-		lastSyncStatus:            "Не синхронизировалось",
-		syncServerMenu:            syncMenuList,
-		serverURLInput:            serverURLInput,
-		loginUsernameInput:        loginUserInput,
-		loginPasswordInput:        loginPassInput,
-		registerUsernameInput:     regUserInput,
-		registerPasswordInput:     regPassInput,
-		loginRegisterFocusedField: 0, // Начинаем с первого поля (URL или username)
-		docStyle:                  docStyle,
-	}
-}
 
 // Init - команда, выполняемая при запуске приложения.
 func (m *model) Init() tea.Cmd {
@@ -479,7 +336,7 @@ func (m *model) View() string {
 // Start запускает TUI приложение.
 func Start(kdbxPath string) {
 	// Создаем начальную модель
-	m := initialModel(kdbxPath) // Передаем путь в initialModel
+	m := initModel(kdbxPath) // Используем initModel из initialization.go
 
 	// --- Инициализация API клиента ---
 	// TODO: Сделать URL конфигурируемым (флаг, env, KDBX)
@@ -522,7 +379,7 @@ func Start(kdbxPath string) {
 	if _, errStat := os.Stat(m.kdbxPath); os.IsNotExist(errStat) {
 		// Файл не существует, переходим на экран создания пароля
 		slog.Info("Файл KDBX не найден, переходим к созданию нового.", "path", m.kdbxPath)
-		m.state = newKdbxPasswordScreen
+		m.state = newKdbxPasswordScreen // Используем константу в нижнем регистре
 		m.newPasswordInput1.Focus()
 		m.newPasswordInput2.Blur()
 	} else if errStat != nil {
@@ -538,6 +395,7 @@ func Start(kdbxPath string) {
 	} else {
 		// Файл существует, оставляем начальное состояние (welcomeScreen -> passwordInputScreen)
 		slog.Info("Файл KDBX найден, запуск стандартного TUI.", "path", m.kdbxPath)
+		// Состояние по умолчанию welcomeScreen в initModel
 	}
 
 	// Используем FullAltScreen для корректной работы списка
