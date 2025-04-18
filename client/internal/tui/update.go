@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/maynagashev/gophkeeper/client/internal/api"
 )
 
 // handleWindowSizeMsg обрабатывает изменение размера окна.
@@ -99,7 +97,7 @@ func handleGlobalKeys(m *model, msg tea.KeyMsg) (tea.Model, tea.Cmd, bool) {
 
 // Update обрабатывает входящие сообщения.
 //
-//nolint:funlen,gocyclo // TODO: Рефакторить роутинг и длину функции
+//nolint:funlen // TODO: Рефакторить роутинг и длину функции (убрали gocyclo)
 func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd         // Собираем команды для батчинга
 	var cmd tea.Cmd            // Команда от обработчика
@@ -154,80 +152,13 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case syncServerScreen:
 		updatedModel, stateCmd = m.updateSyncServerScreen(msg)
 	case serverURLInputScreen:
-		// Обрабатываем Esc и Enter, остальное передаем в textinput
-		if keyMsg, ok := msg.(tea.KeyMsg); ok {
-			switch keyMsg.String() {
-			case keyEsc:
-				m.state = syncServerScreen
-				return m, nil
-			case keyEnter:
-				newURL := m.serverURLInput.Value()
-				if newURL == "" {
-					newURL = m.serverURLInput.Placeholder // Используем плейсхолдер если пусто
-				}
-				// TODO: Добавить валидацию URL?
-				m.serverURL = newURL
-				// Сбрасываем статус, т.к. URL изменился
-				m.loginStatus = "Не выполнен"
-				m.authToken = ""
-				m.apiClient = api.NewHTTPClient(newURL) // Пересоздаем клиент с новым URL
-				slog.Info("URL сервера обновлен", "url", newURL)
-				// Переходим к выбору логина/регистрации
-				m.state = loginRegisterChoiceScreen
-				return m, nil
-			}
-		}
-		// Обновляем поле ввода
-		newInput, inputCmd := m.serverURLInput.Update(msg)
-		m.serverURLInput = newInput
-		stateCmd = inputCmd // Сохраняем команду от textinput
+		updatedModel, stateCmd = m.updateServerURLInputScreen(msg)
 	case loginRegisterChoiceScreen:
-		if keyMsg, ok := msg.(tea.KeyMsg); ok {
-			switch keyMsg.String() {
-			case "r", "R":
-				m.state = registerScreen
-				m.registerUsernameInput.Focus()
-				m.loginRegisterFocusedField = 0
-				return m, textinput.Blink
-			case "l", "L":
-				m.state = loginScreen
-				m.loginUsernameInput.Focus()
-				m.loginRegisterFocusedField = 0
-				return m, textinput.Blink
-			case keyEsc, keyBack:
-				m.state = entryListScreen
-				return m, nil
-			}
-		}
-		// Если не клавиша, то stateCmd будет nil
+		updatedModel, stateCmd = m.updateLoginRegisterChoiceScreen(msg)
 	case loginScreen:
-		var focusedInput *textinput.Model
-		if m.loginRegisterFocusedField == 0 {
-			focusedInput = &m.loginUsernameInput
-		} else {
-			focusedInput = &m.loginPasswordInput
-		}
-		*focusedInput, stateCmd = focusedInput.Update(msg)
-		if keyMsg, ok := msg.(tea.KeyMsg); ok {
-			if keyMsg.String() == keyEsc {
-				m.state = loginRegisterChoiceScreen
-				return m, nil
-			}
-		}
+		updatedModel, stateCmd = m.updateLoginScreen(msg)
 	case registerScreen:
-		var focusedInput *textinput.Model
-		if m.loginRegisterFocusedField == 0 {
-			focusedInput = &m.registerUsernameInput
-		} else {
-			focusedInput = &m.registerPasswordInput
-		}
-		*focusedInput, stateCmd = focusedInput.Update(msg)
-		if keyMsg, ok := msg.(tea.KeyMsg); ok {
-			if keyMsg.String() == keyEsc {
-				m.state = loginRegisterChoiceScreen
-				return m, nil
-			}
-		}
+		updatedModel, stateCmd = m.updateRegisterScreen(msg)
 	default:
 		// Неизвестное состояние - ничего не делаем, updatedModel остается nil?
 		// Это нужно обработать: если updatedModel не был присвоен,
