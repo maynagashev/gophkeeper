@@ -3,7 +3,8 @@
 ## Основные принципы
 
 REST API с JWT-авторизацией:
-- Базовый URL: `/api/v1`
+
+- Базовый URL: `/api`
 - Все запросы кроме `/register` и `/login` требуют заголовок авторизации `Authorization: Bearer <jwt-token>`
 - Ответы возвращаются в формате JSON
 - Для ошибок используются стандартные HTTP-коды состояния с подробным описанием в теле ответа
@@ -12,11 +13,12 @@ REST API с JWT-авторизацией:
 
 ### Регистрация нового пользователя
 
-```
-POST /api/v1/register
+```bash
+POST /api/register
 ```
 
 **Запрос**:
+
 ```json
 {
   "username": "string",
@@ -26,6 +28,7 @@ POST /api/v1/register
 ```
 
 **Успешный ответ** (201 Created):
+
 ```json
 {
   "user_id": "string",
@@ -35,11 +38,12 @@ POST /api/v1/register
 
 ### Аутентификация пользователя
 
-```
-POST /api/v1/login
+```bash
+POST /api/login
 ```
 
 **Запрос**:
+
 ```json
 {
   "username": "string",
@@ -48,6 +52,7 @@ POST /api/v1/login
 ```
 
 **Успешный ответ** (200 OK):
+
 ```json
 {
   "user_id": "string",
@@ -59,11 +64,12 @@ POST /api/v1/login
 
 ### Получение метаданных о файле базы
 
-```
-GET /api/v1/vault
+```bash
+GET /api/vault
 ```
 
 **Успешный ответ** (200 OK):
+
 ```json
 {
   "exists": true,
@@ -76,25 +82,28 @@ GET /api/v1/vault
 
 ### Загрузка файла базы с сервера
 
-```
-GET /api/v1/vault/download
+```bash
+GET /api/vault/download
 ```
 
 **Успешный ответ** (200 OK):
+
 - Бинарные данные зашифрованной базы данных
 - Заголовок `Content-Type: application/octet-stream`
 
 ### Загрузка файла базы на сервер
 
-```
-POST /api/v1/vault/upload
+```bash
+POST /api/vault/upload
 ```
 
 **Запрос**:
+
 - Бинарные данные зашифрованной базы данных
 - Заголовок `Content-Type: application/octet-stream`
 
 **Успешный ответ** (200 OK):
+
 ```json
 {
   "version_id": "string",
@@ -104,11 +113,12 @@ POST /api/v1/vault/upload
 
 ### Получение списка доступных версий
 
-```
-GET /api/v1/vault/versions
+```bash
+GET /api/vault/versions
 ```
 
 **Успешный ответ** (200 OK):
+
 ```json
 {
   "versions": [
@@ -128,6 +138,7 @@ GET /api/v1/vault/versions
 ```
 
 **Параметры ответа**:
+
 - `versions` — массив доступных версий, отсортированный по дате создания (от новых к старым)
 - `current_version_id` — идентификатор текущей активной версии
 - Для каждой версии указываются:
@@ -140,19 +151,20 @@ GET /api/v1/vault/versions
 
 ### Удаление аккаунта пользователя
 
-```
-DELETE /api/v1/account
+```bash
+DELETE /api/account
 ```
 
 **Успешный ответ** (204 No Content)
 
 ### Откат к предыдущей версии базы
 
-```
-POST /api/v1/vault/rollback
+```bash
+POST /api/vault/rollback
 ```
 
 **Запрос**:
+
 ```json
 {
   "version_id": "string" // Опционально. ID версии для отката. Если не указан, откат к последней версии перед текущей
@@ -160,6 +172,7 @@ POST /api/v1/vault/rollback
 ```
 
 **Успешный ответ** (200 OK):
+
 ```json
 {
   "version_id": "string", // ID версии, к которой выполнен откат
@@ -191,4 +204,4 @@ POST /api/v1/vault/rollback
 | 404  | Запрашиваемый ресурс не найден                            |
 | 409  | Конфликт при обновлении данных                            |
 | 429  | Превышен лимит запросов                                   |
-| 500  | Внутренняя ошибка сервера                                 | 
+| 500  | Внутренняя ошибка сервера                                 |

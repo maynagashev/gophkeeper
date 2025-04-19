@@ -106,25 +106,26 @@ func main() {
 		_, _ = w.Write([]byte("pong\n"))
 	})
 
-	// Публичные маршруты (регистрация, вход)
-	r.Route("/api/user", func(r chi.Router) {
+	// Определяем базовый маршрут /api
+	r.Route("/api", func(r chi.Router) {
+		// Публичные маршруты (регистрация, вход) - теперь внутри /api
 		r.Post("/register", authHandler.Register)
 		r.Post("/login", authHandler.Login)
-	})
 
-	// Приватные маршруты (требуют аутентификации)
-	r.Group(func(r chi.Router) {
-		// Применяем middleware аутентификации ко всей группе
-		r.Use(appmiddleware.Authenticator)
+		// Приватные маршруты (требуют аутентификации) - теперь внутри /api
+		r.Group(func(r chi.Router) {
+			// Применяем middleware аутентификации ко всей группе
+			r.Use(appmiddleware.Authenticator)
 
-		// Маршруты для работы с хранилищем
-		r.Route("/api/vault", func(r chi.Router) {
-			r.Get("/", vaultHandler.GetMetadata)
-			r.Post("/upload", vaultHandler.Upload)
-			r.Get("/download", vaultHandler.Download)
-			// Добавляем новые маршруты для версионирования
-			r.Get("/versions", vaultHandler.ListVersions) // Получение списка версий
-			r.Post("/rollback", vaultHandler.Rollback)    // Откат к указанной версии
+			// Маршруты для работы с хранилищем - теперь внутри /api/vault
+			r.Route("/vault", func(r chi.Router) {
+				r.Get("/", vaultHandler.GetMetadata)
+				r.Post("/upload", vaultHandler.Upload)
+				r.Get("/download", vaultHandler.Download)
+				r.Get("/versions", vaultHandler.ListVersions)
+				r.Post("/rollback", vaultHandler.Rollback)
+			})
+			// TODO: Возможно, добавить сюда маршрут /account для удаления?
 		})
 	})
 

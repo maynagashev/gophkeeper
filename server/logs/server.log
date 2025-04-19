@@ -1,3 +1,4 @@
-2025/04/11 01:53:59 [ubuntu/iDTD51HTGa-000001] "GET http://localhost:8080/ping HTTP/1.1" from [::1]:45750 - 200 5B in 48.859µs
-2025/04/11 01:54:08 [ubuntu/iDTD51HTGa-000002] "POST http://localhost:8080/api/user/register HTTP/1.1" from [::1]:42124 - 409 52B in 193.528187ms
-2025/04/11 01:54:13 [ubuntu/iDTD51HTGa-000003] "POST http://localhost:8080/api/user/register HTTP/1.1" from [::1]:42138 - 409 52B in 252.907657ms
+2025/04/19 12:35:33 [ubuntu/FVMOfcqK72-000001] "POST http://localhost:8080/api/register HTTP/1.1" from 127.0.0.1:41658 - 400 88B in 146.473µs
+2025/04/19 12:35:37 [ubuntu/FVMOfcqK72-000002] "POST http://localhost:8080/api/register HTTP/1.1" from 127.0.0.1:41670 - 201 71B in 84.886694ms
+2025/04/19 12:36:02 [ubuntu/FVMOfcqK72-000003] "POST http://localhost:8080/api/login HTTP/1.1" from 127.0.0.1:33718 - 400 88B in 93.019µs
+2025/04/19 12:36:08 [ubuntu/FVMOfcqK72-000004] "POST http://localhost:8080/api/login HTTP/1.1" from 127.0.0.1:33734 - 200 214B in 74.231394ms
