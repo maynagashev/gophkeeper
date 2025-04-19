@@ -50,6 +50,49 @@ func handleDBMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) {
 	}
 }
 
+// handleAPIMsg обрабатывает сообщения от API клиента.
+func handleAPIMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) {
+	switch msg := msg.(type) {
+	case loginSuccessMsg:
+		m.authToken = msg.Token
+		m.loginStatus = fmt.Sprintf("Вход выполнен как %s", m.loginUsernameInput.Value()) // Используем введенное имя
+		m.err = nil                                                                       // Очищаем предыдущие ошибки
+		m.loginUsernameInput.SetValue("")                                                 // Очищаем поля ввода
+		m.loginPasswordInput.SetValue("")
+		m.state = entryListScreen // Переходим к списку записей после успешного входа
+		// TODO: Сохранить токен и URL в KDBX?
+		newM, cmd := m.setStatusMessage("Вход выполнен успешно!")
+		return newM, cmd, true // Сообщение обработано
+
+	case LoginError: // Используем новое имя
+		m.err = msg.err // Сохраняем ошибку для отображения
+		// Остаемся на экране входа (m.state не меняем)
+		newM, cmd := m.setStatusMessage("Ошибка входа") // Краткий статус
+		return newM, cmd, true                          // Сообщение обработано
+
+	// --- Обработка регистрации --- //
+	case registerSuccessMsg:
+		m.err = nil                          // Очищаем предыдущие ошибки
+		m.registerUsernameInput.SetValue("") // Очищаем поля ввода
+		m.registerPasswordInput.SetValue("")
+		// Переводим на экран входа после успешной регистрации
+		m.state = loginScreen
+		m.loginUsernameInput.Focus() // Фокусируемся на поле имени пользователя для входа
+		m.loginRegisterFocusedField = 0
+		newM, cmd := m.setStatusMessage("Регистрация успешна! Теперь войдите.")
+		return newM, cmd, true // Сообщение обработано
+
+	case RegisterError: // Используем новое имя
+		m.err = msg.err // Сохраняем ошибку для отображения
+		// Остаемся на экране регистрации (m.state не меняем)
+		newM, cmd := m.setStatusMessage("Ошибка регистрации") // Краткий статус
+		return newM, cmd, true                                // Сообщение обработано
+
+	default:
+		return m, nil, false // Сообщение не относится к API
+	}
+}
+
 // handleGlobalKeys обрабатывает глобальные сочетания клавиш.
 func handleGlobalKeys(m *model, msg tea.KeyMsg) (tea.Model, tea.Cmd, bool) {
 	switch msg.String() {
@@ -119,12 +162,17 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Если не глобальная клавиша, передаем дальше для обработки по состоянию
 
 	default:
-		// Попытка обработки сообщений БД/статуса
+		// Сначала пытаемся обработать сообщения API
+		updatedModel, cmd, handled = handleAPIMsg(m, msg)
+		if handled {
+			return updatedModel, cmd
+		}
+
+		// Затем пытаемся обработать сообщения БД/статуса
 		updatedModel, cmd, handled = handleDBMsg(m, msg)
 		if handled {
 			return updatedModel, cmd
 		}
-		// Если не сообщение БД/статуса, передаем дальше для обработки по состоянию
 	}
 
 	// == Обработка сообщения в зависимости от текущего состояния ==

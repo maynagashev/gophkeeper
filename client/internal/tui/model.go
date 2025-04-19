@@ -195,7 +195,7 @@ type model struct {
 	itemToDelete       *attachmentItem // Вложение, выбранное для удаления
 	err                error           // Последняя ошибка для отображения
 
-	// -- Новые поля для интеграции с сервером --
+	// -- Поля для интеграции с сервером --
 	apiClient                 api.Client      // Клиент для взаимодействия с API
 	serverURL                 string          // URL сервера
 	authToken                 string          // JWT токен аутентификации

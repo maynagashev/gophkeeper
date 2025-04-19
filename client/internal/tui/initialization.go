@@ -6,7 +6,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// Константы, используемые при инициализации (возможно, стоит переместить, если они используются в других местах).
+// Константы, используемые при инициализации.
 const (
 	initPasswordCharLimit = 156
 	initPasswordWidth     = 20

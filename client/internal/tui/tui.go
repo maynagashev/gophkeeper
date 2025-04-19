@@ -81,30 +81,16 @@ func (m *model) View() string {
 		mainContent = m.viewSyncServerScreen()
 		help = "(↑/↓ - навигация, Enter - выбрать, Esc/b - назад)"
 	case serverURLInputScreen:
-		mainContent = fmt.Sprintf("Введите URL сервера:\n%s", m.serverURLInput.View())
+		mainContent = m.viewServerURLInputScreen()
 		help = "(Enter - подтвердить, Esc - назад)"
 	case loginRegisterChoiceScreen:
-		mainContent = "Сервер не настроен или требуется вход.\n\n(Р)егистрация нового пользователя или (В)ход?"
+		mainContent = m.viewLoginRegisterChoiceScreen()
 		help = "(R - регистрация, L - вход, Esc/b - назад)"
 	case loginScreen:
-		mainContent = fmt.Sprintf(`Вход на сервер (%s)
-
-Имя пользователя:
-%s
-
-Пароль:
-%s`,
-			m.serverURL, m.loginUsernameInput.View(), m.loginPasswordInput.View())
+		mainContent = m.viewLoginScreen()
 		help = "(Tab - след. поле, Enter - войти, Esc - назад)"
 	case registerScreen:
-		mainContent = fmt.Sprintf(`Регистрация на сервере (%s)
-
-Имя пользователя:
-%s
-
-Пароль:
-%s`,
-			m.serverURL, m.registerUsernameInput.View(), m.registerPasswordInput.View())
+		mainContent = m.viewRegisterScreen()
 		help = "(Tab - след. поле, Enter - зарегистрироваться, Esc - назад)"
 	default:
 		mainContent = "Неизвестное состояние!"
@@ -223,6 +209,11 @@ func (i syncMenuItem) Description() string { return "" } // Описание н�
 func (i syncMenuItem) FilterValue() string { return i.title }
 
 // --- Функции-заглушки для отображения других экранов были удалены ---
+
+// viewServerURLInputScreen отображает экран ввода URL сервера.
+func (m *model) viewServerURLInputScreen() string {
+	return fmt.Sprintf("Введите URL сервера:\n%s", m.serverURLInput.View())
+}
 
 // viewSyncServerScreen отображает экран "Синхронизация и Сервер".
 func (m *model) viewSyncServerScreen() string {
