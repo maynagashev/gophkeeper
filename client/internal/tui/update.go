@@ -37,7 +37,7 @@ func handleWindowSizeMsg(m *model, msg tea.WindowSizeMsg) {
 func handleDBMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) {
 	switch msg := msg.(type) {
 	case dbOpenedMsg:
-		newM, cmd := m.handleDBOpenedMsg(msg)
+		newM, cmd := m.handleDBOpenedMsg(msg) // реализация в screen_list.go
 		return newM, cmd, true
 	case errMsg:
 		newM := m.handleErrorMsg(msg)
@@ -53,11 +53,59 @@ func handleDBMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) {
 		m.statusTimer = nil
 		return m, nil, true
 	case SyncError:
+		m.isSyncing = false
 		newM, cmd := m.setStatusMessage(fmt.Sprintf("Ошибка синхронизации: %v", msg.err))
 		return newM, cmd, true
+	case syncStartedMsg:
+		m.isSyncing = true
+		m.receivedServerMeta = false
+		m.receivedLocalMeta = false
+		newM, statusCmd := m.setStatusMessage("Получение метаданных...")
+		fetchCmds := tea.Batch(fetchServerMetadataCmd(m), fetchLocalMetadataCmd(m))
+		return newM, tea.Batch(statusCmd, fetchCmds), true
+	case serverMetadataMsg:
+		if !m.isSyncing {
+			return m, nil, true
+		}
+		m.serverMeta = msg.metadata
+		m.serverMetaFound = msg.found
+		m.receivedServerMeta = true
+		slog.Debug("Получено сообщение serverMetadataMsg", "found", msg.found)
+		if m.receivedLocalMeta {
+			return m.processMetadataResults()
+		}
+		return m, nil, true
+	case localMetadataMsg:
+		if !m.isSyncing {
+			return m, nil, true
+		}
+		m.localMetaModTime = msg.modTime
+		m.localMetaFound = msg.found
+		m.receivedLocalMeta = true
+		slog.Debug("Получено сообщение localMetadataMsg", "found", msg.found)
+		if m.receivedServerMeta {
+			return m.processMetadataResults()
+		}
+		return m, nil, true
 	default:
-		return m, nil, false // Сообщение не обработано этим хендлером
+		return m, nil, false
 	}
+}
+
+// processMetadataResults обрабатывает ситуацию, когда получены и локальные, и серверные метаданные.
+func (m *model) processMetadataResults() (tea.Model, tea.Cmd, bool) {
+	slog.Info("Получены метаданные сервера и локального файла. Запуск сравнения...")
+	slog.Debug("Данные для сравнения",
+		"serverFound", m.serverMetaFound,
+		"serverMetaTime", m.serverMeta.CreatedAt,
+		"localFound", m.localMetaFound,
+		"localMetaTime", m.localMetaModTime,
+	)
+	m.receivedServerMeta = false
+	m.receivedLocalMeta = false
+	m.isSyncing = false
+	newM, statusCmd := m.setStatusMessage("Метаданные получены.")
+	return newM, statusCmd, true
 }
 
 // handleAPIMsg обрабатывает сообщения от API клиента.
@@ -69,6 +117,14 @@ func handleAPIMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) {
 		m.err = nil
 		m.loginUsernameInput.SetValue("")
 		m.loginPasswordInput.SetValue("")
+
+		// Устанавливаем токен в существующем API клиенте
+		if m.apiClient != nil {
+			m.apiClient.SetAuthToken(m.authToken)
+			slog.Debug("Установлен токен в API клиенте после успешного входа")
+		} else {
+			slog.Error("API клиент nil при попытке установить токен после входа")
+		}
 
 		// Сохраняем Auth данные в KDBX (в памяти)
 		if m.db != nil {

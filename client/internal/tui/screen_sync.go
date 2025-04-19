@@ -2,6 +2,7 @@ package tui
 
 import (
 	"fmt"
+	"log/slog"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -77,6 +78,13 @@ func (m *model) updateSyncServerScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 				case "logout":
 					m.authToken = ""
 					m.loginStatus = "Не выполнен"
+					// Очищаем токен и в API клиенте
+					if m.apiClient != nil {
+						m.apiClient.SetAuthToken("")
+						slog.Debug("Токен очищен в API клиенте при выходе")
+					} else {
+						slog.Error("API клиент nil при попытке очистить токен при выходе")
+					}
 					// При выходе из приложения токен не удаляется из KDBX, время жизни токена ограничено параметрами JWT
 					// err := kdbx.SaveAuthData(m.db, m.serverURL, "")
 					return m.setStatusMessage("Выход выполнен.")
