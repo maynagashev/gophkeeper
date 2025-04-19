@@ -222,60 +222,6 @@ func (i syncMenuItem) Title() string       { return i.title }
 func (i syncMenuItem) Description() string { return "" } // Описание не нужно
 func (i syncMenuItem) FilterValue() string { return i.title }
 
-// TODO: Перенести update*Screen функции в отдельные файлы или реорганизовать tui.go
-// TODO: Implement updateEntryListScreen function
-// Оставляем только функцию для entryListScreen, так как она была модифицирована
-// Остальные заглушки удалены, так как они дублируют существующие функции
-/* // Удаляем эту функцию, так как она переопределена в list_screen.go
-func (m *model) updateEntryListScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "s":
-			m.state = syncServerScreen
-			// m.syncServerMenu.Focus() // list.Model не имеет Focus()
-			return m, nil
-		case "l":
-			// TODO: Проверить, настроен ли URL и валиден ли токен
-			// Если URL не настроен -> serverUrlInputScreen
-			// Если токен есть, но невалиден -> loginScreen
-			// Если токен валиден -> может быть, просто показать статус?
-			// Пока просто переходим к выбору
-			m.state = loginRegisterChoiceScreen
-			return m, nil
-		// --- Обработка других клавиш списка (Enter, a, /, q и т.д.) ---
-		// ... (нужно будет перенести или скопировать логику из основного Update) ...
-		case keyEnter: // Просмотр деталей
-			selectedItem := m.entryList.SelectedItem()
-			if selectedItem != nil {
-				if entry, ok := selectedItem.(entryItem); ok {
-					m.selectedEntry = &entry
-					m.state = entryDetailScreen
-					m.previousScreenState = entryListScreen // Запоминаем откуда пришли
-					return m, nil
-				}
-			}
-		case keyAdd: // Добавление новой записи
-			if m.readOnlyMode {
-				return m.setStatusMessage("Read-Only режим: добавление запрещено.")
-			}
-			m.state = entryAddScreen
-			m.previousScreenState = entryListScreen
-			// m.initEditInputs(true) // TODO: Убедиться, что эта функция доступна/вызывается правильно
-			return m, textinput.Blink
-		case keyQuit:
-			return m, tea.Quit
-			// Другие клавиши (поиск и т.д.) будут обработаны списком ниже
-		}
-	}
-
-	// Обновляем сам компонент списка
-	var cmd tea.Cmd
-	m.entryList, cmd = m.entryList.Update(msg)
-	return m, cmd
-}
-*/
-
 // --- Функции-заглушки для отображения других экранов были удалены ---
 
 // viewSyncServerScreen отображает экран "Синхронизация и Сервер".
@@ -357,8 +303,3 @@ func (m *model) updateSyncServerScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	return m, tea.Batch(cmds...)
 }
-
-// TODO: Implement viewServerUrlInputScreen, updateServerUrlInputScreen
-// TODO: Implement viewLoginRegisterChoiceScreen, updateLoginRegisterChoiceScreen
-// TODO: Implement viewLoginScreen, updateLoginScreen
-// TODO: Implement viewRegisterScreen, updateRegisterScreen

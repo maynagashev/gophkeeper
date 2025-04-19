@@ -45,3 +45,12 @@ time=2025-04-19T00:07:37.651+07:00 level=DEBUG msg="Записи, получен
 time=2025-04-19T00:07:37.651+07:00 level=DEBUG msg="Элементы, подготовленные для списка" count=1
 time=2025-04-19T00:07:37.651+07:00 level=DEBUG msg="Элементы в списке после SetItems" count=1
 time=2025-04-19T00:07:39.173+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock
+time=2025-04-19T12:13:45.725+07:00 level=INFO msg="Логгер инициализирован" path=logs/client.log
+time=2025-04-19T12:13:45.725+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию"
+time=2025-04-19T12:13:45.727+07:00 level=INFO msg="API клиент инициализирован" baseURL=http://localhost:8080
+time=2025-04-19T12:13:45.727+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-19T12:13:45.727+07:00 level=INFO msg="Файл KDBX найден, запуск стандартного TUI." path=gophkeeper.kdbx
+time=2025-04-19T12:13:48.418+07:00 level=INFO msg="База KDBX успешно открыта" path=gophkeeper.kdbx
+time=2025-04-19T12:13:48.418+07:00 level=DEBUG msg="Записи, полученные из KDBX" count=1
+time=2025-04-19T12:13:48.418+07:00 level=DEBUG msg="Элементы, подготовленные для списка" count=1
+time=2025-04-19T12:13:48.418+07:00 level=DEBUG msg="Элементы в списке после SetItems" count=1
