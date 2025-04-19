@@ -2,7 +2,6 @@ package tui
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -60,10 +59,9 @@ func (m *model) makeLoginCmd(username, password string) tea.Cmd {
 		ctx := context.Background()
 		token, err := m.apiClient.Login(ctx, username, password)
 		if err != nil {
-			// Возвращаем сообщение об ошибке
-			return LoginError{err: fmt.Errorf("ошибка входа: %w", err)}
+			// Возвращаем исходную ошибку API клиента без добавления контекста
+			return LoginError{err: err}
 		}
-		// Возвращаем сообщение об успехе с токеном
 		return loginSuccessMsg{Token: token}
 	}
 }
@@ -86,7 +84,8 @@ func (m *model) makeRegisterCmd(username, password string) tea.Cmd {
 		ctx := context.Background()
 		err := m.apiClient.Register(ctx, username, password)
 		if err != nil {
-			return RegisterError{err: fmt.Errorf("ошибка регистрации: %w", err)}
+			// Возвращаем исходную ошибку API клиента без добавления контекста
+			return RegisterError{err: err}
 		}
 		return registerSuccessMsg{}
 	}

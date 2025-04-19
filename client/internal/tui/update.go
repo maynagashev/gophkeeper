@@ -68,8 +68,8 @@ func handleAPIMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) {
 	case LoginError:
 		m.err = msg.err
 		newM, statusCmd := m.setStatusMessage("Ошибка входа")
-		// Очистка экрана не нужна, остаемся на том же экране
-		return newM, statusCmd, true
+		// Добавляем очистку экрана, чтобы перерисовать с ошибкой чисто
+		return newM, tea.Batch(statusCmd, tea.ClearScreen), true
 
 	// --- Обработка регистрации --- //
 	case registerSuccessMsg:
@@ -86,8 +86,8 @@ func handleAPIMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) {
 	case RegisterError:
 		m.err = msg.err
 		newM, statusCmd := m.setStatusMessage("Ошибка регистрации")
-		// Очистка экрана не нужна, остаемся на том же экране
-		return newM, statusCmd, true
+		// Добавляем очистку экрана, чтобы перерисовать с ошибкой чисто
+		return newM, tea.Batch(statusCmd, tea.ClearScreen), true
 
 	default:
 		return m, nil, false

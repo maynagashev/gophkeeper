@@ -16,12 +16,12 @@ func (m *model) updateLoginRegisterChoiceScreen(msg tea.Msg) (tea.Model, tea.Cmd
 			m.state = registerScreen
 			m.registerUsernameInput.Focus()
 			m.loginRegisterFocusedField = 0
-			return m, textinput.Blink
+			return m, tea.Batch(textinput.Blink, tea.ClearScreen)
 		case "l", "L":
 			m.state = loginScreen
 			m.loginUsernameInput.Focus()
 			m.loginRegisterFocusedField = 0
-			return m, textinput.Blink
+			return m, tea.Batch(textinput.Blink, tea.ClearScreen)
 		case keyEsc, keyBack:
 			m.state = entryListScreen // Возвращаемся к списку записей
 			return m, nil
