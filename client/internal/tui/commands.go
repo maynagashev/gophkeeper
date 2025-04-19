@@ -2,6 +2,8 @@ package tui
 
 import (
 	"context"
+	"errors"
+	"log/slog"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -88,5 +90,54 @@ func (m *model) makeRegisterCmd(username, password string) tea.Cmd {
 			return RegisterError{err: err}
 		}
 		return registerSuccessMsg{}
+	}
+}
+
+// --- Сообщения и команды для Синхронизации --- //
+
+// SyncError сообщает об ошибке во время процесса синхронизации.
+type SyncError struct {
+	err error
+}
+
+func (e SyncError) Error() string {
+	return e.err.Error()
+}
+
+// startSyncCmd проверяет предусловия и запускает процесс синхронизации.
+func startSyncCmd(m *model) tea.Cmd {
+	return func() tea.Msg {
+		slog.Info("Запуск проверки предусловий для синхронизации...")
+
+		// 1. Проверка URL
+		if m.serverURL == "" {
+			err := errors.New("URL сервера не настроен")
+			slog.Warn("Предусловие синхронизации не выполнено", "error", err)
+			return SyncError{err: err}
+		}
+		// 2. Проверка токена
+		if m.authToken == "" {
+			err := errors.New("необходимо войти на сервер")
+			slog.Warn("Предусловие синхронизации не выполнено", "error", err)
+			return SyncError{err: err}
+		}
+		// 3. Проверка API клиента
+		if m.apiClient == nil {
+			err := errors.New("API клиент не инициализирован")
+			slog.Error("Критическая ошибка: API клиент nil перед синхронизацией")
+			return SyncError{err: err}
+		}
+		// 4. Проверка базы данных
+		if m.db == nil {
+			err := errors.New("локальная база данных не загружена")
+			slog.Error("Критическая ошибка: База данных nil перед синхронизацией")
+			return SyncError{err: err}
+		}
+
+		slog.Info("Предусловия синхронизации выполнены.")
+		// TODO: Здесь будет запуск получения метаданных с сервера
+		// Возвращаем сообщение для обновления статуса (например, "Синхронизация...")
+		// Пока вернем nil, чтобы показать, что проверки пройдены
+		return nil // Заменить на команду получения метаданных
 	}
 }

@@ -73,7 +73,7 @@ func (m *model) updateSyncServerScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.state = loginRegisterChoiceScreen
 					return m, tea.ClearScreen
 				case "sync_now":
-					return m.setStatusMessage("TODO: Запуск синхронизации...")
+					return m, startSyncCmd(m)
 				case "logout":
 					m.authToken = ""
 					m.loginStatus = "Не выполнен"

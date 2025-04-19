@@ -52,6 +52,9 @@ func handleDBMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) {
 		m.savingStatus = ""
 		m.statusTimer = nil
 		return m, nil, true
+	case SyncError:
+		newM, cmd := m.setStatusMessage(fmt.Sprintf("Ошибка синхронизации: %v", msg.err))
+		return newM, cmd, true
 	default:
 		return m, nil, false // Сообщение не обработано этим хендлером
 	}
