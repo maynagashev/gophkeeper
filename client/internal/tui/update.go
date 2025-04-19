@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"log/slog"
 
+	// Убедимся, что импорты на месте.
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/maynagashev/gophkeeper/client/internal/kdbx"
 )
 
 // handleWindowSizeMsg обрабатывает изменение размера окна.
@@ -59,10 +61,27 @@ func handleAPIMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) {
 		m.err = nil
 		m.loginUsernameInput.SetValue("")
 		m.loginPasswordInput.SetValue("")
-		m.state = entryListScreen
-		// TODO: Сохранить токен и URL в KDBX?
+
+		// Сохраняем Auth данные в KDBX (в памяти)
+		if m.db != nil {
+			errSave := kdbx.SaveAuthData(m.db, m.serverURL, m.authToken)
+			if errSave != nil {
+				slog.Error("Ошибка сохранения Auth данных в KDBX (в памяти)", "error", errSave)
+				m.err = fmt.Errorf("ошибка сохранения данных сессии: %w", errSave)
+				m.state = loginScreen // Остаемся на экране входа для показа ошибки
+				newM, statusCmd := m.setStatusMessage("Ошибка сохранения сессии")
+				return newM, tea.Batch(statusCmd, tea.ClearScreen), true // Возвращаемся при ошибке
+			}
+			// Если ошибки не было
+			slog.Info("Auth данные успешно обновлены в KDBX (в памяти)")
+			m.state = entryListScreen // Переходим к списку записей
+		} else {
+			slog.Error("Попытка сохранить Auth данные в KDBX, но m.db is nil")
+			m.state = entryListScreen // Переходим к списку, но без сохранения данных сессии
+		}
+
+		// Возвращаем команды только после успешного сохранения (или если db был nil)
 		newM, statusCmd := m.setStatusMessage("Вход выполнен успешно!")
-		// Добавляем команду очистки экрана
 		return newM, tea.Batch(statusCmd, tea.ClearScreen), true
 
 	case LoginError:
