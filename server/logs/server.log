@@ -2,3 +2,8 @@
 2025/04/19 12:35:37 [ubuntu/FVMOfcqK72-000002] "POST http://localhost:8080/api/register HTTP/1.1" from 127.0.0.1:41670 - 201 71B in 84.886694ms
 2025/04/19 12:36:02 [ubuntu/FVMOfcqK72-000003] "POST http://localhost:8080/api/login HTTP/1.1" from 127.0.0.1:33718 - 400 88B in 93.019µs
 2025/04/19 12:36:08 [ubuntu/FVMOfcqK72-000004] "POST http://localhost:8080/api/login HTTP/1.1" from 127.0.0.1:33734 - 200 214B in 74.231394ms
+2025/04/19 12:55:17 [ubuntu/FVMOfcqK72-000005] "POST http://localhost:8080/api/login HTTP/1.1" from 127.0.0.1:41304 - 200 214B in 91.421313ms
+2025/04/19 12:57:35 [ubuntu/FVMOfcqK72-000006] "POST http://localhost:8080/api/login HTTP/1.1" from 127.0.0.1:46700 - 200 214B in 69.918632ms
+2025/04/19 12:59:53 [ubuntu/FVMOfcqK72-000007] "POST http://localhost:8080/api/login HTTP/1.1" from 127.0.0.1:37638 - 400 88B in 124.143µs
+2025/04/19 12:59:55 [ubuntu/FVMOfcqK72-000008] "POST http://localhost:8080/api/login HTTP/1.1" from 127.0.0.1:37648 - 200 214B in 73.811593ms
+2025/04/19 13:07:11 [ubuntu/FVMOfcqK72-000009] "POST http://localhost:8080/api/login HTTP/1.1" from 127.0.0.1:42802 - 200 214B in 64.928406ms

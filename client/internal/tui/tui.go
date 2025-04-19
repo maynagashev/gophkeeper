@@ -113,9 +113,9 @@ func (m *model) View() string {
 
 	// Собираем финальный вывод
 	// Применяем общий стиль к основному контенту
-	styledContent := m.docStyle.Render(mainContent) // Используем стиль из модели
-	// Собираем все вместе
-	return fmt.Sprintf("%s\n%s%s", styledContent, help, statusLine)
+	styledContent := m.docStyle.Render(mainContent)
+	// Собираем все вместе, всегда добавляя перенос строки перед help
+	return fmt.Sprintf("%s\n%s\n%s", styledContent, help, statusLine)
 }
 
 // Start запускает TUI приложение.

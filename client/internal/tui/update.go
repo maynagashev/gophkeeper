@@ -55,41 +55,42 @@ func handleAPIMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) {
 	switch msg := msg.(type) {
 	case loginSuccessMsg:
 		m.authToken = msg.Token
-		m.loginStatus = fmt.Sprintf("Вход выполнен как %s", m.loginUsernameInput.Value()) // Используем введенное имя
-		m.err = nil                                                                       // Очищаем предыдущие ошибки
-		m.loginUsernameInput.SetValue("")                                                 // Очищаем поля ввода
+		m.loginStatus = fmt.Sprintf("Вход выполнен как %s", m.loginUsernameInput.Value())
+		m.err = nil
+		m.loginUsernameInput.SetValue("")
 		m.loginPasswordInput.SetValue("")
-		m.state = entryListScreen // Переходим к списку записей после успешного входа
+		m.state = entryListScreen
 		// TODO: Сохранить токен и URL в KDBX?
-		newM, cmd := m.setStatusMessage("Вход выполнен успешно!")
-		return newM, cmd, true // Сообщение обработано
+		newM, statusCmd := m.setStatusMessage("Вход выполнен успешно!")
+		// Добавляем команду очистки экрана
+		return newM, tea.Batch(statusCmd, tea.ClearScreen), true
 
-	case LoginError: // Используем новое имя
-		m.err = msg.err // Сохраняем ошибку для отображения
-		// Остаемся на экране входа (m.state не меняем)
-		newM, cmd := m.setStatusMessage("Ошибка входа") // Краткий статус
-		return newM, cmd, true                          // Сообщение обработано
+	case LoginError:
+		m.err = msg.err
+		newM, statusCmd := m.setStatusMessage("Ошибка входа")
+		// Очистка экрана не нужна, остаемся на том же экране
+		return newM, statusCmd, true
 
 	// --- Обработка регистрации --- //
 	case registerSuccessMsg:
-		m.err = nil                          // Очищаем предыдущие ошибки
-		m.registerUsernameInput.SetValue("") // Очищаем поля ввода
+		m.err = nil
+		m.registerUsernameInput.SetValue("")
 		m.registerPasswordInput.SetValue("")
-		// Переводим на экран входа после успешной регистрации
 		m.state = loginScreen
-		m.loginUsernameInput.Focus() // Фокусируемся на поле имени пользователя для входа
+		m.loginUsernameInput.Focus()
 		m.loginRegisterFocusedField = 0
-		newM, cmd := m.setStatusMessage("Регистрация успешна! Теперь войдите.")
-		return newM, cmd, true // Сообщение обработано
+		newM, statusCmd := m.setStatusMessage("Регистрация успешна! Теперь войдите.")
+		// Добавляем команду очистки экрана
+		return newM, tea.Batch(statusCmd, tea.ClearScreen), true
 
-	case RegisterError: // Используем новое имя
-		m.err = msg.err // Сохраняем ошибку для отображения
-		// Остаемся на экране регистрации (m.state не меняем)
-		newM, cmd := m.setStatusMessage("Ошибка регистрации") // Краткий статус
-		return newM, cmd, true                                // Сообщение обработано
+	case RegisterError:
+		m.err = msg.err
+		newM, statusCmd := m.setStatusMessage("Ошибка регистрации")
+		// Очистка экрана не нужна, остаемся на том же экране
+		return newM, statusCmd, true
 
 	default:
-		return m, nil, false // Сообщение не относится к API
+		return m, nil, false
 	}
 }
 
