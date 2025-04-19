@@ -14,11 +14,16 @@ func handleWindowSizeMsg(m *model, msg tea.WindowSizeMsg) {
 	// Обновляем размеры компонентов
 	h, v := m.docStyle.GetFrameSize() // Используем стиль из модели
 	listWidth := msg.Width - h
-	listHeight := msg.Height - v - helpStatusHeightOffset // Используем константу
+	// Высота для основного списка записей
+	entryListHeight := msg.Height - v - helpStatusHeightOffset // Используем константу
 
-	m.entryList.SetSize(listWidth, listHeight)
+	// Высота для меню синхронизации (учитываем строки statusInfo)
+	const statusInfoLines = 4
+	syncMenuHeight := msg.Height - v - statusInfoLines - 1 // -1 для небольшой прокладки/пагинатора
+
+	m.entryList.SetSize(listWidth, entryListHeight)
 	m.passwordInput.Width = msg.Width - passwordInputOffset
-	m.syncServerMenu.SetSize(listWidth, listHeight) // Обновляем размер меню синхронизации
+	m.syncServerMenu.SetSize(listWidth, syncMenuHeight) // Используем новую высоту
 
 	// TODO: Обновить размеры других полей ввода по необходимости
 	m.serverURLInput.Width = listWidth - passwordInputOffset

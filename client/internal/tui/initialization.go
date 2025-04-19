@@ -98,14 +98,16 @@ func initNewKdbxPasswordInputs() (textinput.Model, textinput.Model) {
 // initSyncMenu инициализирует компонент списка для меню синхронизации/сервера.
 func initSyncMenu() list.Model {
 	syncMenuDelegate := list.NewDefaultDelegate()
+	// Устанавливаем ненулевые размеры по умолчанию для диагностики
+	defaultSyncMenuWidth := 40
+	defaultSyncMenuHeight := 16
 	syncMenuList := list.New([]list.Item{
 		syncMenuItem{title: "Настроить URL сервера", id: "configure_url"},
 		syncMenuItem{title: "Войти / Зарегистрироваться", id: "login_register"},
 		syncMenuItem{title: "Синхронизировать сейчас", id: "sync_now"},
-		syncMenuItem{title: "Выйти", id: "logout"},
-		// syncMenuItem{title: "Просмотреть версии (TODO)", id: "view_versions"},
-	}, syncMenuDelegate, 0, 0)
-	syncMenuList.Title = "Синхронизация и Сервер"
+		syncMenuItem{title: "Выйти на сервере", id: "logout"},
+	}, syncMenuDelegate, defaultSyncMenuWidth, defaultSyncMenuHeight)
+	syncMenuList.Title = ""
 	syncMenuList.SetShowHelp(false)
 	syncMenuList.SetShowStatusBar(false)
 	syncMenuList.SetFilteringEnabled(false)

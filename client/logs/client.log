@@ -524,3 +524,112 @@ time=2025-04-20T00:18:00.088+07:00 level=DEBUG msg="Элементы, подго
 time=2025-04-20T00:18:00.088+07:00 level=DEBUG msg="Элементы в списке после SetItems" count=1
 time=2025-04-20T00:18:04.479+07:00 level=INFO msg="Переход к деталям записи" title="Sample Entry"
 time=2025-04-20T00:18:14.030+07:00 level=INFO msg="Возврат к списку записей"
+time=2025-04-20T00:29:32.461+07:00 level=INFO msg="URL сервера обновлен" url=http://localhost:8080
+time=2025-04-20T00:29:50.621+07:00 level=DEBUG msg="Обновлено значение CustomData" key=GophKeeperServerURL
+time=2025-04-20T00:29:50.621+07:00 level=DEBUG msg="Обновлено значение CustomData" key=GophKeeperAuthToken
+time=2025-04-20T00:29:50.621+07:00 level=INFO msg="Auth данные успешно обновлены в KDBX (в памяти)"
+time=2025-04-20T00:33:42.601+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock
+time=2025-04-20T00:33:44.960+07:00 level=INFO msg="Логгер инициализирован" path=logs/client.log
+time=2025-04-20T00:33:44.960+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию" debug_mode=true
+time=2025-04-20T00:33:44.960+07:00 level=INFO msg="API клиент инициализирован" baseURL=http://localhost:8080
+time=2025-04-20T00:33:44.960+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-20T00:33:44.960+07:00 level=INFO msg="Файл KDBX найден, запуск стандартного TUI." path=gophkeeper.kdbx
+time=2025-04-20T00:33:50.423+07:00 level=INFO msg="База KDBX успешно открыта" path=gophkeeper.kdbx
+time=2025-04-20T00:33:50.423+07:00 level=DEBUG msg="Попытка загрузки Auth данных из CustomData" count=2
+time=2025-04-20T00:33:50.423+07:00 level=DEBUG msg="Найден URL сервера в CustomData" key=GophKeeperServerURL value=http://localhost:8080
+time=2025-04-20T00:33:50.423+07:00 level=DEBUG msg="Найден токен в CustomData" key=GophKeeperAuthToken
+time=2025-04-20T00:33:50.423+07:00 level=INFO msg="Auth данные успешно загружены из KDBX" url_found=true token_found=true
+time=2025-04-20T00:33:50.423+07:00 level=DEBUG msg="Записи, полученные из KDBX" count=1
+time=2025-04-20T00:33:50.423+07:00 level=DEBUG msg="Элементы, подготовленные для списка" count=1
+time=2025-04-20T00:33:50.423+07:00 level=DEBUG msg="Элементы в списке после SetItems" count=1
+time=2025-04-20T00:36:06.234+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock
+time=2025-04-20T00:36:08.419+07:00 level=INFO msg="Логгер инициализирован" path=logs/client.log
+time=2025-04-20T00:36:08.419+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию" debug_mode=true
+time=2025-04-20T00:36:08.420+07:00 level=INFO msg="API клиент инициализирован" baseURL=http://localhost:8080
+time=2025-04-20T00:36:08.420+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-20T00:36:08.420+07:00 level=INFO msg="Файл KDBX найден, запуск стандартного TUI." path=gophkeeper.kdbx
+time=2025-04-20T00:36:14.254+07:00 level=INFO msg="База KDBX успешно открыта" path=gophkeeper.kdbx
+time=2025-04-20T00:36:14.254+07:00 level=DEBUG msg="Попытка загрузки Auth данных из CustomData" count=2
+time=2025-04-20T00:36:14.254+07:00 level=DEBUG msg="Найден URL сервера в CustomData" key=GophKeeperServerURL value=http://localhost:8080
+time=2025-04-20T00:36:14.254+07:00 level=DEBUG msg="Найден токен в CustomData" key=GophKeeperAuthToken
+time=2025-04-20T00:36:14.254+07:00 level=INFO msg="Auth данные успешно загружены из KDBX" url_found=true token_found=true
+time=2025-04-20T00:36:14.254+07:00 level=DEBUG msg="Записи, полученные из KDBX" count=1
+time=2025-04-20T00:36:14.254+07:00 level=DEBUG msg="Элементы, подготовленные для списка" count=1
+time=2025-04-20T00:36:14.254+07:00 level=DEBUG msg="Элементы в списке после SetItems" count=1
+time=2025-04-20T00:36:55.503+07:00 level=DEBUG msg="Обновлено значение CustomData" key=GophKeeperServerURL
+time=2025-04-20T00:36:55.503+07:00 level=DEBUG msg="Обновлено значение CustomData" key=GophKeeperAuthToken
+time=2025-04-20T00:36:55.503+07:00 level=INFO msg="Auth данные успешно обновлены в KDBX (в памяти)"
+time=2025-04-20T00:39:39.982+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock
+time=2025-04-20T00:40:07.398+07:00 level=INFO msg="Логгер инициализирован" path=logs/client.log
+time=2025-04-20T00:40:07.398+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию" debug_mode=true
+time=2025-04-20T00:40:07.399+07:00 level=INFO msg="API клиент инициализирован" baseURL=http://localhost:8080
+time=2025-04-20T00:40:07.399+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-20T00:40:07.399+07:00 level=INFO msg="Файл KDBX найден, запуск стандартного TUI." path=gophkeeper.kdbx
+time=2025-04-20T00:40:11.173+07:00 level=INFO msg="База KDBX успешно открыта" path=gophkeeper.kdbx
+time=2025-04-20T00:40:11.173+07:00 level=DEBUG msg="Попытка загрузки Auth данных из CustomData" count=2
+time=2025-04-20T00:40:11.173+07:00 level=DEBUG msg="Найден URL сервера в CustomData" key=GophKeeperServerURL value=http://localhost:8080
+time=2025-04-20T00:40:11.173+07:00 level=DEBUG msg="Найден токен в CustomData" key=GophKeeperAuthToken
+time=2025-04-20T00:40:11.173+07:00 level=INFO msg="Auth данные успешно загружены из KDBX" url_found=true token_found=true
+time=2025-04-20T00:40:11.173+07:00 level=DEBUG msg="Записи, полученные из KDBX" count=1
+time=2025-04-20T00:40:11.173+07:00 level=DEBUG msg="Элементы, подготовленные для списка" count=1
+time=2025-04-20T00:40:11.174+07:00 level=DEBUG msg="Элементы в списке после SetItems" count=1
+time=2025-04-20T00:42:18.346+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock
+time=2025-04-20T00:42:20.303+07:00 level=INFO msg="Логгер инициализирован" path=logs/client.log
+time=2025-04-20T00:42:20.303+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию" debug_mode=true
+time=2025-04-20T00:42:20.304+07:00 level=INFO msg="API клиент инициализирован" baseURL=http://localhost:8080
+time=2025-04-20T00:42:20.304+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-20T00:42:20.304+07:00 level=INFO msg="Файл KDBX найден, запуск стандартного TUI." path=gophkeeper.kdbx
+time=2025-04-20T00:42:23.391+07:00 level=INFO msg="База KDBX успешно открыта" path=gophkeeper.kdbx
+time=2025-04-20T00:42:23.391+07:00 level=DEBUG msg="Попытка загрузки Auth данных из CustomData" count=2
+time=2025-04-20T00:42:23.391+07:00 level=DEBUG msg="Найден URL сервера в CustomData" key=GophKeeperServerURL value=http://localhost:8080
+time=2025-04-20T00:42:23.391+07:00 level=DEBUG msg="Найден токен в CustomData" key=GophKeeperAuthToken
+time=2025-04-20T00:42:23.391+07:00 level=INFO msg="Auth данные успешно загружены из KDBX" url_found=true token_found=true
+time=2025-04-20T00:42:23.391+07:00 level=DEBUG msg="Записи, полученные из KDBX" count=1
+time=2025-04-20T00:42:23.391+07:00 level=DEBUG msg="Элементы, подготовленные для списка" count=1
+time=2025-04-20T00:42:23.391+07:00 level=DEBUG msg="Элементы в списке после SetItems" count=1
+time=2025-04-20T00:42:49.472+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock
+time=2025-04-20T00:42:51.244+07:00 level=INFO msg="Логгер инициализирован" path=logs/client.log
+time=2025-04-20T00:42:51.244+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию" debug_mode=true
+time=2025-04-20T00:42:51.245+07:00 level=INFO msg="API клиент инициализирован" baseURL=http://localhost:8080
+time=2025-04-20T00:42:51.245+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-20T00:42:51.245+07:00 level=INFO msg="Файл KDBX найден, запуск стандартного TUI." path=gophkeeper.kdbx
+time=2025-04-20T00:42:56.956+07:00 level=INFO msg="База KDBX успешно открыта" path=gophkeeper.kdbx
+time=2025-04-20T00:42:56.956+07:00 level=DEBUG msg="Попытка загрузки Auth данных из CustomData" count=2
+time=2025-04-20T00:42:56.956+07:00 level=DEBUG msg="Найден URL сервера в CustomData" key=GophKeeperServerURL value=http://localhost:8080
+time=2025-04-20T00:42:56.956+07:00 level=DEBUG msg="Найден токен в CustomData" key=GophKeeperAuthToken
+time=2025-04-20T00:42:56.956+07:00 level=INFO msg="Auth данные успешно загружены из KDBX" url_found=true token_found=true
+time=2025-04-20T00:42:56.956+07:00 level=DEBUG msg="Записи, полученные из KDBX" count=1
+time=2025-04-20T00:42:56.956+07:00 level=DEBUG msg="Элементы, подготовленные для списка" count=1
+time=2025-04-20T00:42:56.956+07:00 level=DEBUG msg="Элементы в списке после SetItems" count=1
+time=2025-04-20T00:43:03.983+07:00 level=INFO msg="URL сервера обновлен" url=http://localhost:8080
+time=2025-04-20T00:44:33.745+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock
+time=2025-04-20T00:47:22.747+07:00 level=INFO msg="Логгер инициализирован" path=logs/client.log
+time=2025-04-20T00:47:22.747+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию" debug_mode=true
+time=2025-04-20T00:47:22.748+07:00 level=INFO msg="API клиент инициализирован" baseURL=http://localhost:8080
+time=2025-04-20T00:47:22.748+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-20T00:47:22.748+07:00 level=INFO msg="Файл KDBX найден, запуск стандартного TUI." path=gophkeeper.kdbx
+time=2025-04-20T00:47:24.955+07:00 level=INFO msg="База KDBX успешно открыта" path=gophkeeper.kdbx
+time=2025-04-20T00:47:24.955+07:00 level=DEBUG msg="Попытка загрузки Auth данных из CustomData" count=2
+time=2025-04-20T00:47:24.955+07:00 level=DEBUG msg="Найден URL сервера в CustomData" key=GophKeeperServerURL value=http://localhost:8080
+time=2025-04-20T00:47:24.955+07:00 level=DEBUG msg="Найден токен в CustomData" key=GophKeeperAuthToken
+time=2025-04-20T00:47:24.955+07:00 level=INFO msg="Auth данные успешно загружены из KDBX" url_found=true token_found=true
+time=2025-04-20T00:47:24.955+07:00 level=DEBUG msg="Записи, полученные из KDBX" count=1
+time=2025-04-20T00:47:24.955+07:00 level=DEBUG msg="Элементы, подготовленные для списка" count=1
+time=2025-04-20T00:47:24.955+07:00 level=DEBUG msg="Элементы в списке после SetItems" count=1
+time=2025-04-20T00:47:32.058+07:00 level=INFO msg="URL сервера обновлен" url=http://localhost:8080
+time=2025-04-20T00:48:49.157+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock
+time=2025-04-20T00:48:51.919+07:00 level=INFO msg="Логгер инициализирован" path=logs/client.log
+time=2025-04-20T00:48:51.919+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию" debug_mode=true
+time=2025-04-20T00:48:51.920+07:00 level=INFO msg="API клиент инициализирован" baseURL=http://localhost:8080
+time=2025-04-20T00:48:51.920+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-20T00:48:51.920+07:00 level=INFO msg="Файл KDBX найден, запуск стандартного TUI." path=gophkeeper.kdbx
+time=2025-04-20T00:48:58.391+07:00 level=INFO msg="База KDBX успешно открыта" path=gophkeeper.kdbx
+time=2025-04-20T00:48:58.391+07:00 level=DEBUG msg="Попытка загрузки Auth данных из CustomData" count=2
+time=2025-04-20T00:48:58.391+07:00 level=DEBUG msg="Найден URL сервера в CustomData" key=GophKeeperServerURL value=http://localhost:8080
+time=2025-04-20T00:48:58.391+07:00 level=DEBUG msg="Найден токен в CustomData" key=GophKeeperAuthToken
+time=2025-04-20T00:48:58.391+07:00 level=INFO msg="Auth данные успешно загружены из KDBX" url_found=true token_found=true
+time=2025-04-20T00:48:58.391+07:00 level=DEBUG msg="Записи, полученные из KDBX" count=1
+time=2025-04-20T00:48:58.391+07:00 level=DEBUG msg="Элементы, подготовленные для списка" count=1
+time=2025-04-20T00:48:58.391+07:00 level=DEBUG msg="Элементы в списке после SetItems" count=1
+time=2025-04-20T00:49:01.311+07:00 level=INFO msg="URL сервера обновлен" url=http://localhost:8080
+time=2025-04-20T00:49:36.686+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock

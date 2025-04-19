@@ -23,7 +23,7 @@ func (i syncMenuItem) FilterValue() string { return i.title }
 
 // viewSyncServerScreen отображает экран "Синхронизация и Сервер".
 func (m *model) viewSyncServerScreen() string {
-	serverURLText := m.serverURL // Используем правильное имя переменной
+	serverURLText := m.serverURL
 	if serverURLText == "" {
 		serverURLText = "Не настроен"
 	}
@@ -35,8 +35,9 @@ func (m *model) viewSyncServerScreen() string {
 		m.lastSyncStatus,
 	)
 
-	// Объединяем информацию о статусе и меню действий
-	return statusInfo + "\n" + m.syncServerMenu.View()
+	// Объединяем информацию о статусе и РЕНДЕР МЕНЮ
+	// Добавляем перенос строки между ними для четкого разделения.
+	return statusInfo + m.syncServerMenu.View()
 }
 
 // updateSyncServerScreen обрабатывает сообщения для экрана "Синхронизация и Сервер".
@@ -60,23 +61,23 @@ func (m *model) updateSyncServerScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 						m.serverURLInput.SetValue("")
 					}
 					m.serverURLInput.Focus()
-					return m, textinput.Blink
+					return m, tea.Batch(textinput.Blink, tea.ClearScreen)
 				case "login_register":
 					if m.serverURL == "" {
 						m.state = serverURLInputScreen
 						m.serverURLInput.Placeholder = defaultServerURL
 						m.serverURLInput.SetValue("")
 						m.serverURLInput.Focus()
-						return m, textinput.Blink
+						return m, tea.Batch(textinput.Blink, tea.ClearScreen)
 					}
 					m.state = loginRegisterChoiceScreen
-					return m, nil
+					return m, tea.ClearScreen
 				case "sync_now":
 					return m.setStatusMessage("TODO: Запуск синхронизации...")
 				case "logout":
 					m.authToken = ""
 					m.loginStatus = "Не выполнен"
-					// TODO: Нужно ли удалять токен из KDBX при выходе?
+					// При выходе из приложения токен не удаляется из KDBX, время жизни токена ограничено параметрами JWT
 					// err := kdbx.SaveAuthData(m.db, m.serverURL, "")
 					return m.setStatusMessage("Выход выполнен.")
 				}
