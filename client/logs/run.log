@@ -57,94 +57,51 @@
 
 
 
-[13;H[H
-
-  > ****                                      
-
-
-
-
-
-
-
-
-
-[13;H[H                                                                                                          
-  Введите мастер-пароль для gophkeeper.kdbx:                                                              
-  > Мастер-пароль                                                                                         
-                                                                                                          
-                                                                                                          
-  Ошибка: ошибка дешифрования файла 'gophkeeper.kdbx': Wrong password? HMAC-SHA256 of header mismatching  
-                                                                                                          
-  (Нажмите любую клавишу для продолжения)                                                                 
-                                                                                                          
-(Enter - подтвердить, Ctrl+C - выход)
----
-Отладка:
- [State: passwordInputScreen]
- [URL: http://localhost:8080]
- [Token: ]
-[16;H[H                                              
-  Введите мастер-пароль для gophkeeper.kdbx:  
-  > Мастер-пароль                             
-                                              
-                                              
-                                              
-(Enter - подтвердить, Ctrl+C - выход)
----
-Отладка:
- [State: passwordInputScreen]
- [URL: http://localhost:8080]
- [Token: ]
-[J[13;H[H
-
-  > *                                         
-
-
-
-
-
-
-
-
-
-[13;H[H
-
-  > **                                        
-
-
-
-
-
-
-
-
-
-[13;H[H
-
-  > ***                                       
-
-
-
-
-
-
-
-
-
-[13;H[H
-
-  > Мастер-пароль                             
-
-
-
-
-
-
-
-
-
 [13;H[2J[H[H                                        
+     Записи в 'gophkeeper.kdbx' (1)     
+                                        
+    1 item                              
+                                        
+  │ Sample Entry                        
+  │                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+(↑/↓, Enter - детали, / - поиск, a - доб, s - синхр, l - логин, Ctrl+S - сохр, q - вых)
+---
+Отладка:
+ [State: entryListScreen]
+ [URL: http://localhost:8080]
+ [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTE1OTc5MSwibmJmIjoxNzQ1MDczMzkxLCJpYXQiOjE3NDUwNzMzOTF9.AHCv8rQ1mq3m2CfFLUHoY8hlLwKgBETL318q-EFY0-o]
+[33;H[2J[H[H                               
+  Детали записи: Sample Entry  
+                               
+  Title: Sample Entry          
+                               
+                               
+(e - ред., Ctrl+S - сохр., Esc/b - назад)
+---
+Отладка:
+ [State: entryDetailScreen]
+ [URL: http://localhost:8080]
+ [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTE1OTc5MSwibmJmIjoxNzQ1MDczMzkxLCJpYXQiOjE3NDUwNzMzOTF9.AHCv8rQ1mq3m2CfFLUHoY8hlLwKgBETL318q-EFY0-o]
+[J[13;H[2J[H[H                                        
      Записи в 'gophkeeper.kdbx' (1)     
                                         
     1 item                              
@@ -191,277 +148,7 @@
  [State: syncServerScreen]
  [URL: http://localhost:8080]
  [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTE1OTc5MSwibmJmIjoxNzQ1MDczMzkxLCJpYXQiOjE3NDUwNzMzOTF9.AHCv8rQ1mq3m2CfFLUHoY8hlLwKgBETL318q-EFY0-o]
-[J[16;H[H
-
-
-
-
-
-
-    2/4                                           
-
-
-
-
-
-
-
-[16;H[H
-
-
-
-
-
-
-    3/4                                           
-
-
-
-
-
-
-
-[16;H[H
-
-
-
-
-
-
-    4/4                                           
-
-
-
-
-
-
-
-[16;H[H
-
-
-
-
-
-
-    3/4                                           
-
-
-
-
-
-
-
-[16;H[H
-
-
-
-
-
-
-    2/4                                           
-
-
-
-
-
-
-
-[16;H[H
-
-
-
-
-
-
-    1/4                                           
-
-
-
-
-
-
-
-[16;H[H
-
-
-
-
-
-
-    2/4                                           
-
-
-
-
-
-
-
-[16;H[H
-
-
-
-
-
-
-    3/4                                           
-
-
-
-
-
-
-
-[16;H[H
-
-
-
-
-
-
-    4/4                                           
-
-
-
-
-
-
-
-[16;H[H
-
-
-
-
-
-
-    3/4                                           
-
-
-
-
-
-
-
-[16;H[H
-
-
-
-
-
-
-    2/4                                           
-
-
-
-
-
-
-
-[16;H[H
-
-
-
-
-
-
-    1/4                                           
-
-
-
-
-
-
-
-[16;H[H
-
-
-
-
-
-
-    2/4                                           
-
-
-
-
-
-
-
-[16;H[H
-
-
-
-
-
-
-    3/4                                           
-
-
-
-
-
-
-
-[16;H[H
-
-
-
-
-
-
-    4/4                                           
-
-
-
-
-
-
-
-[16;H[H
-
-
-
-
-
-
-    3/4                                           
-
-
-
-
-
-
-
-[16;H[H
-
-
-
-
-
-
-    2/4                                           
-
-
-
-
-
-
-
-[16;H[H
-
-
-
-
-
-
-    1/4                                           
-
-
-
-
-
-
-
-[16;H[H                                        
+[J[16;H[2J[H[H                                        
      Записи в 'gophkeeper.kdbx' (1)     
                                         
     1 item                              
@@ -493,4 +180,4 @@
  [State: entryListScreen]
  [URL: http://localhost:8080]
  [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTE1OTc5MSwibmJmIjoxNzQ1MDczMzkxLCJpYXQiOjE3NDUwNzMzOTF9.AHCv8rQ1mq3m2CfFLUHoY8hlLwKgBETL318q-EFY0-o]
-[33;H[2K[?2004l[?25h[?1002l[?1003l[?1006l[?1049l[?25h
+[33;H
