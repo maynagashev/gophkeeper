@@ -42,8 +42,8 @@ func (m *model) viewLoginRegisterChoiceScreen() string {
 	b.WriteString(titleStyle.Render("Настройка сервера") + "\n\n")
 	b.WriteString("Сервер настроен: " + m.serverURL + "\n\n") // Показываем настроенный URL
 	b.WriteString("Выберите действие:\n")
-	b.WriteString(focusedStyle.Render("(Р)") + "егистрация нового пользователя\n")
-	b.WriteString(focusedStyle.Render("(В)") + "ход с существующими данными\n\n")
+	b.WriteString("- Регистрация нового пользователя " + focusedStyle.Render("(R)") + "\n")
+	b.WriteString("- Вход с существующими данными " + focusedStyle.Render("(L)") + "\n\n")
 	b.WriteString(subtleStyle.Render("Нажмите Esc для возврата"))
 
 	return b.String()

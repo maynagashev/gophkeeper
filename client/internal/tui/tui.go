@@ -94,7 +94,16 @@ func (m *model) View() string {
 		help = "(Tab - след. поле, Enter - зарегистрироваться, Esc - назад)"
 	default:
 		mainContent = "Неизвестное состояние!"
+		// Для неизвестного состояния тоже добавим имя, если оно есть
+		if m.state.String() != "" {
+			help = "State: " + m.state.String()
+		} else {
+			help = "Unknown state"
+		}
 	}
+
+	// Добавляем имя состояния к help для отладки
+	help = help + "\n---\n" + m.state.String()
 
 	// Добавляем статус сохранения или Read-Only, если он есть и мы не на определенных экранах
 	statusLine := ""
