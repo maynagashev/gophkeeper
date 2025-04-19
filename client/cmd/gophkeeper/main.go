@@ -47,8 +47,9 @@ func main() {
 	// Настройка логирования
 	setupLogging()
 
-	// Определение флага для пути к KDBX файлу
+	// Определение флагов
 	kdbxPathFlag := flag.String("db", defaultDBPath, "Путь к файлу базы данных KDBX (переопределяет "+dbPathEnvVar+")")
+	debugModeFlag := flag.Bool("debug", false, "Включить режим отладки TUI")
 
 	// Парсинг флагов командной строки
 	flag.Parse()
@@ -85,8 +86,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	slog.Info("Запуск GophKeeper", "db_path", finalPath, "source", source)
+	slog.Info("Запуск GophKeeper", "db_path", finalPath, "source", source, "debug_mode", *debugModeFlag)
 
-	// Запускаем TUI, передавая финальный путь
-	tui.Start(finalPath)
+	// Запускаем TUI, передавая финальный путь и флаг отладки
+	tui.Start(finalPath, *debugModeFlag)
 }

@@ -159,7 +159,7 @@ func initDocStyle() lipgloss.Style {
 }
 
 // initModel создает начальное состояние модели.
-func initModel(kdbxPath string) model {
+func initModel(kdbxPath string, debugMode bool) model {
 	passwordInput := initPasswordInput()
 	entryList := initEntryList()
 	attachmentDelList := initAttachmentDeleteList()
@@ -191,5 +191,6 @@ func initModel(kdbxPath string) model {
 		registerPasswordInput:     regPassInput,
 		loginRegisterFocusedField: 0,
 		docStyle:                  docStyle,
+		debugMode:                 debugMode,
 	}
 }

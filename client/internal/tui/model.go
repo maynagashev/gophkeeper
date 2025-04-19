@@ -245,6 +245,7 @@ type model struct {
 	registerPasswordInput     textinput.Model // Поле для ввода пароля при регистрации
 	loginRegisterFocusedField int             // Индекс активного поля на экранах входа/регистрации/URL
 	docStyle                  lipgloss.Style  // Общий стиль для обрамления View
+	debugMode                 bool            // Флаг режима отладки
 }
 
 // Сообщение для очистки статуса.

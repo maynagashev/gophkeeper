@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -94,16 +95,22 @@ func (m *model) View() string {
 		help = "(Tab - след. поле, Enter - зарегистрироваться, Esc - назад)"
 	default:
 		mainContent = "Неизвестное состояние!"
-		// Для неизвестного состояния тоже добавим имя, если оно есть
-		if m.state.String() != "" {
+		if m.debugMode {
 			help = "State: " + m.state.String()
 		} else {
 			help = "Unknown state"
 		}
 	}
 
-	// Добавляем имя состояния к help для отладки
-	help = help + "\n---\n" + m.state.String()
+	// Добавляем отладочную информацию, если включен debugMode
+	if m.debugMode {
+		var debugInfo strings.Builder
+		debugInfo.WriteString(" [State: " + m.state.String() + "]\n")
+		debugInfo.WriteString(" [URL: " + m.serverURL + "]\n")
+		// Выводим сам токен (или пустоту, если его нет)
+		debugInfo.WriteString(" [Token: " + m.authToken + "]")
+		help = help + "\n---\nОтладка:\n" + debugInfo.String()
+	}
 
 	// Добавляем статус сохранения или Read-Only, если он есть и мы не на определенных экранах
 	statusLine := ""
@@ -128,9 +135,9 @@ func (m *model) View() string {
 }
 
 // Start запускает TUI приложение.
-func Start(kdbxPath string) {
-	// Создаем начальную модель
-	m := initModel(kdbxPath) // Используем initModel из initialization.go
+func Start(kdbxPath string, debugMode bool) {
+	// Создаем начальную модель, передавая флаг
+	m := initModel(kdbxPath, debugMode)
 
 	// --- Инициализация API клиента ---
 	// TODO: Сделать URL конфигурируемым (флаг, env, KDBX)
