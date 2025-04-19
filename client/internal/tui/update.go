@@ -3,6 +3,7 @@ package tui
 import (
 	"fmt"
 	"log/slog"
+	"time"
 
 	// Убедимся, что импорты на месте.
 	tea "github.com/charmbracelet/bubbletea"
@@ -95,9 +96,16 @@ func handleDBMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) {
 // processMetadataResults обрабатывает ситуацию, когда получены и локальные, и серверные метаданные.
 func (m *model) processMetadataResults() (tea.Model, tea.Cmd, bool) {
 	slog.Info("Получены метаданные сервера и локального файла. Запуск сравнения...")
+
+	// Определяем время создания сервера, обрабатывая случай nil
+	var serverCreatedAt time.Time
+	if m.serverMeta != nil {
+		serverCreatedAt = m.serverMeta.CreatedAt
+	}
+
 	slog.Debug("Данные для сравнения",
 		"serverFound", m.serverMetaFound,
-		"serverMetaTime", m.serverMeta.CreatedAt,
+		"serverMetaTime", serverCreatedAt, // Используем переменную
 		"localFound", m.localMetaFound,
 		"localMetaTime", m.localMetaModTime,
 	)

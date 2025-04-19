@@ -66,3 +66,7 @@ test-server:
 test-coverage:
 	@echo "Генерация отчета о покрытии для клиента..."
 	@make -C client test-coverage
+
+migrate:
+	@echo "Применение миграций..."
+	@make -C server migrate
