@@ -58,7 +58,7 @@ db-up:
 	@docker-compose up -d postgres
 
 # Применение миграций с использованием Docker
-migrate-up:
+migrate:
 	@echo "Применение миграций БД из ${MIGRATIONS_PATH} с помощью Docker ${MIGRATE_IMAGE}..."
 	@docker run --rm -v $$(pwd)/${MIGRATIONS_PATH}:/migrations --network host ${MIGRATE_IMAGE} -path /migrations -database "${DATABASE_URL}" up
 

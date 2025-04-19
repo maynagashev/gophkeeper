@@ -11,6 +11,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/gofrs/flock"
 	"github.com/maynagashev/gophkeeper/client/internal/api"
+	"github.com/maynagashev/gophkeeper/models"
 	"github.com/tobischo/gokeepasslib/v3"
 )
 
@@ -246,6 +247,15 @@ type model struct {
 	loginRegisterFocusedField int             // Индекс активного поля на экранах входа/регистрации/URL
 	docStyle                  lipgloss.Style  // Общий стиль для обрамления View
 	debugMode                 bool            // Флаг режима отладки
+
+	// -- Поля для состояния синхронизации --
+	isSyncing          bool                 // Флаг: идет ли процесс синхронизации
+	serverMeta         *models.VaultVersion // Метаданные сервера
+	serverMetaFound    bool                 // Найдены ли метаданные на сервере
+	localMetaModTime   time.Time            // Время модификации локального файла
+	localMetaFound     bool                 // Найден ли локальный файл
+	receivedServerMeta bool                 // Флаг: получены ли метаданные сервера
+	receivedLocalMeta  bool                 // Флаг: получены ли метаданные локального файла
 }
 
 // Сообщение для очистки статуса.

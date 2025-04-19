@@ -30,6 +30,8 @@ type Client interface {
 	ListVersions(ctx context.Context, limit, offset int) ([]models.VaultVersion, error)
 	// RollbackToVersion откатывает хранилище к указанной версии.
 	RollbackToVersion(ctx context.Context, versionID int64) error
+	// SetAuthToken устанавливает JWT токен для аутентифицированных запросов.
+	SetAuthToken(token string)
 }
 
 // httpClient реализует интерфейс Client для взаимодействия с сервером по HTTP.
@@ -373,6 +375,13 @@ func (c *httpClient) RollbackToVersion(ctx context.Context, versionID int64) err
 	}
 
 	return nil // Успешный откат
+}
+
+// SetAuthToken устанавливает токен аутентификации для клиента.
+func (c *httpClient) SetAuthToken(token string) {
+	c.authToken = token
+	// Можно добавить логирование при необходимости
+	// slog.Debug("Auth token set in API client")
 }
 
 // --- Конец методов API клиента ---
