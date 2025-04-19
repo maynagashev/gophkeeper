@@ -7,7 +7,13 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 
+	// Убедимся, что импорт есть.
 	"github.com/maynagashev/gophkeeper/client/internal/kdbx"
+)
+
+// Добавляем константу для статуса.
+const (
+	statusNotLoggedIn = "Не выполнен"
 )
 
 // updateEntryListScreen обрабатывает сообщения для экрана списка записей.
@@ -68,11 +74,35 @@ func (m *model) updateEntryListScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m *model) handleDBOpenedMsg(msg dbOpenedMsg) (tea.Model, tea.Cmd) {
 	m.db = msg.db
 	m.err = nil
-	// Пароль уже сохранен в m.password при вызове openKdbxCmd
-	prevState := m.state // Сохраняем предыдущее состояние
+	prevState := m.state
 	m.state = entryListScreen
 	slog.Info("База KDBX успешно открыта", "path", m.kdbxPath)
 
+	// <<< НАЧАЛО: Загрузка Auth данных >>>
+	loadedURL, loadedToken, errLoad := kdbx.LoadAuthData(m.db)
+	if errLoad != nil {
+		// Просто логируем ошибку, не прерываем работу
+		slog.Error("Ошибка загрузки Auth данных из KDBX", "error", errLoad)
+		// Устанавливаем пустые значения по умолчанию
+		m.serverURL = ""
+		m.authToken = ""
+		m.loginStatus = statusNotLoggedIn + " (ошибка загрузки)" // Используем константу
+	} else {
+		// Сохраняем загруженные данные в модель
+		m.serverURL = loadedURL
+		m.authToken = loadedToken
+		// Обновляем статус входа
+		if m.authToken != "" {
+			m.loginStatus = "Вход выполнен (сессия загружена)"
+			slog.Info("Auth данные успешно загружены из KDBX", "url_found", m.serverURL != "", "token_found", m.authToken != "")
+		} else {
+			m.loginStatus = statusNotLoggedIn // Используем константу
+			slog.Info("Auth данные не найдены в KDBX")
+		}
+	}
+	// <<< КОНЕЦ: Загрузка Auth данных >>>
+
+	// --- Существующий код для заполнения списка ---
 	entries := kdbx.GetAllEntries(m.db)
 	slog.Debug("Записи, полученные из KDBX", "count", len(entries))
 
@@ -81,20 +111,17 @@ func (m *model) handleDBOpenedMsg(msg dbOpenedMsg) (tea.Model, tea.Cmd) {
 		items[i] = entryItem{entry: entry}
 	}
 
-	// Перед установкой элементов, проверим их количество
 	slog.Debug("Элементы, подготовленные для списка", "count", len(items))
-	m.entryList.SetItems(items)
+	// Используем m.entryList.SetItems, а не listCmd, так как команда теперь не используется
+	_ = m.entryList.SetItems(items) // Команду от SetItems пока игнорируем
 
-	// Проверим количество элементов в списке после установки
 	slog.Debug("Элементы в списке после SetItems", "count", len(m.entryList.Items()))
 
-	// Установим размер списка явно
 	m.entryList.SetWidth(defaultListWidth)
 	m.entryList.SetHeight(defaultListHeight)
-
 	m.entryList.Title = fmt.Sprintf("Записи в '%s' (%d)", m.kdbxPath, len(items))
 
-	// Явно очищаем экран при переходе на список записей
+	// --- Команды для возврата ---
 	dbOpenedCmds := []tea.Cmd{}
 	if prevState != entryListScreen {
 		dbOpenedCmds = append(dbOpenedCmds, tea.ClearScreen)
