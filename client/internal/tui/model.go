@@ -35,6 +35,42 @@ const (
 	registerScreen                               // Экран ввода данных для регистрации
 )
 
+// String возвращает строковое представление screenState.
+func (s screenState) String() string {
+	switch s {
+	case welcomeScreen:
+		return "welcomeScreen"
+	case passwordInputScreen:
+		return "passwordInputScreen"
+	case newKdbxPasswordScreen:
+		return "newKdbxPasswordScreen"
+	case entryListScreen:
+		return "entryListScreen"
+	case entryDetailScreen:
+		return "entryDetailScreen"
+	case entryEditScreen:
+		return "entryEditScreen"
+	case entryAddScreen:
+		return "entryAddScreen"
+	case attachmentListDeleteScreen:
+		return "attachmentListDeleteScreen"
+	case attachmentPathInputScreen:
+		return "attachmentPathInputScreen"
+	case syncServerScreen:
+		return "syncServerScreen"
+	case serverURLInputScreen:
+		return "serverURLInputScreen"
+	case loginRegisterChoiceScreen:
+		return "loginRegisterChoiceScreen"
+	case loginScreen:
+		return "loginScreen"
+	case registerScreen:
+		return "registerScreen"
+	default:
+		return fmt.Sprintf("unknownScreen(%d)", s)
+	}
+}
+
 // Поля, доступные для редактирования.
 const (
 	// Стандартные поля.
@@ -195,7 +231,7 @@ type model struct {
 	itemToDelete       *attachmentItem // Вложение, выбранное для удаления
 	err                error           // Последняя ошибка для отображения
 
-	// -- Новые поля для интеграции с сервером --
+	// -- Поля для интеграции с сервером --
 	apiClient                 api.Client      // Клиент для взаимодействия с API
 	serverURL                 string          // URL сервера
 	authToken                 string          // JWT токен аутентификации
@@ -209,6 +245,7 @@ type model struct {
 	registerPasswordInput     textinput.Model // Поле для ввода пароля при регистрации
 	loginRegisterFocusedField int             // Индекс активного поля на экранах входа/регистрации/URL
 	docStyle                  lipgloss.Style  // Общий стиль для обрамления View
+	debugMode                 bool            // Флаг режима отладки
 }
 
 // Сообщение для очистки статуса.

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -81,33 +82,34 @@ func (m *model) View() string {
 		mainContent = m.viewSyncServerScreen()
 		help = "(↑/↓ - навигация, Enter - выбрать, Esc/b - назад)"
 	case serverURLInputScreen:
-		mainContent = fmt.Sprintf("Введите URL сервера:\n%s", m.serverURLInput.View())
+		mainContent = m.viewServerURLInputScreen()
 		help = "(Enter - подтвердить, Esc - назад)"
 	case loginRegisterChoiceScreen:
-		mainContent = "Сервер не настроен или требуется вход.\n\n(Р)егистрация нового пользователя или (В)ход?"
+		mainContent = m.viewLoginRegisterChoiceScreen()
 		help = "(R - регистрация, L - вход, Esc/b - назад)"
 	case loginScreen:
-		mainContent = fmt.Sprintf(`Вход на сервер (%s)
-
-Имя пользователя:
-%s
-
-Пароль:
-%s`,
-			m.serverURL, m.loginUsernameInput.View(), m.loginPasswordInput.View())
+		mainContent = m.viewLoginScreen()
 		help = "(Tab - след. поле, Enter - войти, Esc - назад)"
 	case registerScreen:
-		mainContent = fmt.Sprintf(`Регистрация на сервере (%s)
-
-Имя пользователя:
-%s
-
-Пароль:
-%s`,
-			m.serverURL, m.registerUsernameInput.View(), m.registerPasswordInput.View())
+		mainContent = m.viewRegisterScreen()
 		help = "(Tab - след. поле, Enter - зарегистрироваться, Esc - назад)"
 	default:
 		mainContent = "Неизвестное состояние!"
+		if m.debugMode {
+			help = "State: " + m.state.String()
+		} else {
+			help = "Unknown state"
+		}
+	}
+
+	// Добавляем отладочную информацию, если включен debugMode
+	if m.debugMode {
+		var debugInfo strings.Builder
+		debugInfo.WriteString(" [State: " + m.state.String() + "]\n")
+		debugInfo.WriteString(" [URL: " + m.serverURL + "]\n")
+		// Выводим сам токен (или пустоту, если его нет)
+		debugInfo.WriteString(" [Token: " + m.authToken + "]")
+		help = help + "\n---\nОтладка:\n" + debugInfo.String()
 	}
 
 	// Добавляем статус сохранения или Read-Only, если он есть и мы не на определенных экранах
@@ -127,15 +129,15 @@ func (m *model) View() string {
 
 	// Собираем финальный вывод
 	// Применяем общий стиль к основному контенту
-	styledContent := m.docStyle.Render(mainContent) // Используем стиль из модели
-	// Собираем все вместе
-	return fmt.Sprintf("%s\n%s%s", styledContent, help, statusLine)
+	styledContent := m.docStyle.Render(mainContent)
+	// Собираем все вместе, всегда добавляя перенос строки перед help
+	return fmt.Sprintf("%s\n%s\n%s", styledContent, help, statusLine)
 }
 
 // Start запускает TUI приложение.
-func Start(kdbxPath string) {
-	// Создаем начальную модель
-	m := initModel(kdbxPath) // Используем initModel из initialization.go
+func Start(kdbxPath string, debugMode bool) {
+	// Создаем начальную модель, передавая флаг
+	m := initModel(kdbxPath, debugMode)
 
 	// --- Инициализация API клиента ---
 	// TODO: Сделать URL конфигурируемым (флаг, env, KDBX)
@@ -222,61 +224,12 @@ func (i syncMenuItem) Title() string       { return i.title }
 func (i syncMenuItem) Description() string { return "" } // Описание не нужно
 func (i syncMenuItem) FilterValue() string { return i.title }
 
-// TODO: Перенести update*Screen функции в отдельные файлы или реорганизовать tui.go
-// TODO: Implement updateEntryListScreen function
-// Оставляем только функцию для entryListScreen, так как она была модифицирована
-// Остальные заглушки удалены, так как они дублируют существующие функции
-/* // Удаляем эту функцию, так как она переопределена в list_screen.go
-func (m *model) updateEntryListScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "s":
-			m.state = syncServerScreen
-			// m.syncServerMenu.Focus() // list.Model не имеет Focus()
-			return m, nil
-		case "l":
-			// TODO: Проверить, настроен ли URL и валиден ли токен
-			// Если URL не настроен -> serverUrlInputScreen
-			// Если токен есть, но невалиден -> loginScreen
-			// Если токен валиден -> может быть, просто показать статус?
-			// Пока просто переходим к выбору
-			m.state = loginRegisterChoiceScreen
-			return m, nil
-		// --- Обработка других клавиш списка (Enter, a, /, q и т.д.) ---
-		// ... (нужно будет перенести или скопировать логику из основного Update) ...
-		case keyEnter: // Просмотр деталей
-			selectedItem := m.entryList.SelectedItem()
-			if selectedItem != nil {
-				if entry, ok := selectedItem.(entryItem); ok {
-					m.selectedEntry = &entry
-					m.state = entryDetailScreen
-					m.previousScreenState = entryListScreen // Запоминаем откуда пришли
-					return m, nil
-				}
-			}
-		case keyAdd: // Добавление новой записи
-			if m.readOnlyMode {
-				return m.setStatusMessage("Read-Only режим: добавление запрещено.")
-			}
-			m.state = entryAddScreen
-			m.previousScreenState = entryListScreen
-			// m.initEditInputs(true) // TODO: Убедиться, что эта функция доступна/вызывается правильно
-			return m, textinput.Blink
-		case keyQuit:
-			return m, tea.Quit
-			// Другие клавиши (поиск и т.д.) будут обработаны списком ниже
-		}
-	}
-
-	// Обновляем сам компонент списка
-	var cmd tea.Cmd
-	m.entryList, cmd = m.entryList.Update(msg)
-	return m, cmd
-}
-*/
-
 // --- Функции-заглушки для отображения других экранов были удалены ---
+
+// viewServerURLInputScreen отображает экран ввода URL сервера.
+func (m *model) viewServerURLInputScreen() string {
+	return fmt.Sprintf("Введите URL сервера:\n%s", m.serverURLInput.View())
+}
 
 // viewSyncServerScreen отображает экран "Синхронизация и Сервер".
 func (m *model) viewSyncServerScreen() string {
@@ -357,8 +310,3 @@ func (m *model) updateSyncServerScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	return m, tea.Batch(cmds...)
 }
-
-// TODO: Implement viewServerUrlInputScreen, updateServerUrlInputScreen
-// TODO: Implement viewLoginRegisterChoiceScreen, updateLoginRegisterChoiceScreen
-// TODO: Implement viewLoginScreen, updateLoginScreen
-// TODO: Implement viewRegisterScreen, updateRegisterScreen

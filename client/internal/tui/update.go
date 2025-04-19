@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"log/slog"
 
+	// Убедимся, что импорты на месте.
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/maynagashev/gophkeeper/client/internal/kdbx"
 )
 
 // handleWindowSizeMsg обрабатывает изменение размера окна.
@@ -47,6 +49,67 @@ func handleDBMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) {
 		return m, nil, true
 	default:
 		return m, nil, false // Сообщение не обработано этим хендлером
+	}
+}
+
+// handleAPIMsg обрабатывает сообщения от API клиента.
+func handleAPIMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) {
+	switch msg := msg.(type) {
+	case loginSuccessMsg:
+		m.authToken = msg.Token
+		m.loginStatus = fmt.Sprintf("Вход выполнен как %s", m.loginUsernameInput.Value())
+		m.err = nil
+		m.loginUsernameInput.SetValue("")
+		m.loginPasswordInput.SetValue("")
+
+		// Сохраняем Auth данные в KDBX (в памяти)
+		if m.db != nil {
+			errSave := kdbx.SaveAuthData(m.db, m.serverURL, m.authToken)
+			if errSave != nil {
+				slog.Error("Ошибка сохранения Auth данных в KDBX (в памяти)", "error", errSave)
+				m.err = fmt.Errorf("ошибка сохранения данных сессии: %w", errSave)
+				m.state = loginScreen // Остаемся на экране входа для показа ошибки
+				newM, statusCmd := m.setStatusMessage("Ошибка сохранения сессии")
+				return newM, tea.Batch(statusCmd, tea.ClearScreen), true // Возвращаемся при ошибке
+			}
+			// Если ошибки не было
+			slog.Info("Auth данные успешно обновлены в KDBX (в памяти)")
+			m.state = entryListScreen // Переходим к списку записей
+		} else {
+			slog.Error("Попытка сохранить Auth данные в KDBX, но m.db is nil")
+			m.state = entryListScreen // Переходим к списку, но без сохранения данных сессии
+		}
+
+		// Возвращаем команды только после успешного сохранения (или если db был nil)
+		newM, statusCmd := m.setStatusMessage("Вход выполнен успешно!")
+		return newM, tea.Batch(statusCmd, tea.ClearScreen), true
+
+	case LoginError:
+		m.err = msg.err
+		newM, statusCmd := m.setStatusMessage("Ошибка входа")
+		// Добавляем очистку экрана, чтобы перерисовать с ошибкой чисто
+		return newM, tea.Batch(statusCmd, tea.ClearScreen), true
+
+	// --- Обработка регистрации --- //
+	case registerSuccessMsg:
+		m.err = nil
+		m.registerUsernameInput.SetValue("")
+		m.registerPasswordInput.SetValue("")
+		m.state = loginScreen
+		m.loginUsernameInput.Focus()
+		m.loginRegisterFocusedField = 0
+		newM, statusCmd := m.setStatusMessage("Регистрация успешна! Теперь войдите.")
+		// Добавляем команду очистки экрана
+		return newM, tea.Batch(statusCmd, tea.ClearScreen), true
+
+	case RegisterError:
+		m.err = msg.err
+		newM, statusCmd := m.setStatusMessage("Ошибка регистрации")
+		// Добавляем очистку экрана, чтобы перерисовать с ошибкой чисто
+		return newM, tea.Batch(statusCmd, tea.ClearScreen), true
+
+	default:
+		return m, nil, false
 	}
 }
 
@@ -119,12 +182,17 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Если не глобальная клавиша, передаем дальше для обработки по состоянию
 
 	default:
-		// Попытка обработки сообщений БД/статуса
+		// Сначала пытаемся обработать сообщения API
+		updatedModel, cmd, handled = handleAPIMsg(m, msg)
+		if handled {
+			return updatedModel, cmd
+		}
+
+		// Затем пытаемся обработать сообщения БД/статуса
 		updatedModel, cmd, handled = handleDBMsg(m, msg)
 		if handled {
 			return updatedModel, cmd
 		}
-		// Если не сообщение БД/статуса, передаем дальше для обработки по состоянию
 	}
 
 	// == Обработка сообщения в зависимости от текущего состояния ==

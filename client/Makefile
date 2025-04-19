@@ -8,7 +8,7 @@ default: run
 # Запуск клиента
 run:
 	@echo "Запуск GophKeeper клиента..."
-	@go run ./cmd/gophkeeper/main.go | tee logs/run.log
+	@go run ./cmd/gophkeeper/main.go -debug | tee logs/run.log
 
 # Сборка клиента
 build:
