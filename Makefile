@@ -8,11 +8,11 @@ all: lint test
 # --- Запуск --- #
 server:
 	@echo "Запуск GophKeeper сервера..."
-	@make -C server run
+	@make -C server server
 
 client:
 	@echo "Запуск GophKeeper клиента..."
-	@make -C client run
+	@make -C client client
 
 # --- Сборка --- #
 build: build-client build-server

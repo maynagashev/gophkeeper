@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/maynagashev/gophkeeper/models"
@@ -19,7 +20,7 @@ import (
 // VaultService определяет интерфейс для сервиса работы с хранилищами.
 type VaultService interface {
 	GetVaultMetadata(userID int64) (*models.VaultVersion, error)
-	UploadVault(userID int64, reader io.Reader, size int64, contentType string) error
+	UploadVault(userID int64, reader io.Reader, size int64, contentType string, contentModifiedAt time.Time) error
 	DownloadVault(userID int64) (io.ReadCloser, *models.VaultVersion, error)
 	ListVersions(userID int64, limit, offset int) ([]models.VaultVersion, error)
 	RollbackToVersion(userID int64, versionID int64) error
@@ -75,8 +76,14 @@ func (s *vaultService) GetVaultMetadata(userID int64) (*models.VaultVersion, err
 	return currentVersion, nil
 }
 
-// UploadVault обрабатывает загрузку файла хранилища, создавая новую версию.
-func (s *vaultService) UploadVault(userID int64, reader io.Reader, size int64, contentType string) error {
+// Добавили contentModifiedAt в параметры.
+func (s *vaultService) UploadVault(
+	userID int64,
+	reader io.Reader,
+	size int64,
+	contentType string,
+	contentModifiedAt time.Time,
+) error {
 	ctx := context.Background()
 
 	// Генерируем УНИКАЛЬНЫЙ ключ объекта для MinIO
@@ -133,12 +140,13 @@ func (s *vaultService) UploadVault(userID int64, reader io.Reader, size int64, c
 
 	// 2. Создать запись о новой версии
 	newVersion := &models.VaultVersion{
-		VaultID:   vaultID,
-		ObjectKey: objectKey,
-		Checksum:  &checksum,
-		SizeBytes: &size,
+		VaultID:           vaultID,
+		ObjectKey:         objectKey,
+		Checksum:          &checksum,
+		SizeBytes:         &size,
+		ContentModifiedAt: &contentModifiedAt,
 	}
-	versionID, err := s.vaultVersionRepo.CreateVersion(ctx, newVersion) // TODO: Передать tx
+	versionID, err := s.vaultVersionRepo.CreateVersion(ctx, newVersion) // Передаем объект с новым полем
 	if err != nil {
 		log.Printf("[VaultService] Ошибка создания версии в транзакции для хранилища %d: %v", vaultID, err)
 		return errors.New("внутренняя ошибка сервера")

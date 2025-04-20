@@ -34,12 +34,12 @@ func (r *postgresVaultVersionRepository) CreateVersion(
 	ctx context.Context,
 	version *models.VaultVersion,
 ) (int64, error) {
-	query := `INSERT INTO vault_versions (vault_id, object_key, checksum, size_bytes)
-	          VALUES ($1, $2, $3, $4) RETURNING id`
+	query := `INSERT INTO vault_versions (vault_id, object_key, checksum, size_bytes, content_modified_at)
+	          VALUES ($1, $2, $3, $4, $5) RETURNING id`
 	var versionID int64
 
 	err := r.db.QueryRowxContext(ctx, query,
-		version.VaultID, version.ObjectKey, version.Checksum, version.SizeBytes,
+		version.VaultID, version.ObjectKey, version.Checksum, version.SizeBytes, version.ContentModifiedAt,
 	).Scan(&versionID)
 
 	if err != nil {
@@ -65,7 +65,7 @@ func (r *postgresVaultVersionRepository) ListVersionsByVaultID(
 	offset int,
 ) ([]models.VaultVersion, error) {
 	// Запрос с сортировкой по убыванию времени создания (сначала новые)
-	query := `SELECT id, vault_id, object_key, checksum, size_bytes, created_at
+	query := `SELECT id, vault_id, object_key, checksum, size_bytes, created_at, content_modified_at
 	          FROM vault_versions
 	          WHERE vault_id=$1
 	          ORDER BY created_at DESC
@@ -88,8 +88,8 @@ func (r *postgresVaultVersionRepository) GetVersionByID(
 	ctx context.Context,
 	versionID int64,
 ) (*models.VaultVersion, error) {
-	query := `SELECT id, vault_id, object_key, checksum, size_bytes, created_at` +
-		` FROM vault_versions WHERE id=$1` // Разделяем длинный запрос
+	query := `SELECT id, vault_id, object_key, checksum, size_bytes, created_at, content_modified_at` +
+		` FROM vault_versions WHERE id=$1`
 	var version models.VaultVersion
 
 	err := r.db.GetContext(ctx, &version, query, versionID)

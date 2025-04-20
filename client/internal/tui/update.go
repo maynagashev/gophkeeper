@@ -35,8 +35,6 @@ func handleWindowSizeMsg(m *model, msg tea.WindowSizeMsg) {
 }
 
 // handleDBMsg обрабатывает сообщения, связанные с базой данных или статусом.
-//
-//nolint:funlen // TODO: split into smaller handlers later.
 func handleDBMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) {
 	switch msg := msg.(type) {
 	case dbOpenedMsg:
@@ -159,7 +157,6 @@ func (m *model) processMetadataResults() (tea.Model, tea.Cmd, bool) {
 		} else {
 			// Обе версии существуют, сравниваем время
 			// Используем After для строгого сравнения (>), чтобы избежать лишних операций при ==
-			//nolint:gocritic // Сохранено в виде if-else для читабельности
 			if m.localMetaModTime.After(serverModTime) {
 				slog.Info("Локальная версия новее. Загрузка на сервер.")
 				statusMsg = "Загрузка на сервер..."

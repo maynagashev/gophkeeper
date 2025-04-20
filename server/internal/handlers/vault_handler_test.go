@@ -35,8 +35,14 @@ func (m *MockVaultService) GetVaultMetadata(userID int64) (*models.VaultVersion,
 	return args.Get(0).(*models.VaultVersion), args.Error(1) //nolint:errcheck // Acceptable for mocks
 }
 
-func (m *MockVaultService) UploadVault(userID int64, reader io.Reader, size int64, contentType string) error {
-	args := m.Called(userID, reader, size, contentType)
+func (m *MockVaultService) UploadVault(
+	userID int64,
+	reader io.Reader,
+	size int64,
+	contentType string,
+	contentModifiedAt time.Time,
+) error {
+	args := m.Called(userID, reader, size, contentType, contentModifiedAt)
 	// Consume the reader to simulate reading the body
 	_, _ = io.Copy(io.Discard, reader)
 	return args.Error(0)
@@ -173,6 +179,8 @@ func TestVaultHandler_Upload(t *testing.T) {
 	testUserID := int64(1)
 	testFileSize := int64(1024)
 	testContentType := "application/octet-stream"
+	testModTime := time.Now().UTC().Truncate(time.Second)
+	testModTimeStr := testModTime.Format(time.RFC3339)
 
 	tests := []struct {
 		name               string
@@ -187,67 +195,94 @@ func TestVaultHandler_Upload(t *testing.T) {
 			name: "Success",
 			body: strings.NewReader(string(make([]byte, testFileSize))),
 			headers: map[string]string{
-				"Content-Length": strconv.FormatInt(testFileSize, 10),
-				"Content-Type":   testContentType,
+				"Content-Length":             strconv.FormatInt(testFileSize, 10),
+				"Content-Type":               testContentType,
+				"X-Kdbx-Content-Modified-At": testModTimeStr,
 			},
 			mockReturnErr:      nil,
 			expectedStatusCode: http.StatusOK,
 			expectedBody:       "Файл успешно загружен\n",
 			setupMock: func(mockSvc *MockVaultService) {
-				mockSvc.On("UploadVault", testUserID, mock.Anything, testFileSize, testContentType).Return(nil)
+				mockSvc.On("UploadVault", testUserID, mock.Anything, testFileSize, testContentType, testModTime).Return(nil)
 			},
 		},
 		{
 			name: "Missing Content-Length",
 			body: strings.NewReader("test"),
 			headers: map[string]string{
-				"Content-Type": testContentType,
+				"Content-Type":               testContentType,
+				"X-Kdbx-Content-Modified-At": testModTimeStr,
 			},
 			mockReturnErr:      nil, // Service not called
 			expectedStatusCode: http.StatusBadRequest,
 			expectedBody:       "Неверный или отсутствующий заголовок Content-Length\n",
-			// Rename unused parameter to _
-			setupMock: func(_ *MockVaultService) { /* No service call expected */ },
+			setupMock:          func(_ *MockVaultService) { /* No service call expected */ },
 		},
 		{
 			name: "Invalid Content-Length",
 			body: strings.NewReader("test"),
 			headers: map[string]string{
-				"Content-Length": "invalid",
-				"Content-Type":   testContentType,
+				"Content-Length":             "invalid",
+				"Content-Type":               testContentType,
+				"X-Kdbx-Content-Modified-At": testModTimeStr,
 			},
 			mockReturnErr:      nil, // Service not called
 			expectedStatusCode: http.StatusBadRequest,
 			expectedBody:       "Неверный или отсутствующий заголовок Content-Length\n",
-			// Rename unused parameter to _
-			setupMock: func(_ *MockVaultService) { /* No service call expected */ },
+			setupMock:          func(_ *MockVaultService) { /* No service call expected */ },
 		},
 		{
 			name: "Zero Content-Length",
 			body: strings.NewReader(""),
 			headers: map[string]string{
-				"Content-Length": "0",
-				"Content-Type":   testContentType,
+				"Content-Length":             "0",
+				"Content-Type":               testContentType,
+				"X-Kdbx-Content-Modified-At": testModTimeStr,
 			},
 			mockReturnErr:      nil, // Service not called
 			expectedStatusCode: http.StatusBadRequest,
 			expectedBody:       "Неверный или отсутствующий заголовок Content-Length\n",
-			// Rename unused parameter to _
-			setupMock: func(_ *MockVaultService) { /* No service call expected */ },
+			setupMock:          func(_ *MockVaultService) { /* No service call expected */ },
 		},
 		{
-			name: "Internal Service Error",
+			name: "Missing X-Kdbx-Content-Modified-At Header",
 			body: strings.NewReader(string(make([]byte, testFileSize))),
 			headers: map[string]string{
 				"Content-Length": strconv.FormatInt(testFileSize, 10),
 				"Content-Type":   testContentType,
 			},
+			mockReturnErr:      nil, // Service not called
+			expectedStatusCode: http.StatusBadRequest,
+			expectedBody:       "Отсутствует обязательный заголовок X-Kdbx-Content-Modified-At\n",
+			setupMock:          func(_ *MockVaultService) { /* No service call expected */ },
+		},
+		{
+			name: "Invalid X-Kdbx-Content-Modified-At Header",
+			body: strings.NewReader(string(make([]byte, testFileSize))),
+			headers: map[string]string{
+				"Content-Length":             strconv.FormatInt(testFileSize, 10),
+				"Content-Type":               testContentType,
+				"X-Kdbx-Content-Modified-At": "not-a-timestamp",
+			},
+			mockReturnErr:      nil, // Service not called
+			expectedStatusCode: http.StatusBadRequest,
+			expectedBody:       "Неверный формат заголовка X-Kdbx-Content-Modified-At (ожидается RFC3339)\n",
+			setupMock:          func(_ *MockVaultService) { /* No service call expected */ },
+		},
+		{
+			name: "Internal Service Error",
+			body: strings.NewReader(string(make([]byte, testFileSize))),
+			headers: map[string]string{
+				"Content-Length":             strconv.FormatInt(testFileSize, 10),
+				"Content-Type":               testContentType,
+				"X-Kdbx-Content-Modified-At": testModTimeStr,
+			},
 			mockReturnErr:      errors.New("service upload error"),
 			expectedStatusCode: http.StatusInternalServerError,
 			expectedBody:       "Внутренняя ошибка сервера при загрузке файла\n",
 			setupMock: func(mockSvc *MockVaultService) {
-				mockSvc.On("UploadVault", testUserID, mock.Anything, testFileSize, testContentType).
-					Return(errors.New("service upload error")) // Shorten line
+				mockSvc.On("UploadVault", testUserID, mock.Anything, testFileSize, testContentType, testModTime).
+					Return(errors.New("service upload error"))
 			},
 		},
 	}
@@ -270,11 +305,18 @@ func TestVaultHandler_Upload(t *testing.T) {
 			for key, value := range tt.headers {
 				req.Header.Set(key, value)
 			}
-			// If Content-Type is not set, chi router might default it.
 			// Handle the case where it's expected to be defaulted.
 			if _, ok := tt.headers["Content-Type"]; !ok {
-				// For the test, we expect it to be defaulted if not provided
-				mockService.On("UploadVault", testUserID, mock.Anything, testFileSize, "application/octet-stream").Maybe()
+				// Если Content-Type не указан, а другие проверки прошли, мок должен ожидать значение по умолчанию
+				if tt.expectedStatusCode == http.StatusOK || tt.expectedStatusCode == http.StatusInternalServerError {
+					mockService.On("UploadVault",
+						testUserID,
+						mock.Anything,
+						testFileSize,
+						"application/octet-stream",
+						testModTime,
+					).Maybe()
+				}
 			}
 
 			rr := httptest.NewRecorder()
@@ -307,7 +349,13 @@ func TestVaultHandler_Upload(t *testing.T) {
 		assert.Equal(t, http.StatusInternalServerError, rr.Code)
 		assert.Equal(t, "Внутренняя ошибка сервера\n", rr.Body.String())
 		// No calls expected to the service
-		mockService.AssertNotCalled(t, "UploadVault", mock.Anything, mock.Anything, mock.Anything, mock.Anything)
+		mockService.AssertNotCalled(t, "UploadVault",
+			mock.Anything, // userID
+			mock.Anything, // reader
+			mock.Anything, // size
+			mock.Anything, // contentType
+			mock.Anything, // contentModifiedAt
+		)
 	})
 }
 

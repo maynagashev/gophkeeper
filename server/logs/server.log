@@ -1,2 +1,0 @@
-2025/04/20 01:52:09 [ubuntu/sIPWBeG5sJ-000001] "GET http://localhost:8080/api/vault HTTP/1.1" from 127.0.0.1:39712 - 404 39B in 2.269938ms
-2025/04/20 01:55:00 [ubuntu/sIPWBeG5sJ-000002] "GET http://localhost:8080/api/vault HTTP/1.1" from 127.0.0.1:45352 - 404 39B in 1.74744ms

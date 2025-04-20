@@ -1,12 +1,12 @@
 # Makefile для проекта GophKeeper
 
-.PHONY: run build clean
+.PHONY: run build clean client
 
 # Цель по умолчанию
 default: run
 
 # Запуск клиента
-run:
+client:
 	@echo "Запуск GophKeeper клиента..."
 	@go run ./cmd/gophkeeper/main.go -debug | tee logs/run.log
 
