@@ -486,6 +486,7 @@ func TestVaultHandler_ListVersions(t *testing.T) {
 	testVaultID := int64(10)
 	testVersion1 := models.VaultVersion{ID: 101, VaultID: testVaultID, CreatedAt: time.Now().Add(-time.Hour)}
 	testVersion2 := models.VaultVersion{ID: 102, VaultID: testVaultID, CreatedAt: time.Now()}
+	testCurrentVersionID := testVersion2.ID // Используем ID второй версии как текущий
 
 	tests := []struct {
 		name               string
@@ -501,17 +502,29 @@ func TestVaultHandler_ListVersions(t *testing.T) {
 		{
 			name:               "Успех - Пагинация по умолчанию",
 			queryParams:        "",
-			mockLimit:          20,                                                // Default limit
-			mockOffset:         0,                                                 // Default offset
-			mockReturnVersions: []models.VaultVersion{testVersion2, testVersion1}, // Example order
+			mockLimit:          20,
+			mockOffset:         0,
+			mockReturnVersions: []models.VaultVersion{testVersion2, testVersion1},
 			mockReturnErr:      nil,
 			expectedStatusCode: http.StatusOK,
 			expectedBody: func() string {
-				bodyBytes, _ := json.Marshal([]models.VaultVersion{testVersion2, testVersion1})
+				// Ожидаем JSON с versions и current_version_id
+				type listResponse struct {
+					Versions         []models.VaultVersion `json:"versions"`
+					CurrentVersionID *int64                `json:"current_version_id,omitempty"`
+				}
+				expectedResp := listResponse{
+					Versions:         []models.VaultVersion{testVersion2, testVersion1},
+					CurrentVersionID: &testCurrentVersionID,
+				}
+				bodyBytes, _ := json.Marshal(expectedResp)
 				return string(bodyBytes) + "\n"
 			}(),
 			setupMock: func(mockSvc *MockVaultService) {
+				// Мокаем ListVersions
 				mockSvc.On("ListVersions", testUserID, 20, 0).Return([]models.VaultVersion{testVersion2, testVersion1}, nil)
+				// Мокаем GetVaultMetadata для получения current_version_id
+				mockSvc.On("GetVaultMetadata", testUserID).Return(&testVersion2, nil)
 			},
 		},
 		{
@@ -523,11 +536,21 @@ func TestVaultHandler_ListVersions(t *testing.T) {
 			mockReturnErr:      nil,
 			expectedStatusCode: http.StatusOK,
 			expectedBody: func() string {
-				bodyBytes, _ := json.Marshal([]models.VaultVersion{testVersion1})
+				// Аналогично формируем ожидаемый JSON
+				type listResponse struct {
+					Versions         []models.VaultVersion `json:"versions"`
+					CurrentVersionID *int64                `json:"current_version_id,omitempty"`
+				}
+				expectedResp := listResponse{
+					Versions:         []models.VaultVersion{testVersion1},
+					CurrentVersionID: &testCurrentVersionID, // Предполагаем ту же текущую версию
+				}
+				bodyBytes, _ := json.Marshal(expectedResp)
 				return string(bodyBytes) + "\n"
 			}(),
 			setupMock: func(mockSvc *MockVaultService) {
 				mockSvc.On("ListVersions", testUserID, 1, 1).Return([]models.VaultVersion{testVersion1}, nil)
+				mockSvc.On("GetVaultMetadata", testUserID).Return(&testVersion2, nil) // Мокаем и здесь
 			},
 		},
 		{
@@ -538,13 +561,52 @@ func TestVaultHandler_ListVersions(t *testing.T) {
 			mockReturnVersions: []models.VaultVersion{}, // Empty slice
 			mockReturnErr:      nil,
 			expectedStatusCode: http.StatusOK,
-			expectedBody:       "[]\n", // Empty JSON array
+			expectedBody: func() string {
+				type listResponse struct {
+					Versions         []models.VaultVersion `json:"versions"`
+					CurrentVersionID *int64                `json:"current_version_id,omitempty"`
+				}
+				expectedResp := listResponse{
+					Versions:         []models.VaultVersion{}, // Пустой слайс
+					CurrentVersionID: &testCurrentVersionID,   // Текущая версия может быть и при пустом результате пагинации
+				}
+				bodyBytes, _ := json.Marshal(expectedResp)
+				return string(bodyBytes) + "\n"
+			}(),
 			setupMock: func(mockSvc *MockVaultService) {
 				mockSvc.On("ListVersions", testUserID, 20, 0).Return([]models.VaultVersion{}, nil)
+				mockSvc.On("GetVaultMetadata", testUserID).Return(&testVersion2, nil)
 			},
 		},
 		{
-			name:               "Внутренняя ошибка сервиса",
+			name:               "Ошибка при получении GetVaultMetadata", // Новый кейс
+			queryParams:        "",
+			mockLimit:          20,
+			mockOffset:         0,
+			mockReturnVersions: []models.VaultVersion{testVersion1}, // ListVersions успешен
+			mockReturnErr:      nil,
+			expectedStatusCode: http.StatusOK, // Статус все равно OK, т.к. список версий получен
+			expectedBody: func() string {
+				// Ожидаем JSON только с versions, без current_version_id
+				type listResponse struct {
+					Versions         []models.VaultVersion `json:"versions"`
+					CurrentVersionID *int64                `json:"current_version_id,omitempty"`
+				}
+				expectedResp := listResponse{
+					Versions:         []models.VaultVersion{testVersion1},
+					CurrentVersionID: nil, // Ожидаем nil
+				}
+				bodyBytes, _ := json.Marshal(expectedResp)
+				return string(bodyBytes) + "\n"
+			}(),
+			setupMock: func(mockSvc *MockVaultService) {
+				mockSvc.On("ListVersions", testUserID, 20, 0).Return([]models.VaultVersion{testVersion1}, nil)
+				// Мокаем ошибку для GetVaultMetadata
+				mockSvc.On("GetVaultMetadata", testUserID).Return(nil, services.ErrVaultNotFound)
+			},
+		},
+		{
+			name:               "Внутренняя ошибка сервиса (ListVersions)",
 			queryParams:        "",
 			mockLimit:          20,
 			mockOffset:         0,
@@ -554,6 +616,7 @@ func TestVaultHandler_ListVersions(t *testing.T) {
 			expectedBody:       "Внутренняя ошибка сервера\n",
 			setupMock: func(mockSvc *MockVaultService) {
 				mockSvc.On("ListVersions", testUserID, 20, 0).Return(nil, errors.New("internal list error"))
+				// GetVaultMetadata не должен вызываться при ошибке ListVersions
 			},
 		},
 	}
@@ -580,7 +643,12 @@ func TestVaultHandler_ListVersions(t *testing.T) {
 			router.ServeHTTP(rr, req)
 
 			assert.Equal(t, tt.expectedStatusCode, rr.Code)
-			assert.Equal(t, tt.expectedBody, rr.Body.String())
+			// Сравниваем тела ответов как JSON объекты, чтобы избежать проблем с порядком полей
+			if tt.expectedStatusCode == http.StatusOK {
+				assert.JSONEq(t, tt.expectedBody, rr.Body.String(), "Тело ответа не соответствует ожидаемому JSON")
+			} else {
+				assert.Equal(t, tt.expectedBody, rr.Body.String()) // Для ошибок сравниваем как строку
+			}
 			mockService.AssertExpectations(t)
 		})
 	}
