@@ -34,6 +34,7 @@ const (
 	loginRegisterChoiceScreen                    // Экран выбора "Войти или Зарегистрироваться?"
 	loginScreen                                  // Экран ввода данных для входа
 	registerScreen                               // Экран ввода данных для регистрации
+	versionListScreen                            // Экран списка версий
 )
 
 // String возвращает строковое представление screenState.
@@ -67,6 +68,8 @@ func (s screenState) String() string {
 		return "loginScreen"
 	case registerScreen:
 		return "registerScreen"
+	case versionListScreen:
+		return "versionListScreen"
 	default:
 		return fmt.Sprintf("unknownScreen(%d)", s)
 	}
@@ -256,6 +259,14 @@ type model struct {
 	localMetaFound     bool                 // Найден ли локальный файл
 	receivedServerMeta bool                 // Флаг: получены ли метаданные сервера
 	receivedLocalMeta  bool                 // Флаг: получены ли метаданные локального файла
+
+	// -- Поля для работы с версиями --
+	versionList                list.Model            // Список версий
+	versions                   []models.VaultVersion // Полученные с сервера версии
+	loadingVersions            bool                  // Флаг: идет ли загрузка списка версий
+	selectedVersionForRollback *models.VaultVersion  // Выбранная версия для отката
+	confirmRollback            bool                  // Флаг: требуется подтверждение отката
+	rollbackError              error                 // Ошибка при откате
 }
 
 // Сообщение для очистки статуса.

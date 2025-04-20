@@ -93,6 +93,9 @@ func (m *model) View() string {
 	case registerScreen:
 		mainContent = m.viewRegisterScreen()
 		help = "(Tab - след. поле, Enter - зарегистрироваться, Esc - назад)"
+	case versionListScreen:
+		mainContent = m.viewVersionListScreen()
+		help = "(↑/↓ - навигация, Enter - откатить, Esc/b - назад, r - обновить)"
 	default:
 		mainContent = "Неизвестное состояние!"
 		if m.debugMode {

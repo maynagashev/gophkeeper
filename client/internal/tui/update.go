@@ -230,6 +230,26 @@ func (m *model) processMetadataResults() (tea.Model, tea.Cmd) {
 	return newM, finalCmd
 }
 
+// handleVersionMsg обрабатывает сообщения, связанные с версиями.
+func handleVersionMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) {
+	switch msg := msg.(type) {
+	case versionsLoadedMsg:
+		newM, cmd := handleVersionsLoadedMsg(m, msg)
+		return newM, cmd, true
+	case versionsLoadErrorMsg:
+		newM, cmd := handleVersionsLoadErrorMsg(m, msg)
+		return newM, cmd, true
+	case rollbackSuccessMsg:
+		newM, cmd := handleRollbackSuccessMsg(m, msg)
+		return newM, cmd, true
+	case rollbackErrorMsg:
+		newM, cmd := handleRollbackErrorMsg(m, msg)
+		return newM, cmd, true
+	default:
+		return m, nil, false // Не обработали сообщение этого типа
+	}
+}
+
 // handleAPIMsg обрабатывает сообщения от API клиента.
 func handleAPIMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) {
 	switch msg := msg.(type) {
@@ -379,6 +399,12 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if handled {
 			return updatedModel, cmd
 		}
+
+		// Затем пытаемся обработать сообщения версий
+		updatedModel, cmd, handled = handleVersionMsg(m, msg)
+		if handled {
+			return updatedModel, cmd
+		}
 	}
 
 	// == Обработка сообщения в зависимости от текущего состояния ==
@@ -413,6 +439,8 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		updatedModel, stateCmd = m.updateLoginScreen(msg)
 	case registerScreen:
 		updatedModel, stateCmd = m.updateRegisterScreen(msg)
+	case versionListScreen:
+		updatedModel, stateCmd = m.updateVersionListScreen(msg)
 	default:
 		// Неизвестное состояние - ничего не делаем, updatedModel остается nil?
 		// Это нужно обработать: если updatedModel не был присвоен,

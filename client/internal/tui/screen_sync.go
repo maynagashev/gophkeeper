@@ -1,11 +1,13 @@
 package tui
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/maynagashev/gophkeeper/client/internal/kdbx"
 )
 
 // --- Тип для элементов меню синхронизации --- //
@@ -38,58 +40,104 @@ func (m *model) viewSyncServerScreen() string {
 
 	// Объединяем информацию о статусе и РЕНДЕР МЕНЮ
 	// Добавляем перенос строки между ними для четкого разделения.
-	return statusInfo + m.syncServerMenu.View()
+	return fmt.Sprintf("%s\n\n%s", statusInfo, m.syncServerMenu.View())
 }
 
-// updateSyncServerScreen обрабатывает сообщения для экрана "Синхронизация и Сервер".
-//
-//nolint:gocognit,nestif // TODO: Рефакторить для уменьшения вложенности и когнитивной сложности.
+// handleSyncMenuConfigureURL обрабатывает выбор пункта "Настроить URL сервера".
+func (m *model) handleSyncMenuConfigureURL() tea.Cmd {
+	m.serverURLInput.Reset()
+	m.serverURLInput.Placeholder = "https://..."
+	m.serverURLInput.Focus()
+	if m.serverURL != "" {
+		m.serverURLInput.SetValue(m.serverURL)
+	}
+	m.state = serverURLInputScreen
+	return textinput.Blink
+}
+
+// handleSyncMenuLoginRegister обрабатывает выбор пункта "Войти / Зарегистрироваться".
+func (m *model) handleSyncMenuLoginRegister() tea.Cmd {
+	if m.serverURL == "" {
+		_, cmd := m.setStatusMessage("Сначала настройте URL сервера")
+		return cmd
+	}
+	m.loginUsernameInput.Focus()
+	m.loginPasswordInput.Blur()
+	m.loginRegisterFocusedField = 0
+	m.state = loginRegisterChoiceScreen
+	return textinput.Blink
+}
+
+// handleSyncMenuSyncNow обрабатывает выбор пункта "Синхронизировать сейчас".
+func (m *model) handleSyncMenuSyncNow() tea.Cmd {
+	if m.authToken == "" {
+		_, cmd := m.setStatusMessage("Необходимо войти перед синхронизацией")
+		return cmd
+	}
+	newM, statusCmd := m.setStatusMessage("Запуск синхронизации...")
+	mModel, ok := newM.(*model)
+	if !ok {
+		slog.Error("Неожиданный тип модели после setStatusMessage")
+		return tea.Batch(statusCmd, func() tea.Msg {
+			return errMsg{err: errors.New("внутренняя ошибка типа модели")}
+		})
+	}
+	syncCmd := startSyncCmd(mModel)
+	return tea.Batch(statusCmd, syncCmd)
+}
+
+// handleSyncMenuViewVersions обрабатывает выбор пункта "Просмотреть версии".
+func (m *model) handleSyncMenuViewVersions() tea.Cmd {
+	if m.authToken == "" {
+		_, cmd := m.setStatusMessage("Необходимо войти для просмотра версий")
+		return cmd
+	}
+	m.state = versionListScreen
+	m.loadingVersions = true
+	return tea.Batch(tea.ClearScreen, loadVersionsCmd(m))
+}
+
+// handleSyncMenuLogout обрабатывает выбор пункта "Выйти на сервере".
+func (m *model) handleSyncMenuLogout() tea.Cmd {
+	if m.authToken == "" {
+		_, cmd := m.setStatusMessage("Вы не авторизованы")
+		return cmd
+	}
+	oldToken := m.authToken
+	m.authToken = ""
+	m.loginStatus = statusNotLoggedIn
+	if m.apiClient != nil {
+		m.apiClient.SetAuthToken("")
+	}
+	var saveCmd tea.Cmd
+	if m.db != nil {
+		errSave := kdbx.SaveAuthData(m.db, m.serverURL, "")
+		if errSave != nil {
+			slog.Error("Ошибка сохранения пустого токена в KDBX при выходе", "error", errSave)
+			_, saveCmd = m.setStatusMessage("Ошибка сохранения данных при выходе")
+		} else {
+			slog.Info("Локальный токен очищен и сохранен в KDBX.")
+			_, saveCmd = m.setStatusMessage("Успешно вышли")
+		}
+	} else {
+		slog.Warn("Не удалось сохранить пустой токен в KDBX при выходе: база не загружена.")
+		_, saveCmd = m.setStatusMessage("Успешно вышли (локально)")
+	}
+	slog.Info("Выполнен выход", "token_existed", oldToken != "")
+	return saveCmd
+}
+
+// updateSyncServerScreen обрабатывает сообщения для экрана синхронизации/сервера.
 func (m *model) updateSyncServerScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 
 	if keyMsg, ok := msg.(tea.KeyMsg); ok {
 		switch keyMsg.String() {
 		case keyEnter:
-			selectedItem := m.syncServerMenu.SelectedItem()
-			if item, itemOk := selectedItem.(syncMenuItem); itemOk {
-				switch item.id {
-				case "configure_url":
-					m.state = serverURLInputScreen
-					if m.serverURL != "" {
-						m.serverURLInput.SetValue(m.serverURL)
-					} else {
-						m.serverURLInput.Placeholder = defaultServerURL
-						m.serverURLInput.SetValue("")
-					}
-					m.serverURLInput.Focus()
-					return m, tea.Batch(textinput.Blink, tea.ClearScreen)
-				case "login_register":
-					if m.serverURL == "" {
-						m.state = serverURLInputScreen
-						m.serverURLInput.Placeholder = defaultServerURL
-						m.serverURLInput.SetValue("")
-						m.serverURLInput.Focus()
-						return m, tea.Batch(textinput.Blink, tea.ClearScreen)
-					}
-					m.state = loginRegisterChoiceScreen
-					return m, tea.ClearScreen
-				case "sync_now":
-					return m, startSyncCmd(m)
-				case "logout":
-					m.authToken = ""
-					m.loginStatus = "Не выполнен"
-					// Очищаем токен и в API клиенте
-					if m.apiClient != nil {
-						m.apiClient.SetAuthToken("")
-						slog.Debug("Токен очищен в API клиенте при выходе")
-					} else {
-						slog.Error("API клиент nil при попытке очистить токен при выходе")
-					}
-					// При выходе из приложения токен не удаляется из KDBX, время жизни токена ограничено параметрами JWT
-					// err := kdbx.SaveAuthData(m.db, m.serverURL, "")
-					return m.setStatusMessage("Выход выполнен.")
-				}
-			}
+			// Обработка выбора пункта меню
+			cmd := m.handleSyncMenuAction()
+			cmds = append(cmds, cmd)
+			// Может потребоваться ClearScreen в зависимости от действия
 		case keyEsc, keyBack:
 			m.state = entryListScreen
 			return m, tea.ClearScreen // Очистка экрана добавлена
@@ -102,4 +150,27 @@ func (m *model) updateSyncServerScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 	cmds = append(cmds, listCmd)
 
 	return m, tea.Batch(cmds...)
+}
+
+// handleSyncMenuAction обрабатывает действие выбора в меню синхронизации.
+func (m *model) handleSyncMenuAction() tea.Cmd {
+	selectedItem, ok := m.syncServerMenu.SelectedItem().(syncMenuItem)
+	if !ok {
+		return nil
+	}
+
+	switch selectedItem.id {
+	case "configure_url":
+		return m.handleSyncMenuConfigureURL()
+	case "login_register":
+		return m.handleSyncMenuLoginRegister()
+	case "sync_now":
+		return m.handleSyncMenuSyncNow()
+	case "view_versions":
+		return m.handleSyncMenuViewVersions()
+	case "logout":
+		return m.handleSyncMenuLogout()
+	}
+
+	return nil
 }
