@@ -46,7 +46,7 @@ func TestHTTPClient_UploadVault(t *testing.T) {
 
 				// Читаем тело, чтобы убедиться, что оно пришло
 				bodyBytes, err := io.ReadAll(r.Body)
-				require.NoError(err)
+				assert.NoError(err)
 				assert.Equal(testData, string(bodyBytes))
 
 				w.WriteHeader(http.StatusOK)
@@ -64,7 +64,7 @@ func TestHTTPClient_UploadVault(t *testing.T) {
 		},
 		{
 			name: "Ошибка сервера (500)",
-			serverHandler: func(w http.ResponseWriter, r *http.Request) {
+			serverHandler: func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusInternalServerError)
 			},
 			expectedErr:    true,
@@ -73,7 +73,7 @@ func TestHTTPClient_UploadVault(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+		t.Run(tt.name, func(_ *testing.T) {
 			server := httptest.NewServer(tt.serverHandler)
 			defer server.Close()
 
@@ -84,19 +84,19 @@ func TestHTTPClient_UploadVault(t *testing.T) {
 			err := client.UploadVault(context.Background(), reader, testSize, testModTime)
 
 			if tt.expectedErr {
-				assert.Error(err)
+				require.Error(err)
 				if tt.expectedErrMsg != "" {
 					assert.Contains(err.Error(), tt.expectedErrMsg)
 				}
 			} else {
-				assert.NoError(err)
+				require.NoError(err)
 			}
 		})
 	}
 
 	// Тест без токена
-	t.Run("Без токена авторизации", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	t.Run("Без токена авторизации", func(_ *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 			assert.Fail("Сервер не должен был получить запрос без токена")
 		}))
 		defer server.Close()
@@ -107,13 +107,14 @@ func TestHTTPClient_UploadVault(t *testing.T) {
 		reader := strings.NewReader(testData)
 		err := client.UploadVault(context.Background(), reader, testSize, testModTime)
 
-		assert.Error(err)
+		require.Error(err)
 		assert.Contains(err.Error(), "токен аутентификации отсутствует")
 	})
 }
 
 func TestHTTPClient_GetVaultMetadata(t *testing.T) {
 	assert := assert.New(t)
+	require := require.New(t)
 	testToken := "test-jwt-token"
 	testVersionID := int64(101)
 	testVaultID := int64(11)
@@ -175,7 +176,7 @@ func TestHTTPClient_GetVaultMetadata(t *testing.T) {
 		},
 		{
 			name: "Ошибка сервера (500)",
-			serverHandler: func(w http.ResponseWriter, r *http.Request) {
+			serverHandler: func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusInternalServerError)
 			},
 			expectedResult: nil,
@@ -184,7 +185,7 @@ func TestHTTPClient_GetVaultMetadata(t *testing.T) {
 		},
 		{
 			name: "Невалидный JSON ответ",
-			serverHandler: func(w http.ResponseWriter, r *http.Request) {
+			serverHandler: func(w http.ResponseWriter, _ *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte("{\"invalid_json"))
@@ -196,7 +197,7 @@ func TestHTTPClient_GetVaultMetadata(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+		t.Run(tt.name, func(_ *testing.T) {
 			server := httptest.NewServer(tt.serverHandler)
 			defer server.Close()
 
@@ -206,13 +207,13 @@ func TestHTTPClient_GetVaultMetadata(t *testing.T) {
 			meta, err := client.GetVaultMetadata(context.Background())
 
 			if tt.expectedErr {
-				assert.Error(err)
+				require.Error(err)
 				assert.Nil(meta)
 				if tt.expectedErrMsg != "" {
 					assert.Contains(err.Error(), tt.expectedErrMsg)
 				}
 			} else {
-				assert.NoError(err)
+				require.NoError(err)
 				// Сравниваем содержимое структур, а не указатели
 				assert.Equal(*tt.expectedResult, *meta)
 				// Отдельно проверяем время с учетом возможной потери точности при JSON маршалинге
@@ -223,8 +224,8 @@ func TestHTTPClient_GetVaultMetadata(t *testing.T) {
 	}
 
 	// Тест без токена
-	t.Run("Без токена авторизации", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	t.Run("Без токена авторизации", func(_ *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 			assert.Fail("Сервер не должен был получить запрос без токена")
 		}))
 		defer server.Close()
@@ -234,7 +235,7 @@ func TestHTTPClient_GetVaultMetadata(t *testing.T) {
 
 		meta, err := client.GetVaultMetadata(context.Background())
 
-		assert.Error(err)
+		require.Error(err)
 		assert.Nil(meta)
 		assert.Contains(err.Error(), "токен аутентификации отсутствует")
 	})
