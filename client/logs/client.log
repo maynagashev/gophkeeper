@@ -780,3 +780,8 @@ time=2025-04-20T01:55:00.322+07:00 level=INFO msg="Хранилище не на�
 time=2025-04-20T01:55:00.322+07:00 level=DEBUG msg="Получено сообщение serverMetadataMsg" found=false
 time=2025-04-20T01:55:00.322+07:00 level=INFO msg="Получены метаданные сервера и локального файла. Запуск сравнения..."
 time=2025-04-20T01:55:00.322+07:00 level=DEBUG msg="Данные для сравнения" serverFound=false serverMetaTime=0001-01-01T00:00:00.000Z localFound=true localMetaTime=2025-04-19T21:36:36.274+07:00
+time=2025-04-20T21:28:23.192+07:00 level=INFO msg="Логгер инициализирован" path=logs/client.log
+time=2025-04-20T21:28:23.192+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию" debug_mode=true
+time=2025-04-20T21:28:23.192+07:00 level=INFO msg="API клиент инициализирован" baseURL=http://localhost:8080
+time=2025-04-20T21:28:23.192+07:00 level=WARN msg="Блокировка не получена (файл используется?). Read-Only." lockPath=gophkeeper.kdbx.lock
+time=2025-04-20T21:28:23.192+07:00 level=INFO msg="Файл KDBX найден, запуск стандартного TUI." path=gophkeeper.kdbx
