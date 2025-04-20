@@ -1,0 +1,11 @@
+2025/04/20 23:32:58 [ubuntu/vGaaiTVh27-000001] "GET http://localhost:8080/api/vault HTTP/1.1" from 127.0.0.1:38840 - 401 32B in 230.408µs
+2025/04/20 23:33:03 [ubuntu/vGaaiTVh27-000002] "GET http://localhost:8080/api/vault HTTP/1.1" from 127.0.0.1:34742 - 401 32B in 140.475µs
+2025/04/20 23:33:18 [ubuntu/vGaaiTVh27-000003] "POST http://localhost:8080/api/login HTTP/1.1" from 127.0.0.1:51754 - 200 214B in 95.579549ms
+2025/04/20 23:33:22 [ubuntu/vGaaiTVh27-000004] "GET http://localhost:8080/api/vault HTTP/1.1" from 127.0.0.1:51754 - 200 225B in 7.817042ms
+2025/04/20 23:33:22 [ubuntu/vGaaiTVh27-000005] "POST http://localhost:8080/api/vault/upload HTTP/1.1" from 127.0.0.1:51754 - 200 41B in 47.660578ms
+2025/04/20 23:33:30 [ubuntu/vGaaiTVh27-000006] "GET http://localhost:8080/api/vault HTTP/1.1" from 127.0.0.1:43036 - 200 270B in 1.666568ms
+2025/04/20 23:33:30 [ubuntu/vGaaiTVh27-000007] "POST http://localhost:8080/api/vault/upload HTTP/1.1" from 127.0.0.1:43036 - 200 41B in 9.913463ms
+2025/04/20 23:33:55 [ubuntu/vGaaiTVh27-000008] "GET http://localhost:8080/api/vault HTTP/1.1" from 127.0.0.1:44082 - 200 270B in 1.79332ms
+2025/04/20 23:33:55 [ubuntu/vGaaiTVh27-000009] "POST http://localhost:8080/api/vault/upload HTTP/1.1" from 127.0.0.1:44082 - 200 41B in 13.390016ms
+2025/04/20 23:35:01 [ubuntu/vGaaiTVh27-000010] "GET http://localhost:8080/api/vault HTTP/1.1" from 127.0.0.1:54486 - 200 270B in 1.357997ms
+2025/04/20 23:35:01 [ubuntu/vGaaiTVh27-000011] "POST http://localhost:8080/api/vault/upload HTTP/1.1" from 127.0.0.1:54486 - 200 41B in 14.889083ms

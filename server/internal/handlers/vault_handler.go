@@ -105,15 +105,24 @@ func (h *VaultHandler) Upload(w http.ResponseWriter, r *http.Request) {
 	// Вызываем сервис для загрузки файла, передавая contentModTime
 	err = h.vaultService.UploadVault(userID, r.Body, size, contentType, contentModTime)
 	if err != nil {
-		// Обработка ошибок сервиса (пока только внутренние)
-		log.Printf("[VaultHandler:Upload] Ошибка сервиса при загрузке файла для пользователя %d: %v", userID, err)
-		http.Error(w, "Внутренняя ошибка сервера при загрузке файла", http.StatusInternalServerError)
+		// Обработка ошибок сервиса
+		if errors.Is(err, services.ErrConflictVersion) {
+			log.Printf("[VaultHandler:Upload] Конфликт версии при загрузке файла для пользователя %d: %v", userID, err)
+			// Формируем строку ошибки для переноса
+			conflictMsg := "Конфликт версий: на сервере уже есть более новая " +
+				"или идентичная версия с другим содержимым."
+			http.Error(w, conflictMsg, http.StatusConflict)
+		} else {
+			// Другие ошибки считаем внутренними
+			log.Printf("[VaultHandler:Upload] Ошибка сервиса при загрузке файла для пользователя %d: %v", userID, err)
+			http.Error(w, "Внутренняя ошибка сервера при загрузке файла", http.StatusInternalServerError)
+		}
 		return
 	}
 
-	// Успешный ответ
+	// Успешный ответ (даже если версия была идентичной и не создавалась новая)
 	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write([]byte("Файл успешно загружен\n"))
+	_, _ = w.Write([]byte("Файл успешно загружен\n")) // TODO: Возможно, стоит вернуть ID версии как в api.md?
 	log.Printf("[VaultHandler:Upload] Файл для пользователя %d успешно загружен", userID)
 }
 
