@@ -38,93 +38,141 @@ func handleWindowSizeMsg(m *model, msg tea.WindowSizeMsg) {
 func handleDBMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) {
 	switch msg := msg.(type) {
 	case dbOpenedMsg:
-		newM, cmd := m.handleDBOpenedMsg(msg) // реализация в screen_list.go
+		newM, cmd := handleDBOpenedMsg(m, msg)
 		return newM, cmd, true
 	case errMsg:
-		newM := m.handleErrorMsg(msg)
+		newM := handleErrorMsg(m, msg)
 		return newM, nil, true
 	case dbSavedMsg:
-		newM, cmd := m.setStatusMessage("Сохранено успешно!")
+		newM, cmd := handleDBSavedMsg(m)
 		return newM, cmd, true
 	case dbSaveErrorMsg:
-		newM, cmd := m.setStatusMessage(fmt.Sprintf("Ошибка сохранения: %v", msg.err))
+		newM, cmd := handleDBSaveErrorMsg(m, msg)
 		return newM, cmd, true
 	case clearStatusMsg:
-		m.savingStatus = ""
-		m.statusTimer = nil
-		return m, nil, true
+		newM := handleClearStatusMsg(m)
+		return newM, nil, true
 	case SyncError:
-		m.isSyncing = false
-		newM, cmd := m.setStatusMessage(fmt.Sprintf("Ошибка синхронизации: %v", msg.err))
+		newM, cmd := handleSyncErrorMsg(m, msg)
 		return newM, cmd, true
 	case syncStartedMsg:
-		m.isSyncing = true
-		m.receivedServerMeta = false
-		m.receivedLocalMeta = false
-		newM, statusCmd := m.setStatusMessage("Получение метаданных...")
-		fetchCmds := tea.Batch(fetchServerMetadataCmd(m), fetchLocalMetadataCmd(m))
-		return newM, tea.Batch(statusCmd, fetchCmds), true
+		newM, cmd := handleSyncStartedMsg(m)
+		return newM, cmd, true
 	case serverMetadataMsg:
-		if !m.isSyncing {
-			return m, nil, true
-		}
-		m.serverMeta = msg.metadata
-		m.serverMetaFound = msg.found
-		m.receivedServerMeta = true
-		slog.Debug("Получено сообщение serverMetadataMsg", "found", msg.found)
-		if m.receivedLocalMeta {
-			return m.processMetadataResults()
-		}
-		return m, nil, true
+		newM, cmd := handleServerMetadataMsg(m, msg)
+		return newM, cmd, true
 	case localMetadataMsg:
-		if !m.isSyncing {
-			return m, nil, true
-		}
-		m.localMetaModTime = msg.modTime
-		m.localMetaFound = msg.found
-		m.receivedLocalMeta = true
-		slog.Debug("Получено сообщение localMetadataMsg", "found", msg.found)
-		if m.receivedServerMeta {
-			return m.processMetadataResults()
-		}
-		return m, nil, true
+		newM, cmd := handleLocalMetadataMsg(m, msg)
+		return newM, cmd, true
 	case syncUploadSuccessMsg:
-		newM, statusCmd := m.setStatusMessage("Синхронизация завершена (загружено)")
-		// TODO: Обновить время последней синхронизации в m
-		return newM, statusCmd, true
+		newM, cmd := handleSyncUploadSuccessMsg(m)
+		return newM, cmd, true
 	case syncDownloadSuccessMsg:
-		// Файл был перезаписан, нужно перезагрузить KDBX
-		newM, statusCmd := m.setStatusMessage("Синхронизация завершена (скачано), перезагрузка...")
-		if msg.reloadNeeded {
-			// Возвращаем команду для асинхронного открытия файла
-			// Пароль берем из модели, так как он должен быть сохранен
-			openCmd := openKdbxCmd(m.kdbxPath, m.password)
-			return newM, tea.Batch(statusCmd, openCmd), true
-		}
-		// Если перезагрузка не нужна (маловероятно для скачивания), просто ставим статус
-		return newM, statusCmd, true
+		newM, cmd := handleSyncDownloadSuccessMsg(m, msg)
+		return newM, cmd, true
 	default:
-		return m, nil, false
+		return m, nil, false // Не обработали сообщение этого типа
 	}
 }
 
+// --- Обработчики для handleDBMsg ---
+
+func handleDBOpenedMsg(m *model, msg dbOpenedMsg) (tea.Model, tea.Cmd) {
+	return m.handleDBOpenedMsg(msg)
+}
+
+func handleErrorMsg(m *model, msg errMsg) tea.Model {
+	return m.handleErrorMsg(msg)
+}
+
+func handleDBSavedMsg(m *model) (tea.Model, tea.Cmd) {
+	return m.setStatusMessage("Сохранено успешно!")
+}
+
+func handleDBSaveErrorMsg(m *model, msg dbSaveErrorMsg) (tea.Model, tea.Cmd) {
+	return m.setStatusMessage(fmt.Sprintf("Ошибка сохранения: %v", msg.err))
+}
+
+func handleClearStatusMsg(m *model) tea.Model {
+	m.savingStatus = ""
+	m.statusTimer = nil
+	return m
+}
+
+func handleSyncErrorMsg(m *model, msg SyncError) (tea.Model, tea.Cmd) {
+	m.isSyncing = false
+	return m.setStatusMessage(fmt.Sprintf("Ошибка синхронизации: %v", msg.err))
+}
+
+func handleSyncStartedMsg(m *model) (tea.Model, tea.Cmd) {
+	m.isSyncing = true
+	m.receivedServerMeta = false
+	m.receivedLocalMeta = false
+	newM, statusCmd := m.setStatusMessage("Получение метаданных...")
+	fetchCmds := tea.Batch(fetchServerMetadataCmd(m), fetchLocalMetadataCmd(m))
+	return newM, tea.Batch(statusCmd, fetchCmds)
+}
+
+func handleServerMetadataMsg(m *model, msg serverMetadataMsg) (tea.Model, tea.Cmd) {
+	if !m.isSyncing {
+		return m, nil
+	}
+	m.serverMeta = msg.metadata
+	m.serverMetaFound = msg.found
+	m.receivedServerMeta = true
+	slog.Debug("Получено сообщение serverMetadataMsg", "found", msg.found)
+	if m.receivedLocalMeta {
+		newM, cmd := m.processMetadataResults()
+		return newM, cmd
+	}
+	return m, nil
+}
+
+func handleLocalMetadataMsg(m *model, msg localMetadataMsg) (tea.Model, tea.Cmd) {
+	if !m.isSyncing {
+		return m, nil
+	}
+	m.localMetaModTime = msg.modTime
+	m.localMetaFound = msg.found
+	m.receivedLocalMeta = true
+	slog.Debug("Получено сообщение localMetadataMsg", "found", msg.found)
+	if m.receivedServerMeta {
+		newM, cmd := m.processMetadataResults()
+		return newM, cmd
+	}
+	return m, nil
+}
+
+func handleSyncUploadSuccessMsg(m *model) (tea.Model, tea.Cmd) {
+	// TODO: Обновить время последней синхронизации в m
+	return m.setStatusMessage("Синхронизация завершена (загружено)")
+}
+
+func handleSyncDownloadSuccessMsg(m *model, msg syncDownloadSuccessMsg) (tea.Model, tea.Cmd) {
+	newM, statusCmd := m.setStatusMessage("Синхронизация завершена (скачано), перезагрузка...")
+	if msg.reloadNeeded {
+		openCmd := openKdbxCmd(m.kdbxPath, m.password)
+		return newM, tea.Batch(statusCmd, openCmd)
+	}
+	return newM, statusCmd
+}
+
 // processMetadataResults обрабатывает ситуацию, когда получены и локальные, и серверные метаданные.
-func (m *model) processMetadataResults() (tea.Model, tea.Cmd, bool) {
+func (m *model) processMetadataResults() (tea.Model, tea.Cmd) {
 	slog.Info("Получены метаданные сервера и локального файла. Запуск сравнения...")
 
-	// Определяем время создания сервера, обрабатывая случай nil
+	// Определяем время модификации контента с сервера
+	// (Используем новое поле ContentModifiedAt)
 	var serverModTime time.Time
-	if m.serverMeta != nil {
-		// Используем CreatedAt как время модификации с сервера
-		// TODO: Уточнить, есть ли на сервере поле LastModified или аналогичное
-		serverModTime = m.serverMeta.CreatedAt
+	if m.serverMeta != nil && m.serverMeta.ContentModifiedAt != nil {
+		serverModTime = *m.serverMeta.ContentModifiedAt
 	}
 
 	slog.Debug("Данные для сравнения",
 		"serverFound", m.serverMetaFound,
-		"serverMetaTime", serverModTime,
+		"serverMetaTime", serverModTime, // Теперь это ContentModifiedAt
 		"localFound", m.localMetaFound,
-		"localMetaTime", m.localMetaModTime,
+		"localMetaTime", m.localMetaModTime, // Это local db.Root.LastModificationTime
 	)
 
 	// Сбрасываем флаги получения
@@ -156,16 +204,17 @@ func (m *model) processMetadataResults() (tea.Model, tea.Cmd, bool) {
 			cmd = downloadVaultCmd(m) // Команда скачивания
 		} else {
 			// Обе версии существуют, сравниваем время
-			// Используем After для строгого сравнения (>), чтобы избежать лишних операций при ==
-			if m.localMetaModTime.After(serverModTime) {
+			// Переписываем if-else на switch для gocritic
+			switch {
+			case m.localMetaModTime.After(serverModTime):
 				slog.Info("Локальная версия новее. Загрузка на сервер.")
 				statusMsg = "Загрузка на сервер..."
 				cmd = uploadVaultCmd(m) // Команда загрузки
-			} else if serverModTime.After(m.localMetaModTime) {
+			case serverModTime.After(m.localMetaModTime):
 				slog.Info("Серверная версия новее. Скачивание с сервера.")
 				statusMsg = "Скачивание с сервера..."
 				cmd = downloadVaultCmd(m) // Команда скачивания
-			} else {
+			default: // Времена равны
 				slog.Info("Версии идентичны. Синхронизация не требуется.")
 				statusMsg = "Уже синхронизировано."
 				cmd = nil // Ничего не делаем
@@ -178,7 +227,7 @@ func (m *model) processMetadataResults() (tea.Model, tea.Cmd, bool) {
 	// Объединяем команду установки статуса с командой загрузки/скачивания (если она есть)
 	finalCmd := tea.Batch(statusCmd, cmd)
 
-	return newM, finalCmd, true
+	return newM, finalCmd
 }
 
 // handleAPIMsg обрабатывает сообщения от API клиента.

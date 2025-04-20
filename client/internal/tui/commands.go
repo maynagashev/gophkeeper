@@ -133,9 +133,6 @@ type syncDownloadSuccessMsg struct {
 	reloadNeeded bool // Обычно true, чтобы обновить TUI
 }
 
-// (Может использоваться после скачивания или других операций, изменяющих файл извне TUI).
-type dbReloadNeededMsg struct{}
-
 const defaultFilePerm = 0600
 
 // startSyncCmd проверяет предусловия и запускает процесс синхронизации.
