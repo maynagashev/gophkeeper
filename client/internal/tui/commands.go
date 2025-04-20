@@ -206,6 +206,8 @@ func fetchServerMetadataCmd(m *model) tea.Cmd {
 func fetchLocalMetadataCmd(m *model) tea.Cmd {
 	return func() tea.Msg {
 		slog.Debug("Получение метаданных локального файла", "path", m.kdbxPath)
+		// Используем os.Stat для получения времени модификации файла
+		// TODO: Заменить на получение времени модификации из m.db (e.g., m.db.Meta.DataLastModified?), когда найдем способ.
 		fileInfo, err := os.Stat(m.kdbxPath)
 		if err != nil {
 			if errors.Is(err, os.ErrNotExist) {
@@ -217,8 +219,9 @@ func fetchLocalMetadataCmd(m *model) tea.Cmd {
 			return SyncError{err: fmt.Errorf("ошибка доступа к локальному файлу: %w", err)}
 		}
 		// Успешно получили информацию о файле
-		slog.Debug("Метаданные локального файла получены", "modTime", fileInfo.ModTime())
-		return localMetadataMsg{modTime: fileInfo.ModTime(), found: true}
+		modTime := fileInfo.ModTime()
+		slog.Debug("Метаданные локального файла получены (os.Stat)", "modTime", modTime)
+		return localMetadataMsg{modTime: modTime, found: true}
 	}
 }
 
@@ -230,9 +233,24 @@ func uploadVaultCmd(m *model) tea.Cmd {
 		applyUIChangesToDB(m)
 		slog.Info("Обновление m.db завершено.")
 
-		var err error // Объявляем err один раз
+		// === Получаем время модификации файла (из os.Stat) ===
+		// TODO: Заменить на получение времени модификации из m.db, когда найдем способ.
+		fileInfo, err := os.Stat(m.kdbxPath)
+		if err != nil {
+			// Ошибка получения статы файла - критично для получения времени модификации
+			slog.Error("Ошибка получения метаданных локального файла перед загрузкой", "path", m.kdbxPath, "error", err)
+			return SyncError{err: fmt.Errorf("ошибка доступа к локальному файлу перед загрузкой: %w", err)}
+		}
+		contentModTime := fileInfo.ModTime() // Используем время модификации файла
+		// =====================================================
+
+		// var err error // Объявляем err один раз - уже сделано выше
 
 		// Шаг 2: Заблокировать и сохранить m.db во временный буфер для загрузки
+		if m.db == nil {
+			slog.Error("Попытка загрузки хранилища, но m.db is nil")
+			return SyncError{err: errors.New("локальная база не загружена")}
+		}
 		if err = m.db.LockProtectedEntries(); err != nil {
 			slog.Warn("Не удалось заблокировать поля перед сохранением в буфер", "error", err)
 		}
@@ -254,10 +272,10 @@ func uploadVaultCmd(m *model) tea.Cmd {
 
 		dataSize := int64(buf.Len())
 
-		// Шаг 3: Вызвать API для загрузки
-		slog.Info("Запуск загрузки KDBX на сервер...")
+		// Шаг 3: Вызвать API для загрузки, передавая время модификации файла
+		slog.Info("Запуск загрузки KDBX на сервер...", "fileModTime", contentModTime)
 		ctx := context.Background()
-		err = m.apiClient.UploadVault(ctx, buf, dataSize)
+		err = m.apiClient.UploadVault(ctx, buf, dataSize, contentModTime) // Передаем fileModTime
 		if err != nil {
 			slog.Error("Ошибка загрузки KDBX на сервер", "error", err)
 			return SyncError{err: fmt.Errorf("ошибка загрузки на сервер: %w", err)}

@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv" // Добавляем для ListVersions
+	"time"    // Добавили time
 
 	"github.com/maynagashev/gophkeeper/models" // Импортируем общие модели
 )
@@ -23,7 +24,7 @@ type Client interface {
 	// GetVaultMetadata получает метаданные текущей версии хранилища.
 	GetVaultMetadata(ctx context.Context) (*models.VaultVersion, error)
 	// UploadVault загружает файл хранилища на сервер.
-	UploadVault(ctx context.Context, data io.Reader, size int64) error
+	UploadVault(ctx context.Context, data io.Reader, size int64, contentModifiedAt time.Time) error
 	// DownloadVault скачивает текущую версию файла хранилища.
 	DownloadVault(ctx context.Context) (io.ReadCloser, *models.VaultVersion, error)
 	// ListVersions получает список версий хранилища.
@@ -197,7 +198,7 @@ func (c *httpClient) GetVaultMetadata(ctx context.Context) (*models.VaultVersion
 }
 
 // UploadVault загружает данные хранилища на сервер.
-func (c *httpClient) UploadVault(ctx context.Context, data io.Reader, size int64) error {
+func (c *httpClient) UploadVault(ctx context.Context, data io.Reader, size int64, contentModifiedAt time.Time) error {
 	uploadURL, err := url.JoinPath(c.baseURL, "/api/vault/upload")
 	if err != nil {
 		return fmt.Errorf("ошибка формирования URL для загрузки: %w", err)
@@ -212,6 +213,10 @@ func (c *httpClient) UploadVault(ctx context.Context, data io.Reader, size int64
 	// Устанавливаем необходимые заголовки
 	req.Header.Set("Content-Type", "application/octet-stream") // Тип контента для KDBX
 	req.Header.Set("Content-Length", strconv.FormatInt(size, 10))
+	// Добавляем заголовок с временем модификации контента
+	modTimeStr := contentModifiedAt.UTC().Format(time.RFC3339)
+	req.Header.Set("X-Kdbx-Content-Modified-At", modTimeStr)
+
 	if err = c.setAuthHeader(req); err != nil {
 		return err
 	}
