@@ -15,6 +15,9 @@ import (
 	"github.com/maynagashev/gophkeeper/models" // Импортируем общие модели
 )
 
+// ErrAuthorization сигнализирует об ошибке авторизации (401).
+var ErrAuthorization = errors.New("ошибка авторизации")
+
 // Client определяет интерфейс для взаимодействия с API сервера GophKeeper.
 type Client interface {
 	// Register регистрирует нового пользователя.
@@ -183,7 +186,8 @@ func (c *httpClient) GetVaultMetadata(ctx context.Context) (*models.VaultVersion
 			return nil, errors.New("хранилище не найдено на сервере") // Кастомная ошибка
 		}
 		if resp.StatusCode == http.StatusUnauthorized {
-			return nil, errors.New("ошибка авторизации (невалидный или просроченный токен?)")
+			// Возвращаем нашу специальную ошибку
+			return nil, ErrAuthorization
 		}
 		// TODO: Читать тело для деталей
 		return nil, fmt.Errorf("ошибка получения метаданных: статус %d", resp.StatusCode)
@@ -229,8 +233,13 @@ func (c *httpClient) UploadVault(ctx context.Context, data io.Reader, size int64
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
+		defer resp.Body.Close() // Закрываем тело в случае ошибки
 		if resp.StatusCode == http.StatusUnauthorized {
-			return errors.New("ошибка авторизации при загрузке")
+			// Возвращаем нашу специальную ошибку
+			return ErrAuthorization
+		}
+		if resp.StatusCode == http.StatusConflict {
+			return errors.New("конфликт версий при загрузке") // Возвращаем ошибку конфликта
 		}
 		// TODO: Читать тело для деталей
 		return fmt.Errorf("ошибка загрузки на сервер: статус %d", resp.StatusCode)
@@ -267,7 +276,8 @@ func (c *httpClient) DownloadVault(ctx context.Context) (io.ReadCloser, *models.
 			return nil, nil, errors.New("хранилище не найдено для скачивания")
 		}
 		if resp.StatusCode == http.StatusUnauthorized {
-			return nil, nil, errors.New("ошибка авторизации при скачивании")
+			// Возвращаем нашу специальную ошибку
+			return nil, nil, ErrAuthorization
 		}
 		// TODO: Читать тело для деталей
 		return nil, nil, fmt.Errorf("ошибка скачивания с сервера: статус %d", resp.StatusCode)
@@ -320,7 +330,8 @@ func (c *httpClient) ListVersions(ctx context.Context, limit, offset int) ([]mod
 
 	if resp.StatusCode != http.StatusOK {
 		if resp.StatusCode == http.StatusUnauthorized {
-			return nil, errors.New("ошибка авторизации при получении списка версий")
+			// Возвращаем нашу специальную ошибку
+			return nil, ErrAuthorization
 		}
 		// TODO: Читать тело для деталей
 		return nil, fmt.Errorf("ошибка получения списка версий: статус %d", resp.StatusCode)
@@ -366,7 +377,8 @@ func (c *httpClient) RollbackToVersion(ctx context.Context, versionID int64) err
 
 	if resp.StatusCode != http.StatusNoContent { // Ожидаем 204 No Content
 		if resp.StatusCode == http.StatusUnauthorized {
-			return errors.New("ошибка авторизации при откате")
+			// Возвращаем нашу специальную ошибку
+			return ErrAuthorization
 		}
 		if resp.StatusCode == http.StatusNotFound {
 			return errors.New("указанная версия или хранилище не найдены для отката")

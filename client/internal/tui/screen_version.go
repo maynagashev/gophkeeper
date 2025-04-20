@@ -9,6 +9,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/maynagashev/gophkeeper/client/internal/api"
 	"github.com/maynagashev/gophkeeper/models"
 )
 
@@ -140,6 +141,10 @@ func (m *model) handleVersionListKeys(keyMsg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		// Обновление списка версий
 		m.loadingVersions = true
 		return m, loadVersionsCmd(m)
+	case "l":
+		// Переход к экрану логина/регистрации
+		m.state = loginRegisterChoiceScreen
+		return m, tea.ClearScreen
 	}
 	return m, nil // Клавиша не обработана здесь
 }
@@ -229,14 +234,22 @@ func handleVersionsLoadedMsg(m *model, msg versionsLoadedMsg) (tea.Model, tea.Cm
 		})
 	}
 
-	// Обновляем список
-	_ = m.versionList.SetItems(items) // Команду от SetItems игнорируем
-	return m, nil                     // Явно возвращаем nil команду
+	// Обновляем список и получаем команду от него
+	cmd := m.versionList.SetItems(items) // Не игнорируем команду
+	return m, cmd                        // Возвращаем модель и команду от списка
 }
 
 // handleVersionsLoadErrorMsg обрабатывает ошибку загрузки версий.
 func handleVersionsLoadErrorMsg(m *model, msg versionsLoadErrorMsg) (tea.Model, tea.Cmd) {
 	m.loadingVersions = false
+	// Проверяем, является ли ошибка ошибкой авторизации
+	if errors.Is(msg.err, api.ErrAuthorization) {
+		// Не меняем состояние здесь, т.к. мы уже на экране версий,
+		// но даем пользователю понять, что делать (нажать 'l')
+		return m.setStatusMessage("Ошибка авторизации. Токен истек? Попробуйте войти заново (L).")
+	}
+	// Иначе показываем общую ошибку
+	// Возвращаем результат setStatusMessage, который включает команду
 	return m.setStatusMessage(fmt.Sprintf("Ошибка загрузки версий: %v", msg.err))
 }
 
@@ -246,11 +259,19 @@ func handleRollbackSuccessMsg(m *model, msg rollbackSuccessMsg) (tea.Model, tea.
 	newM, statusCmd := m.setStatusMessage(fmt.Sprintf("Откат к версии #%d выполнен. Синхронизация...", msg.versionID))
 
 	// После успешного отката выполняем синхронизацию для загрузки обновленной версии
-	return newM, tea.Batch(statusCmd, startSyncCmd(m))
+	// Добавляем ClearScreen перед синхронизацией
+	return newM, tea.Batch(statusCmd, tea.ClearScreen, startSyncCmd(m))
 }
 
 // handleRollbackErrorMsg обрабатывает ошибку отката.
 func handleRollbackErrorMsg(m *model, msg rollbackErrorMsg) (tea.Model, tea.Cmd) {
+	// Проверяем, является ли ошибка ошибкой авторизации
+	if errors.Is(msg.err, api.ErrAuthorization) {
+		m.state = loginRegisterChoiceScreen // Переходим на экран выбора входа/регистрации
+		newM, statusCmd := m.setStatusMessage("Сессия истекла. Пожалуйста, войдите снова (L).")
+		return newM, tea.Batch(statusCmd, tea.ClearScreen)
+	}
+	// Иначе устанавливаем ошибку для отображения на экране версий
 	m.rollbackError = msg.err
 	return m, nil // Явно возвращаем nil команду
 }

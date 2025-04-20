@@ -1,12 +1,14 @@
 package tui
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"time"
 
 	// Убедимся, что импорты на месте.
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/maynagashev/gophkeeper/client/internal/api"
 	"github.com/maynagashev/gophkeeper/client/internal/kdbx"
 )
 
@@ -101,6 +103,14 @@ func handleClearStatusMsg(m *model) tea.Model {
 
 func handleSyncErrorMsg(m *model, msg SyncError) (tea.Model, tea.Cmd) {
 	m.isSyncing = false
+	// Проверяем на ошибку авторизации
+	if errors.Is(msg.err, api.ErrAuthorization) {
+		m.state = loginRegisterChoiceScreen // Переходим на экран выбора входа/регистрации
+		// Можно добавить очистку экрана, если нужно
+		newM, statusCmd := m.setStatusMessage("Сессия истекла. Пожалуйста, войдите снова (L).")
+		return newM, tea.Batch(statusCmd, tea.ClearScreen)
+	}
+	// Иначе показываем общую ошибку синхронизации
 	return m.setStatusMessage(fmt.Sprintf("Ошибка синхронизации: %v", msg.err))
 }
 
