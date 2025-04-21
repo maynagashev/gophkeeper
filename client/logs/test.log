@@ -24,7 +24,7 @@
     --- PASS: TestHTTPClient_GetVaultMetadata/Невалидный_JSON_ответ (0.00s)
     --- PASS: TestHTTPClient_GetVaultMetadata/Без_токена_авторизации (0.00s)
 PASS
-ok  	github.com/maynagashev/gophkeeper/client/internal/api	0.016s
+ok  	github.com/maynagashev/gophkeeper/client/internal/api	(cached)
 === RUN   TestOpenFile
 === RUN   TestOpenFile/Success_With_Correct_Password
 === RUN   TestOpenFile/Error_With_Incorrect_Password
@@ -44,5 +44,5 @@ ok  	github.com/maynagashev/gophkeeper/client/internal/api	0.016s
 --- PASS: TestCreateDatabase (0.00s)
     --- PASS: TestCreateDatabase/Create_New_Database (0.00s)
 PASS
-ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	1.369s
+ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	(cached)
 ?   	github.com/maynagashev/gophkeeper/client/internal/tui	[no test files]

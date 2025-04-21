@@ -267,6 +267,9 @@ type model struct {
 	selectedVersionForRollback *models.VaultVersion  // Выбранная версия для отката
 	confirmRollback            bool                  // Флаг: требуется подтверждение отката
 	rollbackError              error                 // Ошибка при откате
+
+	// -- Добавляем карту для текстов помощи --
+	helpTextMap map[screenState]string
 }
 
 // Сообщение для очистки статуса.

@@ -3,7 +3,8 @@
                                     
   Нажмите Enter для продолжения...  
                                     
-(Enter - продолжить, Ctrl+C/q - выход)
+State: welcomeScreen
+
 ---
 Отладка:
  [State: welcomeScreen]
@@ -11,14 +12,14 @@
  [Token: ]
  [Lock Acquired: true]
  [DB: not loaded]
-
 [15;H[2J[H[H                                              
   Введите мастер-пароль для gophkeeper.kdbx:  
   > Мастер-пароль                             
                                               
                                               
                                               
-(Enter - подтвердить, Ctrl+C - выход)
+State: passwordInputScreen
+
 ---
 Отладка:
  [State: passwordInputScreen]
@@ -26,7 +27,6 @@
  [Token: ]
  [Lock Acquired: true]
  [DB: not loaded]
-
 [16;H[H
 
   > *                                         
@@ -98,7 +98,8 @@
                                         
                                         
                                         
-(↑/↓, Enter - детали, / - поиск, a - доб, s - синхр, l - логин, Ctrl+S - сохр, q - вых)
+State: entryListScreen
+
 ---
 Отладка:
  [State: entryListScreen]
@@ -106,8 +107,7 @@
  [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTI1MzE5OCwibmJmIjoxNzQ1MTY2Nzk4LCJpYXQiOjE3NDUxNjY3OTh9.IkxiDoEJRRCic89hRBGB2lv1N-__aInP7Z0aZFFXr_g]
  [Lock Acquired: true]
  [DB Name: gophkeeper]
- [Local ModTime: 2025-04-21T22:52:05+07:00]
-
+ [DB ModTime: 2025-04-21T23:14:35+07:00 (group0 mod)]
 [37;H[2J[H[H                                        
      Записи в 'gophkeeper.kdbx' (2)     
                                         
@@ -134,7 +134,9 @@
                                         
                                         
                                         
-(↑/↓, Enter - детали, / - поиск, a - доб, s - синхр, l - логин, Ctrl+S - сохр, q - вых)
+State: entryListScreen
+Сохранено успешно!
+
 ---
 Отладка:
  [State: entryListScreen]
@@ -142,1190 +144,8 @@
  [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTI1MzE5OCwibmJmIjoxNzQ1MTY2Nzk4LCJpYXQiOjE3NDUxNjY3OTh9.IkxiDoEJRRCic89hRBGB2lv1N-__aInP7Z0aZFFXr_g]
  [Lock Acquired: true]
  [DB Name: gophkeeper]
- [Local ModTime: 2025-04-21T15:53:44Z]
-
-
-Сохранено успешно![38;H[2J[H[H                                                  
-  URL Сервера: http://localhost:8080              
-  Статус входа: Вход выполнен (сессия загружена)  
-  Последняя синх.: Не синхронизировалось          
-                                                  
-                                                  
-                                                  
-                                                  
-  │ Настроить URL сервера                         
-  │                                               
-                                                  
-    Войти / Зарегистрироваться                    
-                                                  
-                                                  
-    Синхронизировать сейчас                       
-                                                  
-                                                  
-    Просмотреть версии                            
-                                                  
-                                                  
-    Выйти на сервере                              
-                                                  
-                                                  
-                                                  
-                                                  
-                                                  
-                                                  
-(↑/↓ - навигация, Enter - выбрать, Esc/b - назад)
----
-Отладка:
- [State: syncServerScreen]
- [URL: http://localhost:8080]
- [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTI1MzE5OCwibmJmIjoxNzQ1MTY2Nzk4LCJpYXQiOjE3NDUxNjY3OTh9.IkxiDoEJRRCic89hRBGB2lv1N-__aInP7Z0aZFFXr_g]
- [Lock Acquired: true]
- [DB Name: gophkeeper]
- [Local ModTime: 2025-04-21T15:53:44Z]
-
-
-Сохранено успешно![39;H[H
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[J[38;H[H
-
-
-
-
-
-
-
-    Настроить URL сервера                         
-                                                  
-
-  │ Войти / Зарегистрироваться                    
-  │                                               
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[38;H[H
-
-
-
-
-
-
-
-
-
-
-    Войти / Зарегистрироваться                    
-                                                  
-
-  │ Синхронизировать сейчас                       
-  │                                               
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[38;H[H
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Получение метаданных...[39;H[H
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Загрузка на сервер...[39;H[2J[H[H                                                  
-  URL Сервера: http://localhost:8080              
-  Статус входа: Вход выполнен (сессия загружена)  
-  Последняя синх.: Не синхронизировалось          
-                                                  
-                                                  
-                                                  
-                                                  
-    Настроить URL сервера                         
-                                                  
-                                                  
-    Войти / Зарегистрироваться                    
-                                                  
-                                                  
-  │ Синхронизировать сейчас                       
-  │                                               
-                                                  
-    Просмотреть версии                            
-                                                  
-                                                  
-    Выйти на сервере                              
-                                                  
-                                                  
-                                                  
-                                                  
-                                                  
-                                                  
-(↑/↓ - навигация, Enter - выбрать, Esc/b - назад)
----
-Отладка:
- [State: syncServerScreen]
- [URL: http://localhost:8080]
- [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTI1MzE5OCwibmJmIjoxNzQ1MTY2Nzk4LCJpYXQiOjE3NDUxNjY3OTh9.IkxiDoEJRRCic89hRBGB2lv1N-__aInP7Z0aZFFXr_g]
- [Lock Acquired: true]
- [DB Name: gophkeeper]
- [Local ModTime: 2025-04-21T15:53:44Z]
-
-
-Синхронизация завершена (загружено)[39;H[H
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[J[38;H[H
-
-
-
-
-
-
-
-
-
-
-
-
-
-    Синхронизировать сейчас                       
-                                                  
-
-  │ Просмотреть версии                            
-  │                                               
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[38;H[2J[H[H                             
-  Загрузка списка версий...  
-                             
-(↑/↓ - навигация, Enter - откатить, Esc/b - назад, r - обновить)
----
-Отладка:
- [State: versionListScreen]
- [URL: http://localhost:8080]
- [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTI1MzE5OCwibmJmIjoxNzQ1MTY2Nzk4LCJpYXQiOjE3NDUxNjY3OTh9.IkxiDoEJRRCic89hRBGB2lv1N-__aInP7Z0aZFFXr_g]
- [Lock Acquired: true]
- [DB Name: gophkeeper]
- [Local ModTime: 2025-04-21T15:53:44Z]
-
-[J[14;H[2J[H[H                                                      
-     История версий                                   
-                                                      
-    11 items                                          
-                                                      
-  │ Версия #11 (Текущая)                              
-  │ Изменена: 2025-04-21T15:53:44Z | Размер: 1.74 KB  
-                                                      
-    Версия #10                                        
-    Изменена: 2025-04-21T15:29:18Z | Размер: 1.74 KB  
-                                                      
-    Версия #9                                         
-    Изменена: 2025-04-21T15:13:38Z | Размер: 1.74 KB  
-                                                      
-    Версия #8                                         
-    Изменена: 2025-04-21T14:59:33Z | Размер: 1.69 KB  
-                                                      
-    Версия #7                                         
-    Изменена: 2025-04-21T14:59:33Z | Размер: 1.69 KB  
-                                                      
-    Версия #6                                         
-    Изменена: 2025-04-20T14:43:34Z | Размер: 1.69 KB  
-                                                      
-                                                      
-    ••                                                
-                                                      
-(↑/↓ - навигация, Enter - откатить, Esc/b - назад, r - обновить)
----
-Отладка:
- [State: versionListScreen]
- [URL: http://localhost:8080]
- [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTI1MzE5OCwibmJmIjoxNzQ1MTY2Nzk4LCJpYXQiOjE3NDUxNjY3OTh9.IkxiDoEJRRCic89hRBGB2lv1N-__aInP7Z0aZFFXr_g]
- [Lock Acquired: true]
- [DB Name: gophkeeper]
- [Local ModTime: 2025-04-21T15:53:44Z]
-
-[37;H[H
-
-
-
-
-    Версия #11 (Текущая)                              
-    Изменена: 2025-04-21T15:53:44Z | Размер: 1.74 KB  
-
-  │ Версия #10                                        
-  │ Изменена: 2025-04-21T15:29:18Z | Размер: 1.74 KB  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[37;H[H
-
-
-
-
-
-
-
-    Версия #10                                        
-    Изменена: 2025-04-21T15:29:18Z | Размер: 1.74 KB  
-
-  │ Версия #9                                         
-  │ Изменена: 2025-04-21T15:13:38Z | Размер: 1.74 KB  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[37;H[H
-
-
-
-
-
-
-
-
-
-
-    Версия #9                                         
-    Изменена: 2025-04-21T15:13:38Z | Размер: 1.74 KB  
-
-  │ Версия #8                                         
-  │ Изменена: 2025-04-21T14:59:33Z | Размер: 1.69 KB  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[37;H[H
-
-
-
-
-
-
-
-
-
-
-  │ Версия #9                                         
-  │ Изменена: 2025-04-21T15:13:38Z | Размер: 1.74 KB  
-
-    Версия #8                                         
-    Изменена: 2025-04-21T14:59:33Z | Размер: 1.69 KB  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[37;H[H
-
-
-
-
-
-
-
-  │ Версия #10                                        
-  │ Изменена: 2025-04-21T15:29:18Z | Размер: 1.74 KB  
-
-    Версия #9                                         
-    Изменена: 2025-04-21T15:13:38Z | Размер: 1.74 KB  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[37;H[H
-
-
-
-
-  │ Версия #11 (Текущая)                              
-  │ Изменена: 2025-04-21T15:53:44Z | Размер: 1.74 KB  
-
-    Версия #10                                        
-    Изменена: 2025-04-21T15:29:18Z | Размер: 1.74 KB  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[37;H[H
-
-
-
-
-    Версия #11 (Текущая)                              
-    Изменена: 2025-04-21T15:53:44Z | Размер: 1.74 KB  
-
-  │ Версия #10                                        
-  │ Изменена: 2025-04-21T15:29:18Z | Размер: 1.74 KB  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[37;H[H
-
-
-
-
-
-
-
-    Версия #10                                        
-    Изменена: 2025-04-21T15:29:18Z | Размер: 1.74 KB  
-
-  │ Версия #9                                         
-  │ Изменена: 2025-04-21T15:13:38Z | Размер: 1.74 KB  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[37;H[H
-
-
-
-
-
-
-
-
-
-
-    Версия #9                                         
-    Изменена: 2025-04-21T15:13:38Z | Размер: 1.74 KB  
-
-  │ Версия #8                                         
-  │ Изменена: 2025-04-21T14:59:33Z | Размер: 1.69 KB  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[37;H[H
-
-
-
-
-
-
-
-
-
-
-
-
-
-    Версия #8                                         
-    Изменена: 2025-04-21T14:59:33Z | Размер: 1.69 KB  
-
-  │ Версия #7                                         
-  │ Изменена: 2025-04-21T14:59:33Z | Размер: 1.69 KB  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[37;H[H
-
-
-
-
-
-
-
-
-
-
-
-
-
-  │ Версия #8                                         
-  │ Изменена: 2025-04-21T14:59:33Z | Размер: 1.69 KB  
-
-    Версия #7                                         
-    Изменена: 2025-04-21T14:59:33Z | Размер: 1.69 KB  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[37;H[2J[H[H                                                  
-  Вы уверены, что хотите откатиться к версии #8?  
-                                                  
-  Время изменения: 2025-04-21 14:59:33            
-                                                  
-  Enter - подтвердить, Esc - отменить             
-                                                  
-(↑/↓ - навигация, Enter - откатить, Esc/b - назад, r - обновить)
----
-Отладка:
- [State: versionListScreen]
- [URL: http://localhost:8080]
- [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTI1MzE5OCwibmJmIjoxNzQ1MTY2Nzk4LCJpYXQiOjE3NDUxNjY3OTh9.IkxiDoEJRRCic89hRBGB2lv1N-__aInP7Z0aZFFXr_g]
- [Lock Acquired: true]
- [DB Name: gophkeeper]
- [Local ModTime: 2025-04-21T15:53:44Z]
-
-[J[18;H[2J[H[H                                                      
-     История версий                                   
-                                                      
-    11 items                                          
-                                                      
-    Версия #11 (Текущая)                              
-    Изменена: 2025-04-21T15:53:44Z | Размер: 1.74 KB  
-                                                      
-    Версия #10                                        
-    Изменена: 2025-04-21T15:29:18Z | Размер: 1.74 KB  
-                                                      
-    Версия #9                                         
-    Изменена: 2025-04-21T15:13:38Z | Размер: 1.74 KB  
-                                                      
-  │ Версия #8                                         
-  │ Изменена: 2025-04-21T14:59:33Z | Размер: 1.69 KB  
-                                                      
-    Версия #7                                         
-    Изменена: 2025-04-21T14:59:33Z | Размер: 1.69 KB  
-                                                      
-    Версия #6                                         
-    Изменена: 2025-04-20T14:43:34Z | Размер: 1.69 KB  
-                                                      
-                                                      
-    ••                                                
-                                                      
-(↑/↓ - навигация, Enter - откатить, Esc/b - назад, r - обновить)
----
-Отладка:
- [State: versionListScreen]
- [URL: http://localhost:8080]
- [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTI1MzE5OCwibmJmIjoxNzQ1MTY2Nzk4LCJpYXQiOjE3NDUxNjY3OTh9.IkxiDoEJRRCic89hRBGB2lv1N-__aInP7Z0aZFFXr_g]
- [Lock Acquired: true]
- [DB Name: gophkeeper]
- [Local ModTime: 2025-04-21T15:53:44Z]
-
-[37;H[2J[H[H                                                      
-     История версий                                   
-                                                      
-    11 items                                          
-                                                      
-    Версия #11 (Текущая)                              
-    Изменена: 2025-04-21T15:53:44Z | Размер: 1.74 KB  
-                                                      
-    Версия #10                                        
-    Изменена: 2025-04-21T15:29:18Z | Размер: 1.74 KB  
-                                                      
-    Версия #9                                         
-    Изменена: 2025-04-21T15:13:38Z | Размер: 1.74 KB  
-                                                      
-  │ Версия #8                                         
-  │ Изменена: 2025-04-21T14:59:33Z | Размер: 1.69 KB  
-                                                      
-    Версия #7                                         
-    Изменена: 2025-04-21T14:59:33Z | Размер: 1.69 KB  
-                                                      
-    Версия #6                                         
-    Изменена: 2025-04-20T14:43:34Z | Размер: 1.69 KB  
-                                                      
-                                                      
-    ••                                                
-                                                      
-(↑/↓ - навигация, Enter - откатить, Esc/b - назад, r - обновить)
----
-Отладка:
- [State: versionListScreen]
- [URL: http://localhost:8080]
- [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTI1MzE5OCwibmJmIjoxNzQ1MTY2Nzk4LCJpYXQiOjE3NDUxNjY3OTh9.IkxiDoEJRRCic89hRBGB2lv1N-__aInP7Z0aZFFXr_g]
- [Lock Acquired: true]
- [DB Name: gophkeeper]
- [Local ModTime: 2025-04-21T15:53:44Z]
-
-
-Синхронизация завершена (скачано), перезагрузка...[38;H[2J[H[H                                        
-     Записи в 'gophkeeper.kdbx' (1)     
-                                        
-    1 item                              
-                                        
-  │ Sample Entry                        
-  │                                     
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-(↑/↓, Enter - детали, / - поиск, a - доб, s - синхр, l - логин, Ctrl+S - сохр, q - вых)
----
-Отладка:
- [State: entryListScreen]
- [URL: http://localhost:8080]
- [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTMzMzk2NSwibmJmIjoxNzQ1MjQ3NTY1LCJpYXQiOjE3NDUyNDc1NjV9.Y3DEfeyldqEKKddh0OlCU2VjS1mfmcCpB_bJXsmwyTI]
- [Lock Acquired: true]
- [DB Name: gophkeeper]
- [Local ModTime: 2025-04-21T21:59:25+07:00]
-
-
-Синхронизация завершена (скачано), перезагрузка...[38;H[H
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[J[37;H[2J[H[H                                                  
-  URL Сервера: http://localhost:8080              
-  Статус входа: Вход выполнен (сессия загружена)  
-  Последняя синх.: Не синхронизировалось          
-                                                  
-                                                  
-                                                  
-                                                  
-    Настроить URL сервера                         
-                                                  
-                                                  
-    Войти / Зарегистрироваться                    
-                                                  
-                                                  
-    Синхронизировать сейчас                       
-                                                  
-                                                  
-  │ Просмотреть версии                            
-  │                                               
-                                                  
-    Выйти на сервере                              
-                                                  
-                                                  
-                                                  
-                                                  
-                                                  
-                                                  
-(↑/↓ - навигация, Enter - выбрать, Esc/b - назад)
----
-Отладка:
- [State: syncServerScreen]
- [URL: http://localhost:8080]
- [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTMzMzk2NSwibmJmIjoxNzQ1MjQ3NTY1LCJpYXQiOjE3NDUyNDc1NjV9.Y3DEfeyldqEKKddh0OlCU2VjS1mfmcCpB_bJXsmwyTI]
- [Lock Acquired: true]
- [DB Name: gophkeeper]
- [Local ModTime: 2025-04-21T21:59:25+07:00]
-
-[38;H[2J[H[2J[H[H                                                      
-     История версий                                   
-                                                      
-    11 items                                          
-                                                      
-    Версия #11                                        
-    Изменена: 2025-04-21T15:53:44Z | Размер: 1.74 KB  
-                                                      
-    Версия #10                                        
-    Изменена: 2025-04-21T15:29:18Z | Размер: 1.74 KB  
-                                                      
-    Версия #9                                         
-    Изменена: 2025-04-21T15:13:38Z | Размер: 1.74 KB  
-                                                      
-  │ Версия #8 (Текущая)                               
-  │ Изменена: 2025-04-21T14:59:33Z | Размер: 1.69 KB  
-                                                      
-    Версия #7                                         
-    Изменена: 2025-04-21T14:59:33Z | Размер: 1.69 KB  
-                                                      
-    Версия #6                                         
-    Изменена: 2025-04-20T14:43:34Z | Размер: 1.69 KB  
-                                                      
-                                                      
-    ••                                                
-                                                      
-(↑/↓ - навигация, Enter - откатить, Esc/b - назад, r - обновить)
----
-Отладка:
- [State: versionListScreen]
- [URL: http://localhost:8080]
- [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTMzMzk2NSwibmJmIjoxNzQ1MjQ3NTY1LCJpYXQiOjE3NDUyNDc1NjV9.Y3DEfeyldqEKKddh0OlCU2VjS1mfmcCpB_bJXsmwyTI]
- [Lock Acquired: true]
- [DB Name: gophkeeper]
- [Local ModTime: 2025-04-21T21:59:25+07:00]
-
-[J[37;H[H
-
-
-
-
-
-
-
-
-
-
-  │ Версия #9                                         
-  │ Изменена: 2025-04-21T15:13:38Z | Размер: 1.74 KB  
-
-    Версия #8 (Текущая)                               
-    Изменена: 2025-04-21T14:59:33Z | Размер: 1.69 KB  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[37;H[H
-
-
-
-
-
-
-
-  │ Версия #10                                        
-  │ Изменена: 2025-04-21T15:29:18Z | Размер: 1.74 KB  
-
-    Версия #9                                         
-    Изменена: 2025-04-21T15:13:38Z | Размер: 1.74 KB  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[37;H[H
-
-
-
-
-  │ Версия #11                                        
-  │ Изменена: 2025-04-21T15:53:44Z | Размер: 1.74 KB  
-
-    Версия #10                                        
-    Изменена: 2025-04-21T15:29:18Z | Размер: 1.74 KB  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[37;H[2J[H[H                                                   
-  Вы уверены, что хотите откатиться к версии #11?  
-                                                   
-  Время изменения: 2025-04-21 15:53:44             
-                                                   
-  Enter - подтвердить, Esc - отменить              
-                                                   
-(↑/↓ - навигация, Enter - откатить, Esc/b - назад, r - обновить)
----
-Отладка:
- [State: versionListScreen]
- [URL: http://localhost:8080]
- [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTMzMzk2NSwibmJmIjoxNzQ1MjQ3NTY1LCJpYXQiOjE3NDUyNDc1NjV9.Y3DEfeyldqEKKddh0OlCU2VjS1mfmcCpB_bJXsmwyTI]
- [Lock Acquired: true]
- [DB Name: gophkeeper]
- [Local ModTime: 2025-04-21T21:59:25+07:00]
-
-[J[18;H[2J[H[2J[H[H                                                      
-     История версий                                   
-                                                      
-    11 items                                          
-                                                      
-  │ Версия #11                                        
-  │ Изменена: 2025-04-21T15:53:44Z | Размер: 1.74 KB  
-                                                      
-    Версия #10                                        
-    Изменена: 2025-04-21T15:29:18Z | Размер: 1.74 KB  
-                                                      
-    Версия #9                                         
-    Изменена: 2025-04-21T15:13:38Z | Размер: 1.74 KB  
-                                                      
-    Версия #8 (Текущая)                               
-    Изменена: 2025-04-21T14:59:33Z | Размер: 1.69 KB  
-                                                      
-    Версия #7                                         
-    Изменена: 2025-04-21T14:59:33Z | Размер: 1.69 KB  
-                                                      
-    Версия #6                                         
-    Изменена: 2025-04-20T14:43:34Z | Размер: 1.69 KB  
-                                                      
-                                                      
-    ••                                                
-                                                      
-(↑/↓ - навигация, Enter - откатить, Esc/b - назад, r - обновить)
----
-Отладка:
- [State: versionListScreen]
- [URL: http://localhost:8080]
- [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTMzMzk2NSwibmJmIjoxNzQ1MjQ3NTY1LCJpYXQiOjE3NDUyNDc1NjV9.Y3DEfeyldqEKKddh0OlCU2VjS1mfmcCpB_bJXsmwyTI]
- [Lock Acquired: true]
- [DB Name: gophkeeper]
- [Local ModTime: 2025-04-21T21:59:25+07:00]
-
-
-Откат к версии #11 успешен. Загрузка...[38;H[2J[H[H                                        
+ [DB ModTime: 2025-04-21T16:16:09Z (group0 mod)]
+[38;H[2J[H[H                                        
      Записи в 'gophkeeper.kdbx' (2)     
                                         
     2 items                             
@@ -1351,7 +171,8 @@
                                         
                                         
                                         
-(↑/↓, Enter - детали, / - поиск, a - доб, s - синхр, l - логин, Ctrl+S - сохр, q - вых)
+State: entryListScreen
+
 ---
 Отладка:
  [State: entryListScreen]
@@ -1359,45 +180,7 @@
  [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTI1MzE5OCwibmJmIjoxNzQ1MTY2Nzk4LCJpYXQiOjE3NDUxNjY3OTh9.IkxiDoEJRRCic89hRBGB2lv1N-__aInP7Z0aZFFXr_g]
  [Lock Acquired: true]
  [DB Name: gophkeeper]
- [Local ModTime: 2025-04-21T22:53:44+07:00]
-
-
-Синхронизация завершена (скачано), перезагрузка...[38;H[H
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+ [DB ModTime: 2025-04-21T16:16:09Z (group0 mod)]
 [J[37;H[2J[H[H                                        
      Записи в 'gophkeeper.kdbx' (2)     
                                         
@@ -1424,7 +207,9 @@
                                         
                                         
                                         
-(↑/↓, Enter - детали, / - поиск, a - доб, s - синхр, l - логин, Ctrl+S - сохр, q - вых)
+State: entryListScreen
+Сохранено успешно!
+
 ---
 Отладка:
  [State: entryListScreen]
@@ -1432,10 +217,192 @@
  [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTI1MzE5OCwibmJmIjoxNzQ1MTY2Nzk4LCJpYXQiOjE3NDUxNjY3OTh9.IkxiDoEJRRCic89hRBGB2lv1N-__aInP7Z0aZFFXr_g]
  [Lock Acquired: true]
  [DB Name: gophkeeper]
- [Local ModTime: 2025-04-21T15:54:40Z]
+ [DB ModTime: 2025-04-21T16:16:12Z (group0 mod)]
+[38;H[2J[H[H                                        
+     Записи в 'gophkeeper.kdbx' (2)     
+                                        
+    2 items                             
+                                        
+  │ Sample Entry                        
+  │                                     
+                                        
+    test2                               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+State: entryListScreen
+
+---
+Отладка:
+ [State: entryListScreen]
+ [URL: http://localhost:8080]
+ [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTI1MzE5OCwibmJmIjoxNzQ1MTY2Nzk4LCJpYXQiOjE3NDUxNjY3OTh9.IkxiDoEJRRCic89hRBGB2lv1N-__aInP7Z0aZFFXr_g]
+ [Lock Acquired: true]
+ [DB Name: gophkeeper]
+ [DB ModTime: 2025-04-21T16:16:12Z (group0 mod)]
+[J[37;H[2J[H[H                                        
+     Записи в 'gophkeeper.kdbx' (2)     
+                                        
+    2 items                             
+                                        
+  │ Sample Entry                        
+  │                                     
+                                        
+    test2                               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+State: entryListScreen
+Сохранено успешно!
+
+---
+Отладка:
+ [State: entryListScreen]
+ [URL: http://localhost:8080]
+ [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTI1MzE5OCwibmJmIjoxNzQ1MTY2Nzk4LCJpYXQiOjE3NDUxNjY3OTh9.IkxiDoEJRRCic89hRBGB2lv1N-__aInP7Z0aZFFXr_g]
+ [Lock Acquired: true]
+ [DB Name: gophkeeper]
+ [DB ModTime: 2025-04-21T16:16:16Z (group0 mod)]
+[38;H[2J[H[H                                        
+     Записи в 'gophkeeper.kdbx' (2)     
+                                        
+    2 items                             
+                                        
+  │ Sample Entry                        
+  │                                     
+                                        
+    test2                               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+State: entryListScreen
+
+---
+Отладка:
+ [State: entryListScreen]
+ [URL: http://localhost:8080]
+ [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTI1MzE5OCwibmJmIjoxNzQ1MTY2Nzk4LCJpYXQiOjE3NDUxNjY3OTh9.IkxiDoEJRRCic89hRBGB2lv1N-__aInP7Z0aZFFXr_g]
+ [Lock Acquired: true]
+ [DB Name: gophkeeper]
+ [DB ModTime: 2025-04-21T16:16:16Z (group0 mod)]
+[J[37;H[2J[H[H                                        
+     Записи в 'gophkeeper.kdbx' (2)     
+                                        
+    2 items                             
+                                        
+  │ Sample Entry                        
+  │                                     
+                                        
+    test2                               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+State: entryListScreen
+Сохранено успешно!
+
+---
+Отладка:
+ [State: entryListScreen]
+ [URL: http://localhost:8080]
+ [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTI1MzE5OCwibmJmIjoxNzQ1MTY2Nzk4LCJpYXQiOjE3NDUxNjY3OTh9.IkxiDoEJRRCic89hRBGB2lv1N-__aInP7Z0aZFFXr_g]
+ [Lock Acquired: true]
+ [DB Name: gophkeeper]
+ [DB ModTime: 2025-04-21T16:16:21Z (group0 mod)]
+[38;H[2J[H[H                                        
+     Записи в 'gophkeeper.kdbx' (2)     
+                                        
+    2 items                             
+                                        
+  │ Sample Entry                        
+  │                                     
+                                        
+    test2                               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+State: entryListScreen
+
+---
+Отладка:
+ [State: entryListScreen]
+ [URL: http://localhost:8080]
+ [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTI1MzE5OCwibmJmIjoxNzQ1MTY2Nzk4LCJpYXQiOjE3NDUxNjY3OTh9.IkxiDoEJRRCic89hRBGB2lv1N-__aInP7Z0aZFFXr_g]
+ [Lock Acquired: true]
+ [DB Name: gophkeeper]
+ [DB ModTime: 2025-04-21T16:16:21Z (group0 mod)]
+[J[37;H[H
 
 
-Сохранено успешно![38;H[H
 
 
 
@@ -1460,17 +427,89 @@
 
 
 
+Сохранение...
 
+---
+Отладка:
+ [State: entryListScreen]
+ [URL: http://localhost:8080]
+ [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTI1MzE5OCwibmJmIjoxNzQ1MTY2Nzk4LCJpYXQiOjE3NDUxNjY3OTh9.IkxiDoEJRRCic89hRBGB2lv1N-__aInP7Z0aZFFXr_g]
+ [Lock Acquired: true]
+ [DB Name: gophkeeper]
+ [DB ModTime: 2025-04-21T16:16:24Z (group0 mod)]
+[38;H[2J[H[H                                        
+     Записи в 'gophkeeper.kdbx' (2)     
+                                        
+    2 items                             
+                                        
+  │ Sample Entry                        
+  │                                     
+                                        
+    test2                               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+State: entryListScreen
+Сохранено успешно!
 
+---
+Отладка:
+ [State: entryListScreen]
+ [URL: http://localhost:8080]
+ [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTI1MzE5OCwibmJmIjoxNzQ1MTY2Nzk4LCJpYXQiOjE3NDUxNjY3OTh9.IkxiDoEJRRCic89hRBGB2lv1N-__aInP7Z0aZFFXr_g]
+ [Lock Acquired: true]
+ [DB Name: gophkeeper]
+ [DB ModTime: 2025-04-21T16:16:24Z (group0 mod)]
+[38;H[2J[H[H                                        
+     Записи в 'gophkeeper.kdbx' (2)     
+                                        
+    2 items                             
+                                        
+  │ Sample Entry                        
+  │                                     
+                                        
+    test2                               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+State: entryListScreen
 
-
-
-
-
-
-
-
-
+---
+Отладка:
+ [State: entryListScreen]
+ [URL: http://localhost:8080]
+ [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTI1MzE5OCwibmJmIjoxNzQ1MTY2Nzk4LCJpYXQiOjE3NDUxNjY3OTh9.IkxiDoEJRRCic89hRBGB2lv1N-__aInP7Z0aZFFXr_g]
+ [Lock Acquired: true]
+ [DB Name: gophkeeper]
+ [DB ModTime: 2025-04-21T16:16:24Z (group0 mod)]
 [J[37;H[2J[H[H                                                  
   URL Сервера: http://localhost:8080              
   Статус входа: Вход выполнен (сессия загружена)  
@@ -1479,8 +518,8 @@
                                                   
                                                   
                                                   
-    Настроить URL сервера                         
-                                                  
+  │ Настроить URL сервера                         
+  │                                               
                                                   
     Войти / Зарегистрироваться                    
                                                   
@@ -1488,8 +527,8 @@
     Синхронизировать сейчас                       
                                                   
                                                   
-  │ Просмотреть версии                            
-  │                                               
+    Просмотреть версии                            
+                                                  
                                                   
     Выйти на сервере                              
                                                   
@@ -1498,7 +537,8 @@
                                                   
                                                   
                                                   
-(↑/↓ - навигация, Enter - выбрать, Esc/b - назад)
+State: syncServerScreen
+
 ---
 Отладка:
  [State: syncServerScreen]
@@ -1506,8 +546,7 @@
  [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTI1MzE5OCwibmJmIjoxNzQ1MTY2Nzk4LCJpYXQiOjE3NDUxNjY3OTh9.IkxiDoEJRRCic89hRBGB2lv1N-__aInP7Z0aZFFXr_g]
  [Lock Acquired: true]
  [DB Name: gophkeeper]
- [Local ModTime: 2025-04-21T15:54:40Z]
-
+ [DB ModTime: 2025-04-21T16:16:24Z (group0 mod)]
 [38;H[H
 
 
@@ -1516,91 +555,91 @@
 
 
 
-
-
-
-
-
-
-  │ Синхронизировать сейчас                       
-  │                                               
-
-    Просмотреть версии                            
+    Настроить URL сервера                         
                                                   
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[38;H[H
-
-
-
-
-
-
-
-
-
 
   │ Войти / Зарегистрироваться                    
   │                                               
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[38;H[H
+
+
+
+
+
+
+
+
+
+
+    Войти / Зарегистрироваться                    
+                                                  
+
+  │ Синхронизировать сейчас                       
+  │                                               
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[38;H[H
+
+
+
+
+
+
+
+
+
+
+
+
+
     Синхронизировать сейчас                       
                                                   
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[38;H[H
-
-
-
-
-
-
-
-
-
-
-    Войти / Зарегистрироваться                    
-                                                  
-
-  │ Синхронизировать сейчас                       
+  │ Просмотреть версии                            
   │                                               
-
-
-
 
 
 
@@ -1633,6 +672,30 @@
 
 
 
+  │ Синхронизировать сейчас                       
+  │                                               
+
+    Просмотреть версии                            
+                                                  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[38;H[H
 
 
 
@@ -1657,7 +720,58 @@
 
 
 
-Загрузка на сервер...[39;H[2J[H[H                                                  
+
+
+
+Получение метаданных...
+
+---
+Отладка:
+ [State: syncServerScreen]
+ [URL: http://localhost:8080]
+ [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTI1MzE5OCwibmJmIjoxNzQ1MTY2Nzk4LCJpYXQiOjE3NDUxNjY3OTh9.IkxiDoEJRRCic89hRBGB2lv1N-__aInP7Z0aZFFXr_g]
+ [Lock Acquired: true]
+ [DB Name: gophkeeper]
+ [DB ModTime: 2025-04-21T16:16:24Z (group0 mod)]
+[39;H[H
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Загрузка на сервер...
+
+
+
+
+
+
+
+
+
+[39;H[2J[H[H                                                  
   URL Сервера: http://localhost:8080              
   Статус входа: Вход выполнен (сессия загружена)  
   Последняя синх.: Не синхронизировалось          
@@ -1684,7 +798,9 @@
                                                   
                                                   
                                                   
-(↑/↓ - навигация, Enter - выбрать, Esc/b - назад)
+State: syncServerScreen
+Синхронизация завершена (загружено)
+
 ---
 Отладка:
  [State: syncServerScreen]
@@ -1692,85 +808,8 @@
  [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTI1MzE5OCwibmJmIjoxNzQ1MTY2Nzk4LCJpYXQiOjE3NDUxNjY3OTh9.IkxiDoEJRRCic89hRBGB2lv1N-__aInP7Z0aZFFXr_g]
  [Lock Acquired: true]
  [DB Name: gophkeeper]
- [Local ModTime: 2025-04-21T15:54:40Z]
-
-
-Синхронизация завершена (загружено)[39;H[H
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[J[38;H[H
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Получение метаданных...[39;H[2J[H[H                                                  
+ [DB ModTime: 2025-04-21T16:16:24Z (group0 mod)]
+[39;H[2J[H[2J[H[H                                                  
   URL Сервера: http://localhost:8080              
   Статус входа: Вход выполнен (сессия загружена)  
   Последняя синх.: Не синхронизировалось          
@@ -1797,7 +836,8 @@
                                                   
                                                   
                                                   
-(↑/↓ - навигация, Enter - выбрать, Esc/b - назад)
+State: syncServerScreen
+
 ---
 Отладка:
  [State: syncServerScreen]
@@ -1805,85 +845,8 @@
  [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTI1MzE5OCwibmJmIjoxNzQ1MTY2Nzk4LCJpYXQiOjE3NDUxNjY3OTh9.IkxiDoEJRRCic89hRBGB2lv1N-__aInP7Z0aZFFXr_g]
  [Lock Acquired: true]
  [DB Name: gophkeeper]
- [Local ModTime: 2025-04-21T15:54:40Z]
-
-
-Синхронизация завершена (загружено)[39;H[H
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[J[38;H[H
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Получение метаданных...[39;H[2J[H[H                                                  
+ [DB ModTime: 2025-04-21T16:16:24Z (group0 mod)]
+[J[38;H[2J[H[H                                                  
   URL Сервера: http://localhost:8080              
   Статус входа: Вход выполнен (сессия загружена)  
   Последняя синх.: Не синхронизировалось          
@@ -1910,7 +873,8 @@
                                                   
                                                   
                                                   
-(↑/↓ - навигация, Enter - выбрать, Esc/b - назад)
+State: syncServerScreen
+
 ---
 Отладка:
  [State: syncServerScreen]
@@ -1918,44 +882,42 @@
  [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTI1MzE5OCwibmJmIjoxNzQ1MTY2Nzk4LCJpYXQiOjE3NDUxNjY3OTh9.IkxiDoEJRRCic89hRBGB2lv1N-__aInP7Z0aZFFXr_g]
  [Lock Acquired: true]
  [DB Name: gophkeeper]
- [Local ModTime: 2025-04-21T15:54:40Z]
+ [DB ModTime: 2025-04-21T16:16:24Z (group0 mod)]
+[38;H[2J[H[H                                                  
+  URL Сервера: http://localhost:8080              
+  Статус входа: Вход выполнен (сессия загружена)  
+  Последняя синх.: Не синхронизировалось          
+                                                  
+                                                  
+                                                  
+                                                  
+    Настроить URL сервера                         
+                                                  
+                                                  
+    Войти / Зарегистрироваться                    
+                                                  
+                                                  
+  │ Синхронизировать сейчас                       
+  │                                               
+                                                  
+    Просмотреть версии                            
+                                                  
+                                                  
+    Выйти на сервере                              
+                                                  
+                                                  
+                                                  
+                                                  
+                                                  
+                                                  
+State: syncServerScreen
 
-
-Синхронизация завершена (загружено)[39;H[H
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[J[38;H[2K[?2004l[?25h[?1002l[?1003l[?1006l[?1049l[?25h
+---
+Отладка:
+ [State: syncServerScreen]
+ [URL: http://localhost:8080]
+ [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTI1MzE5OCwibmJmIjoxNzQ1MTY2Nzk4LCJpYXQiOjE3NDUxNjY3OTh9.IkxiDoEJRRCic89hRBGB2lv1N-__aInP7Z0aZFFXr_g]
+ [Lock Acquired: true]
+ [DB Name: gophkeeper]
+ [DB ModTime: 2025-04-21T16:16:24Z (group0 mod)]
+[38;H[2K[?2004l[?25h[?1002l[?1003l[?1006l[?1049l[?25h

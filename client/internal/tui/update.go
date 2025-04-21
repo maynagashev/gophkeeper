@@ -54,8 +54,8 @@ func handleDBMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) {
 		newM, cmd := handleDBSaveErrorMsg(m, msg)
 		return newM, cmd, true
 	case clearStatusMsg:
-		newM := handleClearStatusMsg(m)
-		return newM, nil, true
+		newM, cmd := handleClearStatusMsg(m)
+		return newM, cmd, true
 	case SyncError:
 		newM, cmd := handleSyncErrorMsg(m, msg)
 		return newM, cmd, true
@@ -99,10 +99,11 @@ func handleDBSaveErrorMsg(m *model, msg dbSaveErrorMsg) (tea.Model, tea.Cmd) {
 	return m.setStatusMessage(fmt.Sprintf("Ошибка сохранения: %v", msg.err))
 }
 
-func handleClearStatusMsg(m *model) tea.Model {
+func handleClearStatusMsg(m *model) (tea.Model, tea.Cmd) {
 	m.savingStatus = ""
-	m.statusTimer = nil
-	return m
+	m.statusTimer = nil // Обнуляем таймер (хотя он и так не используется для отмены)
+	// Возвращаем команду для принудительной перерисовки
+	return m, tea.ClearScreen
 }
 
 func handleSyncErrorMsg(m *model, msg SyncError) (tea.Model, tea.Cmd) {
@@ -337,56 +338,87 @@ func handleAPIMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) {
 	}
 }
 
+// canSave checks if the application is in a state where saving is allowed.
+func (m *model) canSave() bool {
+	return !m.readOnlyMode && m.db != nil && (m.state == entryListScreen || m.state == entryDetailScreen)
+}
+
+// updateDBFromList updates the in-memory database (m.db) with data from the TUI list (m.entryList).
+func (m *model) updateDBFromList() int {
+	slog.Info("Начало обновления m.db перед сохранением")
+	items := m.entryList.Items()
+	updatedCount := 0
+	for _, item := range items {
+		listItem, ok := item.(entryItem)
+		if !ok {
+			continue // Skip if not an entryItem
+		}
+		// Находим соответствующую запись в m.db по UUID
+		dbEntryPtr := findEntryInDB(m.db, listItem.entry.UUID)
+		if dbEntryPtr != nil {
+			// Обновляем найденную запись данными из элемента списка
+			// Создаем копию перед присваиванием, чтобы не менять listItem
+			entryToSave := deepCopyEntry(listItem.entry)
+			*dbEntryPtr = entryToSave
+			updatedCount++
+		} else {
+			slog.Warn("Запись из списка не найдена в m.db", "uuid", listItem.entry.UUID)
+		}
+	}
+	slog.Info("Обновление m.db завершено", "updated_count", updatedCount)
+	return updatedCount
+}
+
+// updateRootModTime updates the LastModificationTime of the root group.
+func (m *model) updateRootModTime() {
+	if m.db == nil || m.db.Content == nil || m.db.Content.Root == nil {
+		slog.Warn("Не удалось обновить LastModificationTime: db, Content или Root is nil")
+		return
+	}
+
+	now := time.Now().UTC()
+	modTimeWrapper := wrappers.TimeWrapper{Time: now}
+
+	// Обновляем время модификации первой (корневой) группы
+	if len(m.db.Content.Root.Groups) > 0 {
+		rootGroup := &m.db.Content.Root.Groups[0]
+		rootGroup.Times.LastModificationTime = &modTimeWrapper // Присваиваем указатель
+		slog.Debug("Обновлено LastModificationTime корневой группы перед сохранением", "newTime", now)
+	} else {
+		slog.Warn("Не удалось обновить LastModificationTime: нет корневой группы")
+	}
+}
+
+// handleSaveKeyPress handles the logic for the Ctrl+S key press.
+func (m *model) handleSaveKeyPress() (tea.Model, tea.Cmd) {
+	if !m.canSave() {
+		return m, nil // Not in a state to save, or read-only
+	}
+
+	m.savingStatus = "Подготовка к сохранению..."
+
+	// Update m.db from the list UI
+	m.updateDBFromList()
+
+	// Update the root modification time
+	m.updateRootModTime()
+
+	m.savingStatus = "Сохранение..."
+	slog.Info("Запуск сохранения KDBX", "path", m.kdbxPath)
+	// Use the stored password
+	return m, saveKdbxCmd(m.db, m.kdbxPath, m.password)
+}
+
 // handleGlobalKeys обрабатывает глобальные сочетания клавиш.
 func handleGlobalKeys(m *model, msg tea.KeyMsg) (tea.Model, tea.Cmd, bool) {
 	switch msg.String() {
 	case "ctrl+c":
 		return m, tea.Quit, true
 	case "ctrl+s":
-		// Сохраняем только из списка или деталей и если не Read-Only
-		if !m.readOnlyMode && (m.state == entryListScreen || m.state == entryDetailScreen) && m.db != nil {
-			m.savingStatus = "Подготовка к сохранению..."
-			slog.Info("Начало обновления m.db перед сохранением")
-
-			// Проходим по всем элементам в списке интерфейса
-			items := m.entryList.Items()
-			updatedCount := 0
-			for _, item := range items {
-				if listItem, ok := item.(entryItem); ok {
-					// Находим соответствующую запись в m.db по UUID
-					dbEntryPtr := findEntryInDB(m.db, listItem.entry.UUID)
-					if dbEntryPtr != nil {
-						// Обновляем найденную запись данными из элемента списка
-						// Создаем копию перед присваиванием, чтобы не менять listItem
-						entryToSave := deepCopyEntry(listItem.entry)
-						*dbEntryPtr = entryToSave
-						updatedCount++
-					} else {
-						slog.Warn("Запись из списка не найдена в m.db", "uuid", listItem.entry.UUID)
-					}
-				}
-			}
-			slog.Info("Обновление m.db завершено", "updated_count", updatedCount)
-
-			// Обновляем время модификации корневой группы перед сохранением
-			if m.db.Content != nil && m.db.Content.Root != nil && len(m.db.Content.Root.Groups) > 0 {
-				now := time.Now().UTC()
-				rootGroup := &m.db.Content.Root.Groups[0]
-				modTimeWrapper := wrappers.TimeWrapper{Time: now}      // Создаем экземпляр
-				rootGroup.Times.LastModificationTime = &modTimeWrapper // Присваиваем указатель
-				slog.Debug("Обновлено LastModificationTime корневой группы перед сохранением (Ctrl+S)", "newTime", now)
-			} else {
-				slog.Warn("Не удалось обновить LastModificationTime корневой группы перед сохранением (Ctrl+S)")
-			}
-
-			m.savingStatus = "Сохранение..."
-			slog.Info("Запуск сохранения KDBX", "path", m.kdbxPath)
-			// Используем сохраненный пароль
-			return m, saveKdbxCmd(m.db, m.kdbxPath, m.password), true
-		}
-		// Если сохранение не выполнено (не тот экран или read-only),
-		// то клавиша не считается обработанной глобально.
-		return m, nil, false
+		// Delegate saving logic to a separate function
+		updatedModel, cmd := m.handleSaveKeyPress()
+		// Return true only if saving was actually attempted (canSave was true)
+		return updatedModel, cmd, m.canSave()
 	default:
 		// Клавиша не является глобальной
 		return m, nil, false
