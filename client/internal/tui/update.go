@@ -10,6 +10,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/maynagashev/gophkeeper/client/internal/api"
 	"github.com/maynagashev/gophkeeper/client/internal/kdbx"
+	"github.com/tobischo/gokeepasslib/v3/wrappers"
 )
 
 // handleWindowSizeMsg обрабатывает изменение размера окна.
@@ -359,6 +360,17 @@ func handleGlobalKeys(m *model, msg tea.KeyMsg) (tea.Model, tea.Cmd, bool) {
 				}
 			}
 			slog.Info("Обновление m.db завершено", "updated_count", updatedCount)
+
+			// Обновляем время модификации корневой группы перед сохранением
+			if m.db.Content != nil && m.db.Content.Root != nil && len(m.db.Content.Root.Groups) > 0 {
+				now := time.Now().UTC()
+				rootGroup := &m.db.Content.Root.Groups[0]
+				modTimeWrapper := wrappers.TimeWrapper{Time: now}      // Создаем экземпляр
+				rootGroup.Times.LastModificationTime = &modTimeWrapper // Присваиваем указатель
+				slog.Debug("Обновлено LastModificationTime корневой группы перед сохранением (Ctrl+S)", "newTime", now)
+			} else {
+				slog.Warn("Не удалось обновить LastModificationTime корневой группы перед сохранением (Ctrl+S)")
+			}
 
 			m.savingStatus = "Сохранение..."
 			slog.Info("Запуск сохранения KDBX", "path", m.kdbxPath)

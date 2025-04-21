@@ -72,6 +72,7 @@ func (m *model) updateEntryListScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // handleDBOpenedMsg обрабатывает сообщение об успешном открытии базы.
 func (m *model) handleDBOpenedMsg(msg dbOpenedMsg) (tea.Model, tea.Cmd) {
+	slog.Debug("handleDBOpenedMsg: Начало")
 	m.db = msg.db
 	m.err = nil
 	prevState := m.state
@@ -134,5 +135,6 @@ func (m *model) handleDBOpenedMsg(msg dbOpenedMsg) (tea.Model, tea.Cmd) {
 		dbOpenedCmds = append(dbOpenedCmds, tea.ClearScreen)
 	}
 
+	slog.Debug("handleDBOpenedMsg: Конец, m.db обновлен")
 	return m, tea.Batch(dbOpenedCmds...)
 }
