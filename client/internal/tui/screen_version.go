@@ -105,13 +105,15 @@ func (m *model) handleVersionRollbackConfirm(keyMsg tea.KeyMsg) (tea.Model, tea.
 		if m.selectedVersionForRollback != nil {
 			m.confirmRollback = false
 			m.rollbackError = nil
-			return m, rollbackToVersionCmd(m, m.selectedVersionForRollback.ID)
+			// Добавляем ClearScreen
+			return m, tea.Batch(tea.ClearScreen, rollbackToVersionCmd(m, m.selectedVersionForRollback.ID))
 		}
 	case keyEsc, keyBack:
 		// Отмена отката
 		m.confirmRollback = false
 		m.selectedVersionForRollback = nil
-		return m, nil
+		// Добавляем ClearScreen
+		return m, tea.ClearScreen
 	}
 	return m, nil
 }
@@ -120,7 +122,8 @@ func (m *model) handleVersionRollbackConfirm(keyMsg tea.KeyMsg) (tea.Model, tea.
 func (m *model) handleVersionRollbackError(keyMsg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	if keyMsg.String() == keyEsc || keyMsg.String() == keyBack || keyMsg.String() == keyEnter {
 		m.rollbackError = nil
-		return m, nil
+		// Добавляем ClearScreen
+		return m, tea.ClearScreen
 	}
 	return m, nil
 }
@@ -138,7 +141,8 @@ func (m *model) handleVersionListKeys(keyMsg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			}
 			m.selectedVersionForRollback = &item.version
 			m.confirmRollback = true
-			return m, nil
+			// Добавляем ClearScreen при переходе к подтверждению
+			return m, tea.ClearScreen
 		}
 	case keyEsc, keyBack:
 		// Возврат к экрану синхронизации
@@ -286,7 +290,8 @@ func handleRollbackErrorMsg(m *model, msg rollbackErrorMsg) (tea.Model, tea.Cmd)
 	}
 	// Иначе устанавливаем ошибку для отображения на экране версий
 	m.rollbackError = msg.err
-	return m, nil // Явно возвращаем nil команду
+	// Добавляем ClearScreen при показе ошибки
+	return m, tea.ClearScreen
 }
 
 // Вспомогательная функция для форматирования времени.

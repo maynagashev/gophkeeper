@@ -16,7 +16,7 @@
 === RUN   TestHTTPClient_GetVaultMetadata/Ошибка_сервера_(500)
 === RUN   TestHTTPClient_GetVaultMetadata/Невалидный_JSON_ответ
 === RUN   TestHTTPClient_GetVaultMetadata/Без_токена_авторизации
---- PASS: TestHTTPClient_GetVaultMetadata (0.00s)
+--- PASS: TestHTTPClient_GetVaultMetadata (0.01s)
     --- PASS: TestHTTPClient_GetVaultMetadata/Успех (0.00s)
     --- PASS: TestHTTPClient_GetVaultMetadata/Хранилище_не_найдено_(404) (0.00s)
     --- PASS: TestHTTPClient_GetVaultMetadata/Ошибка_авторизации_(401) (0.00s)
@@ -24,25 +24,25 @@
     --- PASS: TestHTTPClient_GetVaultMetadata/Невалидный_JSON_ответ (0.00s)
     --- PASS: TestHTTPClient_GetVaultMetadata/Без_токена_авторизации (0.00s)
 PASS
-ok  	github.com/maynagashev/gophkeeper/client/internal/api	0.008s
+ok  	github.com/maynagashev/gophkeeper/client/internal/api	0.016s
 === RUN   TestOpenFile
 === RUN   TestOpenFile/Success_With_Correct_Password
 === RUN   TestOpenFile/Error_With_Incorrect_Password
 === RUN   TestOpenFile/Error_With_Nonexistent_File
---- PASS: TestOpenFile (0.92s)
-    --- PASS: TestOpenFile/Success_With_Correct_Password (0.47s)
-    --- PASS: TestOpenFile/Error_With_Incorrect_Password (0.45s)
+--- PASS: TestOpenFile (0.95s)
+    --- PASS: TestOpenFile/Success_With_Correct_Password (0.48s)
+    --- PASS: TestOpenFile/Error_With_Incorrect_Password (0.46s)
     --- PASS: TestOpenFile/Error_With_Nonexistent_File (0.00s)
 === RUN   TestGetAllEntries
 === RUN   TestGetAllEntries/Success_Get_Entries
 === RUN   TestGetAllEntries/Handle_Nil_Database
---- PASS: TestGetAllEntries (0.44s)
-    --- PASS: TestGetAllEntries/Success_Get_Entries (0.44s)
+--- PASS: TestGetAllEntries (0.40s)
+    --- PASS: TestGetAllEntries/Success_Get_Entries (0.40s)
     --- PASS: TestGetAllEntries/Handle_Nil_Database (0.00s)
 === RUN   TestCreateDatabase
 === RUN   TestCreateDatabase/Create_New_Database
 --- PASS: TestCreateDatabase (0.00s)
     --- PASS: TestCreateDatabase/Create_New_Database (0.00s)
 PASS
-ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	(cached)
+ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	1.369s
 ?   	github.com/maynagashev/gophkeeper/client/internal/tui	[no test files]
