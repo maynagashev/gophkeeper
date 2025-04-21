@@ -3,8 +3,10 @@ package kdbx
 import (
 	"errors"
 	"log/slog"
+	"time"
 
 	"github.com/tobischo/gokeepasslib/v3"
+	"github.com/tobischo/gokeepasslib/v3/wrappers"
 )
 
 const (
@@ -62,6 +64,9 @@ func SaveAuthData(db *gokeepasslib.Database, serverURL, authToken string) error 
 	}
 
 	meta := db.Content.Meta
+	initialCustomData := make([]gokeepasslib.CustomData, len(meta.CustomData)) // Копируем исходные данные
+	copy(initialCustomData, meta.CustomData)
+	changed := false // Флаг, что данные действительно изменились
 
 	// Сохраняем/удаляем URL
 	if serverURL != "" {
@@ -75,6 +80,38 @@ func SaveAuthData(db *gokeepasslib.Database, serverURL, authToken string) error 
 		meta.CustomData = setCustomDataValue(meta.CustomData, CustomDataKeyAuthToken, authToken)
 	} else {
 		meta.CustomData = removeCustomDataValue(meta.CustomData, CustomDataKeyAuthToken)
+	}
+
+	// Проверяем, изменился ли слайс CustomData
+	if len(initialCustomData) != len(meta.CustomData) {
+		changed = true
+	} else {
+		// Если длина одинаковая, проверяем содержимое
+		for i := range meta.CustomData {
+			if initialCustomData[i].Key != meta.CustomData[i].Key || initialCustomData[i].Value != meta.CustomData[i].Value {
+				changed = true
+				break
+			}
+		}
+	}
+
+	// Обновляем время модификации корневой группы, только если CustomData действительно изменились
+	if changed {
+		now := time.Now().UTC()
+		// Обновляем время модификации корневой группы
+		if db.Content != nil && db.Content.Root != nil && len(db.Content.Root.Groups) > 0 {
+			// Получаем указатель на корневую группу
+			rootGroup := &db.Content.Root.Groups[0]
+			// Тип Times не указатель, поэтому присваиваем обертку напрямую
+			// Создаем wrappers.TimeWrapper и присваиваем указатель на него
+			modTimeWrapper := wrappers.TimeWrapper{Time: now}      // Создаем экземпляр
+			rootGroup.Times.LastModificationTime = &modTimeWrapper // Присваиваем указатель
+			slog.Debug("Обновлено LastModificationTime корневой группы", "newTime", now)
+		} else {
+			// Логируем, если Content, Root или Groups == nil/пуст
+			slog.Warn("Не удалось обновить LastModificationTime корневой группы:" +
+				" db.Content, Root или Groups == nil/пуст")
+		}
 	}
 
 	// TODO: Как правильно установить флаг DatabaseChanged? Возможно, не нужно.
