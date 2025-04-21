@@ -171,7 +171,6 @@ func (m *model) viewVersionListScreen() string {
 		confirmMsg := fmt.Sprintf(
 			"Вы уверены, что хотите откатиться к версии #%d?\n\n"+
 				"Время изменения: %s\n\n"+
-				"ВНИМАНИЕ: После отката вам потребуется перезагрузить локальный файл.\n\n"+
 				"Enter - подтвердить, Esc - отменить",
 			m.selectedVersionForRollback.ID,
 			formatTime(m.selectedVersionForRollback.ContentModifiedAt),
@@ -272,12 +271,12 @@ func handleVersionsLoadErrorMsg(m *model, msg versionsLoadErrorMsg) (tea.Model, 
 
 // handleRollbackSuccessMsg обрабатывает успешный откат к версии.
 func handleRollbackSuccessMsg(m *model, msg rollbackSuccessMsg) (tea.Model, tea.Cmd) {
-	// После успешного отката нужно обновить список версий и скачать новую версию
-	newM, statusCmd := m.setStatusMessage(fmt.Sprintf("Откат к версии #%d выполнен. Синхронизация...", msg.versionID))
+	// После успешного отката нужно принудительно скачать новую текущую версию
+	statusText := fmt.Sprintf("Откат к версии #%d успешен. Загрузка...", msg.versionID)
+	newM, statusCmd := m.setStatusMessage(statusText)
 
-	// После успешного отката выполняем синхронизацию для загрузки обновленной версии
-	// Добавляем ClearScreen перед синхронизацией
-	return newM, tea.Batch(statusCmd, tea.ClearScreen, startSyncCmd(m))
+	// Заменяем startSyncCmd на downloadVaultCmd для принудительного скачивания
+	return newM, tea.Batch(statusCmd, tea.ClearScreen, downloadVaultCmd(m))
 }
 
 // handleRollbackErrorMsg обрабатывает ошибку отката.

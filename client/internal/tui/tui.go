@@ -108,10 +108,32 @@ func (m *model) View() string {
 	// Добавляем отладочную информацию, если включен debugMode
 	if m.debugMode {
 		var debugInfo strings.Builder
-		debugInfo.WriteString(" [State: " + m.state.String() + "]\n")
-		debugInfo.WriteString(" [URL: " + m.serverURL + "]\n")
+		debugInfo.WriteString(fmt.Sprintf(" [State: %s]\n", m.state.String()))
+		debugInfo.WriteString(fmt.Sprintf(" [URL: %s]\n", m.serverURL))
 		// Выводим сам токен (или пустоту, если его нет)
-		debugInfo.WriteString(" [Token: " + m.authToken + "]")
+		debugInfo.WriteString(fmt.Sprintf(" [Token: %s]\n", m.authToken))
+		debugInfo.WriteString(fmt.Sprintf(" [Lock Acquired: %t]\n", m.lockAcquired))
+
+		// Добавляем информацию из KDBX, если база загружена
+		if m.db != nil && m.db.Content != nil {
+			if m.db.Content.Meta != nil {
+				debugInfo.WriteString(fmt.Sprintf(" [DB Name: %s]\n", m.db.Content.Meta.DatabaseName))
+			}
+			if m.db.Content.Root != nil && len(m.db.Content.Root.Groups) > 0 {
+				rootGroup := &m.db.Content.Root.Groups[0]
+				var modTimeStr = "<not set>"
+				if rootGroup.Times.LastModificationTime != nil {
+					modTimeStr = rootGroup.Times.LastModificationTime.Time.Format(time.RFC3339)
+				} else if rootGroup.Times.CreationTime != nil {
+					// Fallback на время создания
+					modTimeStr = rootGroup.Times.CreationTime.Time.Format(time.RFC3339) + " (creation)"
+				}
+				debugInfo.WriteString(fmt.Sprintf(" [Local ModTime: %s]\n", modTimeStr))
+			}
+		} else {
+			debugInfo.WriteString(" [DB: not loaded]\n")
+		}
+
 		help = help + "\n---\nОтладка:\n" + debugInfo.String()
 	}
 
