@@ -85,7 +85,11 @@ func TestHTTPClient_UploadVault(t *testing.T) {
 
 			if tt.expectedErr {
 				require.Error(err)
-				if tt.expectedErrMsg != "" {
+				// Специальная проверка для ошибки авторизации
+				if tt.name == "Ошибка авторизации (401)" {
+					require.ErrorIs(err, api.ErrAuthorization)
+				} else if tt.expectedErrMsg != "" {
+					// Для остальных ошибок проверяем содержание
 					assert.Contains(err.Error(), tt.expectedErrMsg)
 				}
 			} else {

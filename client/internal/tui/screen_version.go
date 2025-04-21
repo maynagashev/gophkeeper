@@ -22,7 +22,8 @@ const (
 
 // versionsLoadedMsg сообщает о завершении загрузки списка версий.
 type versionsLoadedMsg struct {
-	versions []models.VaultVersion
+	versions         []models.VaultVersion
+	currentVersionID int64
 }
 
 // versionsLoadErrorMsg сообщает об ошибке при загрузке списка версий.
@@ -54,14 +55,20 @@ func loadVersionsCmd(m *model) tea.Cmd {
 		}
 
 		ctx := context.Background()
-		versions, err := m.apiClient.ListVersions(ctx, defaultVersionListLimit, 0) // Используем константу
+		// Вызываем обновленную ListVersions
+		versions, currentID, err := m.apiClient.ListVersions(ctx, defaultVersionListLimit, 0)
 		if err != nil {
+			// Проверяем на ошибку авторизации
+			if errors.Is(err, api.ErrAuthorization) {
+				slog.Error("Ошибка загрузки списка версий: ошибка авторизации")
+				return versionsLoadErrorMsg{err: api.ErrAuthorization} // Возвращаем именно ErrAuthorization
+			}
 			slog.Error("Ошибка загрузки списка версий", "error", err)
 			return versionsLoadErrorMsg{err: err}
 		}
 
-		slog.Info("Список версий успешно загружен", "count", len(versions))
-		return versionsLoadedMsg{versions: versions}
+		slog.Info("Список версий успешно загружен", "count", len(versions), "current_id", currentID)
+		return versionsLoadedMsg{versions: versions, currentVersionID: currentID}
 	}
 }
 
@@ -220,11 +227,12 @@ func handleVersionsLoadedMsg(m *model, msg versionsLoadedMsg) (tea.Model, tea.Cm
 
 	// Преобразуем модели в версии для списка и отмечаем текущую
 	var items []list.Item
-	var currentVersionID int64
+	currentVersionID := msg.currentVersionID // Используем ID из сообщения
 
-	// Пытаемся определить текущую версию
-	if m.serverMeta != nil {
+	// Пытаемся определить текущую версию, если ID из сообщения 0 или его нет (для обратной совместимости?)
+	if currentVersionID == 0 && m.serverMeta != nil {
 		currentVersionID = m.serverMeta.ID
+		slog.Warn("currentVersionID из API = 0, используем ID из serverMeta", "serverMeta.ID", currentVersionID)
 	}
 
 	for _, v := range m.versions {
@@ -236,7 +244,9 @@ func handleVersionsLoadedMsg(m *model, msg versionsLoadedMsg) (tea.Model, tea.Cm
 
 	// Обновляем список и получаем команду от него
 	cmd := m.versionList.SetItems(items) // Не игнорируем команду
-	return m, cmd                        // Возвращаем модель и команду от списка
+
+	// Добавляем ClearScreen для очистки артефактов
+	return m, tea.Batch(cmd, tea.ClearScreen)
 }
 
 // handleVersionsLoadErrorMsg обрабатывает ошибку загрузки версий.
@@ -246,11 +256,14 @@ func handleVersionsLoadErrorMsg(m *model, msg versionsLoadErrorMsg) (tea.Model, 
 	if errors.Is(msg.err, api.ErrAuthorization) {
 		// Не меняем состояние здесь, т.к. мы уже на экране версий,
 		// но даем пользователю понять, что делать (нажать 'l')
-		return m.setStatusMessage("Ошибка авторизации. Токен истек? Попробуйте войти заново (L).")
+		newM, statusCmd := m.setStatusMessage("Ошибка авторизации. Токен истек? Попробуйте войти заново (L).")
+		return newM, tea.Batch(statusCmd, tea.ClearScreen) // Добавляем ClearScreen
 	}
 	// Иначе показываем общую ошибку
 	// Возвращаем результат setStatusMessage, который включает команду
-	return m.setStatusMessage(fmt.Sprintf("Ошибка загрузки версий: %v", msg.err))
+	newM, statusCmd := m.setStatusMessage(fmt.Sprintf("Ошибка загрузки версий: %v", msg.err))
+	// Добавляем ClearScreen и сюда
+	return newM, tea.Batch(statusCmd, tea.ClearScreen)
 }
 
 // handleRollbackSuccessMsg обрабатывает успешный откат к версии.

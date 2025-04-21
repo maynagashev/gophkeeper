@@ -1,19 +1,43 @@
 ?   	github.com/maynagashev/gophkeeper/client/cmd/gophkeeper	[no test files]
-?   	github.com/maynagashev/gophkeeper/client/internal/api	[no test files]
-?   	github.com/maynagashev/gophkeeper/client/internal/client	[no test files]
+=== RUN   TestHTTPClient_UploadVault
+=== RUN   TestHTTPClient_UploadVault/Успех
+=== RUN   TestHTTPClient_UploadVault/Ошибка_авторизации_(401)
+=== RUN   TestHTTPClient_UploadVault/Ошибка_сервера_(500)
+=== RUN   TestHTTPClient_UploadVault/Без_токена_авторизации
+--- PASS: TestHTTPClient_UploadVault (0.00s)
+    --- PASS: TestHTTPClient_UploadVault/Успех (0.00s)
+    --- PASS: TestHTTPClient_UploadVault/Ошибка_авторизации_(401) (0.00s)
+    --- PASS: TestHTTPClient_UploadVault/Ошибка_сервера_(500) (0.00s)
+    --- PASS: TestHTTPClient_UploadVault/Без_токена_авторизации (0.00s)
+=== RUN   TestHTTPClient_GetVaultMetadata
+=== RUN   TestHTTPClient_GetVaultMetadata/Успех
+=== RUN   TestHTTPClient_GetVaultMetadata/Хранилище_не_найдено_(404)
+=== RUN   TestHTTPClient_GetVaultMetadata/Ошибка_авторизации_(401)
+=== RUN   TestHTTPClient_GetVaultMetadata/Ошибка_сервера_(500)
+=== RUN   TestHTTPClient_GetVaultMetadata/Невалидный_JSON_ответ
+=== RUN   TestHTTPClient_GetVaultMetadata/Без_токена_авторизации
+--- PASS: TestHTTPClient_GetVaultMetadata (0.00s)
+    --- PASS: TestHTTPClient_GetVaultMetadata/Успех (0.00s)
+    --- PASS: TestHTTPClient_GetVaultMetadata/Хранилище_не_найдено_(404) (0.00s)
+    --- PASS: TestHTTPClient_GetVaultMetadata/Ошибка_авторизации_(401) (0.00s)
+    --- PASS: TestHTTPClient_GetVaultMetadata/Ошибка_сервера_(500) (0.00s)
+    --- PASS: TestHTTPClient_GetVaultMetadata/Невалидный_JSON_ответ (0.00s)
+    --- PASS: TestHTTPClient_GetVaultMetadata/Без_токена_авторизации (0.00s)
+PASS
+ok  	github.com/maynagashev/gophkeeper/client/internal/api	0.008s
 === RUN   TestOpenFile
 === RUN   TestOpenFile/Success_With_Correct_Password
 === RUN   TestOpenFile/Error_With_Incorrect_Password
 === RUN   TestOpenFile/Error_With_Nonexistent_File
---- PASS: TestOpenFile (0.85s)
-    --- PASS: TestOpenFile/Success_With_Correct_Password (0.45s)
-    --- PASS: TestOpenFile/Error_With_Incorrect_Password (0.40s)
+--- PASS: TestOpenFile (0.92s)
+    --- PASS: TestOpenFile/Success_With_Correct_Password (0.47s)
+    --- PASS: TestOpenFile/Error_With_Incorrect_Password (0.45s)
     --- PASS: TestOpenFile/Error_With_Nonexistent_File (0.00s)
 === RUN   TestGetAllEntries
 === RUN   TestGetAllEntries/Success_Get_Entries
 === RUN   TestGetAllEntries/Handle_Nil_Database
---- PASS: TestGetAllEntries (0.34s)
-    --- PASS: TestGetAllEntries/Success_Get_Entries (0.34s)
+--- PASS: TestGetAllEntries (0.44s)
+    --- PASS: TestGetAllEntries/Success_Get_Entries (0.44s)
     --- PASS: TestGetAllEntries/Handle_Nil_Database (0.00s)
 === RUN   TestCreateDatabase
 === RUN   TestCreateDatabase/Create_New_Database

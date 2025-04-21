@@ -31,7 +31,7 @@ type Client interface {
 	// DownloadVault скачивает текущую версию файла хранилища.
 	DownloadVault(ctx context.Context) (io.ReadCloser, *models.VaultVersion, error)
 	// ListVersions получает список версий хранилища.
-	ListVersions(ctx context.Context, limit, offset int) ([]models.VaultVersion, error)
+	ListVersions(ctx context.Context, limit, offset int) ([]models.VaultVersion, int64, error)
 	// RollbackToVersion откатывает хранилище к указанной версии.
 	RollbackToVersion(ctx context.Context, versionID int64) error
 	// SetAuthToken устанавливает JWT токен для аутентифицированных запросов.
@@ -295,10 +295,11 @@ func (c *httpClient) DownloadVault(ctx context.Context) (io.ReadCloser, *models.
 }
 
 // ListVersions получает список версий хранилища.
-func (c *httpClient) ListVersions(ctx context.Context, limit, offset int) ([]models.VaultVersion, error) {
+// Возвращает список версий и ID текущей версии.
+func (c *httpClient) ListVersions(ctx context.Context, limit, offset int) ([]models.VaultVersion, int64, error) {
 	listURL, err := url.JoinPath(c.baseURL, "/api/vault/versions")
 	if err != nil {
-		return nil, fmt.Errorf("ошибка формирования URL для списка версий: %w", err)
+		return nil, 0, fmt.Errorf("ошибка формирования URL для списка версий: %w", err)
 	}
 
 	// Добавляем параметры пагинации
@@ -315,34 +316,39 @@ func (c *httpClient) ListVersions(ctx context.Context, limit, offset int) ([]mod
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, listURL, nil)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка создания запроса на список версий: %w", err)
+		return nil, 0, fmt.Errorf("ошибка создания запроса на список версий: %w", err)
 	}
 	if err = c.setAuthHeader(req); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		// TODO: Обработка сетевых ошибок
-		return nil, fmt.Errorf("ошибка выполнения запроса на список версий: %w", err)
+		return nil, 0, fmt.Errorf("ошибка выполнения запроса на список версий: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		if resp.StatusCode == http.StatusUnauthorized {
 			// Возвращаем нашу специальную ошибку
-			return nil, ErrAuthorization
+			return nil, 0, ErrAuthorization
 		}
 		// TODO: Читать тело для деталей
-		return nil, fmt.Errorf("ошибка получения списка версий: статус %d", resp.StatusCode)
+		return nil, 0, fmt.Errorf("ошибка получения списка версий: статус %d", resp.StatusCode)
 	}
 
-	var versions []models.VaultVersion
-	if err = json.NewDecoder(resp.Body).Decode(&versions); err != nil {
-		return nil, fmt.Errorf("ошибка декодирования списка версий: %w", err)
+	// Создаем анонимную структуру для декодирования ответа
+	var response struct {
+		Versions         []models.VaultVersion `json:"versions"`
+		CurrentVersionID int64                 `json:"current_version_id"` // Используем int64, как в модели
 	}
 
-	return versions, nil
+	if err = json.NewDecoder(resp.Body).Decode(&response); err != nil {
+		return nil, 0, fmt.Errorf("ошибка декодирования списка версий: %w", err)
+	}
+
+	return response.Versions, response.CurrentVersionID, nil
 }
 
 // RollbackToVersion отправляет запрос на откат к указанной версии.
