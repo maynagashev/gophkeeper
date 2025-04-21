@@ -21,9 +21,10 @@ func handleWindowSizeMsg(m *model, msg tea.WindowSizeMsg) {
 	// Высота для основного списка записей
 	entryListHeight := msg.Height - v - helpStatusHeightOffset // Используем константу
 
-	// Высота для меню синхронизации (учитываем строки statusInfo)
-	const statusInfoLines = 4
-	syncMenuHeight := msg.Height - v - statusInfoLines - 1 // -1 для небольшой прокладки/пагинатора
+	// Высота для меню синхронизации
+	// Статус занимает 3 строки + 1 строка разделитель = 4
+	const statusHeight = 4
+	syncMenuHeight := msg.Height - v - statusHeight
 
 	m.entryList.SetSize(listWidth, entryListHeight)
 	m.passwordInput.Width = msg.Width - passwordInputOffset
@@ -89,7 +90,9 @@ func handleErrorMsg(m *model, msg errMsg) tea.Model {
 }
 
 func handleDBSavedMsg(m *model) (tea.Model, tea.Cmd) {
-	return m.setStatusMessage("Сохранено успешно!")
+	// Добавляем tea.ClearScreen в Batch после установки статуса
+	newM, statusCmd := m.setStatusMessage("Сохранено успешно!")
+	return newM, tea.Batch(statusCmd, tea.ClearScreen)
 }
 
 func handleDBSaveErrorMsg(m *model, msg dbSaveErrorMsg) (tea.Model, tea.Cmd) {
@@ -112,7 +115,9 @@ func handleSyncErrorMsg(m *model, msg SyncError) (tea.Model, tea.Cmd) {
 		return newM, tea.Batch(statusCmd, tea.ClearScreen)
 	}
 	// Иначе показываем общую ошибку синхронизации
-	return m.setStatusMessage(fmt.Sprintf("Ошибка синхронизации: %v", msg.err))
+	// Добавляем ClearScreen и здесь
+	newM, statusCmd := m.setStatusMessage(fmt.Sprintf("Ошибка синхронизации: %v", msg.err))
+	return newM, tea.Batch(statusCmd, tea.ClearScreen)
 }
 
 func handleSyncStartedMsg(m *model) (tea.Model, tea.Cmd) {
@@ -156,7 +161,9 @@ func handleLocalMetadataMsg(m *model, msg localMetadataMsg) (tea.Model, tea.Cmd)
 
 func handleSyncUploadSuccessMsg(m *model) (tea.Model, tea.Cmd) {
 	// TODO: Обновить время последней синхронизации в m
-	return m.setStatusMessage("Синхронизация завершена (загружено)")
+	newM, statusCmd := m.setStatusMessage("Синхронизация завершена (загружено)")
+	// Добавляем ClearScreen
+	return newM, tea.Batch(statusCmd, tea.ClearScreen)
 }
 
 func handleSyncDownloadSuccessMsg(m *model, msg syncDownloadSuccessMsg) (tea.Model, tea.Cmd) {

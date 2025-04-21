@@ -155,7 +155,7 @@ func initSyncMenu() list.Model {
 	syncMenuDelegate := list.NewDefaultDelegate()
 	// Устанавливаем ненулевые размеры по умолчанию для диагностики
 	defaultSyncMenuWidth := 40
-	defaultSyncMenuHeight := 16
+	defaultSyncMenuHeight := 20
 	syncMenuList := list.New([]list.Item{
 		syncMenuItem{title: "Настроить URL сервера", id: "configure_url"},
 		syncMenuItem{title: "Войти / Зарегистрироваться", id: "login_register"},
