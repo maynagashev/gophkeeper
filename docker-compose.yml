@@ -38,43 +38,6 @@ services:
         timeout: 5s
         retries: 5
 
-  server:
-    container_name: gophkeeper-server
-    build:
-      context: .
-      dockerfile: ./server/Dockerfile # Предполагаемый путь к Dockerfile сервера
-    ports:
-      - "${SERVER_PORT:-443}:443" # Проброс порта HTTPS
-    environment:
-      # Настройки сервера
-      - SERVER_PORT=443
-      # Пути к TLS сертификатам ВНУТРИ контейнера
-      - TLS_CERT_FILE=/etc/ssl/certs/cert.pem
-      - TLS_KEY_FILE=/etc/ssl/private/key.pem
-      # Настройки подключения к PostgreSQL (берем из сервиса postgres)
-      - POSTGRES_HOST=postgres # Используем имя сервиса
-      - POSTGRES_PORT=5432 # Внутренний порт PostgreSQL
-      - POSTGRES_DB=${POSTGRES_DB:-gophkeeper}
-      - POSTGRES_USER=${POSTGRES_USER:-gophkeeper}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-secret}
-      # Настройки подключения к MinIO (берем из сервиса minio)
-      - MINIO_ENDPOINT=minio:9000 # Используем имя сервиса и порт API
-      - MINIO_USER=${MINIO_USER:-minioadmin}
-      - MINIO_PASSWORD=${MINIO_PASSWORD:-minioadmin}
-      - MINIO_BUCKET=${MINIO_BUCKET:-gophkeeper-vaults}
-    volumes:
-      # Проброс сертификатов с хоста внутрь контейнера
-      # Предполагаем, что файлы cert.pem и key.pem лежат рядом с docker-compose.yml
-      # Важно: Эти файлы должны существовать на хосте перед запуском!
-      - ./cert.pem:/etc/ssl/certs/cert.pem:ro
-      - ./key.pem:/etc/ssl/private/key.pem:ro
-    depends_on:
-      postgres:
-        condition: service_healthy # Ждем полной готовности PostgreSQL
-      minio:
-        condition: service_healthy # Ждем полной готовности MinIO
-    restart: on-failure
-
 volumes:
   postgres_data: # Именованный volume для данных PostgreSQL
     driver: local

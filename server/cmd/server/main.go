@@ -23,24 +23,6 @@ const (
 	defaultReadTimeout  = 10 * time.Second
 	defaultWriteTimeout = 10 * time.Second
 	defaultIdleTimeout  = 30 * time.Second
-	// Меняем порт по умолчанию на 443 для HTTPS.
-	defaultServerPort = "443"
-	envServerPort     = "SERVER_PORT"
-	// Переменные окружения для TLS.
-	envTLSCertFile = "TLS_CERT_FILE"
-	envTLSKeyFile  = "TLS_KEY_FILE"
-
-	// Переменные окружения для БД (значения по умолчанию из Makefile/docker-compose).
-	envDBUser     = "POSTGRES_USER"
-	envDBPass     = "POSTGRES_PASSWORD" //nolint:gosec // Ложное срабатывание, это имя переменной окружения
-	envDBName     = "POSTGRES_DB"
-	envDBHost     = "POSTGRES_HOST"
-	envDBPort     = "POSTGRES_PORT"
-	defaultDBUser = "gophkeeper"
-	defaultDBPass = "secret"
-	defaultDBName = "gophkeeper"
-	defaultDBHost = "localhost"
-	defaultDBPort = "5433"
 
 	// Переменные окружения для MinIO (значения по умолчанию из docker-compose).
 	envMinioEndpoint     = "MINIO_ENDPOINT"
@@ -74,8 +56,15 @@ func main() {
 func run() error {
 	log.Println("Запуск сервера GophKeeper...")
 
+	// Парсинг флагов командной строки
+	cfg, err := parseFlags()
+	if err != nil {
+		// Используем log.Fatalf, так как ошибка фатальна для запуска сервера.
+		log.Fatalf("Ошибка конфигурации сервера: %v", err)
+	}
+
 	// Инициализация зависимостей
-	deps, err := setupDependencies()
+	deps, err := setupDependencies(cfg)
 	if err != nil {
 		return fmt.Errorf("ошибка инициализации зависимостей: %w", err)
 	}
@@ -93,30 +82,20 @@ func run() error {
 	r := setupRouter(deps.authHandler, deps.vaultHandler)
 
 	// --- Запуск сервера --- //
-	port := getEnv(envServerPort, defaultServerPort)
-	certFile := getEnv(envTLSCertFile, "")
-	keyFile := getEnv(envTLSKeyFile, "")
-
-	// Проверяем наличие путей к сертификату и ключу
-	if certFile == "" || keyFile == "" {
-		// Возвращаем ошибку вместо Fatalf
-		return errors.New("не указаны пути к файлам сертификата (TLS_CERT_FILE) и/или ключа (TLS_KEY_FILE)")
-	}
-
 	server := &http.Server{
-		Addr:         fmt.Sprintf(":%s", port),
+		Addr:         fmt.Sprintf(":%s", cfg.Port),
 		Handler:      r,
 		ReadTimeout:  defaultReadTimeout,
 		WriteTimeout: defaultWriteTimeout,
 		IdleTimeout:  defaultIdleTimeout,
 	}
 
-	log.Printf("Запуск HTTPS-сервера на порту %s...", port)
-	log.Printf("Используется сертификат: %s", certFile)
-	log.Printf("Используется ключ: %s", keyFile)
+	log.Printf("Запуск HTTPS-сервера на порту %s...", cfg.Port)
+	log.Printf("Используется сертификат: %s", cfg.CertFile)
+	log.Printf("Используется ключ: %s", cfg.KeyFile)
 
 	// Запускаем сервер с TLS
-	if err = server.ListenAndServeTLS(certFile, keyFile); err != nil && !errors.Is(err, http.ErrServerClosed) {
+	if err = server.ListenAndServeTLS(cfg.CertFile, cfg.KeyFile); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		// Возвращаем ошибку вместо Fatalf
 		return fmt.Errorf("ошибка запуска HTTPS-сервера: %w", err)
 	}
@@ -124,14 +103,12 @@ func run() error {
 }
 
 // setupDependencies инициализирует и возвращает все необходимые зависимости сервера.
-func setupDependencies() (*dependencies, error) {
+func setupDependencies(cfg *config) (*dependencies, error) {
 	deps := &dependencies{}
 	var err error
 
 	// 1. Подключение к БД
-	dsn := getDSNFromEnv()
-	// repository.NewPostgresDB возвращает *sqlx.DB
-	deps.db, err = repository.NewPostgresDB(dsn)
+	deps.db, err = repository.NewPostgresDB(cfg.DatabaseDSN)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка инициализации БД: %w", err)
 	}
@@ -210,21 +187,6 @@ func setupRouter(authHandler *handlers.AuthHandler, vaultHandler *handlers.Vault
 		})
 	})
 	return r
-}
-
-// getDSNFromEnv формирует строку подключения к БД из переменных окружения.
-func getDSNFromEnv() string {
-	user := getEnv(envDBUser, defaultDBUser)
-	password := getEnv(envDBPass, defaultDBPass)
-	host := getEnv(envDBHost, defaultDBHost)
-	port := getEnv(envDBPort, defaultDBPort)
-	dbname := getEnv(envDBName, defaultDBName)
-
-	// sslmode=disable - небезопасно для продакшена, но удобно для локальной разработки с Docker
-	// TODO: Сделать sslmode конфигурируемым для продакшена (sslmode=require или verify-full)
-	//nolint:nosprintfhostport // DSN - это URL, а не просто host:port
-	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		user, password, host, port, dbname)
 }
 
 // getEnv получает значение переменной окружения или возвращает значение по умолчанию.

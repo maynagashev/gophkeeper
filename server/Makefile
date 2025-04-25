@@ -1,13 +1,14 @@
 # Makefile для сервера GophKeeper
 
 # --- Переменные --- #
-# Используем значения по умолчанию, если переменные окружения не установлены
-POSTGRES_USER ?= gophkeeper
-POSTGRES_PASSWORD ?= secret
-POSTGRES_DB ?= gophkeeper
-POSTGRES_HOST ?= localhost
-POSTGRES_PORT ?= 5433
-DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable
+# Строка подключения к БД. Используется для миграций.
+# Значение по умолчанию соответствует настройкам в docker-compose.yml
+DATABASE_DSN ?= postgres://gophkeeper:secret@localhost:5433/gophkeeper?sslmode=disable
+
+# Пути к файлам TLS (используются при запуске сервера)
+TLS_CERT_FILE ?= ./certs/server.crt
+TLS_KEY_FILE ?= ./certs/server.key
+
 MIGRATIONS_PATH=./migrations
 MIGRATE_IMAGE=migrate/migrate:v4.17.1 
 
@@ -19,7 +20,7 @@ default: server
 # Запуск сервера
 server:
 	@echo "Запуск GophKeeper сервера..."
-	@go run ./cmd/server/main.go | tee ./logs/server.log
+	@go run ./cmd/server --database-dsn="${DATABASE_DSN}" --cert-file="${TLS_CERT_FILE}" --key-file="${TLS_KEY_FILE}" | tee ./logs/server.log
 
 # Сборка сервера
 build:
@@ -60,15 +61,15 @@ db-up:
 # Применение миграций с использованием Docker
 migrate:
 	@echo "Применение миграций БД из ${MIGRATIONS_PATH} с помощью Docker ${MIGRATE_IMAGE}..."
-	@docker run --rm -v $$(pwd)/${MIGRATIONS_PATH}:/migrations --network host ${MIGRATE_IMAGE} -path /migrations -database "${DATABASE_URL}" up
+	@docker run --rm -v $$(pwd)/${MIGRATIONS_PATH}:/migrations --network host ${MIGRATE_IMAGE} -path /migrations -database "${DATABASE_DSN}" up
 
 # Откат последней миграции с использованием Docker
 migrate-down:
 	@echo "Откат последней миграции БД из ${MIGRATIONS_PATH} с помощью Docker ${MIGRATE_IMAGE}..."
-	@docker run --rm -v $$(pwd)/${MIGRATIONS_PATH}:/migrations --network host ${MIGRATE_IMAGE} -path /migrations -database "${DATABASE_URL}" down 1
+	@docker run --rm -v $$(pwd)/${MIGRATIONS_PATH}:/migrations --network host ${MIGRATE_IMAGE} -path /migrations -database "${DATABASE_DSN}" down 1
 
 # Установка определенной версии миграции с использованием Docker
 # Использование: make migrate-force version=<номер_версии>
 migrate-force:
 	@echo "Принудительная установка версии миграции ${version} из ${MIGRATIONS_PATH} с помощью Docker ${MIGRATE_IMAGE}..."
-	@docker run --rm -v $$(pwd)/${MIGRATIONS_PATH}:/migrations --network host ${MIGRATE_IMAGE} -path /migrations -database "${DATABASE_URL}" force ${version}
+	@docker run --rm -v $$(pwd)/${MIGRATIONS_PATH}:/migrations --network host ${MIGRATE_IMAGE} -path /migrations -database "${DATABASE_DSN}" force ${version}
