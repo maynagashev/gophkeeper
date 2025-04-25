@@ -8,7 +8,7 @@ default: run
 # Запуск клиента
 client:
 	@echo "Запуск GophKeeper клиента..."
-	@go run ./cmd/gophkeeper/main.go -debug | tee logs/run.log
+	@go run ./cmd/gophkeeper/main.go -debug --server-url=https://localhost:8443 | tee logs/run.log
 
 # Сборка клиента
 build:
