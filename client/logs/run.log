@@ -27,40 +27,22 @@ State: passwordInputScreen
  [Token: ]
  [Lock Acquired: true]
  [DB: not loaded]
-[16;H[H                                                                                                          
-  Введите мастер-пароль для gophkeeper.kdbx:                                                              
-  > Мастер-пароль                                                                                         
-                                                                                                          
-                                                                                                          
-  Ошибка: ошибка дешифрования файла 'gophkeeper.kdbx': Wrong password? HMAC-SHA256 of header mismatching  
-                                                                                                          
-  (Нажмите любую клавишу для продолжения)                                                                 
-                                                                                                          
-State: passwordInputScreen
+[16;H[H
 
----
-Отладка:
- [State: passwordInputScreen]
- [URL: ]
- [Token: ]
- [Lock Acquired: true]
- [DB: not loaded]
-[19;H[H                                              
-  Введите мастер-пароль для gophkeeper.kdbx:  
   > *                                         
-                                              
-                                              
-                                              
-State: passwordInputScreen
 
----
-Отладка:
- [State: passwordInputScreen]
- [URL: ]
- [Token: ]
- [Lock Acquired: true]
- [DB: not loaded]
-[J[16;H[H
+
+
+
+
+
+
+
+
+
+
+
+[16;H[H
 
   > **                                        
 
@@ -78,21 +60,6 @@ State: passwordInputScreen
 [16;H[H
 
   > ***                                       
-
-
-
-
-
-
-
-
-
-
-
-
-[16;H[H
-
-  > Мастер-пароль                             
 
 
 
@@ -141,201 +108,41 @@ State: entryListScreen
  [Lock Acquired: true]
  [DB Name: gophkeeper]
  [DB ModTime: 2025-04-21T23:16:24+07:00 (group0 mod)]
-[37;H[H                                          
-  Настройка сервера                       
-                                          
-  Сервер настроен: http://localhost:8080  
-                                          
-  Выберите действие:                      
-  - Регистрация нового пользователя (R)   
-  - Вход с существующими данными (L)      
-                                          
-  Нажмите Esc для возврата                
-                                          
-State: loginRegisterChoiceScreen
+[37;H[2J[H[H                                                  
+  URL Сервера: http://localhost:8080              
+  Статус входа: Вход выполнен (сессия загружена)  
+  Последняя синх.: Не синхронизировалось          
+                                                  
+                                                  
+                                                  
+                                                  
+  │ Настроить URL сервера                         
+  │                                               
+                                                  
+    Войти / Зарегистрироваться                    
+                                                  
+                                                  
+    Синхронизировать сейчас                       
+                                                  
+                                                  
+    Просмотреть версии                            
+                                                  
+                                                  
+    Выйти на сервере                              
+                                                  
+                                                  
+                                                  
+                                                  
+                                                  
+                                                  
+State: syncServerScreen
 
 ---
 Отладка:
- [State: loginRegisterChoiceScreen]
+ [State: syncServerScreen]
  [URL: http://localhost:8080]
  [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTI1MzE5OCwibmJmIjoxNzQ1MTY2Nzk4LCJpYXQiOjE3NDUxNjY3OTh9.IkxiDoEJRRCic89hRBGB2lv1N-__aInP7Z0aZFFXr_g]
  [Lock Acquired: true]
  [DB Name: gophkeeper]
  [DB ModTime: 2025-04-21T23:16:24+07:00 (group0 mod)]
-[J[22;H[2J[H[H                                             
-  Вход в учетную запись                      
-                                             
-  > Имя пользователя                         
-  > Пароль                                   
-                                             
-  Нажмите Enter для входа, Esc для возврата  
-                                             
-                                             
-State: loginScreen
-
----
-Отладка:
- [State: loginScreen]
- [URL: http://localhost:8080]
- [Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJpc3MiOiJnb3Boa2VlcGVyLXNlcnZlciIsImV4cCI6MTc0NTI1MzE5OCwibmJmIjoxNzQ1MTY2Nzk4LCJpYXQiOjE3NDUxNjY3OTh9.IkxiDoEJRRCic89hRBGB2lv1N-__aInP7Z0aZFFXr_g]
- [Lock Acquired: true]
- [DB Name: gophkeeper]
- [DB ModTime: 2025-04-21T23:16:24+07:00 (group0 mod)]
-[J[20;H[H
-
-
-  > t                                        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[20;H[H
-
-
-  > te                                       
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[20;H[H
-
-
-  > tes                                      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[20;H[H
-
-
-  > test                                     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[20;H[H
-
-
-
-  > *                                        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[20;H[H
-
-
-
-  > **                                       
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[20;H[H
-
-
-
-  > ***                                      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[20;H[H
-
-
-
-  > ****                                     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[20;H[2K[?2004l[?25h[?1002l[?1003l[?1006l[?1049l[?25h[2K[?2004l[?25h[?1002l[?1003l[?1006lCaught panic:
-
-runtime error: invalid memory address or nil pointer dereference
-
-Restoring terminal...
-
+[38;H
