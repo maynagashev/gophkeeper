@@ -1,0 +1,7 @@
+time=2025-04-25T22:10:49.744+07:00 level=INFO msg="Логгер инициализирован" path=logs/client.log
+time=2025-04-25T22:10:49.744+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию" debug_mode=false server_url=""
+time=2025-04-25T22:10:49.744+07:00 level=WARN msg="URL сервера не указан (--server-url), функции API будут недоступны."
+time=2025-04-25T22:10:49.749+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-25T22:10:49.749+07:00 level=INFO msg="Файл KDBX найден, запуск стандартного TUI." path=gophkeeper.kdbx
+time=2025-04-25T22:10:52.481+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock
+time=2025-04-25T22:10:56.681+07:00 level=INFO msg="Логгер инициализирован" path=logs/client.log

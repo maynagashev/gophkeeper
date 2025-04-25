@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"log"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -17,6 +18,13 @@ const (
 	dbPathEnvVar = "GOPHKEEPER_DB_PATH"
 	// Путь к файлу KDBX по умолчанию.
 	defaultDBPath = "gophkeeper.kdbx"
+)
+
+// Переменные для версии и даты сборки, устанавливаются через ldflags.
+var (
+	version = "dev" // Значение по умолчанию, если не установлено при сборке
+	//nolint:gochecknoglobals // Устанавливается через ldflags при сборке
+	buildDate = "unknown" // Значение по умолчанию
 )
 
 // setupLogging настраивает логирование в файл logs/gophkeeper.log.
@@ -44,6 +52,9 @@ func setupLogging() {
 }
 
 func main() {
+	// Добавляем флаг для версии
+	versionFlag := flag.Bool("version", false, "Показать версию и дату сборки")
+
 	// Настройка логирования
 	setupLogging()
 
@@ -54,6 +65,17 @@ func main() {
 
 	// Парсинг флагов командной строки
 	flag.Parse()
+
+	// Если указан флаг --version, выводим информацию и выходим
+	if *versionFlag {
+		// Используем стандартный log для вывода в консоль, так как slog настроен на файл
+		log.SetOutput(os.Stdout) // Направляем вывод log в stdout
+		log.SetFlags(0)          // Убираем префиксы даты/времени
+		log.Println("GophKeeper Client")
+		log.Printf("Version: %s", version)
+		log.Printf("Build Date: %s", buildDate)
+		os.Exit(0)
+	}
 
 	// Определение финального пути к файлу KDBX
 	finalPath := defaultDBPath
