@@ -1346,3 +1346,20 @@ time=2025-04-21T23:16:31.243+07:00 level=INFO msg="Обновление m.db з�
 time=2025-04-21T23:16:31.247+07:00 level=INFO msg="Запуск загрузки KDBX на сервер..." fileModTime=2025-04-21T23:16:24.325+07:00
 time=2025-04-21T23:16:31.268+07:00 level=INFO msg="Загрузка KDBX на сервер успешно завершена."
 time=2025-04-21T23:16:38.019+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock
+time=2025-04-25T21:47:41.996+07:00 level=INFO msg="Логгер инициализирован" path=logs/client.log
+time=2025-04-25T21:47:41.996+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию" debug_mode=true server_url=""
+time=2025-04-25T21:47:41.996+07:00 level=WARN msg="URL сервера не указан (--server-url), функции API будут недоступны."
+time=2025-04-25T21:47:41.997+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-25T21:47:41.998+07:00 level=INFO msg="Файл KDBX найден, запуск стандартного TUI." path=gophkeeper.kdbx
+time=2025-04-25T21:47:50.419+07:00 level=DEBUG msg="handleDBOpenedMsg: Начало"
+time=2025-04-25T21:47:50.419+07:00 level=INFO msg="База KDBX успешно открыта" path=gophkeeper.kdbx
+time=2025-04-25T21:47:50.419+07:00 level=DEBUG msg="Попытка загрузки Auth данных из CustomData" count=2
+time=2025-04-25T21:47:50.419+07:00 level=DEBUG msg="Найден URL сервера в CustomData" key=GophKeeperServerURL value=http://localhost:8080
+time=2025-04-25T21:47:50.419+07:00 level=DEBUG msg="Найден токен в CustomData" key=GophKeeperAuthToken
+time=2025-04-25T21:47:50.419+07:00 level=INFO msg="Auth данные успешно загружены из KDBX" url_found=true token_found=true
+time=2025-04-25T21:47:50.419+07:00 level=ERROR msg="API клиент nil при попытке установить токен после загрузки из KDBX"
+time=2025-04-25T21:47:50.419+07:00 level=DEBUG msg="Записи, полученные из KDBX" count=2
+time=2025-04-25T21:47:50.419+07:00 level=DEBUG msg="Элементы, подготовленные для списка" count=2
+time=2025-04-25T21:47:50.419+07:00 level=DEBUG msg="Элементы в списке после SetItems" count=2
+time=2025-04-25T21:47:50.419+07:00 level=DEBUG msg="handleDBOpenedMsg: Конец, m.db обновлен"
+time=2025-04-25T21:48:03.457+07:00 level=ERROR msg="Ошибка при запуске TUI" error="program was killed: context canceled"

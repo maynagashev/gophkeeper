@@ -177,15 +177,19 @@ func (m *model) View() string {
 }
 
 // Start запускает TUI приложение.
-func Start(kdbxPath string, debugMode bool) {
-	// Создаем начальную модель, передавая флаг
-	m := initModel(kdbxPath, debugMode)
-
+func Start(kdbxPath string, debugMode bool, serverURL string) {
 	// --- Инициализация API клиента ---
-	// TODO: Сделать URL конфигурируемым (флаг, env, KDBX)
-	m.apiClient = api.NewHTTPClient(defaultServerURL)
-	m.serverURL = defaultServerURL // Сохраняем URL в модели
-	slog.Info("API клиент инициализирован", "baseURL", defaultServerURL)
+	var apiClient api.Client // Объявляем переменную
+	if serverURL != "" {     // Создаем клиент, только если URL не пустой
+		apiClient = api.NewHTTPClient(serverURL)
+		slog.Info("API клиент инициализирован", "baseURL", serverURL)
+	} else {
+		slog.Warn("URL сервера не указан (--server-url), функции API будут недоступны.")
+		// apiClient остается nil
+	}
+
+	// Создаем начальную модель, передавая флаг
+	m := initModel(kdbxPath, debugMode, serverURL, apiClient)
 
 	// --- Реализация flock ---
 	lockPath := kdbxPath + ".lock"

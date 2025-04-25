@@ -7,6 +7,7 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/maynagashev/gophkeeper/client/internal/api"
 	"github.com/maynagashev/gophkeeper/models"
 )
 
@@ -242,7 +243,7 @@ func initVersionList() list.Model {
 }
 
 // initModel создает начальное состояние модели.
-func initModel(kdbxPath string, debugMode bool) model {
+func initModel(kdbxPath string, debugMode bool, serverURL string, apiClient api.Client) model {
 	passwordInput := initPasswordInput()
 	entryList := initEntryList()
 	attachmentDelList := initAttachmentDeleteList()
@@ -277,5 +278,7 @@ func initModel(kdbxPath string, debugMode bool) model {
 		docStyle:                  docStyle,
 		debugMode:                 debugMode,
 		versionList:               versionList,
+		serverURL:                 serverURL,
+		apiClient:                 apiClient,
 	}
 }
