@@ -107,7 +107,7 @@
 				
 				<option value="file25">github.com/maynagashev/gophkeeper/client/internal/tui/tui.go (3.5%)</option>
 				
-				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (19.5%)</option>
+				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (31.9%)</option>
 				
 				<option value="file27">github.com/maynagashev/gophkeeper/client/internal/tui/utils.go (85.7%)</option>
 				
@@ -4678,9 +4678,9 @@ func handleVersionMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) <span cl
 }
 
 // handleAPIMsg обрабатывает сообщения от API клиента.
-func handleAPIMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) <span class="cov0" title="0">{
+func handleAPIMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) <span class="cov8" title="1">{
         switch msg := msg.(type) </span>{
-        case loginSuccessMsg:<span class="cov0" title="0">
+        case loginSuccessMsg:<span class="cov8" title="1">
                 m.authToken = msg.Token
                 m.loginStatus = fmt.Sprintf("Вход выполнен как %s", m.loginUsernameInput.Value())
                 m.err = nil
@@ -4688,7 +4688,7 @@ func handleAPIMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) <span class=
                 m.loginPasswordInput.SetValue("")
 
                 // Устанавливаем токен в существующем API клиенте
-                if m.apiClient != nil </span><span class="cov0" title="0">{
+                if m.apiClient != nil </span><span class="cov8" title="1">{
                         m.apiClient.SetAuthToken(m.authToken)
                         slog.Debug("Установлен токен в API клиенте после успешного входа")
                 }</span> else<span class="cov0" title="0"> {
@@ -4696,7 +4696,7 @@ func handleAPIMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) <span class=
                 }</span>
 
                 // Сохраняем Auth данные в KDBX (в памяти)
-                <span class="cov0" title="0">if m.db != nil </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">if m.db != nil </span><span class="cov8" title="1">{
                         errSave := kdbx.SaveAuthData(m.db, m.serverURL, m.authToken)
                         if errSave != nil </span><span class="cov0" title="0">{
                                 slog.Error("Ошибка сохранения Auth данных в KDBX (в памяти)", "error", errSave)
@@ -4706,7 +4706,7 @@ func handleAPIMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) <span class=
                                 return newM, tea.Batch(statusCmd, tea.ClearScreen), true // Возвращаемся при ошибке
                         }</span>
                         // Если ошибки не было
-                        <span class="cov0" title="0">slog.Info("Auth данные успешно обновлены в KDBX (в памяти)")
+                        <span class="cov8" title="1">slog.Info("Auth данные успешно обновлены в KDBX (в памяти)")
                         m.state = entryListScreen</span> // Переходим к списку записей
                 } else<span class="cov0" title="0"> {
                         slog.Error("Попытка сохранить Auth данные в KDBX, но m.db is nil")
@@ -4714,17 +4714,17 @@ func handleAPIMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) <span class=
                 }</span>
 
                 // Возвращаем команды только после успешного сохранения (или если db был nil)
-                <span class="cov0" title="0">newM, statusCmd := m.setStatusMessage("Вход выполнен успешно!")
+                <span class="cov8" title="1">newM, statusCmd := m.setStatusMessage("Вход выполнен успешно!")
                 return newM, tea.Batch(statusCmd, tea.ClearScreen), true</span>
 
-        case LoginError:<span class="cov0" title="0">
+        case LoginError:<span class="cov8" title="1">
                 m.err = msg.err
                 newM, statusCmd := m.setStatusMessage("Ошибка входа")
                 // Добавляем очистку экрана, чтобы перерисовать с ошибкой чисто
                 return newM, tea.Batch(statusCmd, tea.ClearScreen), true</span>
 
         // --- Обработка регистрации --- //
-        case registerSuccessMsg:<span class="cov0" title="0">
+        case registerSuccessMsg:<span class="cov8" title="1">
                 m.err = nil
                 m.registerUsernameInput.SetValue("")
                 m.registerPasswordInput.SetValue("")
@@ -4735,13 +4735,13 @@ func handleAPIMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) <span class=
                 // Добавляем команду очистки экрана
                 return newM, tea.Batch(statusCmd, tea.ClearScreen), true</span>
 
-        case RegisterError:<span class="cov0" title="0">
+        case RegisterError:<span class="cov8" title="1">
                 m.err = msg.err
                 newM, statusCmd := m.setStatusMessage("Ошибка регистрации")
                 // Добавляем очистку экрана, чтобы перерисовать с ошибкой чисто
                 return newM, tea.Batch(statusCmd, tea.ClearScreen), true</span>
 
-        default:<span class="cov0" title="0">
+        default:<span class="cov8" title="1">
                 return m, nil, false</span>
         }
 }

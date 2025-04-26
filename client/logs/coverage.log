@@ -156,7 +156,7 @@ github.com/maynagashev/gophkeeper/client/internal/tui/update.go:163:				handleSy
 github.com/maynagashev/gophkeeper/client/internal/tui/update.go:170:				handleSyncDownloadSuccessMsg		0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/update.go:180:				processMetadataResults			0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/update.go:253:				handleVersionMsg			0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/update.go:273:				handleAPIMsg				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/update.go:273:				handleAPIMsg				79.5%
 github.com/maynagashev/gophkeeper/client/internal/tui/update.go:342:				canSave					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/update.go:347:				updateDBFromList			40.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/update.go:373:				updateRootModTime			100.0%
@@ -168,4 +168,4 @@ github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:46:				deepCopyEn
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:51:				FindEntryInDB				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:60:				findEntryInDB				0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:65:				FindEntryInGroups			100.0%
-total:												(statements)				19.1%
+total:												(statements)				20.7%
