@@ -79,7 +79,7 @@
 				
 				<option value="file11">github.com/maynagashev/gophkeeper/client/internal/tui/screen_credentials.go (90.9%)</option>
 				
-				<option value="file12">github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go (0.0%)</option>
+				<option value="file12">github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go (27.6%)</option>
 				
 				<option value="file13">github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go (0.0%)</option>
 				
@@ -2481,7 +2481,7 @@ func (m *model) updateEntryDetailScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span 
 
 // renderStandardFields форматирует стандартные поля записи для отображения.
 // Он также удаляет отображенные поля из переданной карты valuesMap.
-func renderStandardFields(_ gokeepasslib.Entry, valuesMap map[string]gokeepasslib.ValueData) string <span class="cov0" title="0">{
+func renderStandardFields(_ gokeepasslib.Entry, valuesMap map[string]gokeepasslib.ValueData) string <span class="cov8" title="1">{
         s := ""
         // Включаем поля карты в стандартный порядок
         desiredOrder := []string{
@@ -2490,45 +2490,45 @@ func renderStandardFields(_ gokeepasslib.Entry, valuesMap map[string]gokeepassli
         }
         // Не создаем новую карту, используем переданную
 
-        for _, key := range desiredOrder </span><span class="cov0" title="0">{
-                if val, ok := valuesMap[key]; ok </span><span class="cov0" title="0">{
+        for _, key := range desiredOrder </span><span class="cov8" title="1">{
+                if val, ok := valuesMap[key]; ok </span><span class="cov8" title="1">{
                         valueContent := val.Value.Content
                         // Маскируем чувствительные поля
                         switch val.Key </span>{
-                        case fieldNamePassword, fieldNameCVV, fieldNamePIN:<span class="cov0" title="0">
+                        case fieldNamePassword, fieldNameCVV, fieldNamePIN:<span class="cov8" title="1">
                                 valueContent = "********"</span>
-                        case fieldNameCardNumber:<span class="cov0" title="0">
+                        case fieldNameCardNumber:<span class="cov8" title="1">
                                 valueContent = maskCardNumber(valueContent)</span>
                         }
-                        <span class="cov0" title="0">s += fmt.Sprintf("%s: %s\n", val.Key, valueContent)
+                        <span class="cov8" title="1">s += fmt.Sprintf("%s: %s\n", val.Key, valueContent)
 
                         // Удаляем из карты, чтобы она осталась для renderCustomFields
                         delete(valuesMap, key)</span>
                 }
         }
-        <span class="cov0" title="0">return s</span>
+        <span class="cov8" title="1">return s</span>
 }
 
 // maskCardNumber маскирует номер карты, оставляя видимыми первые visibleCardDigits цифры с каждой стороны.
-func maskCardNumber(number string) string <span class="cov0" title="0">{
+func maskCardNumber(number string) string <span class="cov8" title="1">{
         length := len(number)
-        if length &lt; minCardLengthForMask </span><span class="cov0" title="0">{
+        if length &lt; minCardLengthForMask </span><span class="cov8" title="1">{
                 return "********" // Слишком короткий номер для маскирования
         }</span>
-        <span class="cov0" title="0">return fmt.Sprintf("%s********%s", number[:visibleCardDigits], number[length-visibleCardDigits:])</span>
+        <span class="cov8" title="1">return fmt.Sprintf("%s********%s", number[:visibleCardDigits], number[length-visibleCardDigits:])</span>
 }
 
 // renderCustomFields форматирует дополнительные (нестандартные) поля записи.
-func renderCustomFields(valuesMap map[string]gokeepasslib.ValueData) string <span class="cov0" title="0">{
-        if len(valuesMap) == 0 </span><span class="cov0" title="0">{
+func renderCustomFields(valuesMap map[string]gokeepasslib.ValueData) string <span class="cov8" title="1">{
+        if len(valuesMap) == 0 </span><span class="cov8" title="1">{
                 return ""
         }</span>
-        <span class="cov0" title="0">s := "\n--- Дополнительные поля ---\n"
+        <span class="cov8" title="1">s := "\n--- Дополнительные поля ---\n"
         // Перебираем оставшиеся в карте поля
-        for _, val := range valuesMap </span><span class="cov0" title="0">{
+        for _, val := range valuesMap </span><span class="cov8" title="1">{
                 s += fmt.Sprintf("%s: %s\n", val.Key, val.Value.Content)
         }</span>
-        <span class="cov0" title="0">return s</span>
+        <span class="cov8" title="1">return s</span>
 }
 
 // getBinariesFromDB возвращает срез бинарных данных из базы данных,
