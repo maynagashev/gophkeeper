@@ -41,7 +41,6 @@ func (m *model) viewLoginScreen() string {
 	)
 }
 
-//nolint:testpackage // Тесты в том же пакете для доступа к приватным компонентам
 func TestLoginScreen_TabNavigation(t *testing.T) {
 	t.Run("ПереключениеФокусаПоTab", func(t *testing.T) {
 		// Создаем модель

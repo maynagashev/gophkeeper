@@ -129,7 +129,7 @@ func TestPasswordInputScreen(t *testing.T) {
 		m := toModel(t, newModel)
 
 		// Проверяем, что ошибка очищена и фокус возвращен
-		assert.Nil(t, m.err, "Ошибка должна быть очищена после нажатия клавиши")
+		assert.NoError(t, m.err, "Ошибка должна быть очищена после нажатия клавиши")
 		assert.True(t, m.passwordInput.Focused(), "Поле ввода должно получить фокус")
 	})
 }

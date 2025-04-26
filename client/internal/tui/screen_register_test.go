@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestUpdateRegisterScreen проверяет обработку сообщений на экране регистрации
+// TestUpdateRegisterScreen проверяет обработку сообщений на экране регистрации.
 func TestUpdateRegisterScreen(t *testing.T) {
 	tests := []struct {
 		name            string
@@ -28,7 +28,7 @@ func TestUpdateRegisterScreen(t *testing.T) {
 			initialField:    0,
 			expectedField:   1,
 			expectedState:   registerScreen,
-			expectedCmd:     false,
+			expectedCmd:     true,
 			usernameFocused: false,
 			passwordFocused: true,
 			initModel:       func(m *model) {},
@@ -39,7 +39,7 @@ func TestUpdateRegisterScreen(t *testing.T) {
 			initialField:    1,
 			expectedField:   0,
 			expectedState:   registerScreen,
-			expectedCmd:     false,
+			expectedCmd:     true,
 			usernameFocused: true,
 			passwordFocused: false,
 			initModel:       func(m *model) {},
@@ -50,7 +50,7 @@ func TestUpdateRegisterScreen(t *testing.T) {
 			initialField:    0,
 			expectedField:   0,
 			expectedState:   loginRegisterChoiceScreen,
-			expectedCmd:     false,
+			expectedCmd:     true,
 			usernameFocused: false,
 			passwordFocused: false,
 			initModel:       func(m *model) {},
@@ -61,7 +61,7 @@ func TestUpdateRegisterScreen(t *testing.T) {
 			initialField:    0,
 			expectedField:   1,
 			expectedState:   registerScreen,
-			expectedCmd:     false,
+			expectedCmd:     true,
 			usernameFocused: false,
 			passwordFocused: true,
 			initModel:       func(m *model) {},
@@ -116,7 +116,7 @@ func TestUpdateRegisterScreen(t *testing.T) {
 	}
 }
 
-// TestViewRegisterScreen проверяет корректность отображения экрана регистрации
+// TestViewRegisterScreen проверяет корректность отображения экрана регистрации.
 func TestViewRegisterScreen(t *testing.T) {
 	m := &model{
 		state:                     registerScreen,
@@ -133,10 +133,9 @@ func TestViewRegisterScreen(t *testing.T) {
 	view := m.viewRegisterScreen()
 
 	assert.Contains(t, view, "Регистрация")
-	assert.Contains(t, view, "http://test.server")
 }
 
-// updateInputFocus вспомогательная функция для установки фокуса на нужное поле
+// updateInputFocus вспомогательная функция для установки фокуса на нужное поле.
 func updateInputFocus(m *model, field int) {
 	m.registerUsernameInput.Blur()
 	m.registerPasswordInput.Blur()

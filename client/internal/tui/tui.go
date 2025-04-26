@@ -257,8 +257,3 @@ func Start(kdbxPath string, debugMode bool, serverURL string) {
 	}
 	// Успешный выход ПОСЛЕ defer Unlock
 }
-
-// viewServerURLInputScreen отображает экран ввода URL сервера.
-func (m *model) viewServerURLInputScreen() string {
-	return fmt.Sprintf("Введите URL сервера:\n%s", m.serverURLInput.View())
-}

@@ -25,7 +25,7 @@ func (m *model) updateLoginRegisterChoiceScreen(msg tea.Msg) (tea.Model, tea.Cmd
 			m.loginRegisterFocusedField = 0
 			return m, tea.Batch(textinput.Blink, tea.ClearScreen)
 		case keyEsc, keyBack:
-			m.state = entryListScreen // Возвращаемся к списку записей
+			m.state = syncServerScreen // Возвращаемся на экран синхронизации и сервера
 			return m, nil
 		}
 	}
@@ -51,7 +51,6 @@ func (m *model) viewLoginRegisterChoiceScreen() string {
 	return b.String()
 }
 
-//nolint:testpackage // Тесты в том же пакете для доступа к приватным компонентам
 func TestLoginRegisterChoiceScreen_SimulateKeyPress(t *testing.T) {
 	t.Run("ПереходНаЭкранРегистрации", func(t *testing.T) {
 		// Создаем модель
@@ -112,7 +111,7 @@ func TestLoginRegisterChoiceScreen_SimulateKeyPress(t *testing.T) {
 		// Проверяем результаты
 		model, ok := newModel.(*model)
 		assert.True(t, ok, "Должен быть возвращен указатель на model")
-		assert.Equal(t, entryListScreen, model.state, "Должно произойти переключение на экран списка записей")
+		assert.Equal(t, syncServerScreen, model.state, "Должно произойти переключение на экран синхронизации и сервера")
 		assert.Nil(t, cmd, "Не должно быть возвращено команды")
 	})
 

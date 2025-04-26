@@ -1,5 +1,4 @@
-FAIL	github.com/maynagashev/gophkeeper/client/cmd/gophkeeper [setup failed]
-FAIL	github.com/maynagashev/gophkeeper/client/internal/tui [setup failed]
+?   	github.com/maynagashev/gophkeeper/client/cmd/gophkeeper	[no test files]
 === RUN   TestHTTPClient_UploadVault
 === RUN   TestHTTPClient_UploadVault/Успех
 === RUN   TestHTTPClient_UploadVault/Ошибка_авторизации_(401)
@@ -152,4 +151,367 @@ ok  	github.com/maynagashev/gophkeeper/client/internal/api	(cached)
     --- PASS: TestSaveFileFunction/Ошибка_записи_в_недоступный_каталог (0.00s)
 PASS
 ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	(cached)
-FAIL
+=== RUN   TestHandleAPIMessages
+=== RUN   TestHandleAPIMessages/УспешныйВход
+2025/04/26 19:40:20 INFO Auth данные успешно обновлены в KDBX (в памяти)
+=== RUN   TestHandleAPIMessages/ОшибкаВхода
+=== RUN   TestHandleAPIMessages/УспешнаяРегистрация
+=== RUN   TestHandleAPIMessages/ОшибкаРегистрации
+=== RUN   TestHandleAPIMessages/НеобрабатываемоеСообщение
+--- PASS: TestHandleAPIMessages (0.00s)
+    --- PASS: TestHandleAPIMessages/УспешныйВход (0.00s)
+    --- PASS: TestHandleAPIMessages/ОшибкаВхода (0.00s)
+    --- PASS: TestHandleAPIMessages/УспешнаяРегистрация (0.00s)
+    --- PASS: TestHandleAPIMessages/ОшибкаРегистрации (0.00s)
+    --- PASS: TestHandleAPIMessages/НеобрабатываемоеСообщение (0.00s)
+=== RUN   TestOpenKdbxCmd
+=== RUN   TestOpenKdbxCmd/SuccessfulOpen
+=== RUN   TestOpenKdbxCmd/FileNotFound
+=== RUN   TestOpenKdbxCmd/WrongPassword
+--- PASS: TestOpenKdbxCmd (0.00s)
+    --- PASS: TestOpenKdbxCmd/SuccessfulOpen (0.00s)
+    --- PASS: TestOpenKdbxCmd/FileNotFound (0.00s)
+    --- PASS: TestOpenKdbxCmd/WrongPassword (0.00s)
+=== RUN   TestSaveKdbxCmd
+=== RUN   TestSaveKdbxCmd/SuccessfulSave
+=== RUN   TestSaveKdbxCmd/NilDatabase
+=== RUN   TestSaveKdbxCmd/EmptyPath
+=== RUN   TestSaveKdbxCmd/InaccessibleDirectory
+--- PASS: TestSaveKdbxCmd (0.00s)
+    --- PASS: TestSaveKdbxCmd/SuccessfulSave (0.00s)
+    --- PASS: TestSaveKdbxCmd/NilDatabase (0.00s)
+    --- PASS: TestSaveKdbxCmd/EmptyPath (0.00s)
+    --- PASS: TestSaveKdbxCmd/InaccessibleDirectory (0.00s)
+=== RUN   TestClearStatusCmd
+--- PASS: TestClearStatusCmd (0.02s)
+=== RUN   TestMakeLoginCmd
+=== RUN   TestMakeLoginCmd/SuccessfulLogin
+=== RUN   TestMakeLoginCmd/LoginError
+--- PASS: TestMakeLoginCmd (0.00s)
+    --- PASS: TestMakeLoginCmd/SuccessfulLogin (0.00s)
+    --- PASS: TestMakeLoginCmd/LoginError (0.00s)
+=== RUN   TestMakeRegisterCmd
+=== RUN   TestMakeRegisterCmd/SuccessfulRegistration
+=== RUN   TestMakeRegisterCmd/RegistrationError
+--- PASS: TestMakeRegisterCmd (0.00s)
+    --- PASS: TestMakeRegisterCmd/SuccessfulRegistration (0.00s)
+    --- PASS: TestMakeRegisterCmd/RegistrationError (0.00s)
+=== RUN   TestStartSyncCmd
+=== RUN   TestStartSyncCmd/AllPreconditionsOK
+2025/04/26 19:40:20 INFO Запуск проверки предусловий для синхронизации...
+2025/04/26 19:40:20 INFO Предусловия синхронизации выполнены.
+=== RUN   TestStartSyncCmd/NoServerURL
+2025/04/26 19:40:20 INFO Запуск проверки предусловий для синхронизации...
+2025/04/26 19:40:20 WARN Предусловие синхронизации не выполнено error="URL сервера не настроен"
+=== RUN   TestStartSyncCmd/NoAuthToken
+2025/04/26 19:40:20 INFO Запуск проверки предусловий для синхронизации...
+2025/04/26 19:40:20 WARN Предусловие синхронизации не выполнено error="необходимо войти на сервер"
+=== RUN   TestStartSyncCmd/NoAPIClient
+2025/04/26 19:40:20 INFO Запуск проверки предусловий для синхронизации...
+2025/04/26 19:40:20 ERROR Критическая ошибка: API клиент nil перед синхронизацией
+=== RUN   TestStartSyncCmd/NoDatabase
+2025/04/26 19:40:20 INFO Запуск проверки предусловий для синхронизации...
+2025/04/26 19:40:20 ERROR Критическая ошибка: База данных nil перед синхронизацией
+--- PASS: TestStartSyncCmd (0.00s)
+    --- PASS: TestStartSyncCmd/AllPreconditionsOK (0.00s)
+    --- PASS: TestStartSyncCmd/NoServerURL (0.00s)
+    --- PASS: TestStartSyncCmd/NoAuthToken (0.00s)
+    --- PASS: TestStartSyncCmd/NoAPIClient (0.00s)
+    --- PASS: TestStartSyncCmd/NoDatabase (0.00s)
+=== RUN   TestFetchServerMetadataCmd
+=== RUN   TestFetchServerMetadataCmd/SuccessfulMetadataFetch
+=== RUN   TestFetchServerMetadataCmd/ErrorFetchingMetadata
+2025/04/26 19:40:20 ERROR Ошибка получения метаданных с сервера error="ошибка получения метаданных"
+--- PASS: TestFetchServerMetadataCmd (0.00s)
+    --- PASS: TestFetchServerMetadataCmd/SuccessfulMetadataFetch (0.00s)
+    --- PASS: TestFetchServerMetadataCmd/ErrorFetchingMetadata (0.00s)
+=== RUN   TestFetchLocalMetadataCmd
+=== RUN   TestFetchLocalMetadataCmd/SuccessfulLocalMetadataFetch
+=== RUN   TestFetchLocalMetadataCmd/FileNotFound
+2025/04/26 19:40:20 INFO Локальный файл KDBX не найден.
+=== RUN   TestFetchLocalMetadataCmd/NoPathInModel
+2025/04/26 19:40:20 INFO Локальный файл KDBX не найден.
+--- PASS: TestFetchLocalMetadataCmd (0.00s)
+    --- PASS: TestFetchLocalMetadataCmd/SuccessfulLocalMetadataFetch (0.00s)
+    --- PASS: TestFetchLocalMetadataCmd/FileNotFound (0.00s)
+    --- PASS: TestFetchLocalMetadataCmd/NoPathInModel (0.00s)
+=== RUN   TestUploadVaultCmd
+=== RUN   TestUploadVaultCmd/SuccessfulUpload
+2025/04/26 19:40:20 INFO Подготовка к загрузке: обновление m.db из TUI...
+2025/04/26 19:40:20 INFO Обновление m.db завершено.
+2025/04/26 19:40:20 INFO Запуск загрузки KDBX на сервер... fileModTime=2025-04-26T19:40:20.389+07:00
+2025/04/26 19:40:20 INFO Загрузка KDBX на сервер успешно завершена.
+=== RUN   TestUploadVaultCmd/APIError
+2025/04/26 19:40:20 INFO Подготовка к загрузке: обновление m.db из TUI...
+2025/04/26 19:40:20 INFO Обновление m.db завершено.
+2025/04/26 19:40:20 INFO Запуск загрузки KDBX на сервер... fileModTime=2025-04-26T19:40:20.389+07:00
+2025/04/26 19:40:20 ERROR Ошибка загрузки KDBX на сервер error="ошибка загрузки"
+=== RUN   TestUploadVaultCmd/NoDatabaseLoaded
+2025/04/26 19:40:20 INFO Подготовка к загрузке: обновление m.db из TUI...
+2025/04/26 19:40:20 INFO Обновление m.db завершено.
+2025/04/26 19:40:20 ERROR Попытка загрузки хранилища, но m.db is nil
+=== RUN   TestUploadVaultCmd/FileNotFoundForMetadata
+2025/04/26 19:40:20 INFO Подготовка к загрузке: обновление m.db из TUI...
+2025/04/26 19:40:20 INFO Обновление m.db завершено.
+2025/04/26 19:40:20 ERROR Ошибка получения метаданных локального файла перед загрузкой path=/tmp/gophkeeper_test_2896997228/non_existent.kdbx error="stat /tmp/gophkeeper_test_2896997228/non_existent.kdbx: no such file or directory"
+--- PASS: TestUploadVaultCmd (0.00s)
+    --- PASS: TestUploadVaultCmd/SuccessfulUpload (0.00s)
+    --- PASS: TestUploadVaultCmd/APIError (0.00s)
+    --- PASS: TestUploadVaultCmd/NoDatabaseLoaded (0.00s)
+    --- PASS: TestUploadVaultCmd/FileNotFoundForMetadata (0.00s)
+=== RUN   TestDownloadVaultCmd
+=== RUN   TestDownloadVaultCmd/SuccessfulDownload
+2025/04/26 19:40:20 INFO Запуск скачивания KDBX с сервера...
+2025/04/26 19:40:20 INFO Скачивание KDBX с сервера и сохранение локально завершено.
+=== RUN   TestDownloadVaultCmd/APIError
+2025/04/26 19:40:20 INFO Запуск скачивания KDBX с сервера...
+2025/04/26 19:40:20 ERROR Ошибка скачивания KDBX с сервера error="ошибка скачивания"
+=== RUN   TestDownloadVaultCmd/WriteError
+2025/04/26 19:40:20 INFO Запуск скачивания KDBX с сервера...
+2025/04/26 19:40:20 ERROR Ошибка открытия локального файла для записи path=/tmp/gophkeeper_test_4064969967/readonly/test.kdbx error="open /tmp/gophkeeper_test_4064969967/readonly/test.kdbx: permission denied"
+--- PASS: TestDownloadVaultCmd (0.00s)
+    --- PASS: TestDownloadVaultCmd/SuccessfulDownload (0.00s)
+    --- PASS: TestDownloadVaultCmd/APIError (0.00s)
+    --- PASS: TestDownloadVaultCmd/WriteError (0.00s)
+=== RUN   TestListVersionsCmd
+=== RUN   TestListVersionsCmd/УспешнаяЗагрузкаВерсий
+2025/04/26 19:40:20 INFO Список версий успешно загружен count=2 current_id=2
+=== RUN   TestListVersionsCmd/APIКлиентНеИнициализирован
+=== RUN   TestListVersionsCmd/ОтсутствуетТокенАвторизации
+=== RUN   TestListVersionsCmd/ОшибкаAPI
+2025/04/26 19:40:20 ERROR Ошибка загрузки списка версий error="ошибка сети"
+=== RUN   TestListVersionsCmd/ОшибкаАвторизации
+2025/04/26 19:40:20 ERROR Ошибка загрузки списка версий: ошибка авторизации
+--- PASS: TestListVersionsCmd (0.00s)
+    --- PASS: TestListVersionsCmd/УспешнаяЗагрузкаВерсий (0.00s)
+    --- PASS: TestListVersionsCmd/APIКлиентНеИнициализирован (0.00s)
+    --- PASS: TestListVersionsCmd/ОтсутствуетТокенАвторизации (0.00s)
+    --- PASS: TestListVersionsCmd/ОшибкаAPI (0.00s)
+    --- PASS: TestListVersionsCmd/ОшибкаАвторизации (0.00s)
+=== RUN   TestRollbackToVersionCmd
+=== RUN   TestRollbackToVersionCmd/УспешныйОткат
+2025/04/26 19:40:20 INFO Успешный откат к версии version_id=10
+=== RUN   TestRollbackToVersionCmd/APIКлиентНеИнициализирован
+=== RUN   TestRollbackToVersionCmd/ОтсутствуетТокенАвторизации
+=== RUN   TestRollbackToVersionCmd/ОшибкаОтката
+2025/04/26 19:40:20 ERROR Ошибка отката к версии version_id=10 error="версия не найдена"
+--- PASS: TestRollbackToVersionCmd (0.00s)
+    --- PASS: TestRollbackToVersionCmd/УспешныйОткат (0.00s)
+    --- PASS: TestRollbackToVersionCmd/APIКлиентНеИнициализирован (0.00s)
+    --- PASS: TestRollbackToVersionCmd/ОтсутствуетТокенАвторизации (0.00s)
+    --- PASS: TestRollbackToVersionCmd/ОшибкаОтката (0.00s)
+=== RUN   TestApplyUIChangesToDB
+=== RUN   TestApplyUIChangesToDB/УспешноеОбновлениеЗаписей
+=== RUN   TestApplyUIChangesToDB/НесуществующийUUID
+2025/04/26 19:40:20 WARN Запись из списка не найдена в m.db при подготовке к загрузке uuid="zk37IutNx1Q2Rl2OHp3Zdg=="
+=== RUN   TestApplyUIChangesToDB/ПустойСписок
+--- PASS: TestApplyUIChangesToDB (0.00s)
+    --- PASS: TestApplyUIChangesToDB/УспешноеОбновлениеЗаписей (0.00s)
+    --- PASS: TestApplyUIChangesToDB/НесуществующийUUID (0.00s)
+    --- PASS: TestApplyUIChangesToDB/ПустойСписок (0.00s)
+=== RUN   TestHandleCredentialsKeys
+=== RUN   TestHandleCredentialsKeys/TabKey
+=== RUN   TestHandleCredentialsKeys/ShiftTabKey
+=== RUN   TestHandleCredentialsKeys/EnterOnFirstField
+=== RUN   TestHandleCredentialsKeys/EnterOnSecondField
+=== RUN   TestHandleCredentialsKeys/UnhandledKey
+--- PASS: TestHandleCredentialsKeys (0.00s)
+    --- PASS: TestHandleCredentialsKeys/TabKey (0.00s)
+    --- PASS: TestHandleCredentialsKeys/ShiftTabKey (0.00s)
+    --- PASS: TestHandleCredentialsKeys/EnterOnFirstField (0.00s)
+    --- PASS: TestHandleCredentialsKeys/EnterOnSecondField (0.00s)
+    --- PASS: TestHandleCredentialsKeys/UnhandledKey (0.00s)
+=== RUN   TestHandleCredentialsInput
+=== RUN   TestHandleCredentialsInput/EscKey
+=== RUN   TestHandleCredentialsInput/TabKey
+=== RUN   TestHandleCredentialsInput/TextInputUpdate
+--- PASS: TestHandleCredentialsInput (0.00s)
+    --- PASS: TestHandleCredentialsInput/EscKey (0.00s)
+    --- PASS: TestHandleCredentialsInput/TabKey (0.00s)
+    --- PASS: TestHandleCredentialsInput/TextInputUpdate (0.00s)
+=== RUN   TestUpdateLoginRegisterChoiceScreen
+    screen_login_register_choice_test.go:15: Значения констант - syncServerScreen: 9, loginRegisterChoiceScreen: 11
+=== RUN   TestUpdateLoginRegisterChoiceScreen/ПереходНаЭкранРегистрации
+=== RUN   TestUpdateLoginRegisterChoiceScreen/ПереходНаЭкранРегистрации_ВерхнийРегистр
+=== RUN   TestUpdateLoginRegisterChoiceScreen/ПереходНаЭкранВхода
+=== RUN   TestUpdateLoginRegisterChoiceScreen/ПереходНаЭкранВхода_ВерхнийРегистр
+=== RUN   TestUpdateLoginRegisterChoiceScreen/ВозвратНаСписокЗаписей
+=== RUN   TestUpdateLoginRegisterChoiceScreen/ВозвратНаСписокЗаписей_Backspace
+=== RUN   TestUpdateLoginRegisterChoiceScreen/ИгнорированиеДругихКлавиш
+--- PASS: TestUpdateLoginRegisterChoiceScreen (0.00s)
+    --- PASS: TestUpdateLoginRegisterChoiceScreen/ПереходНаЭкранРегистрации (0.00s)
+    --- PASS: TestUpdateLoginRegisterChoiceScreen/ПереходНаЭкранРегистрации_ВерхнийРегистр (0.00s)
+    --- PASS: TestUpdateLoginRegisterChoiceScreen/ПереходНаЭкранВхода (0.00s)
+    --- PASS: TestUpdateLoginRegisterChoiceScreen/ПереходНаЭкранВхода_ВерхнийРегистр (0.00s)
+    --- PASS: TestUpdateLoginRegisterChoiceScreen/ВозвратНаСписокЗаписей (0.00s)
+    --- PASS: TestUpdateLoginRegisterChoiceScreen/ВозвратНаСписокЗаписей_Backspace (0.00s)
+    --- PASS: TestUpdateLoginRegisterChoiceScreen/ИгнорированиеДругихКлавиш (0.00s)
+=== RUN   TestViewLoginRegisterChoiceScreen
+--- PASS: TestViewLoginRegisterChoiceScreen (0.00s)
+=== RUN   TestUpdateLoginScreen
+=== RUN   TestUpdateLoginScreen/ПереключениеПоляВперед
+=== RUN   TestUpdateLoginScreen/ПереключениеПоляНазад
+=== RUN   TestUpdateLoginScreen/ОтменаВхода
+=== RUN   TestUpdateLoginScreen/НажатиеEnter_ПервоеПоле
+=== RUN   TestUpdateLoginScreen/НажатиеEnter_ВтороеПоле_ОтправкаФормы
+--- PASS: TestUpdateLoginScreen (0.00s)
+    --- PASS: TestUpdateLoginScreen/ПереключениеПоляВперед (0.00s)
+    --- PASS: TestUpdateLoginScreen/ПереключениеПоляНазад (0.00s)
+    --- PASS: TestUpdateLoginScreen/ОтменаВхода (0.00s)
+    --- PASS: TestUpdateLoginScreen/НажатиеEnter_ПервоеПоле (0.00s)
+    --- PASS: TestUpdateLoginScreen/НажатиеEnter_ВтороеПоле_ОтправкаФормы (0.00s)
+=== RUN   TestViewLoginScreen
+--- PASS: TestViewLoginScreen (0.00s)
+=== RUN   TestLoginWithScreenTestSuite
+    screen_login_test.go:144: Требуется полностью переработать тесты для модели входа/авторизации
+--- SKIP: TestLoginWithScreenTestSuite (0.00s)
+=== RUN   TestPasswordInputScreen
+=== RUN   TestPasswordInputScreen/ОтрисовкаЭкрана
+=== RUN   TestPasswordInputScreen/ОтображениеОшибки
+=== RUN   TestPasswordInputScreen/ВводПароляИОтправкаКоманды
+=== RUN   TestPasswordInputScreen/ОбработкаErrMsg
+=== RUN   TestPasswordInputScreen/ОчисткаОшибкиПриНажатииКлавиши
+--- PASS: TestPasswordInputScreen (0.00s)
+    --- PASS: TestPasswordInputScreen/ОтрисовкаЭкрана (0.00s)
+    --- PASS: TestPasswordInputScreen/ОтображениеОшибки (0.00s)
+    --- PASS: TestPasswordInputScreen/ВводПароляИОтправкаКоманды (0.00s)
+    --- PASS: TestPasswordInputScreen/ОбработкаErrMsg (0.00s)
+    --- PASS: TestPasswordInputScreen/ОчисткаОшибкиПриНажатииКлавиши (0.00s)
+=== RUN   TestUpdateRegisterScreen
+=== RUN   TestUpdateRegisterScreen/ПереключениеПоляВперед
+=== RUN   TestUpdateRegisterScreen/ПереключениеПоляНазад
+=== RUN   TestUpdateRegisterScreen/ОтменаРегистрации
+=== RUN   TestUpdateRegisterScreen/НажатиеEnter_ПервоеПоле
+=== RUN   TestUpdateRegisterScreen/НажатиеEnter_ВтороеПоле_ОтправкаФормы
+--- PASS: TestUpdateRegisterScreen (0.00s)
+    --- PASS: TestUpdateRegisterScreen/ПереключениеПоляВперед (0.00s)
+    --- PASS: TestUpdateRegisterScreen/ПереключениеПоляНазад (0.00s)
+    --- PASS: TestUpdateRegisterScreen/ОтменаРегистрации (0.00s)
+    --- PASS: TestUpdateRegisterScreen/НажатиеEnter_ПервоеПоле (0.00s)
+    --- PASS: TestUpdateRegisterScreen/НажатиеEnter_ВтороеПоле_ОтправкаФормы (0.00s)
+=== RUN   TestViewRegisterScreen
+--- PASS: TestViewRegisterScreen (0.00s)
+=== RUN   TestUpdateServerURLInputScreen
+=== RUN   TestUpdateServerURLInputScreen/ОтменаВводаURL
+=== RUN   TestUpdateServerURLInputScreen/ПодтверждениеВводаURL
+2025/04/26 19:40:20 INFO URL сервера обновлен url=https://new.server
+=== RUN   TestUpdateServerURLInputScreen/ИспользованиеПлейсхолдера
+2025/04/26 19:40:20 INFO URL сервера обновлен url=https://default.server
+=== RUN   TestUpdateServerURLInputScreen/ОбновлениеПоляВвода
+--- PASS: TestUpdateServerURLInputScreen (0.00s)
+    --- PASS: TestUpdateServerURLInputScreen/ОтменаВводаURL (0.00s)
+    --- PASS: TestUpdateServerURLInputScreen/ПодтверждениеВводаURL (0.00s)
+    --- PASS: TestUpdateServerURLInputScreen/ИспользованиеПлейсхолдера (0.00s)
+    --- PASS: TestUpdateServerURLInputScreen/ОбновлениеПоляВвода (0.00s)
+=== RUN   TestViewServerURLInputScreen
+--- PASS: TestViewServerURLInputScreen (0.00s)
+=== RUN   TestDirectServerURLInputScreen
+=== RUN   TestDirectServerURLInputScreen/ОтменаВвода
+=== RUN   TestDirectServerURLInputScreen/ПодтверждениеПустогоВвода
+2025/04/26 19:40:20 INFO URL сервера обновлен url=https://default.server
+--- PASS: TestDirectServerURLInputScreen (0.00s)
+    --- PASS: TestDirectServerURLInputScreen/ОтменаВвода (0.00s)
+    --- PASS: TestDirectServerURLInputScreen/ПодтверждениеПустогоВвода (0.00s)
+=== RUN   TestWelcomeScreen
+=== RUN   TestWelcomeScreen/ОтрисовкаЭкрана
+=== RUN   TestWelcomeScreen/ПереходПриНажатииEnter
+=== RUN   TestWelcomeScreen/ВыходПриНажатииQ
+--- PASS: TestWelcomeScreen (0.00s)
+    --- PASS: TestWelcomeScreen/ОтрисовкаЭкрана (0.00s)
+    --- PASS: TestWelcomeScreen/ПереходПриНажатииEnter (0.00s)
+    --- PASS: TestWelcomeScreen/ВыходПриНажатииQ (0.00s)
+=== RUN   TestHandleDBSavedMsg
+--- PASS: TestHandleDBSavedMsg (0.00s)
+=== RUN   TestHandleDBSaveErrorMsg
+--- PASS: TestHandleDBSaveErrorMsg (0.00s)
+=== RUN   TestHandleClearStatusMsg
+--- PASS: TestHandleClearStatusMsg (0.00s)
+=== RUN   TestHandleSyncErrorMsg
+=== RUN   TestHandleSyncErrorMsg/ОбычнаяОшибка
+=== RUN   TestHandleSyncErrorMsg/ОшибкаАвторизации
+--- PASS: TestHandleSyncErrorMsg (0.00s)
+    --- PASS: TestHandleSyncErrorMsg/ОбычнаяОшибка (0.00s)
+    --- PASS: TestHandleSyncErrorMsg/ОшибкаАвторизации (0.00s)
+=== RUN   TestHandleSyncStartedMsg
+--- PASS: TestHandleSyncStartedMsg (0.00s)
+=== RUN   TestCanSave
+=== RUN   TestCanSave/РазрешеноСохранение
+=== RUN   TestCanSave/РежимТолькоЧтение
+=== RUN   TestCanSave/НетБазыДанных
+=== RUN   TestCanSave/НеподходящееСостояние
+--- PASS: TestCanSave (0.00s)
+    --- PASS: TestCanSave/РазрешеноСохранение (0.00s)
+    --- PASS: TestCanSave/РежимТолькоЧтение (0.00s)
+    --- PASS: TestCanSave/НетБазыДанных (0.00s)
+    --- PASS: TestCanSave/НеподходящееСостояние (0.00s)
+=== RUN   TestUpdateRootModTime
+=== RUN   TestUpdateRootModTime/УспешноеОбновление
+=== RUN   TestUpdateRootModTime/ПустаяБазаДанных
+2025/04/26 19:40:20 WARN Не удалось обновить LastModificationTime: db, Content или Root is nil
+=== RUN   TestUpdateRootModTime/НетКорневойГруппы
+2025/04/26 19:40:20 WARN Не удалось обновить LastModificationTime: нет корневой группы
+--- PASS: TestUpdateRootModTime (0.00s)
+    --- PASS: TestUpdateRootModTime/УспешноеОбновление (0.00s)
+    --- PASS: TestUpdateRootModTime/ПустаяБазаДанных (0.00s)
+    --- PASS: TestUpdateRootModTime/НетКорневойГруппы (0.00s)
+=== RUN   TestHandleGlobalKeys
+=== RUN   TestHandleGlobalKeys/CtrlC
+=== RUN   TestHandleGlobalKeys/CtrlS_РазрешеноСохранение
+2025/04/26 19:40:20 INFO Начало обновления m.db перед сохранением
+2025/04/26 19:40:20 INFO Обновление m.db завершено updated_count=0
+2025/04/26 19:40:20 WARN Не удалось обновить LastModificationTime: db, Content или Root is nil
+2025/04/26 19:40:20 INFO Запуск сохранения KDBX path=/tmp/test.kdbx
+=== RUN   TestHandleGlobalKeys/CtrlS_ЗапрещеноСохранение
+=== RUN   TestHandleGlobalKeys/ДругаяКлавиша
+--- PASS: TestHandleGlobalKeys (0.00s)
+    --- PASS: TestHandleGlobalKeys/CtrlC (0.00s)
+    --- PASS: TestHandleGlobalKeys/CtrlS_РазрешеноСохранение (0.00s)
+    --- PASS: TestHandleGlobalKeys/CtrlS_ЗапрещеноСохранение (0.00s)
+    --- PASS: TestHandleGlobalKeys/ДругаяКлавиша (0.00s)
+=== RUN   TestUpdateDBFromList
+=== RUN   TestUpdateDBFromList/ОбновлениеСуществующейЗаписи
+2025/04/26 19:40:20 INFO Начало обновления m.db перед сохранением
+2025/04/26 19:40:20 INFO Обновление m.db завершено updated_count=1
+=== RUN   TestUpdateDBFromList/ЗаписьНеНайденаВБазе
+2025/04/26 19:40:20 INFO Начало обновления m.db перед сохранением
+2025/04/26 19:40:20 WARN Запись из списка не найдена в m.db uuid="CU8D5Eynx1/7vbd5k2tnLA=="
+2025/04/26 19:40:20 INFO Обновление m.db завершено updated_count=0
+=== RUN   TestUpdateDBFromList/ПустойСписок
+2025/04/26 19:40:20 INFO Начало обновления m.db перед сохранением
+2025/04/26 19:40:20 INFO Обновление m.db завершено updated_count=0
+--- PASS: TestUpdateDBFromList (0.00s)
+    --- PASS: TestUpdateDBFromList/ОбновлениеСуществующейЗаписи (0.00s)
+    --- PASS: TestUpdateDBFromList/ЗаписьНеНайденаВБазе (0.00s)
+    --- PASS: TestUpdateDBFromList/ПустойСписок (0.00s)
+=== RUN   TestDeepCopyEntry
+--- PASS: TestDeepCopyEntry (0.00s)
+=== RUN   TestDeepCopyEntryAlias
+--- PASS: TestDeepCopyEntryAlias (0.00s)
+=== RUN   TestFindEntryInDB
+=== RUN   TestFindEntryInDB/Entry_In_Root_Group
+=== RUN   TestFindEntryInDB/Entry_In_Subgroup
+=== RUN   TestFindEntryInDB/Nonexistent_Entry
+=== RUN   TestFindEntryInDB/Nil_Database
+=== RUN   TestFindEntryInDB/Nil_Content
+=== RUN   TestFindEntryInDB/Nil_Root
+--- PASS: TestFindEntryInDB (0.00s)
+    --- PASS: TestFindEntryInDB/Entry_In_Root_Group (0.00s)
+    --- PASS: TestFindEntryInDB/Entry_In_Subgroup (0.00s)
+    --- PASS: TestFindEntryInDB/Nonexistent_Entry (0.00s)
+    --- PASS: TestFindEntryInDB/Nil_Database (0.00s)
+    --- PASS: TestFindEntryInDB/Nil_Content (0.00s)
+    --- PASS: TestFindEntryInDB/Nil_Root (0.00s)
+=== RUN   TestFindEntryInGroups
+=== RUN   TestFindEntryInGroups/Entry_In_Root_Group
+=== RUN   TestFindEntryInGroups/Entry_In_Subgroup
+=== RUN   TestFindEntryInGroups/Nonexistent_Entry
+=== RUN   TestFindEntryInGroups/Empty_Groups
+--- PASS: TestFindEntryInGroups (0.00s)
+    --- PASS: TestFindEntryInGroups/Entry_In_Root_Group (0.00s)
+    --- PASS: TestFindEntryInGroups/Entry_In_Subgroup (0.00s)
+    --- PASS: TestFindEntryInGroups/Nonexistent_Entry (0.00s)
+    --- PASS: TestFindEntryInGroups/Empty_Groups (0.00s)
+=== RUN   TestFindEntryInDBAlias
+--- PASS: TestFindEntryInDBAlias (0.00s)
+PASS
+ok  	github.com/maynagashev/gophkeeper/client/internal/tui	0.053s

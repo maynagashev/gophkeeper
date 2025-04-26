@@ -28,13 +28,13 @@ const (
 	attachmentListDeleteScreen                    // Экран выбора вложения для удаления
 	attachmentPathInputScreen                     // Экран ввода пути к добавляемому вложению
 	newKdbxPasswordScreen                         // Экран ввода пароля для нового KDBX файла
-	// Новые состояния для синхронизации и сервера.
-	syncServerScreen          screenState = iota // Экран "Синхронизация и Сервер"
-	serverURLInputScreen                         // Экран ввода URL сервера
-	loginRegisterChoiceScreen                    // Экран выбора "Войти или Зарегистрироваться?"
-	loginScreen                                  // Экран ввода данных для входа
-	registerScreen                               // Экран ввода данных для регистрации
-	versionListScreen                            // Экран списка версий
+	// Экраны для синхронизации и сервера.
+	syncServerScreen          // Экран "Синхронизация и Сервер"
+	serverURLInputScreen      // Экран ввода URL сервера
+	loginRegisterChoiceScreen // Экран выбора "Войти или Зарегистрироваться?"
+	loginScreen               // Экран ввода данных для входа
+	registerScreen            // Экран ввода данных для регистрации
+	versionListScreen         // Экран списка версий
 )
 
 // String возвращает строковое представление screenState.
