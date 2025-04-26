@@ -63,7 +63,7 @@
 				
 				<option value="file3">github.com/maynagashev/gophkeeper/client/internal/kdbx/kdbx.go (88.1%)</option>
 				
-				<option value="file4">github.com/maynagashev/gophkeeper/client/internal/tui/commands.go (2.9%)</option>
+				<option value="file4">github.com/maynagashev/gophkeeper/client/internal/tui/commands.go (77.9%)</option>
 				
 				<option value="file5">github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go (0.0%)</option>
 				
@@ -99,7 +99,7 @@
 				
 				<option value="file21">github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go (0.0%)</option>
 				
-				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go (0.0%)</option>
+				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go (25.2%)</option>
 				
 				<option value="file23">github.com/maynagashev/gophkeeper/client/internal/tui/screen_welcome.go (0.0%)</option>
 				
@@ -982,7 +982,7 @@ func saveKdbxCmd(db *gokeepasslib.Database, path, password string) tea.Cmd <span
 
 // clearStatusCmd возвращает команду, которая отправит clearStatusMsg через delay.
 func clearStatusCmd(delay time.Duration) tea.Cmd <span class="cov8" title="1">{
-        return tea.Tick(delay, func(_ time.Time) tea.Msg </span><span class="cov0" title="0">{
+        return tea.Tick(delay, func(_ time.Time) tea.Msg </span><span class="cov8" title="1">{
                 return clearStatusMsg{}
         }</span>)
 }
@@ -997,20 +997,20 @@ type LoginError struct {
         err error
 }
 
-func (e LoginError) Error() string <span class="cov0" title="0">{
+func (e LoginError) Error() string <span class="cov8" title="1">{
         return e.err.Error()
 }</span>
 
 // makeLoginCmd выполняет вход через API.
-func (m *model) makeLoginCmd(username, password string) tea.Cmd <span class="cov0" title="0">{
-        return func() tea.Msg </span><span class="cov0" title="0">{
+func (m *model) makeLoginCmd(username, password string) tea.Cmd <span class="cov8" title="1">{
+        return func() tea.Msg </span><span class="cov8" title="1">{
                 ctx := context.Background()
                 token, err := m.apiClient.Login(ctx, username, password)
-                if err != nil </span><span class="cov0" title="0">{
+                if err != nil </span><span class="cov8" title="1">{
                         // Возвращаем исходную ошибку API клиента без добавления контекста
                         return LoginError{err: err}
                 }</span>
-                <span class="cov0" title="0">return loginSuccessMsg{Token: token}</span>
+                <span class="cov8" title="1">return loginSuccessMsg{Token: token}</span>
         }
 }
 
@@ -1022,20 +1022,20 @@ type RegisterError struct {
         err error
 }
 
-func (e RegisterError) Error() string <span class="cov0" title="0">{
+func (e RegisterError) Error() string <span class="cov8" title="1">{
         return e.err.Error()
 }</span>
 
 // makeRegisterCmd выполняет регистрацию через API.
-func (m *model) makeRegisterCmd(username, password string) tea.Cmd <span class="cov0" title="0">{
-        return func() tea.Msg </span><span class="cov0" title="0">{
+func (m *model) makeRegisterCmd(username, password string) tea.Cmd <span class="cov8" title="1">{
+        return func() tea.Msg </span><span class="cov8" title="1">{
                 ctx := context.Background()
                 err := m.apiClient.Register(ctx, username, password)
-                if err != nil </span><span class="cov0" title="0">{
+                if err != nil </span><span class="cov8" title="1">{
                         // Возвращаем исходную ошибку API клиента без добавления контекста
                         return RegisterError{err: err}
                 }</span>
-                <span class="cov0" title="0">return registerSuccessMsg{}</span>
+                <span class="cov8" title="1">return registerSuccessMsg{}</span>
         }
 }
 
@@ -1046,7 +1046,7 @@ type SyncError struct {
         err error
 }
 
-func (e SyncError) Error() string <span class="cov0" title="0">{
+func (e SyncError) Error() string <span class="cov8" title="1">{
         return e.err.Error()
 }</span>
 
@@ -1077,36 +1077,36 @@ type syncDownloadSuccessMsg struct {
 const defaultFilePerm = 0600
 
 // startSyncCmd проверяет предусловия и запускает процесс синхронизации.
-func startSyncCmd(m *model) tea.Cmd <span class="cov0" title="0">{
-        return func() tea.Msg </span><span class="cov0" title="0">{
+func startSyncCmd(m *model) tea.Cmd <span class="cov8" title="1">{
+        return func() tea.Msg </span><span class="cov8" title="1">{
                 slog.Info("Запуск проверки предусловий для синхронизации...")
 
                 // 1. Проверка URL
-                if m.serverURL == "" </span><span class="cov0" title="0">{
+                if m.serverURL == "" </span><span class="cov8" title="1">{
                         err := errors.New("URL сервера не настроен")
                         slog.Warn("Предусловие синхронизации не выполнено", "error", err)
                         return SyncError{err: err}
                 }</span>
                 // 2. Проверка токена
-                <span class="cov0" title="0">if m.authToken == "" </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">if m.authToken == "" </span><span class="cov8" title="1">{
                         err := errors.New("необходимо войти на сервер")
                         slog.Warn("Предусловие синхронизации не выполнено", "error", err)
                         return SyncError{err: err}
                 }</span>
                 // 3. Проверка API клиента
-                <span class="cov0" title="0">if m.apiClient == nil </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">if m.apiClient == nil </span><span class="cov8" title="1">{
                         err := errors.New("API клиент не инициализирован")
                         slog.Error("Критическая ошибка: API клиент nil перед синхронизацией")
                         return SyncError{err: err}
                 }</span>
                 // 4. Проверка базы данных
-                <span class="cov0" title="0">if m.db == nil </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">if m.db == nil </span><span class="cov8" title="1">{
                         err := errors.New("локальная база данных не загружена")
                         slog.Error("Критическая ошибка: База данных nil перед синхронизацией")
                         return SyncError{err: err}
                 }</span>
 
-                <span class="cov0" title="0">slog.Info("Предусловия синхронизации выполнены.")
+                <span class="cov8" title="1">slog.Info("Предусловия синхронизации выполнены.")
                 // TODO: Здесь будет запуск получения метаданных с сервера
                 // Возвращаем сообщение для обновления статуса (например, "Синхронизация...")
                 // Заменяем nil на syncStartedMsg
@@ -1116,12 +1116,12 @@ func startSyncCmd(m *model) tea.Cmd <span class="cov0" title="0">{
 
 // fetchServerMetadataCmd получает метаданные хранилища с сервера.
 func fetchServerMetadataCmd(m *model) tea.Cmd <span class="cov8" title="1">{
-        return func() tea.Msg </span><span class="cov0" title="0">{
+        return func() tea.Msg </span><span class="cov8" title="1">{
                 slog.Debug("Получение метаданных с сервера", "url", m.serverURL)
                 ctx := context.Background() // Используем background context
                 meta, err := m.apiClient.GetVaultMetadata(ctx)
 
-                if err != nil </span><span class="cov0" title="0">{
+                if err != nil </span><span class="cov8" title="1">{
                         // Проверяем специфичные ошибки API клиента с помощью switch
                         switch err.Error() </span>{
                         case "хранилище не найдено на сервере":<span class="cov0" title="0"> // Проверка на текст ошибки
@@ -1130,7 +1130,7 @@ func fetchServerMetadataCmd(m *model) tea.Cmd <span class="cov8" title="1">{
                         case "ошибка авторизации (невалидный или просроченный токен?)":<span class="cov0" title="0">
                                 slog.Warn("Ошибка авторизации при получении метаданных с сервера", "error", err)
                                 return SyncError{err: errors.New("ошибка авторизации")}</span>
-                        default:<span class="cov0" title="0">
+                        default:<span class="cov8" title="1">
                                 // Другая ошибка (сетевая, 5xx, ошибка декодирования)
                                 slog.Error("Ошибка получения метаданных с сервера", "error", err)
                                 return SyncError{err: fmt.Errorf("ошибка сети или сервера: %w", err)}</span>
@@ -1138,20 +1138,20 @@ func fetchServerMetadataCmd(m *model) tea.Cmd <span class="cov8" title="1">{
                 }
 
                 // Успешно получили метаданные
-                <span class="cov0" title="0">slog.Debug("Метаданные с сервера получены", "versionId", meta.ID, "createdAt", meta.CreatedAt)
+                <span class="cov8" title="1">slog.Debug("Метаданные с сервера получены", "versionId", meta.ID, "createdAt", meta.CreatedAt)
                 return serverMetadataMsg{metadata: meta, found: true}</span>
         }
 }
 
 // fetchLocalMetadataCmd получает время модификации локального файла.
 func fetchLocalMetadataCmd(m *model) tea.Cmd <span class="cov8" title="1">{
-        return func() tea.Msg </span><span class="cov0" title="0">{
+        return func() tea.Msg </span><span class="cov8" title="1">{
                 slog.Debug("Получение метаданных локального файла", "path", m.kdbxPath)
                 // Используем os.Stat для получения времени модификации файла
                 // TODO: Заменить на получение времени модификации из m.db (e.g., m.db.Meta.DataLastModified?), когда найдем способ.
                 fileInfo, err := os.Stat(m.kdbxPath)
-                if err != nil </span><span class="cov0" title="0">{
-                        if errors.Is(err, os.ErrNotExist) </span><span class="cov0" title="0">{
+                if err != nil </span><span class="cov8" title="1">{
+                        if errors.Is(err, os.ErrNotExist) </span><span class="cov8" title="1">{
                                 slog.Info("Локальный файл KDBX не найден.")
                                 return localMetadataMsg{found: false} // Файл не найден
                         }</span>
@@ -1160,15 +1160,15 @@ func fetchLocalMetadataCmd(m *model) tea.Cmd <span class="cov8" title="1">{
                         return SyncError{err: fmt.Errorf("ошибка доступа к локальному файлу: %w", err)}</span>
                 }
                 // Успешно получили информацию о файле
-                <span class="cov0" title="0">modTime := fileInfo.ModTime()
+                <span class="cov8" title="1">modTime := fileInfo.ModTime()
                 slog.Debug("Метаданные локального файла получены (os.Stat)", "modTime", modTime)
                 return localMetadataMsg{modTime: modTime, found: true}</span>
         }
 }
 
 // uploadVaultCmd загружает локальный файл KDBX на сервер.
-func uploadVaultCmd(m *model) tea.Cmd <span class="cov0" title="0">{
-        return func() tea.Msg </span><span class="cov0" title="0">{
+func uploadVaultCmd(m *model) tea.Cmd <span class="cov8" title="1">{
+        return func() tea.Msg </span><span class="cov8" title="1">{
                 // Шаг 1: Убедиться, что все изменения из TUI применены к m.db (как в Ctrl+S)
                 slog.Info("Подготовка к загрузке: обновление m.db из TUI...")
                 applyUIChangesToDB(m)
@@ -1177,23 +1177,23 @@ func uploadVaultCmd(m *model) tea.Cmd <span class="cov0" title="0">{
                 // === Получаем время модификации файла (из os.Stat) ===
                 // TODO: Заменить на получение времени модификации из m.db, когда найдем способ.
                 fileInfo, err := os.Stat(m.kdbxPath)
-                if err != nil </span><span class="cov0" title="0">{
+                if err != nil </span><span class="cov8" title="1">{
                         // Ошибка получения статы файла - критично для получения времени модификации
                         slog.Error("Ошибка получения метаданных локального файла перед загрузкой", "path", m.kdbxPath, "error", err)
                         return SyncError{err: fmt.Errorf("ошибка доступа к локальному файлу перед загрузкой: %w", err)}
                 }</span>
-                <span class="cov0" title="0">contentModTime := fileInfo.ModTime() // Используем время модификации файла
+                <span class="cov8" title="1">contentModTime := fileInfo.ModTime() // Используем время модификации файла
                 // =====================================================
 
                 // Шаг 2: Заблокировать и сохранить m.db во временный буфер для загрузки
-                if m.db == nil </span><span class="cov0" title="0">{
+                if m.db == nil </span><span class="cov8" title="1">{
                         slog.Error("Попытка загрузки хранилища, но m.db is nil")
                         return SyncError{err: errors.New("локальная база не загружена")}
                 }</span>
-                <span class="cov0" title="0">if err = m.db.LockProtectedEntries(); err != nil </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">if err = m.db.LockProtectedEntries(); err != nil </span><span class="cov0" title="0">{
                         slog.Warn("Не удалось заблокировать поля перед сохранением в буфер", "error", err)
                 }</span>
-                <span class="cov0" title="0">buf := new(bytes.Buffer)
+                <span class="cov8" title="1">buf := new(bytes.Buffer)
                 encoder := gokeepasslib.NewEncoder(buf)
                 if err = encoder.Encode(m.db); err != nil </span><span class="cov0" title="0">{
                         slog.Error("Ошибка кодирования KDBX в буфер перед загрузкой", "error", err)
@@ -1204,47 +1204,47 @@ func uploadVaultCmd(m *model) tea.Cmd <span class="cov0" title="0">{
                         <span class="cov0" title="0">return SyncError{err: fmt.Errorf("ошибка подготовки данных для загрузки: %w", err)}</span>
                 }
                 // Разблокируем поля после успешного кодирования для дальнейшей работы
-                <span class="cov0" title="0">if err = m.db.UnlockProtectedEntries(); err != nil </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">if err = m.db.UnlockProtectedEntries(); err != nil </span><span class="cov0" title="0">{
                         slog.Warn("Не удалось разблокировать поля после кодирования в буфер", "error", err)
                         // Продолжаем, так как данные уже в буфере
                 }</span>
 
-                <span class="cov0" title="0">dataSize := int64(buf.Len())
+                <span class="cov8" title="1">dataSize := int64(buf.Len())
 
                 // Шаг 3: Вызвать API для загрузки, передавая время модификации файла
                 slog.Info("Запуск загрузки KDBX на сервер...", "fileModTime", contentModTime)
                 ctx := context.Background()
                 err = m.apiClient.UploadVault(ctx, buf, dataSize, contentModTime) // Передаем fileModTime
-                if err != nil </span><span class="cov0" title="0">{
+                if err != nil </span><span class="cov8" title="1">{
                         slog.Error("Ошибка загрузки KDBX на сервер", "error", err)
                         return SyncError{err: fmt.Errorf("ошибка загрузки на сервер: %w", err)}
                 }</span>
 
-                <span class="cov0" title="0">slog.Info("Загрузка KDBX на сервер успешно завершена.")
+                <span class="cov8" title="1">slog.Info("Загрузка KDBX на сервер успешно завершена.")
                 return syncUploadSuccessMsg{}</span>
         }
 }
 
 // downloadVaultCmd скачивает файл KDBX с сервера и перезаписывает локальный.
-func downloadVaultCmd(m *model) tea.Cmd <span class="cov0" title="0">{
-        return func() tea.Msg </span><span class="cov0" title="0">{
+func downloadVaultCmd(m *model) tea.Cmd <span class="cov8" title="1">{
+        return func() tea.Msg </span><span class="cov8" title="1">{
                 slog.Info("Запуск скачивания KDBX с сервера...")
                 ctx := context.Background()
                 reader, _, err := m.apiClient.DownloadVault(ctx) // Метаданные пока не используем
-                if err != nil </span><span class="cov0" title="0">{
+                if err != nil </span><span class="cov8" title="1">{
                         slog.Error("Ошибка скачивания KDBX с сервера", "error", err)
                         return SyncError{err: fmt.Errorf("ошибка скачивания с сервера: %w", err)}
                 }</span>
-                <span class="cov0" title="0">defer reader.Close()
+                <span class="cov8" title="1">defer reader.Close()
 
                 // Шаг 2: Создать/открыть локальный файл для записи (перезапись)
                 slog.Debug("Открытие локального файла для записи", "path", m.kdbxPath)
                 file, err := os.OpenFile(m.kdbxPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, defaultFilePerm)
-                if err != nil </span><span class="cov0" title="0">{
+                if err != nil </span><span class="cov8" title="1">{
                         slog.Error("Ошибка открытия локального файла для записи", "path", m.kdbxPath, "error", err)
                         return SyncError{err: fmt.Errorf("ошибка записи локального файла: %w", err)}
                 }</span>
-                <span class="cov0" title="0">defer file.Close()
+                <span class="cov8" title="1">defer file.Close()
 
                 // Шаг 3: Скопировать данные из ответа в файл
                 _, err = io.Copy(file, reader)
@@ -1253,7 +1253,7 @@ func downloadVaultCmd(m *model) tea.Cmd <span class="cov0" title="0">{
                         return SyncError{err: fmt.Errorf("ошибка сохранения скачанного файла: %w", err)}
                 }</span>
 
-                <span class="cov0" title="0">slog.Info("Скачивание KDBX с сервера и сохранение локально завершено.")
+                <span class="cov8" title="1">slog.Info("Скачивание KDBX с сервера и сохранение локально завершено.")
                 // Отправляем сообщение об успехе и необходимости перезагрузки
                 return syncDownloadSuccessMsg{reloadNeeded: true}</span>
         }
@@ -1261,7 +1261,7 @@ func downloadVaultCmd(m *model) tea.Cmd <span class="cov0" title="0">{
 
 // applyUIChangesToDB применяет изменения из компонентов TUI (например, списка) к m.db.
 // Эта функция должна быть похожа на логику в handleGlobalKeys для Ctrl+S.
-func applyUIChangesToDB(m *model) <span class="cov0" title="0">{
+func applyUIChangesToDB(m *model) <span class="cov8" title="1">{
         // TODO: Избежать дублирования кода с handleGlobalKeys
         items := m.entryList.Items()
         updatedCount := 0
@@ -1277,7 +1277,7 @@ func applyUIChangesToDB(m *model) <span class="cov0" title="0">{
                         }</span>
                 }
         }
-        <span class="cov0" title="0">slog.Debug("Применено изменений из UI в m.db перед загрузкой", "updated_count", updatedCount)</span>
+        <span class="cov8" title="1">slog.Debug("Применено изменений из UI в m.db перед загрузкой", "updated_count", updatedCount)</span>
 }
 </pre>
 		
@@ -3718,53 +3718,53 @@ type rollbackErrorMsg struct {
 // --- Команды для работы с версиями --- //
 
 // loadVersionsCmd загружает список версий с сервера.
-func loadVersionsCmd(m *model) tea.Cmd <span class="cov0" title="0">{
-        return func() tea.Msg </span><span class="cov0" title="0">{
-                if m.apiClient == nil </span><span class="cov0" title="0">{
+func loadVersionsCmd(m *model) tea.Cmd <span class="cov8" title="1">{
+        return func() tea.Msg </span><span class="cov8" title="1">{
+                if m.apiClient == nil </span><span class="cov8" title="1">{
                         return versionsLoadErrorMsg{err: errors.New("API клиент не инициализирован")}
                 }</span>
 
-                <span class="cov0" title="0">if m.authToken == "" </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">if m.authToken == "" </span><span class="cov8" title="1">{
                         return versionsLoadErrorMsg{err: errors.New("требуется авторизация")}
                 }</span>
 
-                <span class="cov0" title="0">ctx := context.Background()
+                <span class="cov8" title="1">ctx := context.Background()
                 // Вызываем обновленную ListVersions
                 versions, currentID, err := m.apiClient.ListVersions(ctx, defaultVersionListLimit, 0)
-                if err != nil </span><span class="cov0" title="0">{
+                if err != nil </span><span class="cov8" title="1">{
                         // Проверяем на ошибку авторизации
-                        if errors.Is(err, api.ErrAuthorization) </span><span class="cov0" title="0">{
+                        if errors.Is(err, api.ErrAuthorization) </span><span class="cov8" title="1">{
                                 slog.Error("Ошибка загрузки списка версий: ошибка авторизации")
                                 return versionsLoadErrorMsg{err: api.ErrAuthorization} // Возвращаем именно ErrAuthorization
                         }</span>
-                        <span class="cov0" title="0">slog.Error("Ошибка загрузки списка версий", "error", err)
+                        <span class="cov8" title="1">slog.Error("Ошибка загрузки списка версий", "error", err)
                         return versionsLoadErrorMsg{err: err}</span>
                 }
 
-                <span class="cov0" title="0">slog.Info("Список версий успешно загружен", "count", len(versions), "current_id", currentID)
+                <span class="cov8" title="1">slog.Info("Список версий успешно загружен", "count", len(versions), "current_id", currentID)
                 return versionsLoadedMsg{versions: versions, currentVersionID: currentID}</span>
         }
 }
 
 // rollbackToVersionCmd выполняет откат к выбранной версии.
-func rollbackToVersionCmd(m *model, versionID int64) tea.Cmd <span class="cov0" title="0">{
-        return func() tea.Msg </span><span class="cov0" title="0">{
-                if m.apiClient == nil </span><span class="cov0" title="0">{
+func rollbackToVersionCmd(m *model, versionID int64) tea.Cmd <span class="cov8" title="1">{
+        return func() tea.Msg </span><span class="cov8" title="1">{
+                if m.apiClient == nil </span><span class="cov8" title="1">{
                         return rollbackErrorMsg{err: errors.New("API клиент не инициализирован")}
                 }</span>
 
-                <span class="cov0" title="0">if m.authToken == "" </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">if m.authToken == "" </span><span class="cov8" title="1">{
                         return rollbackErrorMsg{err: errors.New("требуется авторизация")}
                 }</span>
 
-                <span class="cov0" title="0">ctx := context.Background()
+                <span class="cov8" title="1">ctx := context.Background()
                 err := m.apiClient.RollbackToVersion(ctx, versionID)
-                if err != nil </span><span class="cov0" title="0">{
+                if err != nil </span><span class="cov8" title="1">{
                         slog.Error("Ошибка отката к версии", "version_id", versionID, "error", err)
                         return rollbackErrorMsg{err: err}
                 }</span>
 
-                <span class="cov0" title="0">slog.Info("Успешный откат к версии", "version_id", versionID)
+                <span class="cov8" title="1">slog.Info("Успешный откат к версии", "version_id", versionID)
                 return rollbackSuccessMsg{versionID: versionID}</span>
         }
 }
