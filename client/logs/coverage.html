@@ -57,7 +57,7 @@
 				
 				<option value="file0">github.com/maynagashev/gophkeeper/client/cmd/gophkeeper/main.go (0.0%)</option>
 				
-				<option value="file1">github.com/maynagashev/gophkeeper/client/internal/api/client.go (25.9%)</option>
+				<option value="file1">github.com/maynagashev/gophkeeper/client/internal/api/client.go (26.6%)</option>
 				
 				<option value="file2">github.com/maynagashev/gophkeeper/client/internal/kdbx/auth.go (0.0%)</option>
 				
@@ -99,13 +99,15 @@
 				
 				<option value="file21">github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go (0.0%)</option>
 				
-				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_welcome.go (0.0%)</option>
+				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go (0.0%)</option>
 				
-				<option value="file23">github.com/maynagashev/gophkeeper/client/internal/tui/tui.go (0.0%)</option>
+				<option value="file23">github.com/maynagashev/gophkeeper/client/internal/tui/screen_welcome.go (0.0%)</option>
 				
-				<option value="file24">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (0.0%)</option>
+				<option value="file24">github.com/maynagashev/gophkeeper/client/internal/tui/tui.go (0.0%)</option>
 				
-				<option value="file25">github.com/maynagashev/gophkeeper/client/internal/tui/utils.go (0.0%)</option>
+				<option value="file25">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (0.0%)</option>
+				
+				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/utils.go (0.0%)</option>
 				
 				</select>
 			</div>
@@ -123,6 +125,7 @@
 
 import (
         "flag"
+        "log"
         "log/slog"
         "os"
         "path/filepath"
@@ -138,6 +141,15 @@ const (
         dbPathEnvVar = "GOPHKEEPER_DB_PATH"
         // Путь к файлу KDBX по умолчанию.
         defaultDBPath = "gophkeeper.kdbx"
+)
+
+// Переменные для версии и даты сборки, устанавливаются через ldflags.
+var (
+        version = "dev" // Значение по умолчанию, если не установлено при сборке
+        //nolint:gochecknoglobals // Устанавливается через ldflags при сборке
+        buildDate = "unknown" // Значение по умолчанию
+        //nolint:gochecknoglobals // Устанавливается через ldflags при сборке
+        commitHash = "N/A" // Значение по умолчанию
 )
 
 // setupLogging настраивает логирование в файл logs/gophkeeper.log.
@@ -165,18 +177,34 @@ func setupLogging() <span class="cov0" title="0">{
 }
 
 func main() <span class="cov0" title="0">{
+        // Добавляем флаг для версии
+        versionFlag := flag.Bool("version", false, "Показать версию и дату сборки")
+
         // Настройка логирования
         setupLogging()
 
         // Определение флагов
         kdbxPathFlag := flag.String("db", defaultDBPath, "Путь к файлу базы данных KDBX (переопределяет "+dbPathEnvVar+")")
         debugModeFlag := flag.Bool("debug", false, "Включить режим отладки TUI")
+        serverURLFlag := flag.String("server-url", "", "URL сервера GophKeeper (например, https://localhost:8443)")
 
         // Парсинг флагов командной строки
         flag.Parse()
 
+        // Если указан флаг --version, выводим информацию и выходим
+        if *versionFlag </span><span class="cov0" title="0">{
+                // Используем стандартный log для вывода в консоль, так как slog настроен на файл
+                log.SetOutput(os.Stdout) // Направляем вывод log в stdout
+                log.SetFlags(0)          // Убираем префиксы даты/времени
+                log.Println("GophKeeper Client")
+                log.Printf("Version: %s", version)
+                log.Printf("Build Date: %s", buildDate)
+                log.Printf("Commit Hash: %s", commitHash)
+                os.Exit(0)
+        }</span>
+
         // Определение финального пути к файлу KDBX
-        finalPath := defaultDBPath
+        <span class="cov0" title="0">finalPath := defaultDBPath
         source := "по умолчанию"
 
         // 1. Проверяем переменную окружения
@@ -207,10 +235,15 @@ func main() <span class="cov0" title="0">{
                 os.Exit(1)
         }</span>
 
-        <span class="cov0" title="0">slog.Info("Запуск GophKeeper", "db_path", finalPath, "source", source, "debug_mode", *debugModeFlag)
+        <span class="cov0" title="0">slog.Info("Запуск GophKeeper",
+                "db_path", finalPath,
+                "source", source,
+                "debug_mode", *debugModeFlag,
+                "server_url", *serverURLFlag,
+        )
 
         // Запускаем TUI, передавая финальный путь и флаг отладки
-        tui.Start(finalPath, *debugModeFlag)</span>
+        tui.Start(finalPath, *debugModeFlag, *serverURLFlag)</span>
 }
 </pre>
 		
@@ -231,6 +264,9 @@ import (
         "github.com/maynagashev/gophkeeper/models" // Импортируем общие модели
 )
 
+// ErrAuthorization сигнализирует об ошибке авторизации (401).
+var ErrAuthorization = errors.New("ошибка авторизации")
+
 // Client определяет интерфейс для взаимодействия с API сервера GophKeeper.
 type Client interface {
         // Register регистрирует нового пользователя.
@@ -244,7 +280,7 @@ type Client interface {
         // DownloadVault скачивает текущую версию файла хранилища.
         DownloadVault(ctx context.Context) (io.ReadCloser, *models.VaultVersion, error)
         // ListVersions получает список версий хранилища.
-        ListVersions(ctx context.Context, limit, offset int) ([]models.VaultVersion, error)
+        ListVersions(ctx context.Context, limit, offset int) ([]models.VaultVersion, int64, error)
         // RollbackToVersion откатывает хранилище к указанной версии.
         RollbackToVersion(ctx context.Context, versionID int64) error
         // SetAuthToken устанавливает JWT токен для аутентифицированных запросов.
@@ -399,7 +435,8 @@ func (c *httpClient) GetVaultMetadata(ctx context.Context) (*models.VaultVersion
                         return nil, errors.New("хранилище не найдено на сервере") // Кастомная ошибка
                 }</span>
                 <span class="cov8" title="1">if resp.StatusCode == http.StatusUnauthorized </span><span class="cov8" title="1">{
-                        return nil, errors.New("ошибка авторизации (невалидный или просроченный токен?)")
+                        // Возвращаем нашу специальную ошибку
+                        return nil, ErrAuthorization
                 }</span>
                 // TODO: Читать тело для деталей
                 <span class="cov8" title="1">return nil, fmt.Errorf("ошибка получения метаданных: статус %d", resp.StatusCode)</span>
@@ -445,8 +482,13 @@ func (c *httpClient) UploadVault(ctx context.Context, data io.Reader, size int64
         <span class="cov8" title="1">defer resp.Body.Close()
 
         if resp.StatusCode != http.StatusOK </span><span class="cov8" title="1">{
+                defer resp.Body.Close() // Закрываем тело в случае ошибки
                 if resp.StatusCode == http.StatusUnauthorized </span><span class="cov8" title="1">{
-                        return errors.New("ошибка авторизации при загрузке")
+                        // Возвращаем нашу специальную ошибку
+                        return ErrAuthorization
+                }</span>
+                <span class="cov8" title="1">if resp.StatusCode == http.StatusConflict </span><span class="cov0" title="0">{
+                        return errors.New("конфликт версий при загрузке") // Возвращаем ошибку конфликта
                 }</span>
                 // TODO: Читать тело для деталей
                 <span class="cov8" title="1">return fmt.Errorf("ошибка загрузки на сервер: статус %d", resp.StatusCode)</span>
@@ -483,7 +525,8 @@ func (c *httpClient) DownloadVault(ctx context.Context) (io.ReadCloser, *models.
                         return nil, nil, errors.New("хранилище не найдено для скачивания")
                 }</span>
                 <span class="cov0" title="0">if resp.StatusCode == http.StatusUnauthorized </span><span class="cov0" title="0">{
-                        return nil, nil, errors.New("ошибка авторизации при скачивании")
+                        // Возвращаем нашу специальную ошибку
+                        return nil, nil, ErrAuthorization
                 }</span>
                 // TODO: Читать тело для деталей
                 <span class="cov0" title="0">return nil, nil, fmt.Errorf("ошибка скачивания с сервера: статус %d", resp.StatusCode)</span>
@@ -501,10 +544,11 @@ func (c *httpClient) DownloadVault(ctx context.Context) (io.ReadCloser, *models.
 }
 
 // ListVersions получает список версий хранилища.
-func (c *httpClient) ListVersions(ctx context.Context, limit, offset int) ([]models.VaultVersion, error) <span class="cov0" title="0">{
+// Возвращает список версий и ID текущей версии.
+func (c *httpClient) ListVersions(ctx context.Context, limit, offset int) ([]models.VaultVersion, int64, error) <span class="cov0" title="0">{
         listURL, err := url.JoinPath(c.baseURL, "/api/vault/versions")
         if err != nil </span><span class="cov0" title="0">{
-                return nil, fmt.Errorf("ошибка формирования URL для списка версий: %w", err)
+                return nil, 0, fmt.Errorf("ошибка формирования URL для списка версий: %w", err)
         }</span>
 
         // Добавляем параметры пагинации
@@ -521,33 +565,39 @@ func (c *httpClient) ListVersions(ctx context.Context, limit, offset int) ([]mod
 
         <span class="cov0" title="0">req, err := http.NewRequestWithContext(ctx, http.MethodGet, listURL, nil)
         if err != nil </span><span class="cov0" title="0">{
-                return nil, fmt.Errorf("ошибка создания запроса на список версий: %w", err)
+                return nil, 0, fmt.Errorf("ошибка создания запроса на список версий: %w", err)
         }</span>
         <span class="cov0" title="0">if err = c.setAuthHeader(req); err != nil </span><span class="cov0" title="0">{
-                return nil, err
+                return nil, 0, err
         }</span>
 
         <span class="cov0" title="0">resp, err := c.httpClient.Do(req)
         if err != nil </span><span class="cov0" title="0">{
                 // TODO: Обработка сетевых ошибок
-                return nil, fmt.Errorf("ошибка выполнения запроса на список версий: %w", err)
+                return nil, 0, fmt.Errorf("ошибка выполнения запроса на список версий: %w", err)
         }</span>
         <span class="cov0" title="0">defer resp.Body.Close()
 
         if resp.StatusCode != http.StatusOK </span><span class="cov0" title="0">{
                 if resp.StatusCode == http.StatusUnauthorized </span><span class="cov0" title="0">{
-                        return nil, errors.New("ошибка авторизации при получении списка версий")
+                        // Возвращаем нашу специальную ошибку
+                        return nil, 0, ErrAuthorization
                 }</span>
                 // TODO: Читать тело для деталей
-                <span class="cov0" title="0">return nil, fmt.Errorf("ошибка получения списка версий: статус %d", resp.StatusCode)</span>
+                <span class="cov0" title="0">return nil, 0, fmt.Errorf("ошибка получения списка версий: статус %d", resp.StatusCode)</span>
         }
 
-        <span class="cov0" title="0">var versions []models.VaultVersion
-        if err = json.NewDecoder(resp.Body).Decode(&amp;versions); err != nil </span><span class="cov0" title="0">{
-                return nil, fmt.Errorf("ошибка декодирования списка версий: %w", err)
+        // Создаем анонимную структуру для декодирования ответа
+        <span class="cov0" title="0">var response struct {
+                Versions         []models.VaultVersion `json:"versions"`
+                CurrentVersionID int64                 `json:"current_version_id"` // Используем int64, как в модели
+        }
+
+        if err = json.NewDecoder(resp.Body).Decode(&amp;response); err != nil </span><span class="cov0" title="0">{
+                return nil, 0, fmt.Errorf("ошибка декодирования списка версий: %w", err)
         }</span>
 
-        <span class="cov0" title="0">return versions, nil</span>
+        <span class="cov0" title="0">return response.Versions, response.CurrentVersionID, nil</span>
 }
 
 // RollbackToVersion отправляет запрос на откат к указанной версии.
@@ -582,7 +632,8 @@ func (c *httpClient) RollbackToVersion(ctx context.Context, versionID int64) err
 
         if resp.StatusCode != http.StatusNoContent </span><span class="cov0" title="0">{ // Ожидаем 204 No Content
                 if resp.StatusCode == http.StatusUnauthorized </span><span class="cov0" title="0">{
-                        return errors.New("ошибка авторизации при откате")
+                        // Возвращаем нашу специальную ошибку
+                        return ErrAuthorization
                 }</span>
                 <span class="cov0" title="0">if resp.StatusCode == http.StatusNotFound </span><span class="cov0" title="0">{
                         return errors.New("указанная версия или хранилище не найдены для отката")
@@ -613,8 +664,10 @@ func (c *httpClient) SetAuthToken(token string) <span class="cov8" title="1">{
 import (
         "errors"
         "log/slog"
+        "time"
 
         "github.com/tobischo/gokeepasslib/v3"
+        "github.com/tobischo/gokeepasslib/v3/wrappers"
 )
 
 const (
@@ -672,6 +725,9 @@ func SaveAuthData(db *gokeepasslib.Database, serverURL, authToken string) error 
         }</span>
 
         <span class="cov0" title="0">meta := db.Content.Meta
+        initialCustomData := make([]gokeepasslib.CustomData, len(meta.CustomData)) // Копируем исходные данные
+        copy(initialCustomData, meta.CustomData)
+        changed := false // Флаг, что данные действительно изменились
 
         // Сохраняем/удаляем URL
         if serverURL != "" </span><span class="cov0" title="0">{
@@ -686,6 +742,38 @@ func SaveAuthData(db *gokeepasslib.Database, serverURL, authToken string) error 
         }</span> else<span class="cov0" title="0"> {
                 meta.CustomData = removeCustomDataValue(meta.CustomData, CustomDataKeyAuthToken)
         }</span>
+
+        // Проверяем, изменился ли слайс CustomData
+        <span class="cov0" title="0">if len(initialCustomData) != len(meta.CustomData) </span><span class="cov0" title="0">{
+                changed = true
+        }</span> else<span class="cov0" title="0"> {
+                // Если длина одинаковая, проверяем содержимое
+                for i := range meta.CustomData </span><span class="cov0" title="0">{
+                        if initialCustomData[i].Key != meta.CustomData[i].Key || initialCustomData[i].Value != meta.CustomData[i].Value </span><span class="cov0" title="0">{
+                                changed = true
+                                break</span>
+                        }
+                }
+        }
+
+        // Обновляем время модификации корневой группы, только если CustomData действительно изменились
+        <span class="cov0" title="0">if changed </span><span class="cov0" title="0">{
+                now := time.Now().UTC()
+                // Обновляем время модификации корневой группы
+                if db.Content != nil &amp;&amp; db.Content.Root != nil &amp;&amp; len(db.Content.Root.Groups) &gt; 0 </span><span class="cov0" title="0">{
+                        // Получаем указатель на корневую группу
+                        rootGroup := &amp;db.Content.Root.Groups[0]
+                        // Тип Times не указатель, поэтому присваиваем обертку напрямую
+                        // Создаем wrappers.TimeWrapper и присваиваем указатель на него
+                        modTimeWrapper := wrappers.TimeWrapper{Time: now}      // Создаем экземпляр
+                        rootGroup.Times.LastModificationTime = &amp;modTimeWrapper // Присваиваем указатель
+                        slog.Debug("Обновлено LastModificationTime корневой группы", "newTime", now)
+                }</span> else<span class="cov0" title="0"> {
+                        // Логируем, если Content, Root или Groups == nil/пуст
+                        slog.Warn("Не удалось обновить LastModificationTime корневой группы:" +
+                                " db.Content, Root или Groups == nil/пуст")
+                }</span>
+        }
 
         // TODO: Как правильно установить флаг DatabaseChanged? Возможно, не нужно.
         // meta.SetDatabaseChanged(true) // Пока комментируем
@@ -1095,8 +1183,6 @@ func uploadVaultCmd(m *model) tea.Cmd <span class="cov0" title="0">{
                 <span class="cov0" title="0">contentModTime := fileInfo.ModTime() // Используем время модификации файла
                 // =====================================================
 
-                // var err error // Объявляем err один раз - уже сделано выше
-
                 // Шаг 2: Заблокировать и сохранить m.db во временный буфер для загрузки
                 if m.db == nil </span><span class="cov0" title="0">{
                         slog.Error("Попытка загрузки хранилища, но m.db is nil")
@@ -1196,9 +1282,14 @@ func applyUIChangesToDB(m *model) <span class="cov0" title="0">{
 		<pre class="file" id="file5" style="display: none">package tui
 
 import (
+        "fmt"
+        "time"
+
         "github.com/charmbracelet/bubbles/list"
         "github.com/charmbracelet/bubbles/textinput"
         "github.com/charmbracelet/lipgloss"
+        "github.com/maynagashev/gophkeeper/client/internal/api"
+        "github.com/maynagashev/gophkeeper/models"
 )
 
 // Константы, используемые при инициализации.
@@ -1211,6 +1302,57 @@ const (
         initUserCharLimit     = 128
         initUserWidth         = 30
 )
+
+// Константы для работы с данными.
+const (
+        bytesPerKilobyte = 1024.0 // Добавлено для mnd
+)
+
+// versionItem представляет элемент в списке версий.
+type versionItem struct {
+        version   models.VaultVersion
+        isCurrent bool // Флаг текущей активной версии
+}
+
+func (i versionItem) Title() string <span class="cov0" title="0">{
+        // Формат: ID (+ "Текущая" если активная версия)
+        title := fmt.Sprintf("Версия #%d", i.version.ID)
+        if i.isCurrent </span><span class="cov0" title="0">{
+                title += " (Текущая)"
+        }</span>
+        <span class="cov0" title="0">return title</span>
+}
+
+func (i versionItem) Description() string <span class="cov0" title="0">{
+        description := ""
+
+        // Добавляем время создания, если есть
+        if i.version.ContentModifiedAt != nil </span><span class="cov0" title="0">{
+                timeStr := i.version.ContentModifiedAt.Format(time.RFC3339)
+                description += fmt.Sprintf("Изменена: %s", timeStr)
+        }</span>
+
+        // Добавляем размер, если есть
+        <span class="cov0" title="0">if i.version.SizeBytes != nil </span><span class="cov0" title="0">{
+                if description != "" </span><span class="cov0" title="0">{
+                        description += " | "
+                }</span>
+                <span class="cov0" title="0">sizeKB := float64(*i.version.SizeBytes) / bytesPerKilobyte // Используем константу
+                description += fmt.Sprintf("Размер: %.2f KB", sizeKB)</span>
+        }
+
+        // Если ничего нет, просто выводим ID
+        <span class="cov0" title="0">if description == "" </span><span class="cov0" title="0">{
+                description = fmt.Sprintf("ID: %d", i.version.ID)
+        }</span>
+
+        <span class="cov0" title="0">return description</span>
+}
+
+func (i versionItem) FilterValue() string <span class="cov0" title="0">{
+        // Фильтрация не используется для этого списка, но интерфейс требует реализации
+        return i.Title()
+}</span>
 
 // initPasswordInput инициализирует основное поле ввода пароля.
 func initPasswordInput() textinput.Model <span class="cov0" title="0">{
@@ -1295,11 +1437,12 @@ func initSyncMenu() list.Model <span class="cov0" title="0">{
         syncMenuDelegate := list.NewDefaultDelegate()
         // Устанавливаем ненулевые размеры по умолчанию для диагностики
         defaultSyncMenuWidth := 40
-        defaultSyncMenuHeight := 16
+        defaultSyncMenuHeight := 20
         syncMenuList := list.New([]list.Item{
                 syncMenuItem{title: "Настроить URL сервера", id: "configure_url"},
                 syncMenuItem{title: "Войти / Зарегистрироваться", id: "login_register"},
                 syncMenuItem{title: "Синхронизировать сейчас", id: "sync_now"},
+                syncMenuItem{title: "Просмотреть версии", id: "view_versions"},
                 syncMenuItem{title: "Выйти на сервере", id: "logout"},
         }, syncMenuDelegate, defaultSyncMenuWidth, defaultSyncMenuHeight)
         syncMenuList.Title = ""
@@ -1355,8 +1498,33 @@ func initDocStyle() lipgloss.Style <span class="cov0" title="0">{
         return lipgloss.NewStyle().Margin(docStyleMarginVertical, docStyleMarginHorizontal)
 }</span>
 
+// initVersionList инициализирует список для отображения версий хранилища.
+func initVersionList() list.Model <span class="cov0" title="0">{
+        versionDelegate := list.NewDefaultDelegate()
+
+        // Настройка стилей для выделения текущей версии
+        versionDelegate.Styles.SelectedTitle = versionDelegate.Styles.SelectedTitle.
+                Foreground(lipgloss.Color("212")).
+                Background(lipgloss.Color("237")).
+                BorderLeftForeground(lipgloss.Color("212"))
+
+        versionDelegate.Styles.SelectedDesc = versionDelegate.Styles.SelectedDesc.
+                Foreground(lipgloss.Color("240")).
+                Background(lipgloss.Color("237")).
+                BorderLeftForeground(lipgloss.Color("212"))
+
+        versionList := list.New([]list.Item{}, versionDelegate, defaultListWidth, defaultListHeight)
+        versionList.Title = "История версий"
+        versionList.SetShowHelp(false)
+        versionList.SetShowStatusBar(true)
+        versionList.SetFilteringEnabled(false)
+        versionList.Styles.Title = list.DefaultStyles().Title.Bold(true)
+
+        return versionList
+}</span>
+
 // initModel создает начальное состояние модели.
-func initModel(kdbxPath string, debugMode bool) model <span class="cov0" title="0">{
+func initModel(kdbxPath string, debugMode bool, serverURL string, apiClient api.Client) model <span class="cov0" title="0">{
         passwordInput := initPasswordInput()
         entryList := initEntryList()
         attachmentDelList := initAttachmentDeleteList()
@@ -1367,6 +1535,7 @@ func initModel(kdbxPath string, debugMode bool) model <span class="cov0" title="
         loginUserInput, loginPassInput := initLoginInputs()
         regUserInput, regPassInput := initRegisterInputs()
         docStyle := initDocStyle()
+        versionList := initVersionList()
 
         return model{
                 state:                     welcomeScreen,
@@ -1389,6 +1558,9 @@ func initModel(kdbxPath string, debugMode bool) model <span class="cov0" title="
                 loginRegisterFocusedField: 0,
                 docStyle:                  docStyle,
                 debugMode:                 debugMode,
+                versionList:               versionList,
+                serverURL:                 serverURL,
+                apiClient:                 apiClient,
         }
 }</span>
 </pre>
@@ -1528,6 +1700,7 @@ const (
         loginRegisterChoiceScreen                    // Экран выбора "Войти или Зарегистрироваться?"
         loginScreen                                  // Экран ввода данных для входа
         registerScreen                               // Экран ввода данных для регистрации
+        versionListScreen                            // Экран списка версий
 )
 
 // String возвращает строковое представление screenState.
@@ -1561,6 +1734,8 @@ func (s screenState) String() string <span class="cov0" title="0">{
                 return "loginScreen"</span>
         case registerScreen:<span class="cov0" title="0">
                 return "registerScreen"</span>
+        case versionListScreen:<span class="cov0" title="0">
+                return "versionListScreen"</span>
         default:<span class="cov0" title="0">
                 return fmt.Sprintf("unknownScreen(%d)", s)</span>
         }
@@ -1750,6 +1925,17 @@ type model struct {
         localMetaFound     bool                 // Найден ли локальный файл
         receivedServerMeta bool                 // Флаг: получены ли метаданные сервера
         receivedLocalMeta  bool                 // Флаг: получены ли метаданные локального файла
+
+        // -- Поля для работы с версиями --
+        versionList                list.Model            // Список версий
+        versions                   []models.VaultVersion // Полученные с сервера версии
+        loadingVersions            bool                  // Флаг: идет ли загрузка списка версий
+        selectedVersionForRollback *models.VaultVersion  // Выбранная версия для отката
+        confirmRollback            bool                  // Флаг: требуется подтверждение отката
+        rollbackError              error                 // Ошибка при откате
+
+        // -- Добавляем карту для текстов помощи --
+        helpTextMap map[screenState]string
 }
 
 // Сообщение для очистки статуса.
@@ -2704,6 +2890,7 @@ import (
         tea "github.com/charmbracelet/bubbletea"
 
         // Убедимся, что импорт есть.
+        "github.com/maynagashev/gophkeeper/client/internal/api"
         "github.com/maynagashev/gophkeeper/client/internal/kdbx"
 )
 
@@ -2751,8 +2938,8 @@ func (m *model) updateEntryListScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span cl
                         }</span>
                 case "s":<span class="cov0" title="0">
                         m.state = syncServerScreen
-                        // m.syncServerMenu.Focus() // list.Model не имеет Focus()
-                        return m, nil</span>
+                        // Добавляем ClearScreen при переходе
+                        return m, tea.ClearScreen</span>
                 case "l":<span class="cov0" title="0">
                         // TODO: Проверить, настроен ли URL и валиден ли токен
                         // Если URL не настроен -&gt; serverUrlInputScreen
@@ -2766,43 +2953,73 @@ func (m *model) updateEntryListScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span cl
         <span class="cov0" title="0">return m, tea.Batch(cmds...)</span>
 }
 
+// _handleAuthLoadError обрабатывает ошибку загрузки Auth данных.
+func (m *model) _handleAuthLoadError(errLoad error, urlFromFlag bool) <span class="cov0" title="0">{
+        slog.Error("Ошибка загрузки Auth данных из KDBX", "error", errLoad)
+        if !urlFromFlag </span><span class="cov0" title="0">{
+                m.serverURL = ""
+                m.apiClient = nil
+        }</span>
+        <span class="cov0" title="0">m.authToken = ""
+        m.loginStatus = statusNotLoggedIn + " (ошибка загрузки)"</span>
+}
+
+// _handleAuthLoadSuccess обрабатывает успешную загрузку Auth данных.
+func (m *model) _handleAuthLoadSuccess(loadedURL, loadedToken string, urlFromFlag bool) <span class="cov0" title="0">{
+        if urlFromFlag </span><span class="cov0" title="0">{
+                // URL задан флагом, загружаем только токен
+                m.authToken = loadedToken
+                slog.Info("URL сервера задан флагом, загружен только токен из KDBX", "token_found", m.authToken != "")
+        }</span> else<span class="cov0" title="0"> {
+                // URL не задан флагом, используем загруженный URL
+                m.serverURL = loadedURL
+                m.authToken = loadedToken
+                if m.serverURL != "" </span><span class="cov0" title="0">{
+                        m.apiClient = api.NewHTTPClient(m.serverURL)
+                        slog.Info("URL сервера загружен из KDBX, создан API клиент", "url", m.serverURL, "token_found", m.authToken != "")
+                }</span> else<span class="cov0" title="0"> {
+                        m.apiClient = nil
+                        slog.Info("URL сервера не задан и не найден в KDBX.")
+                }</span>
+        }
+
+        // Обновляем статус входа
+        <span class="cov0" title="0">if m.authToken != "" </span><span class="cov0" title="0">{
+                m.loginStatus = "Вход выполнен (сессия загружена)"
+        }</span> else<span class="cov0" title="0"> {
+                m.loginStatus = statusNotLoggedIn
+        }</span>
+}
+
 // handleDBOpenedMsg обрабатывает сообщение об успешном открытии базы.
 func (m *model) handleDBOpenedMsg(msg dbOpenedMsg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+        slog.Debug("handleDBOpenedMsg: Начало")
         m.db = msg.db
         m.err = nil
         prevState := m.state
         m.state = entryListScreen
         slog.Info("База KDBX успешно открыта", "path", m.kdbxPath)
 
-        // Загрузка Auth данных
-        loadedURL, loadedToken, errLoad := kdbx.LoadAuthData(m.db)
-        if errLoad != nil </span><span class="cov0" title="0">{
-                // Просто логируем ошибку, не прерываем работу
-                slog.Error("Ошибка загрузки Auth данных из KDBX", "error", errLoad)
-                // Устанавливаем пустые значения по умолчанию
-                m.serverURL = ""
-                m.authToken = ""
-                m.loginStatus = statusNotLoggedIn + " (ошибка загрузки)" // Используем константу
-        }</span> else<span class="cov0" title="0"> {
-                // Сохраняем загруженные данные в модель
-                m.serverURL = loadedURL
-                m.authToken = loadedToken
-                // Обновляем статус входа
-                if m.authToken != "" </span><span class="cov0" title="0">{
-                        m.loginStatus = "Вход выполнен (сессия загружена)"
-                        slog.Info("Auth данные успешно загружены из KDBX", "url_found", m.serverURL != "", "token_found", m.authToken != "")
-                }</span> else<span class="cov0" title="0"> {
-                        m.loginStatus = statusNotLoggedIn // Используем константу
-                        slog.Info("Auth данные не найдены в KDBX")
-                }</span>
-        }
+        // --- Обновленная логика загрузки Auth данных ---
+        // Определяем, был ли URL задан через флаг (т.е. apiClient уже инициализирован)
+        urlFromFlag := m.serverURL != "" &amp;&amp; m.apiClient != nil
+        slog.Debug("Проверка URL из флага", "urlFromFlag", urlFromFlag, "initialURL", m.serverURL)
 
-        // Устанавливаем токен в API клиенте ЗДЕСЬ, после блока if/else
+        loadedURL, loadedToken, errLoad := kdbx.LoadAuthData(m.db)
+        // Вызываем соответствующие хелперы
+        if errLoad != nil </span><span class="cov0" title="0">{
+                m._handleAuthLoadError(errLoad, urlFromFlag)
+        }</span> else<span class="cov0" title="0"> {
+                m._handleAuthLoadSuccess(loadedURL, loadedToken, urlFromFlag)
+        }</span>
+
+        // Устанавливаем токен в API клиенте, если клиент существует
         <span class="cov0" title="0">if m.apiClient != nil </span><span class="cov0" title="0">{
                 m.apiClient.SetAuthToken(m.authToken) // m.authToken будет либо загруженным, либо пустым
-                slog.Debug("Установлен токен в API клиенте после загрузки из KDBX", "token_set", m.authToken != "")
+                slog.Debug("Установлен токен в API клиенте после загрузки/проверки KDBX", "token_set", m.authToken != "")
         }</span> else<span class="cov0" title="0"> {
-                slog.Error("API клиент nil при попытке установить токен после загрузки из KDBX")
+                // Эта ситуация возможна, если URL не задан ни флагом, ни в KDBX
+                slog.Warn("API клиент не инициализирован (URL не задан), токен не установлен.")
         }</span>
 
         // --- Существующий код для заполнения списка ---
@@ -2830,7 +3047,8 @@ func (m *model) handleDBOpenedMsg(msg dbOpenedMsg) (tea.Model, tea.Cmd) <span cl
                 dbOpenedCmds = append(dbOpenedCmds, tea.ClearScreen)
         }</span>
 
-        <span class="cov0" title="0">return m, tea.Batch(dbOpenedCmds...)</span>
+        <span class="cov0" title="0">slog.Debug("handleDBOpenedMsg: Конец, m.db обновлен")
+        return m, tea.Batch(dbOpenedCmds...)</span>
 }
 </pre>
 		
@@ -3277,11 +3495,13 @@ func (m *model) updateServerURLInputScreen(msg tea.Msg) (tea.Model, tea.Cmd) <sp
 		<pre class="file" id="file21" style="display: none">package tui
 
 import (
+        "errors"
         "fmt"
         "log/slog"
 
         "github.com/charmbracelet/bubbles/textinput"
         tea "github.com/charmbracelet/bubbletea"
+        "github.com/maynagashev/gophkeeper/client/internal/kdbx"
 )
 
 // --- Тип для элементов меню синхронизации --- //
@@ -3314,58 +3534,104 @@ func (m *model) viewSyncServerScreen() string <span class="cov0" title="0">{
 
         // Объединяем информацию о статусе и РЕНДЕР МЕНЮ
         // Добавляем перенос строки между ними для четкого разделения.
-        return statusInfo + m.syncServerMenu.View()</span>
+        return fmt.Sprintf("%s\n\n%s", statusInfo, m.syncServerMenu.View())</span>
 }
 
-// updateSyncServerScreen обрабатывает сообщения для экрана "Синхронизация и Сервер".
-//
-//nolint:gocognit,nestif // TODO: Рефакторить для уменьшения вложенности и когнитивной сложности.
+// handleSyncMenuConfigureURL обрабатывает выбор пункта "Настроить URL сервера".
+func (m *model) handleSyncMenuConfigureURL() tea.Cmd <span class="cov0" title="0">{
+        m.serverURLInput.Reset()
+        m.serverURLInput.Placeholder = "https://..."
+        m.serverURLInput.Focus()
+        if m.serverURL != "" </span><span class="cov0" title="0">{
+                m.serverURLInput.SetValue(m.serverURL)
+        }</span>
+        <span class="cov0" title="0">m.state = serverURLInputScreen
+        return textinput.Blink</span>
+}
+
+// handleSyncMenuLoginRegister обрабатывает выбор пункта "Войти / Зарегистрироваться".
+func (m *model) handleSyncMenuLoginRegister() tea.Cmd <span class="cov0" title="0">{
+        if m.serverURL == "" </span><span class="cov0" title="0">{
+                _, cmd := m.setStatusMessage("Сначала настройте URL сервера")
+                return cmd
+        }</span>
+        <span class="cov0" title="0">m.loginUsernameInput.Focus()
+        m.loginPasswordInput.Blur()
+        m.loginRegisterFocusedField = 0
+        m.state = loginRegisterChoiceScreen
+        return textinput.Blink</span>
+}
+
+// handleSyncMenuSyncNow обрабатывает выбор пункта "Синхронизировать сейчас".
+func (m *model) handleSyncMenuSyncNow() tea.Cmd <span class="cov0" title="0">{
+        if m.authToken == "" </span><span class="cov0" title="0">{
+                _, cmd := m.setStatusMessage("Необходимо войти перед синхронизацией")
+                return cmd
+        }</span>
+        <span class="cov0" title="0">newM, statusCmd := m.setStatusMessage("Запуск синхронизации...")
+        mModel, ok := newM.(*model)
+        if !ok </span><span class="cov0" title="0">{
+                slog.Error("Неожиданный тип модели после setStatusMessage")
+                return tea.Batch(statusCmd, func() tea.Msg </span><span class="cov0" title="0">{
+                        return errMsg{err: errors.New("внутренняя ошибка типа модели")}
+                }</span>)
+        }
+        <span class="cov0" title="0">syncCmd := startSyncCmd(mModel)
+        return tea.Batch(statusCmd, syncCmd)</span>
+}
+
+// handleSyncMenuViewVersions обрабатывает выбор пункта "Просмотреть версии".
+func (m *model) handleSyncMenuViewVersions() tea.Cmd <span class="cov0" title="0">{
+        if m.authToken == "" </span><span class="cov0" title="0">{
+                _, cmd := m.setStatusMessage("Необходимо войти для просмотра версий")
+                return cmd
+        }</span>
+        <span class="cov0" title="0">m.state = versionListScreen
+        m.loadingVersions = true
+        return tea.Batch(tea.ClearScreen, loadVersionsCmd(m))</span>
+}
+
+// handleSyncMenuLogout обрабатывает выбор пункта "Выйти на сервере".
+func (m *model) handleSyncMenuLogout() tea.Cmd <span class="cov0" title="0">{
+        if m.authToken == "" </span><span class="cov0" title="0">{
+                _, cmd := m.setStatusMessage("Вы не авторизованы")
+                return cmd
+        }</span>
+        <span class="cov0" title="0">oldToken := m.authToken
+        m.authToken = ""
+        m.loginStatus = statusNotLoggedIn
+        if m.apiClient != nil </span><span class="cov0" title="0">{
+                m.apiClient.SetAuthToken("")
+        }</span>
+        <span class="cov0" title="0">var saveCmd tea.Cmd
+        if m.db != nil </span><span class="cov0" title="0">{
+                errSave := kdbx.SaveAuthData(m.db, m.serverURL, "")
+                if errSave != nil </span><span class="cov0" title="0">{
+                        slog.Error("Ошибка сохранения пустого токена в KDBX при выходе", "error", errSave)
+                        _, saveCmd = m.setStatusMessage("Ошибка сохранения данных при выходе")
+                }</span> else<span class="cov0" title="0"> {
+                        slog.Info("Локальный токен очищен и сохранен в KDBX.")
+                        _, saveCmd = m.setStatusMessage("Успешно вышли")
+                }</span>
+        } else<span class="cov0" title="0"> {
+                slog.Warn("Не удалось сохранить пустой токен в KDBX при выходе: база не загружена.")
+                _, saveCmd = m.setStatusMessage("Успешно вышли (локально)")
+        }</span>
+        <span class="cov0" title="0">slog.Info("Выполнен выход", "token_existed", oldToken != "")
+        return saveCmd</span>
+}
+
+// updateSyncServerScreen обрабатывает сообщения для экрана синхронизации/сервера.
 func (m *model) updateSyncServerScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
         var cmds []tea.Cmd
 
         if keyMsg, ok := msg.(tea.KeyMsg); ok </span><span class="cov0" title="0">{
                 switch keyMsg.String() </span>{
                 case keyEnter:<span class="cov0" title="0">
-                        selectedItem := m.syncServerMenu.SelectedItem()
-                        if item, itemOk := selectedItem.(syncMenuItem); itemOk </span><span class="cov0" title="0">{
-                                switch item.id </span>{
-                                case "configure_url":<span class="cov0" title="0">
-                                        m.state = serverURLInputScreen
-                                        if m.serverURL != "" </span><span class="cov0" title="0">{
-                                                m.serverURLInput.SetValue(m.serverURL)
-                                        }</span> else<span class="cov0" title="0"> {
-                                                m.serverURLInput.Placeholder = defaultServerURL
-                                                m.serverURLInput.SetValue("")
-                                        }</span>
-                                        <span class="cov0" title="0">m.serverURLInput.Focus()
-                                        return m, tea.Batch(textinput.Blink, tea.ClearScreen)</span>
-                                case "login_register":<span class="cov0" title="0">
-                                        if m.serverURL == "" </span><span class="cov0" title="0">{
-                                                m.state = serverURLInputScreen
-                                                m.serverURLInput.Placeholder = defaultServerURL
-                                                m.serverURLInput.SetValue("")
-                                                m.serverURLInput.Focus()
-                                                return m, tea.Batch(textinput.Blink, tea.ClearScreen)
-                                        }</span>
-                                        <span class="cov0" title="0">m.state = loginRegisterChoiceScreen
-                                        return m, tea.ClearScreen</span>
-                                case "sync_now":<span class="cov0" title="0">
-                                        return m, startSyncCmd(m)</span>
-                                case "logout":<span class="cov0" title="0">
-                                        m.authToken = ""
-                                        m.loginStatus = "Не выполнен"
-                                        // Очищаем токен и в API клиенте
-                                        if m.apiClient != nil </span><span class="cov0" title="0">{
-                                                m.apiClient.SetAuthToken("")
-                                                slog.Debug("Токен очищен в API клиенте при выходе")
-                                        }</span> else<span class="cov0" title="0"> {
-                                                slog.Error("API клиент nil при попытке очистить токен при выходе")
-                                        }</span>
-                                        // При выходе из приложения токен не удаляется из KDBX, время жизни токена ограничено параметрами JWT
-                                        // err := kdbx.SaveAuthData(m.db, m.serverURL, "")
-                                        <span class="cov0" title="0">return m.setStatusMessage("Выход выполнен.")</span>
-                                }
-                        }
+                        // Обработка выбора пункта меню
+                        cmd := m.handleSyncMenuAction()
+                        cmds = append(cmds, cmd)</span>
+                        // Может потребоваться ClearScreen в зависимости от действия
                 case keyEsc, keyBack:<span class="cov0" title="0">
                         m.state = entryListScreen
                         return m, tea.ClearScreen</span> // Очистка экрана добавлена
@@ -3379,9 +3645,336 @@ func (m *model) updateSyncServerScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span c
 
         return m, tea.Batch(cmds...)</span>
 }
+
+// handleSyncMenuAction обрабатывает действие выбора в меню синхронизации.
+func (m *model) handleSyncMenuAction() tea.Cmd <span class="cov0" title="0">{
+        selectedItem, ok := m.syncServerMenu.SelectedItem().(syncMenuItem)
+        if !ok </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+
+        <span class="cov0" title="0">switch selectedItem.id </span>{
+        case "configure_url":<span class="cov0" title="0">
+                return m.handleSyncMenuConfigureURL()</span>
+        case "login_register":<span class="cov0" title="0">
+                return m.handleSyncMenuLoginRegister()</span>
+        case "sync_now":<span class="cov0" title="0">
+                return m.handleSyncMenuSyncNow()</span>
+        case "view_versions":<span class="cov0" title="0">
+                return m.handleSyncMenuViewVersions()</span>
+        case "logout":<span class="cov0" title="0">
+                return m.handleSyncMenuLogout()</span>
+        }
+
+        <span class="cov0" title="0">return nil</span>
+}
 </pre>
 		
 		<pre class="file" id="file22" style="display: none">package tui
+
+import (
+        "context"
+        "errors"
+        "fmt"
+        "log/slog"
+        "time"
+
+        "github.com/charmbracelet/bubbles/list"
+        tea "github.com/charmbracelet/bubbletea"
+        "github.com/maynagashev/gophkeeper/client/internal/api"
+        "github.com/maynagashev/gophkeeper/models"
+)
+
+// --- Сообщения для работы с версиями --- //
+
+// Константы для работы с версиями.
+const (
+        defaultVersionListLimit = 50 // Добавлено для mnd
+)
+
+// versionsLoadedMsg сообщает о завершении загрузки списка версий.
+type versionsLoadedMsg struct {
+        versions         []models.VaultVersion
+        currentVersionID int64
+}
+
+// versionsLoadErrorMsg сообщает об ошибке при загрузке списка версий.
+type versionsLoadErrorMsg struct {
+        err error
+}
+
+// rollbackSuccessMsg сообщает об успешном откате к выбранной версии.
+type rollbackSuccessMsg struct {
+        versionID int64
+}
+
+// rollbackErrorMsg сообщает об ошибке при откате к выбранной версии.
+type rollbackErrorMsg struct {
+        err error
+}
+
+// --- Команды для работы с версиями --- //
+
+// loadVersionsCmd загружает список версий с сервера.
+func loadVersionsCmd(m *model) tea.Cmd <span class="cov0" title="0">{
+        return func() tea.Msg </span><span class="cov0" title="0">{
+                if m.apiClient == nil </span><span class="cov0" title="0">{
+                        return versionsLoadErrorMsg{err: errors.New("API клиент не инициализирован")}
+                }</span>
+
+                <span class="cov0" title="0">if m.authToken == "" </span><span class="cov0" title="0">{
+                        return versionsLoadErrorMsg{err: errors.New("требуется авторизация")}
+                }</span>
+
+                <span class="cov0" title="0">ctx := context.Background()
+                // Вызываем обновленную ListVersions
+                versions, currentID, err := m.apiClient.ListVersions(ctx, defaultVersionListLimit, 0)
+                if err != nil </span><span class="cov0" title="0">{
+                        // Проверяем на ошибку авторизации
+                        if errors.Is(err, api.ErrAuthorization) </span><span class="cov0" title="0">{
+                                slog.Error("Ошибка загрузки списка версий: ошибка авторизации")
+                                return versionsLoadErrorMsg{err: api.ErrAuthorization} // Возвращаем именно ErrAuthorization
+                        }</span>
+                        <span class="cov0" title="0">slog.Error("Ошибка загрузки списка версий", "error", err)
+                        return versionsLoadErrorMsg{err: err}</span>
+                }
+
+                <span class="cov0" title="0">slog.Info("Список версий успешно загружен", "count", len(versions), "current_id", currentID)
+                return versionsLoadedMsg{versions: versions, currentVersionID: currentID}</span>
+        }
+}
+
+// rollbackToVersionCmd выполняет откат к выбранной версии.
+func rollbackToVersionCmd(m *model, versionID int64) tea.Cmd <span class="cov0" title="0">{
+        return func() tea.Msg </span><span class="cov0" title="0">{
+                if m.apiClient == nil </span><span class="cov0" title="0">{
+                        return rollbackErrorMsg{err: errors.New("API клиент не инициализирован")}
+                }</span>
+
+                <span class="cov0" title="0">if m.authToken == "" </span><span class="cov0" title="0">{
+                        return rollbackErrorMsg{err: errors.New("требуется авторизация")}
+                }</span>
+
+                <span class="cov0" title="0">ctx := context.Background()
+                err := m.apiClient.RollbackToVersion(ctx, versionID)
+                if err != nil </span><span class="cov0" title="0">{
+                        slog.Error("Ошибка отката к версии", "version_id", versionID, "error", err)
+                        return rollbackErrorMsg{err: err}
+                }</span>
+
+                <span class="cov0" title="0">slog.Info("Успешный откат к версии", "version_id", versionID)
+                return rollbackSuccessMsg{versionID: versionID}</span>
+        }
+}
+
+// --- Функции обработки экрана версий --- //
+
+// handleVersionRollbackConfirm обрабатывает ввод в режиме подтверждения отката.
+func (m *model) handleVersionRollbackConfirm(keyMsg tea.KeyMsg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+        switch keyMsg.String() </span>{
+        case keyEnter:<span class="cov0" title="0">
+                // Подтверждение отката
+                if m.selectedVersionForRollback != nil </span><span class="cov0" title="0">{
+                        m.confirmRollback = false
+                        m.rollbackError = nil
+                        // Добавляем ClearScreen
+                        return m, tea.Batch(tea.ClearScreen, rollbackToVersionCmd(m, m.selectedVersionForRollback.ID))
+                }</span>
+        case keyEsc, keyBack:<span class="cov0" title="0">
+                // Отмена отката
+                m.confirmRollback = false
+                m.selectedVersionForRollback = nil
+                // Добавляем ClearScreen
+                return m, tea.ClearScreen</span>
+        }
+        <span class="cov0" title="0">return m, nil</span>
+}
+
+// handleVersionRollbackError обрабатывает ввод в режиме отображения ошибки отката.
+func (m *model) handleVersionRollbackError(keyMsg tea.KeyMsg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+        if keyMsg.String() == keyEsc || keyMsg.String() == keyBack || keyMsg.String() == keyEnter </span><span class="cov0" title="0">{
+                m.rollbackError = nil
+                // Добавляем ClearScreen
+                return m, tea.ClearScreen
+        }</span>
+        <span class="cov0" title="0">return m, nil</span>
+}
+
+// handleVersionListKeys обрабатывает основные клавиши на экране списка версий.
+func (m *model) handleVersionListKeys(keyMsg tea.KeyMsg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+        switch keyMsg.String() </span>{
+        case keyEnter:<span class="cov0" title="0">
+                // Выбор версии для отката
+                selectedItem := m.versionList.SelectedItem()
+                if item, itemOk := selectedItem.(versionItem); itemOk </span><span class="cov0" title="0">{ // Используем itemOk
+                        if item.isCurrent </span><span class="cov0" title="0">{
+                                // Нельзя откатиться к текущей версии
+                                return m.setStatusMessage("Это уже текущая версия")
+                        }</span>
+                        <span class="cov0" title="0">m.selectedVersionForRollback = &amp;item.version
+                        m.confirmRollback = true
+                        // Добавляем ClearScreen при переходе к подтверждению
+                        return m, tea.ClearScreen</span>
+                }
+        case keyEsc, keyBack:<span class="cov0" title="0">
+                // Возврат к экрану синхронизации
+                m.state = syncServerScreen
+                return m, tea.ClearScreen</span>
+        case "r":<span class="cov0" title="0">
+                // Обновление списка версий
+                m.loadingVersions = true
+                return m, loadVersionsCmd(m)</span>
+        case "l":<span class="cov0" title="0">
+                // Переход к экрану логина/регистрации
+                m.state = loginRegisterChoiceScreen
+                return m, tea.ClearScreen</span>
+        }
+        <span class="cov0" title="0">return m, nil</span> // Клавиша не обработана здесь
+}
+
+// viewVersionListScreen отображает экран со списком версий.
+func (m *model) viewVersionListScreen() string <span class="cov0" title="0">{
+        if m.loadingVersions </span><span class="cov0" title="0">{
+                return "Загрузка списка версий..."
+        }</span>
+
+        <span class="cov0" title="0">if m.confirmRollback &amp;&amp; m.selectedVersionForRollback != nil </span><span class="cov0" title="0">{
+                // Показываем экран подтверждения отката
+                confirmMsg := fmt.Sprintf(
+                        "Вы уверены, что хотите откатиться к версии #%d?\n\n"+
+                                "Время изменения: %s\n\n"+
+                                "Enter - подтвердить, Esc - отменить",
+                        m.selectedVersionForRollback.ID,
+                        formatTime(m.selectedVersionForRollback.ContentModifiedAt),
+                )
+                return confirmMsg
+        }</span>
+
+        <span class="cov0" title="0">if m.rollbackError != nil </span><span class="cov0" title="0">{
+                // Показываем ошибку отката
+                return fmt.Sprintf("Ошибка отката: %v\n\nНажмите Esc для возврата к списку версий", m.rollbackError)
+        }</span>
+
+        <span class="cov0" title="0">if len(m.versions) == 0 </span><span class="cov0" title="0">{
+                return "История версий пуста.\n\nПосле успешной синхронизации здесь появятся версии."
+        }</span>
+
+        // Обычный показ списка версий
+        <span class="cov0" title="0">return m.versionList.View()</span>
+}
+
+// updateVersionListScreen обрабатывает сообщения для экрана списка версий.
+func (m *model) updateVersionListScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+        var cmd tea.Cmd
+        var cmds []tea.Cmd
+
+        // Обработка сообщений клавиатуры
+        if keyMsg, ok := msg.(tea.KeyMsg); ok </span><span class="cov0" title="0">{
+                // Если показывается экран подтверждения
+                if m.confirmRollback </span><span class="cov0" title="0">{
+                        return m.handleVersionRollbackConfirm(keyMsg)
+                }</span>
+
+                // Если показывается ошибка отката
+                <span class="cov0" title="0">if m.rollbackError != nil </span><span class="cov0" title="0">{
+                        return m.handleVersionRollbackError(keyMsg)
+                }</span>
+
+                // Стандартная обработка клавиш для списка версий
+                <span class="cov0" title="0">model, keyCmd := m.handleVersionListKeys(keyMsg)
+                // Если клавиша была обработана в handleVersionListKeys, она вернет команду
+                if keyCmd != nil </span><span class="cov0" title="0">{
+                        return model, keyCmd
+                }</span>
+                // Если клавиша не была обработана выше, передаем ее списку
+        }
+
+        // Обработка обновлений списка (скроллинг и т.д.)
+        <span class="cov0" title="0">m.versionList, cmd = m.versionList.Update(msg)
+        cmds = append(cmds, cmd)
+        return m, tea.Batch(cmds...)</span>
+}
+
+// handleVersionsLoadedMsg обрабатывает сообщение о загруженных версиях.
+func handleVersionsLoadedMsg(m *model, msg versionsLoadedMsg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+        m.loadingVersions = false
+        m.versions = msg.versions
+
+        // Преобразуем модели в версии для списка и отмечаем текущую
+        var items []list.Item
+        currentVersionID := msg.currentVersionID // Используем ID из сообщения
+
+        // Пытаемся определить текущую версию, если ID из сообщения 0 или его нет (для обратной совместимости?)
+        if currentVersionID == 0 &amp;&amp; m.serverMeta != nil </span><span class="cov0" title="0">{
+                currentVersionID = m.serverMeta.ID
+                slog.Warn("currentVersionID из API = 0, используем ID из serverMeta", "serverMeta.ID", currentVersionID)
+        }</span>
+
+        <span class="cov0" title="0">for _, v := range m.versions </span><span class="cov0" title="0">{
+                items = append(items, versionItem{
+                        version:   v,
+                        isCurrent: v.ID == currentVersionID,
+                })
+        }</span>
+
+        // Обновляем список и получаем команду от него
+        <span class="cov0" title="0">cmd := m.versionList.SetItems(items) // Не игнорируем команду
+
+        // Добавляем ClearScreen для очистки артефактов
+        return m, tea.Batch(cmd, tea.ClearScreen)</span>
+}
+
+// handleVersionsLoadErrorMsg обрабатывает ошибку загрузки версий.
+func handleVersionsLoadErrorMsg(m *model, msg versionsLoadErrorMsg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+        m.loadingVersions = false
+        // Проверяем, является ли ошибка ошибкой авторизации
+        if errors.Is(msg.err, api.ErrAuthorization) </span><span class="cov0" title="0">{
+                // Не меняем состояние здесь, т.к. мы уже на экране версий,
+                // но даем пользователю понять, что делать (нажать 'l')
+                newM, statusCmd := m.setStatusMessage("Ошибка авторизации. Токен истек? Попробуйте войти заново (L).")
+                return newM, tea.Batch(statusCmd, tea.ClearScreen) // Добавляем ClearScreen
+        }</span>
+        // Иначе показываем общую ошибку
+        // Возвращаем результат setStatusMessage, который включает команду
+        <span class="cov0" title="0">newM, statusCmd := m.setStatusMessage(fmt.Sprintf("Ошибка загрузки версий: %v", msg.err))
+        // Добавляем ClearScreen и сюда
+        return newM, tea.Batch(statusCmd, tea.ClearScreen)</span>
+}
+
+// handleRollbackSuccessMsg обрабатывает успешный откат к версии.
+func handleRollbackSuccessMsg(m *model, msg rollbackSuccessMsg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+        // После успешного отката нужно принудительно скачать новую текущую версию
+        statusText := fmt.Sprintf("Откат к версии #%d успешен. Загрузка...", msg.versionID)
+        newM, statusCmd := m.setStatusMessage(statusText)
+
+        // Заменяем startSyncCmd на downloadVaultCmd для принудительного скачивания
+        return newM, tea.Batch(statusCmd, tea.ClearScreen, downloadVaultCmd(m))
+}</span>
+
+// handleRollbackErrorMsg обрабатывает ошибку отката.
+func handleRollbackErrorMsg(m *model, msg rollbackErrorMsg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+        // Проверяем, является ли ошибка ошибкой авторизации
+        if errors.Is(msg.err, api.ErrAuthorization) </span><span class="cov0" title="0">{
+                m.state = loginRegisterChoiceScreen // Переходим на экран выбора входа/регистрации
+                newM, statusCmd := m.setStatusMessage("Сессия истекла. Пожалуйста, войдите снова (L).")
+                return newM, tea.Batch(statusCmd, tea.ClearScreen)
+        }</span>
+        // Иначе устанавливаем ошибку для отображения на экране версий
+        <span class="cov0" title="0">m.rollbackError = msg.err
+        // Добавляем ClearScreen при показе ошибки
+        return m, tea.ClearScreen</span>
+}
+
+// Вспомогательная функция для форматирования времени.
+func formatTime(t *time.Time) string <span class="cov0" title="0">{
+        if t == nil </span><span class="cov0" title="0">{
+                return "неизвестно"
+        }</span>
+        <span class="cov0" title="0">return t.Format("2006-01-02 15:04:05")</span>
+}
+</pre>
+		
+		<pre class="file" id="file23" style="display: none">package tui
 
 import (
         "github.com/charmbracelet/bubbles/textinput"
@@ -3410,7 +4003,7 @@ func (m *model) viewWelcomeScreen() string <span class="cov0" title="0">{
 }</span>
 </pre>
 		
-		<pre class="file" id="file23" style="display: none">package tui
+		<pre class="file" id="file24" style="display: none">package tui
 
 import (
         "fmt"
@@ -3424,6 +4017,7 @@ import (
         "github.com/gofrs/flock"
 
         "github.com/maynagashev/gophkeeper/client/internal/api" // Импортируем пакет API клиента
+        // Импортируем пакет models для использования в debug info.
 )
 
 const (
@@ -3455,107 +4049,152 @@ func (m *model) setStatusMessage(status string) (tea.Model, tea.Cmd) <span class
         return m, cmd</span>
 }
 
-// View отрисовывает пользовательский интерфейс.
-//
-//nolint:funlen
-func (m *model) View() string <span class="cov0" title="0">{
-        var mainContent string
-        var help string
-
+// getMainContentView возвращает основное содержимое для текущего состояния.
+func (m *model) getMainContentView() string <span class="cov0" title="0">{
         switch m.state </span>{
         case welcomeScreen:<span class="cov0" title="0">
-                mainContent = m.viewWelcomeScreen()
-                help = "(Enter - продолжить, Ctrl+C/q - выход)"</span>
+                return m.viewWelcomeScreen()</span>
         case passwordInputScreen:<span class="cov0" title="0">
-                mainContent = m.viewPasswordInputScreen()
-                help = "(Enter - подтвердить, Ctrl+C - выход)"</span>
+                return m.viewPasswordInputScreen()</span>
         case newKdbxPasswordScreen:<span class="cov0" title="0">
-                mainContent = m.viewNewKdbxPasswordScreen()
-                help = "(Tab - сменить поле, Enter - создать, Esc/Ctrl+C - выход)"</span>
+                return m.viewNewKdbxPasswordScreen()</span>
         case entryListScreen:<span class="cov0" title="0">
-                mainContent = m.entryList.View()
-                help = "(↑/↓, Enter - детали, / - поиск, a - доб, s - синхр, l - логин, Ctrl+S - сохр, q - вых)"</span>
+                return m.entryList.View()</span>
         case entryDetailScreen:<span class="cov0" title="0">
-                mainContent = m.viewEntryDetailScreen()
-                help = "(e - ред., Ctrl+S - сохр., Esc/b - назад)"</span>
+                return m.viewEntryDetailScreen()</span>
         case entryEditScreen:<span class="cov0" title="0">
-                mainContent = m.viewEntryEditScreen()
-                help = "(Tab/↑/↓, Enter - сохр., Esc - отмена, ^O - влож+, ^D - влож-)"</span>
+                return m.viewEntryEditScreen()</span>
         case entryAddScreen:<span class="cov0" title="0">
-                mainContent = m.viewEntryAddScreen()
-                help = "(Tab/↑/↓, Enter - доб., ^O - влож+, Esc - отмена)"</span>
+                return m.viewEntryAddScreen()</span>
         case attachmentListDeleteScreen:<span class="cov0" title="0">
-                mainContent = m.viewAttachmentListDeleteScreen()
-                help = "(↑/↓ - навигация, Enter/d - удалить, Esc/b - отмена)"</span>
+                return m.viewAttachmentListDeleteScreen()</span>
         case attachmentPathInputScreen:<span class="cov0" title="0">
-                mainContent = m.viewAttachmentPathInputScreen()
-                help = "(Enter - подтвердить, Esc - отмена)"</span>
+                return m.viewAttachmentPathInputScreen()</span>
         case syncServerScreen:<span class="cov0" title="0">
-                mainContent = m.viewSyncServerScreen()
-                help = "(↑/↓ - навигация, Enter - выбрать, Esc/b - назад)"</span>
+                return m.viewSyncServerScreen()</span>
         case serverURLInputScreen:<span class="cov0" title="0">
-                mainContent = m.viewServerURLInputScreen()
-                help = "(Enter - подтвердить, Esc - назад)"</span>
+                return m.viewServerURLInputScreen()</span>
         case loginRegisterChoiceScreen:<span class="cov0" title="0">
-                mainContent = m.viewLoginRegisterChoiceScreen()
-                help = "(R - регистрация, L - вход, Esc/b - назад)"</span>
+                return m.viewLoginRegisterChoiceScreen()</span>
         case loginScreen:<span class="cov0" title="0">
-                mainContent = m.viewLoginScreen()
-                help = "(Tab - след. поле, Enter - войти, Esc - назад)"</span>
+                return m.viewLoginScreen()</span>
         case registerScreen:<span class="cov0" title="0">
-                mainContent = m.viewRegisterScreen()
-                help = "(Tab - след. поле, Enter - зарегистрироваться, Esc - назад)"</span>
+                return m.viewRegisterScreen()</span>
+        case versionListScreen:<span class="cov0" title="0">
+                return m.viewVersionListScreen()</span>
         default:<span class="cov0" title="0">
-                mainContent = "Неизвестное состояние!"
-                if m.debugMode </span><span class="cov0" title="0">{
-                        help = "State: " + m.state.String()
-                }</span> else<span class="cov0" title="0"> {
-                        help = "Unknown state"
-                }</span>
+                return "Неизвестное состояние!"</span>
         }
+}
 
-        // Добавляем отладочную информацию, если включен debugMode
-        <span class="cov0" title="0">if m.debugMode </span><span class="cov0" title="0">{
-                var debugInfo strings.Builder
-                debugInfo.WriteString(" [State: " + m.state.String() + "]\n")
-                debugInfo.WriteString(" [URL: " + m.serverURL + "]\n")
-                // Выводим сам токен (или пустоту, если его нет)
-                debugInfo.WriteString(" [Token: " + m.authToken + "]")
-                help = help + "\n---\nОтладка:\n" + debugInfo.String()
+// Helper function to get the main content and help string based on the state.
+func (m *model) getContentAndHelp() (string, string) <span class="cov0" title="0">{
+        mainContent := m.getMainContentView()
+        // Используем карту из модели
+        help, ok := m.helpTextMap[m.state]
+        if !ok </span><span class="cov0" title="0">{
+                help = "Unknown state" // Default help for unknown state
+        }</span>
+        <span class="cov0" title="0">return mainContent, help</span>
+}
+
+// getDBModTimeString возвращает отформатированную строку времени модификации для БД.
+func (m *model) getDBModTimeString() string <span class="cov0" title="0">{
+        // Предполагаем, что db, Content и Root проверены перед вызовом
+        if len(m.db.Content.Root.Groups) == 0 </span><span class="cov0" title="0">{
+                return "&lt;not set&gt;" // No groups to get time from
+        }</span>
+        <span class="cov0" title="0">rootGroup := &amp;m.db.Content.Root.Groups[0]
+        if rootGroup.Times.LastModificationTime != nil </span><span class="cov0" title="0">{
+                return rootGroup.Times.LastModificationTime.Time.Format(time.RFC3339) + " (group0 mod)"
+        }</span>
+        <span class="cov0" title="0">if rootGroup.Times.CreationTime != nil </span><span class="cov0" title="0">{
+                return rootGroup.Times.CreationTime.Time.Format(time.RFC3339) + " (group0 creation)"
+        }</span>
+        <span class="cov0" title="0">return "&lt;not set&gt;"</span>
+}
+
+// getDBDebugInfo генерирует отладочную информацию, связанную с базой данных.
+func (m *model) getDBDebugInfo() string <span class="cov0" title="0">{
+        if m.db == nil </span><span class="cov0" title="0">{
+                return " [DB: not loaded]\n"
+        }</span>
+        <span class="cov0" title="0">if m.db.Content == nil || m.db.Content.Root == nil || m.db.Content.Meta == nil </span><span class="cov0" title="0">{
+                return " [DB: Content, Root or Meta missing]\n"
         }</span>
 
-        // Добавляем статус сохранения или Read-Only, если он есть и мы не на определенных экранах
-        <span class="cov0" title="0">statusLine := ""
+        <span class="cov0" title="0">var dbDebugInfo strings.Builder
+        dbDebugInfo.WriteString(fmt.Sprintf(" [DB Name: %s]\n", m.db.Content.Meta.DatabaseName))
+        modTimeStr := m.getDBModTimeString()
+        dbDebugInfo.WriteString(fmt.Sprintf(" [DB ModTime: %s]\n", modTimeStr))
+        return dbDebugInfo.String()</span>
+}
+
+// Helper function to generate the debug info string.
+func (m *model) getDebugInfoString() string <span class="cov0" title="0">{
+        var debugInfo strings.Builder
+        debugInfo.WriteString(fmt.Sprintf(" [State: %s]\n", m.state.String()))
+        debugInfo.WriteString(fmt.Sprintf(" [URL: %s]\n", m.serverURL))
+        debugInfo.WriteString(fmt.Sprintf(" [Token: %s]\n", m.authToken)) // Keep showing token in debug
+        debugInfo.WriteString(fmt.Sprintf(" [Lock Acquired: %t]\n", m.lockAcquired))
+
+        // Добавляем информацию о БД через helper
+        dbDebugInfo := m.getDBDebugInfo()
+        debugInfo.WriteString(dbDebugInfo)
+
+        return debugInfo.String()
+}</span>
+
+// View отрисовывает пользовательский интерфейс.
+func (m *model) View() string <span class="cov0" title="0">{
+        mainContent, help := m.getContentAndHelp()
+
+        // --- Формируем подвал (статус + отладка) --- //
+        var footer strings.Builder
+
+        // Добавляем статус, если он есть
         readOnlyIndicator := ""
         if m.readOnlyMode </span><span class="cov0" title="0">{
                 readOnlyIndicator = " [Read-Only]"
         }</span>
-        <span class="cov0" title="0">displayStatus := (m.savingStatus != "" || m.readOnlyMode) &amp;&amp;
-                m.state != welcomeScreen &amp;&amp;
-                m.state != passwordInputScreen &amp;&amp;
-                m.state != newKdbxPasswordScreen &amp;&amp;
-                m.state != attachmentPathInputScreen
+        <span class="cov0" title="0">displayStatus := m.savingStatus != "" || m.readOnlyMode
         if displayStatus </span><span class="cov0" title="0">{
-                statusLine = "\n" + m.savingStatus + readOnlyIndicator
+                footer.WriteString("\n") // Перенос перед статусом
+                footer.WriteString(m.savingStatus)
+                footer.WriteString(readOnlyIndicator)
         }</span>
 
+        // Добавляем отладку, если включен режим
+        <span class="cov0" title="0">if m.debugMode </span><span class="cov0" title="0">{
+                // Убедимся, что help для неизвестного состояния установлен, если нужно
+                if help == "Unknown state" </span><span class="cov0" title="0">{
+                        help = fmt.Sprintf("State: %s", m.state.String())
+                }</span>
+                // Добавляем разделитель и отладку
+                <span class="cov0" title="0">footer.WriteString("\n\n---\nОтладка:\n") // Двойной перенос перед отладкой
+                footer.WriteString(m.getDebugInfoString())</span>
+        }
+
         // Собираем финальный вывод
-        // Применяем общий стиль к основному контенту
         <span class="cov0" title="0">styledContent := m.docStyle.Render(mainContent)
-        // Собираем все вместе, всегда добавляя перенос строки перед help
-        return fmt.Sprintf("%s\n%s\n%s", styledContent, help, statusLine)</span>
+        // Сначала основной контент, потом помощь, потом весь подвал
+        return fmt.Sprintf("%s\n%s%s", styledContent, help, footer.String())</span>
 }
 
 // Start запускает TUI приложение.
-func Start(kdbxPath string, debugMode bool) <span class="cov0" title="0">{
-        // Создаем начальную модель, передавая флаг
-        m := initModel(kdbxPath, debugMode)
-
+func Start(kdbxPath string, debugMode bool, serverURL string) <span class="cov0" title="0">{
         // --- Инициализация API клиента ---
-        // TODO: Сделать URL конфигурируемым (флаг, env, KDBX)
-        m.apiClient = api.NewHTTPClient(defaultServerURL)
-        m.serverURL = defaultServerURL // Сохраняем URL в модели
-        slog.Info("API клиент инициализирован", "baseURL", defaultServerURL)
+        var apiClient api.Client // Объявляем переменную
+        if serverURL != "" </span><span class="cov0" title="0">{     // Создаем клиент, только если URL не пустой
+                apiClient = api.NewHTTPClient(serverURL)
+                slog.Info("API клиент инициализирован", "baseURL", serverURL)
+        }</span> else<span class="cov0" title="0"> {
+                slog.Warn("URL сервера не указан (--server-url), функции API будут недоступны.")
+                // apiClient остается nil
+        }</span>
+
+        // Создаем начальную модель, передавая флаг
+        <span class="cov0" title="0">m := initModel(kdbxPath, debugMode, serverURL, apiClient)
 
         // --- Реализация flock ---
         lockPath := kdbxPath + ".lock"
@@ -3630,16 +4269,19 @@ func (m *model) viewServerURLInputScreen() string <span class="cov0" title="0">{
 }</span>
 </pre>
 		
-		<pre class="file" id="file24" style="display: none">package tui
+		<pre class="file" id="file25" style="display: none">package tui
 
 import (
+        "errors"
         "fmt"
         "log/slog"
         "time"
 
         // Убедимся, что импорты на месте.
         tea "github.com/charmbracelet/bubbletea"
+        "github.com/maynagashev/gophkeeper/client/internal/api"
         "github.com/maynagashev/gophkeeper/client/internal/kdbx"
+        "github.com/tobischo/gokeepasslib/v3/wrappers"
 )
 
 // handleWindowSizeMsg обрабатывает изменение размера окна.
@@ -3650,9 +4292,10 @@ func handleWindowSizeMsg(m *model, msg tea.WindowSizeMsg) <span class="cov0" tit
         // Высота для основного списка записей
         entryListHeight := msg.Height - v - helpStatusHeightOffset // Используем константу
 
-        // Высота для меню синхронизации (учитываем строки statusInfo)
-        const statusInfoLines = 4
-        syncMenuHeight := msg.Height - v - statusInfoLines - 1 // -1 для небольшой прокладки/пагинатора
+        // Высота для меню синхронизации
+        // Статус занимает 3 строки + 1 строка разделитель = 4
+        const statusHeight = 4
+        syncMenuHeight := msg.Height - v - statusHeight
 
         m.entryList.SetSize(listWidth, entryListHeight)
         m.passwordInput.Width = msg.Width - passwordInputOffset
@@ -3682,8 +4325,8 @@ func handleDBMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) <span class="
                 newM, cmd := handleDBSaveErrorMsg(m, msg)
                 return newM, cmd, true</span>
         case clearStatusMsg:<span class="cov0" title="0">
-                newM := handleClearStatusMsg(m)
-                return newM, nil, true</span>
+                newM, cmd := handleClearStatusMsg(m)
+                return newM, cmd, true</span>
         case SyncError:<span class="cov0" title="0">
                 newM, cmd := handleSyncErrorMsg(m, msg)
                 return newM, cmd, true</span>
@@ -3718,23 +4361,36 @@ func handleErrorMsg(m *model, msg errMsg) tea.Model <span class="cov0" title="0"
 }</span>
 
 func handleDBSavedMsg(m *model) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
-        return m.setStatusMessage("Сохранено успешно!")
+        // Добавляем tea.ClearScreen в Batch после установки статуса
+        newM, statusCmd := m.setStatusMessage("Сохранено успешно!")
+        return newM, tea.Batch(statusCmd, tea.ClearScreen)
 }</span>
 
 func handleDBSaveErrorMsg(m *model, msg dbSaveErrorMsg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
         return m.setStatusMessage(fmt.Sprintf("Ошибка сохранения: %v", msg.err))
 }</span>
 
-func handleClearStatusMsg(m *model) tea.Model <span class="cov0" title="0">{
+func handleClearStatusMsg(m *model) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
         m.savingStatus = ""
-        m.statusTimer = nil
-        return m
+        m.statusTimer = nil // Обнуляем таймер (хотя он и так не используется для отмены)
+        // Возвращаем команду для принудительной перерисовки
+        return m, tea.ClearScreen
 }</span>
 
 func handleSyncErrorMsg(m *model, msg SyncError) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
         m.isSyncing = false
-        return m.setStatusMessage(fmt.Sprintf("Ошибка синхронизации: %v", msg.err))
-}</span>
+        // Проверяем на ошибку авторизации
+        if errors.Is(msg.err, api.ErrAuthorization) </span><span class="cov0" title="0">{
+                m.state = loginRegisterChoiceScreen // Переходим на экран выбора входа/регистрации
+                // Можно добавить очистку экрана, если нужно
+                newM, statusCmd := m.setStatusMessage("Сессия истекла. Пожалуйста, войдите снова (L).")
+                return newM, tea.Batch(statusCmd, tea.ClearScreen)
+        }</span>
+        // Иначе показываем общую ошибку синхронизации
+        // Добавляем ClearScreen и здесь
+        <span class="cov0" title="0">newM, statusCmd := m.setStatusMessage(fmt.Sprintf("Ошибка синхронизации: %v", msg.err))
+        return newM, tea.Batch(statusCmd, tea.ClearScreen)</span>
+}
 
 func handleSyncStartedMsg(m *model) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
         m.isSyncing = true
@@ -3777,7 +4433,9 @@ func handleLocalMetadataMsg(m *model, msg localMetadataMsg) (tea.Model, tea.Cmd)
 
 func handleSyncUploadSuccessMsg(m *model) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
         // TODO: Обновить время последней синхронизации в m
-        return m.setStatusMessage("Синхронизация завершена (загружено)")
+        newM, statusCmd := m.setStatusMessage("Синхронизация завершена (загружено)")
+        // Добавляем ClearScreen
+        return newM, tea.Batch(statusCmd, tea.ClearScreen)
 }</span>
 
 func handleSyncDownloadSuccessMsg(m *model, msg syncDownloadSuccessMsg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
@@ -3862,6 +4520,26 @@ func (m *model) processMetadataResults() (tea.Model, tea.Cmd) <span class="cov0"
         return newM, finalCmd</span>
 }
 
+// handleVersionMsg обрабатывает сообщения, связанные с версиями.
+func handleVersionMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) <span class="cov0" title="0">{
+        switch msg := msg.(type) </span>{
+        case versionsLoadedMsg:<span class="cov0" title="0">
+                newM, cmd := handleVersionsLoadedMsg(m, msg)
+                return newM, cmd, true</span>
+        case versionsLoadErrorMsg:<span class="cov0" title="0">
+                newM, cmd := handleVersionsLoadErrorMsg(m, msg)
+                return newM, cmd, true</span>
+        case rollbackSuccessMsg:<span class="cov0" title="0">
+                newM, cmd := handleRollbackSuccessMsg(m, msg)
+                return newM, cmd, true</span>
+        case rollbackErrorMsg:<span class="cov0" title="0">
+                newM, cmd := handleRollbackErrorMsg(m, msg)
+                return newM, cmd, true</span>
+        default:<span class="cov0" title="0">
+                return m, nil, false</span> // Не обработали сообщение этого типа
+        }
+}
+
 // handleAPIMsg обрабатывает сообщения от API клиента.
 func handleAPIMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) <span class="cov0" title="0">{
         switch msg := msg.(type) </span>{
@@ -3931,45 +4609,87 @@ func handleAPIMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) <span class=
         }
 }
 
+// canSave checks if the application is in a state where saving is allowed.
+func (m *model) canSave() bool <span class="cov0" title="0">{
+        return !m.readOnlyMode &amp;&amp; m.db != nil &amp;&amp; (m.state == entryListScreen || m.state == entryDetailScreen)
+}</span>
+
+// updateDBFromList updates the in-memory database (m.db) with data from the TUI list (m.entryList).
+func (m *model) updateDBFromList() int <span class="cov0" title="0">{
+        slog.Info("Начало обновления m.db перед сохранением")
+        items := m.entryList.Items()
+        updatedCount := 0
+        for _, item := range items </span><span class="cov0" title="0">{
+                listItem, ok := item.(entryItem)
+                if !ok </span><span class="cov0" title="0">{
+                        continue</span> // Skip if not an entryItem
+                }
+                // Находим соответствующую запись в m.db по UUID
+                <span class="cov0" title="0">dbEntryPtr := findEntryInDB(m.db, listItem.entry.UUID)
+                if dbEntryPtr != nil </span><span class="cov0" title="0">{
+                        // Обновляем найденную запись данными из элемента списка
+                        // Создаем копию перед присваиванием, чтобы не менять listItem
+                        entryToSave := deepCopyEntry(listItem.entry)
+                        *dbEntryPtr = entryToSave
+                        updatedCount++
+                }</span> else<span class="cov0" title="0"> {
+                        slog.Warn("Запись из списка не найдена в m.db", "uuid", listItem.entry.UUID)
+                }</span>
+        }
+        <span class="cov0" title="0">slog.Info("Обновление m.db завершено", "updated_count", updatedCount)
+        return updatedCount</span>
+}
+
+// updateRootModTime updates the LastModificationTime of the root group.
+func (m *model) updateRootModTime() <span class="cov0" title="0">{
+        if m.db == nil || m.db.Content == nil || m.db.Content.Root == nil </span><span class="cov0" title="0">{
+                slog.Warn("Не удалось обновить LastModificationTime: db, Content или Root is nil")
+                return
+        }</span>
+
+        <span class="cov0" title="0">now := time.Now().UTC()
+        modTimeWrapper := wrappers.TimeWrapper{Time: now}
+
+        // Обновляем время модификации первой (корневой) группы
+        if len(m.db.Content.Root.Groups) &gt; 0 </span><span class="cov0" title="0">{
+                rootGroup := &amp;m.db.Content.Root.Groups[0]
+                rootGroup.Times.LastModificationTime = &amp;modTimeWrapper // Присваиваем указатель
+                slog.Debug("Обновлено LastModificationTime корневой группы перед сохранением", "newTime", now)
+        }</span> else<span class="cov0" title="0"> {
+                slog.Warn("Не удалось обновить LastModificationTime: нет корневой группы")
+        }</span>
+}
+
+// handleSaveKeyPress handles the logic for the Ctrl+S key press.
+func (m *model) handleSaveKeyPress() (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+        if !m.canSave() </span><span class="cov0" title="0">{
+                return m, nil // Not in a state to save, or read-only
+        }</span>
+
+        <span class="cov0" title="0">m.savingStatus = "Подготовка к сохранению..."
+
+        // Update m.db from the list UI
+        m.updateDBFromList()
+
+        // Update the root modification time
+        m.updateRootModTime()
+
+        m.savingStatus = "Сохранение..."
+        slog.Info("Запуск сохранения KDBX", "path", m.kdbxPath)
+        // Use the stored password
+        return m, saveKdbxCmd(m.db, m.kdbxPath, m.password)</span>
+}
+
 // handleGlobalKeys обрабатывает глобальные сочетания клавиш.
 func handleGlobalKeys(m *model, msg tea.KeyMsg) (tea.Model, tea.Cmd, bool) <span class="cov0" title="0">{
         switch msg.String() </span>{
         case "ctrl+c":<span class="cov0" title="0">
                 return m, tea.Quit, true</span>
         case "ctrl+s":<span class="cov0" title="0">
-                // Сохраняем только из списка или деталей и если не Read-Only
-                if !m.readOnlyMode &amp;&amp; (m.state == entryListScreen || m.state == entryDetailScreen) &amp;&amp; m.db != nil </span><span class="cov0" title="0">{
-                        m.savingStatus = "Подготовка к сохранению..."
-                        slog.Info("Начало обновления m.db перед сохранением")
-
-                        // Проходим по всем элементам в списке интерфейса
-                        items := m.entryList.Items()
-                        updatedCount := 0
-                        for _, item := range items </span><span class="cov0" title="0">{
-                                if listItem, ok := item.(entryItem); ok </span><span class="cov0" title="0">{
-                                        // Находим соответствующую запись в m.db по UUID
-                                        dbEntryPtr := findEntryInDB(m.db, listItem.entry.UUID)
-                                        if dbEntryPtr != nil </span><span class="cov0" title="0">{
-                                                // Обновляем найденную запись данными из элемента списка
-                                                // Создаем копию перед присваиванием, чтобы не менять listItem
-                                                entryToSave := deepCopyEntry(listItem.entry)
-                                                *dbEntryPtr = entryToSave
-                                                updatedCount++
-                                        }</span> else<span class="cov0" title="0"> {
-                                                slog.Warn("Запись из списка не найдена в m.db", "uuid", listItem.entry.UUID)
-                                        }</span>
-                                }
-                        }
-                        <span class="cov0" title="0">slog.Info("Обновление m.db завершено", "updated_count", updatedCount)
-
-                        m.savingStatus = "Сохранение..."
-                        slog.Info("Запуск сохранения KDBX", "path", m.kdbxPath)
-                        // Используем сохраненный пароль
-                        return m, saveKdbxCmd(m.db, m.kdbxPath, m.password), true</span>
-                }
-                // Если сохранение не выполнено (не тот экран или read-only),
-                // то клавиша не считается обработанной глобально.
-                <span class="cov0" title="0">return m, nil, false</span>
+                // Delegate saving logic to a separate function
+                updatedModel, cmd := m.handleSaveKeyPress()
+                // Return true only if saving was actually attempted (canSave was true)
+                return updatedModel, cmd, m.canSave()</span>
         default:<span class="cov0" title="0">
                 // Клавиша не является глобальной
                 return m, nil, false</span>
@@ -4011,6 +4731,12 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov0" titl
                 if handled </span><span class="cov0" title="0">{
                         return updatedModel, cmd
                 }</span>
+
+                // Затем пытаемся обработать сообщения версий
+                <span class="cov0" title="0">updatedModel, cmd, handled = handleVersionMsg(m, msg)
+                if handled </span><span class="cov0" title="0">{
+                        return updatedModel, cmd
+                }</span>
         }
 
         // == Обработка сообщения в зависимости от текущего состояния ==
@@ -4045,6 +4771,8 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov0" titl
                 updatedModel, stateCmd = m.updateLoginScreen(msg)</span>
         case registerScreen:<span class="cov0" title="0">
                 updatedModel, stateCmd = m.updateRegisterScreen(msg)</span>
+        case versionListScreen:<span class="cov0" title="0">
+                updatedModel, stateCmd = m.updateVersionListScreen(msg)</span>
         default:<span class="cov0" title="0">
                 // Неизвестное состояние - ничего не делаем, updatedModel остается nil?
                 // Это нужно обработать: если updatedModel не был присвоен,
@@ -4067,7 +4795,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov0" titl
 }
 </pre>
 		
-		<pre class="file" id="file25" style="display: none">package tui
+		<pre class="file" id="file26" style="display: none">package tui
 
 import (
         "github.com/tobischo/gokeepasslib/v3"

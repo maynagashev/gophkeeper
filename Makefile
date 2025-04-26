@@ -1,6 +1,6 @@
 # Корневой Makefile для управления модулями GophKeeper
 
-.PHONY: all server client build build-client build-server clean clean-client clean-server lint lint-client lint-server test test-client test-server test-coverage
+.PHONY: all server client build build-client build-server clean clean-client clean-server lint lint-client lint-server test test-client test-server test-coverage test-coverage-client test-coverage-server
 
 # Цель по умолчанию: запустить линтеры и тесты
 all: lint test
@@ -62,10 +62,17 @@ test-server:
 	@echo "Тестирование сервера..."
 	@make -C server test
 
-# --- Покрытие тестами (только для клиента пока) --- #
-test-coverage:
+# --- Покрытие тестами --- #
+test-coverage: test-coverage-client test-coverage-server
+	@echo "Проверка покрытия тестами завершена для всех модулей."
+
+test-coverage-client:
 	@echo "Генерация отчета о покрытии для клиента..."
 	@make -C client test-coverage
+
+test-coverage-server:
+	@echo "Генерация отчета о покрытии для сервера..."
+	@make -C server test-coverage
 
 migrate:
 	@echo "Применение миграций..."
