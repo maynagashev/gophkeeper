@@ -65,7 +65,7 @@
 				
 				<option value="file4">github.com/maynagashev/gophkeeper/client/internal/tui/commands.go (86.0%)</option>
 				
-				<option value="file5">github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go (0.0%)</option>
+				<option value="file5">github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go (14.2%)</option>
 				
 				<option value="file6">github.com/maynagashev/gophkeeper/client/internal/tui/input_helpers.go (87.8%)</option>
 				
@@ -1318,42 +1318,42 @@ type versionItem struct {
         isCurrent bool // Флаг текущей активной версии
 }
 
-func (i versionItem) Title() string <span class="cov0" title="0">{
+func (i versionItem) Title() string <span class="cov8" title="1">{
         // Формат: ID (+ "Текущая" если активная версия)
         title := fmt.Sprintf("Версия #%d", i.version.ID)
-        if i.isCurrent </span><span class="cov0" title="0">{
+        if i.isCurrent </span><span class="cov8" title="1">{
                 title += " (Текущая)"
         }</span>
-        <span class="cov0" title="0">return title</span>
+        <span class="cov8" title="1">return title</span>
 }
 
-func (i versionItem) Description() string <span class="cov0" title="0">{
+func (i versionItem) Description() string <span class="cov8" title="1">{
         description := ""
 
         // Добавляем время создания, если есть
-        if i.version.ContentModifiedAt != nil </span><span class="cov0" title="0">{
+        if i.version.ContentModifiedAt != nil </span><span class="cov8" title="1">{
                 timeStr := i.version.ContentModifiedAt.Format(time.RFC3339)
                 description += fmt.Sprintf("Изменена: %s", timeStr)
         }</span>
 
         // Добавляем размер, если есть
-        <span class="cov0" title="0">if i.version.SizeBytes != nil </span><span class="cov0" title="0">{
-                if description != "" </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if i.version.SizeBytes != nil </span><span class="cov8" title="1">{
+                if description != "" </span><span class="cov8" title="1">{
                         description += " | "
                 }</span>
-                <span class="cov0" title="0">sizeKB := float64(*i.version.SizeBytes) / bytesPerKilobyte // Используем константу
+                <span class="cov8" title="1">sizeKB := float64(*i.version.SizeBytes) / bytesPerKilobyte // Используем константу
                 description += fmt.Sprintf("Размер: %.2f KB", sizeKB)</span>
         }
 
         // Если ничего нет, просто выводим ID
-        <span class="cov0" title="0">if description == "" </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if description == "" </span><span class="cov8" title="1">{
                 description = fmt.Sprintf("ID: %d", i.version.ID)
         }</span>
 
-        <span class="cov0" title="0">return description</span>
+        <span class="cov8" title="1">return description</span>
 }
 
-func (i versionItem) FilterValue() string <span class="cov0" title="0">{
+func (i versionItem) FilterValue() string <span class="cov8" title="1">{
         // Фильтрация не используется для этого списка, но интерфейс требует реализации
         return i.Title()
 }</span>

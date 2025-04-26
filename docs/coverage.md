@@ -28,8 +28,8 @@ make lint
 go test -coverprofile=logs/coverage.out ./...
 	github.com/maynagashev/gophkeeper/client/cmd/gophkeeper		coverage: 0.0% of statements
 ok  	github.com/maynagashev/gophkeeper/client/internal/api	0.018s	coverage: 84.6% of statements
-ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	1.256s	coverage: 94.6% of statements
-ok  	github.com/maynagashev/gophkeeper/client/internal/tui	0.071s	coverage: 24.4% of statements
+ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	0.690s	coverage: 94.6% of statements
+ok  	github.com/maynagashev/gophkeeper/client/internal/tui	0.052s	coverage: 25.3% of statements
 go tool cover -html=logs/coverage.out -o logs/coverage.html
 go tool cover -func=logs/coverage.out | tee logs/coverage.log
 github.com/maynagashev/gophkeeper/client/cmd/gophkeeper/main.go:33:				setupLogging					0.0%
@@ -67,9 +67,9 @@ github.com/maynagashev/gophkeeper/client/internal/tui/commands.go:206:				fetchL
 github.com/maynagashev/gophkeeper/client/internal/tui/commands.go:229:				uploadVaultCmd					81.2%
 github.com/maynagashev/gophkeeper/client/internal/tui/commands.go:288:				downloadVaultCmd				90.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/commands.go:323:				applyUIChangesToDB				100.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:36:			Title						0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:45:			Description					0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:71:			FilterValue					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:36:			Title						100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:45:			Description					100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:71:			FilterValue					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:77:			initPasswordInput				0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:88:			initEntryList					0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:118:			initAttachmentDeleteList			0.0%
@@ -233,5 +233,5 @@ github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:46:				deepCopyEn
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:51:				FindEntryInDB					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:60:				findEntryInDB					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:65:				FindEntryInGroups				100.0%
-total:												(statements)					32.4%
+total:												(statements)					33.2%
 ```

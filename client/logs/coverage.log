@@ -33,9 +33,9 @@ github.com/maynagashev/gophkeeper/client/internal/tui/commands.go:206:				fetchL
 github.com/maynagashev/gophkeeper/client/internal/tui/commands.go:229:				uploadVaultCmd					81.2%
 github.com/maynagashev/gophkeeper/client/internal/tui/commands.go:288:				downloadVaultCmd				90.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/commands.go:323:				applyUIChangesToDB				100.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:36:			Title						0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:45:			Description					0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:71:			FilterValue					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:36:			Title						100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:45:			Description					100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:71:			FilterValue					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:77:			initPasswordInput				0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:88:			initEntryList					0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:118:			initAttachmentDeleteList			0.0%
@@ -199,4 +199,4 @@ github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:46:				deepCopyEn
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:51:				FindEntryInDB					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:60:				findEntryInDB					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:65:				FindEntryInGroups				100.0%
-total:												(statements)					32.4%
+total:												(statements)					33.2%
