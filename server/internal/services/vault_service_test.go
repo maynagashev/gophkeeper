@@ -247,8 +247,8 @@ func TestVaultService_GetVaultMetadata(t *testing.T) {
 				).Return(nil, nil, errors.New("db error")).Once()
 			},
 			expectedMetadata: nil,
-			expectedErr:      errors.New("внутренняя ошибка сервера при получении метаданных"), // Ошибка из сервиса
-			checkErrorIs:     false,                                                            // Используем Contains для этой общей ошибки
+			expectedErr:      errors.New("внутренняя ошибка сервера при получении метаданных"),
+			checkErrorIs:     false,
 		},
 	}
 
@@ -338,9 +338,9 @@ func TestVaultService_UploadVault(t *testing.T) {
 				// 1. Загрузка файла
 				mockFileStorage.On(
 					"UploadFile",
-					mock.Anything,                 // ctx
-					mock.AnythingOfType("string"), // Object key
-					mock.Anything,                 // Reader (TeeReader)
+					mock.Anything,
+					mock.AnythingOfType("string"),
+					mock.Anything,
 					testSize,
 					testContentType,
 				).Return(nil).Once()
@@ -349,7 +349,11 @@ func TestVaultService_UploadVault(t *testing.T) {
 				mockSQL.ExpectBegin()
 
 				// 3. Проверка существования хранилища (для проверки конфликта)
-				mockVaultRepo.On("GetVaultWithCurrentVersionByUserID", mock.Anything, testUserID).Return(nil, nil, repository.ErrVaultNotFound).Once()
+				mockVaultRepo.On(
+					"GetVaultWithCurrentVersionByUserID",
+					mock.Anything,
+					testUserID,
+				).Return(nil, nil, repository.ErrVaultNotFound).Once()
 
 				// 4. Создание нового хранилища
 				mockVaultRepo.On("CreateVault", mock.Anything, mock.AnythingOfType("*models.Vault")).Return(testVaultID, nil).Once()
@@ -375,7 +379,14 @@ func TestVaultService_UploadVault(t *testing.T) {
 				mockSQL sqlmock.Sqlmock,
 			) {
 				// 1. Загрузка файла
-				mockFileStorage.On("UploadFile", mock.Anything, mock.AnythingOfType("string"), mock.Anything, testSize, testContentType).Return(nil).Once()
+				mockFileStorage.On(
+					"UploadFile",
+					mock.Anything,
+					mock.AnythingOfType("string"),
+					mock.Anything,
+					testSize,
+					testContentType,
+				).Return(nil).Once()
 
 				// 2. Начало транзакции
 				mockSQL.ExpectBegin()
@@ -384,8 +395,16 @@ func TestVaultService_UploadVault(t *testing.T) {
 				mockExistingVault := &models.Vault{ID: testVaultID, UserID: testUserID}
 				modTimeOlderCopy := testModTimeOlder // Используем старое время для существующей версии
 				serverChecksum := "server_checksum"  // Чексумма на сервере
-				mockExistingVersion := &models.VaultVersion{ContentModifiedAt: &modTimeOlderCopy, Checksum: &serverChecksum}
-				mockVaultRepo.On("GetVaultWithCurrentVersionByUserID", mock.Anything, testUserID).Return(mockExistingVault, mockExistingVersion, nil).Once()
+				mockExistingVersion := &models.VaultVersion{
+					ContentModifiedAt: &modTimeOlderCopy,
+					Checksum:          &serverChecksum,
+				}
+
+				mockVaultRepo.On(
+					"GetVaultWithCurrentVersionByUserID",
+					mock.Anything,
+					testUserID,
+				).Return(mockExistingVault, mockExistingVersion, nil).Once()
 
 				// 4. Создание новой версии
 				mockVersionRepo.On("CreateVersion", mock.Anything, expectedVersionMatcher).Return(testVersionID, nil).Once()
@@ -408,7 +427,14 @@ func TestVaultService_UploadVault(t *testing.T) {
 				mockSQL sqlmock.Sqlmock,
 			) {
 				// 1. Загрузка файла (всегда происходит сначала)
-				mockFileStorage.On("UploadFile", mock.Anything, mock.AnythingOfType("string"), mock.Anything, testSize, testContentType).Return(nil).Once()
+				mockFileStorage.On(
+					"UploadFile",
+					mock.Anything,
+					mock.AnythingOfType("string"),
+					mock.Anything,
+					testSize,
+					testContentType,
+				).Return(nil).Once()
 
 				// 2. Начало транзакции
 				mockSQL.ExpectBegin()
@@ -417,8 +443,15 @@ func TestVaultService_UploadVault(t *testing.T) {
 				mockExistingVault := &models.Vault{ID: testVaultID, UserID: testUserID}
 				modTimeServer := testModTime // Версия на сервере новее клиента
 				serverChecksum := "server_checksum"
-				mockExistingVersion := &models.VaultVersion{ContentModifiedAt: &modTimeServer, Checksum: &serverChecksum}
-				mockVaultRepo.On("GetVaultWithCurrentVersionByUserID", mock.Anything, testUserID).Return(mockExistingVault, mockExistingVersion, nil).Once()
+				mockExistingVersion := &models.VaultVersion{
+					ContentModifiedAt: &modTimeServer,
+					Checksum:          &serverChecksum,
+				}
+				mockVaultRepo.On(
+					"GetVaultWithCurrentVersionByUserID",
+					mock.Anything,
+					testUserID,
+				).Return(mockExistingVault, mockExistingVersion, nil).Once()
 
 				// 4. Откат транзакции из-за ошибки
 				mockSQL.ExpectRollback()
@@ -437,7 +470,14 @@ func TestVaultService_UploadVault(t *testing.T) {
 				mockSQL sqlmock.Sqlmock,
 			) {
 				// 1. Загрузка файла
-				mockFileStorage.On("UploadFile", mock.Anything, mock.AnythingOfType("string"), mock.Anything, testSize, testContentType).Return(nil).Once()
+				mockFileStorage.On(
+					"UploadFile",
+					mock.Anything,
+					mock.AnythingOfType("string"),
+					mock.Anything,
+					testSize,
+					testContentType,
+				).Return(nil).Once()
 
 				// 2. Начало транзакции
 				mockSQL.ExpectBegin()
@@ -446,8 +486,15 @@ func TestVaultService_UploadVault(t *testing.T) {
 				mockExistingVault := &models.Vault{ID: testVaultID, UserID: testUserID}
 				modTimeServer := testModTime                  // Время совпадает
 				serverChecksum := "different_server_checksum" // Чексумма отличается
-				mockExistingVersion := &models.VaultVersion{ContentModifiedAt: &modTimeServer, Checksum: &serverChecksum}
-				mockVaultRepo.On("GetVaultWithCurrentVersionByUserID", mock.Anything, testUserID).Return(mockExistingVault, mockExistingVersion, nil).Once()
+				mockExistingVersion := &models.VaultVersion{
+					ContentModifiedAt: &modTimeServer,
+					Checksum:          &serverChecksum,
+				}
+				mockVaultRepo.On(
+					"GetVaultWithCurrentVersionByUserID",
+					mock.Anything,
+					testUserID,
+				).Return(mockExistingVault, mockExistingVersion, nil).Once()
 
 				// 4. Транзакция откатывается из-за ошибки конфликта
 				mockSQL.ExpectRollback()
@@ -466,7 +513,14 @@ func TestVaultService_UploadVault(t *testing.T) {
 				mockSQL sqlmock.Sqlmock,
 			) {
 				// 1. Загрузка файла
-				mockFileStorage.On("UploadFile", mock.Anything, mock.AnythingOfType("string"), mock.Anything, testSize, testContentType).Return(nil).Once()
+				mockFileStorage.On(
+					"UploadFile",
+					mock.Anything,
+					mock.AnythingOfType("string"),
+					mock.Anything,
+					testSize,
+					testContentType,
+				).Return(nil).Once()
 
 				// 2. Начало транзакции
 				mockSQL.ExpectBegin()
@@ -481,8 +535,15 @@ func TestVaultService_UploadVault(t *testing.T) {
 				expectedChecksum := hex.EncodeToString(h.Sum(nil))
 				serverChecksum := expectedChecksum // Чексумма идентична!
 
-				mockExistingVersion := &models.VaultVersion{ContentModifiedAt: &modTimeServer, Checksum: &serverChecksum}
-				mockVaultRepo.On("GetVaultWithCurrentVersionByUserID", mock.Anything, testUserID).Return(mockExistingVault, mockExistingVersion, nil).Once()
+				mockExistingVersion := &models.VaultVersion{
+					ContentModifiedAt: &modTimeServer,
+					Checksum:          &serverChecksum,
+				}
+				mockVaultRepo.On(
+					"GetVaultWithCurrentVersionByUserID",
+					mock.Anything,
+					testUserID,
+				).Return(mockExistingVault, mockExistingVersion, nil).Once()
 
 				// 4. Транзакция фиксируется (коммитится), даже если мы ничего не делаем
 				mockSQL.ExpectCommit()
@@ -499,7 +560,14 @@ func TestVaultService_UploadVault(t *testing.T) {
 				_ sqlmock.Sqlmock,
 			) {
 				// 1. Ошибка при загрузке файла - файл не загружается, транзакция не начинается
-				mockFileStorage.On("UploadFile", mock.Anything, mock.AnythingOfType("string"), mock.Anything, testSize, testContentType).Return(errors.New("storage error")).Once()
+				mockFileStorage.On(
+					"UploadFile",
+					mock.Anything,
+					mock.AnythingOfType("string"),
+					mock.Anything,
+					testSize,
+					testContentType,
+				).Return(errors.New("storage error")).Once()
 
 				// Все остальные вызовы не должны произойти
 			},

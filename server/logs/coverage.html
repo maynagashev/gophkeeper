@@ -55,27 +55,29 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/maynagashev/gophkeeper/server/cmd/server/main.go (0.0%)</option>
+				<option value="file0">github.com/maynagashev/gophkeeper/server/cmd/server/flags.go (0.0%)</option>
 				
-				<option value="file1">github.com/maynagashev/gophkeeper/server/internal/handlers/auth.go (0.0%)</option>
+				<option value="file1">github.com/maynagashev/gophkeeper/server/cmd/server/main.go (0.0%)</option>
 				
-				<option value="file2">github.com/maynagashev/gophkeeper/server/internal/handlers/vault_handler.go (94.1%)</option>
+				<option value="file2">github.com/maynagashev/gophkeeper/server/internal/handlers/auth.go (0.0%)</option>
 				
-				<option value="file3">github.com/maynagashev/gophkeeper/server/internal/middleware/auth.go (0.0%)</option>
+				<option value="file3">github.com/maynagashev/gophkeeper/server/internal/handlers/vault_handler.go (92.2%)</option>
 				
-				<option value="file4">github.com/maynagashev/gophkeeper/server/internal/repository/db.go (0.0%)</option>
+				<option value="file4">github.com/maynagashev/gophkeeper/server/internal/middleware/auth.go (0.0%)</option>
 				
-				<option value="file5">github.com/maynagashev/gophkeeper/server/internal/repository/user_repository.go (0.0%)</option>
+				<option value="file5">github.com/maynagashev/gophkeeper/server/internal/repository/db.go (0.0%)</option>
 				
-				<option value="file6">github.com/maynagashev/gophkeeper/server/internal/repository/vault_repository.go (0.0%)</option>
+				<option value="file6">github.com/maynagashev/gophkeeper/server/internal/repository/user_repository.go (0.0%)</option>
 				
-				<option value="file7">github.com/maynagashev/gophkeeper/server/internal/repository/vault_version_repository.go (0.0%)</option>
+				<option value="file7">github.com/maynagashev/gophkeeper/server/internal/repository/vault_repository.go (0.0%)</option>
 				
-				<option value="file8">github.com/maynagashev/gophkeeper/server/internal/services/auth_service.go (0.0%)</option>
+				<option value="file8">github.com/maynagashev/gophkeeper/server/internal/repository/vault_version_repository.go (0.0%)</option>
 				
-				<option value="file9">github.com/maynagashev/gophkeeper/server/internal/services/vault_service.go (0.0%)</option>
+				<option value="file9">github.com/maynagashev/gophkeeper/server/internal/services/auth_service.go (0.0%)</option>
 				
-				<option value="file10">github.com/maynagashev/gophkeeper/server/internal/storage/minio_client.go (0.0%)</option>
+				<option value="file10">github.com/maynagashev/gophkeeper/server/internal/services/vault_service.go (52.2%)</option>
+				
+				<option value="file11">github.com/maynagashev/gophkeeper/server/internal/storage/minio_client.go (0.0%)</option>
 				
 				</select>
 			</div>
@@ -93,6 +95,90 @@
 
 import (
         "errors"
+        "flag"
+        "fmt"
+        "os"
+)
+
+const (
+        // Порт по умолчанию для HTTPS (непривилегированный).
+        defaultServerPort = "8443"
+
+        // Переменные окружения.
+        envServerPort  = "SERVER_PORT"
+        envTLSCertFile = "TLS_CERT_FILE"
+        envTLSKeyFile  = "TLS_KEY_FILE"
+        envDatabaseDSN = "DATABASE_DSN"
+)
+
+// config хранит конфигурацию сервера.
+type config struct {
+        Port        string
+        CertFile    string
+        KeyFile     string
+        DatabaseDSN string
+}
+
+// parseFlags разбирает флаги и переменные окружения, возвращает config или ошибку.
+func parseFlags() (*config, error) <span class="cov0" title="0">{
+        cfg := &amp;config{}
+
+        // Определяем флаги
+        flag.StringVar(&amp;cfg.Port, "port", "",
+                fmt.Sprintf("Порт для запуска HTTPS-сервера (env: %s, default: %s)", envServerPort, defaultServerPort))
+        flag.StringVar(&amp;cfg.CertFile, "cert-file", "",
+                fmt.Sprintf("Путь к файлу TLS-сертификата (env: %s)", envTLSCertFile))
+        flag.StringVar(&amp;cfg.KeyFile, "key-file", "",
+                fmt.Sprintf("Путь к файлу TLS-ключа (env: %s)", envTLSKeyFile))
+        flag.StringVar(&amp;cfg.DatabaseDSN, "database-dsn", "",
+                fmt.Sprintf("Строка подключения к базе данных (env: %s)", envDatabaseDSN))
+
+        // Парсим флаги
+        flag.Parse()
+
+        // Применяем переменные окружения, если флаги не заданы
+        if cfg.Port == "" </span><span class="cov0" title="0">{
+                if value, ok := os.LookupEnv(envServerPort); ok </span><span class="cov0" title="0">{
+                        cfg.Port = value
+                }</span> else<span class="cov0" title="0"> {
+                        cfg.Port = defaultServerPort
+                }</span>
+        }
+        <span class="cov0" title="0">if cfg.CertFile == "" </span><span class="cov0" title="0">{
+                if value, ok := os.LookupEnv(envTLSCertFile); ok </span><span class="cov0" title="0">{
+                        cfg.CertFile = value
+                }</span>
+        }
+        <span class="cov0" title="0">if cfg.KeyFile == "" </span><span class="cov0" title="0">{
+                if value, ok := os.LookupEnv(envTLSKeyFile); ok </span><span class="cov0" title="0">{
+                        cfg.KeyFile = value
+                }</span>
+        }
+        <span class="cov0" title="0">if cfg.DatabaseDSN == "" </span><span class="cov0" title="0">{
+                if value, ok := os.LookupEnv(envDatabaseDSN); ok </span><span class="cov0" title="0">{
+                        cfg.DatabaseDSN = value
+                }</span>
+        }
+
+        // Проверяем обязательные параметры
+        <span class="cov0" title="0">if cfg.CertFile == "" </span><span class="cov0" title="0">{
+                return nil, errors.New("не указан путь к файлу сертификата (--cert-file или " + envTLSCertFile + ")")
+        }</span>
+        <span class="cov0" title="0">if cfg.KeyFile == "" </span><span class="cov0" title="0">{
+                return nil, errors.New("не указан путь к файлу ключа (--key-file или " + envTLSKeyFile + ")")
+        }</span>
+        <span class="cov0" title="0">if cfg.DatabaseDSN == "" </span><span class="cov0" title="0">{
+                return nil, errors.New("не указана строка подключения к БД (--database-dsn или " + envDatabaseDSN + ")")
+        }</span>
+
+        <span class="cov0" title="0">return cfg, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package main
+
+import (
+        "errors"
         "fmt"
         "log"
         "net/http"
@@ -101,7 +187,8 @@ import (
 
         "github.com/go-chi/chi/v5"
         "github.com/go-chi/chi/v5/middleware"
-        _ "github.com/lib/pq" // Драйвер PostgreSQL
+        "github.com/jmoiron/sqlx" // Добавляем импорт sqlx
+        _ "github.com/lib/pq"     // Драйвер PostgreSQL
         "github.com/maynagashev/gophkeeper/server/internal/handlers"
         appmiddleware "github.com/maynagashev/gophkeeper/server/internal/middleware"
         "github.com/maynagashev/gophkeeper/server/internal/repository"
@@ -113,19 +200,6 @@ const (
         defaultReadTimeout  = 10 * time.Second
         defaultWriteTimeout = 10 * time.Second
         defaultIdleTimeout  = 30 * time.Second
-        defaultServerPort   = "8080"
-
-        // Переменные окружения для БД (значения по умолчанию из Makefile/docker-compose).
-        envDBUser     = "POSTGRES_USER"
-        envDBPass     = "POSTGRES_PASSWORD" //nolint:gosec // Ложное срабатывание, это имя переменной окружения
-        envDBName     = "POSTGRES_DB"
-        envDBHost     = "POSTGRES_HOST"
-        envDBPort     = "POSTGRES_PORT"
-        defaultDBUser = "gophkeeper"
-        defaultDBPass = "secret"
-        defaultDBName = "gophkeeper"
-        defaultDBHost = "localhost"
-        defaultDBPort = "5433"
 
         // Переменные окружения для MinIO (значения по умолчанию из docker-compose).
         envMinioEndpoint     = "MINIO_ENDPOINT"
@@ -139,23 +213,82 @@ const (
         minioUseSSL          = false // Для локальной разработки
 )
 
-// main - точка входа для сервера GophKeeper.
+// Структура для хранения инициализированных зависимостей.
+type dependencies struct {
+        db           *sqlx.DB            // Используем тип *sqlx.DB
+        fileStorage  storage.FileStorage // Используем интерфейс
+        authHandler  *handlers.AuthHandler
+        vaultHandler *handlers.VaultHandler
+}
+
+// main - точка входа. Вызывает run и обрабатывает ошибку.
 func main() <span class="cov0" title="0">{
+        if err := run(); err != nil </span><span class="cov0" title="0">{
+                log.Printf("Ошибка выполнения сервера: %v", err) // Используем Printf
+                os.Exit(1)                                       // Выход с кодом ошибки
+        }</span>
+}
+
+// run содержит основную логику запуска сервера и возвращает ошибку.
+func run() error <span class="cov0" title="0">{
         log.Println("Запуск сервера GophKeeper...")
 
-        // --- Инициализация зависимостей --- //
+        // Парсинг флагов командной строки
+        cfg, err := parseFlags()
+        if err != nil </span><span class="cov0" title="0">{
+                // Используем log.Fatalf, так как ошибка фатальна для запуска сервера.
+                log.Fatalf("Ошибка конфигурации сервера: %v", err)
+        }</span>
+
+        // Инициализация зависимостей
+        <span class="cov0" title="0">deps, err := setupDependencies(cfg)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("ошибка инициализации зависимостей: %w", err)
+        }</span>
+        // Отложенное закрытие соединения с БД
+        // Это гарантированно выполнится при выходе из run()
+        <span class="cov0" title="0">defer func() </span><span class="cov0" title="0">{
+                if deps.db != nil </span><span class="cov0" title="0">{
+                        if closeErr := deps.db.Close(); closeErr != nil </span><span class="cov0" title="0">{
+                                log.Printf("Ошибка закрытия соединения с БД: %v", closeErr)
+                        }</span>
+                }
+        }()
+
+        // Настройка роутера
+        <span class="cov0" title="0">r := setupRouter(deps.authHandler, deps.vaultHandler)
+
+        // --- Запуск сервера --- //
+        server := &amp;http.Server{
+                Addr:         fmt.Sprintf(":%s", cfg.Port),
+                Handler:      r,
+                ReadTimeout:  defaultReadTimeout,
+                WriteTimeout: defaultWriteTimeout,
+                IdleTimeout:  defaultIdleTimeout,
+        }
+
+        log.Printf("Запуск HTTPS-сервера на порту %s...", cfg.Port)
+        log.Printf("Используется сертификат: %s", cfg.CertFile)
+        log.Printf("Используется ключ: %s", cfg.KeyFile)
+
+        // Запускаем сервер с TLS
+        if err = server.ListenAndServeTLS(cfg.CertFile, cfg.KeyFile); err != nil &amp;&amp; !errors.Is(err, http.ErrServerClosed) </span><span class="cov0" title="0">{
+                // Возвращаем ошибку вместо Fatalf
+                return fmt.Errorf("ошибка запуска HTTPS-сервера: %w", err)
+        }</span>
+        <span class="cov0" title="0">return nil</span> // Успешное завершение run()
+}
+
+// setupDependencies инициализирует и возвращает все необходимые зависимости сервера.
+func setupDependencies(cfg *config) (*dependencies, error) <span class="cov0" title="0">{
+        deps := &amp;dependencies{}
+        var err error
 
         // 1. Подключение к БД
-        dsn := getDSNFromEnv()
-        db, err := repository.NewPostgresDB(dsn)
+        deps.db, err = repository.NewPostgresDB(cfg.DatabaseDSN)
         if err != nil </span><span class="cov0" title="0">{
-                log.Fatalf("Ошибка инициализации БД: %v", err)
+                return nil, fmt.Errorf("ошибка инициализации БД: %w", err)
         }</span>
-        <span class="cov0" title="0">defer func() </span><span class="cov0" title="0">{
-                if err = db.Close(); err != nil </span><span class="cov0" title="0">{
-                        log.Printf("Ошибка закрытия соединения с БД: %v", err)
-                }</span>
-        }()
         <span class="cov0" title="0">log.Println("Соединение с БД успешно установлено.")
 
         // 2. Инициализация клиента MinIO
@@ -166,26 +299,36 @@ func main() <span class="cov0" title="0">{
                 UseSSL:          minioUseSSL,
                 BucketName:      getEnv(envMinioBucket, defaultMinioBucket),
         }
-        fileStorage, err := storage.NewMinioClient(minioCfg)
+        // storage.NewMinioClient возвращает *storage.MinioClient, который реализует storage.FileStorage
+        deps.fileStorage, err = storage.NewMinioClient(minioCfg)
         if err != nil </span><span class="cov0" title="0">{
-                //nolint:gocritic // exitAfterDefer is acceptable here
-                log.Fatalf("Ошибка инициализации клиента MinIO: %v", err)
-        }</span>
+                // Закрываем соединение с БД перед выходом
+                if dbCloseErr := deps.db.Close(); dbCloseErr != nil </span><span class="cov0" title="0">{
+                        log.Printf("Ошибка закрытия соединения с БД при ошибке MinIO: %v", dbCloseErr)
+                }</span>
+                <span class="cov0" title="0">return nil, fmt.Errorf("ошибка инициализации клиента MinIO: %w", err)</span>
+        }
 
         // 3. Создание репозиториев
-        <span class="cov0" title="0">userRepo := repository.NewPostgresUserRepository(db)
-        vaultRepo := repository.NewPostgresVaultRepository(db)
-        vaultVersionRepo := repository.NewPostgresVaultVersionRepository(db)
+        // Передаем *sqlx.DB в конструкторы репозиториев
+        <span class="cov0" title="0">userRepo := repository.NewPostgresUserRepository(deps.db)
+        vaultRepo := repository.NewPostgresVaultRepository(deps.db)
+        vaultVersionRepo := repository.NewPostgresVaultVersionRepository(deps.db)
 
         // 4. Создание сервисов
         authService := services.NewAuthService(userRepo)
-        vaultService := services.NewVaultService(db.DB, vaultRepo, vaultVersionRepo, fileStorage)
+        // Передаем *sql.DB (из поля DB типа *sqlx.DB) в VaultService
+        vaultService := services.NewVaultService(deps.db.DB, vaultRepo, vaultVersionRepo, deps.fileStorage)
 
         // 5. Создание обработчиков
-        authHandler := handlers.NewAuthHandler(authService)
-        vaultHandler := handlers.NewVaultHandler(vaultService)
+        deps.authHandler = handlers.NewAuthHandler(authService)
+        deps.vaultHandler = handlers.NewVaultHandler(vaultService)
 
-        // --- Настройка роутера --- //
+        return deps, nil</span>
+}
+
+// setupRouter настраивает и возвращает роутер chi.
+func setupRouter(authHandler *handlers.AuthHandler, vaultHandler *handlers.VaultHandler) *chi.Mux <span class="cov0" title="0">{
         r := chi.NewRouter()
         r.Use(middleware.RequestID)
         r.Use(middleware.RealIP)
@@ -197,68 +340,43 @@ func main() <span class="cov0" title="0">{
                 _, _ = w.Write([]byte("pong\n"))
         }</span>)
 
-        // Публичные маршруты (регистрация, вход)
-        <span class="cov0" title="0">r.Route("/api/user", func(r chi.Router) </span><span class="cov0" title="0">{
+        // Определяем базовый маршрут /api
+        <span class="cov0" title="0">r.Route("/api", func(r chi.Router) </span><span class="cov0" title="0">{
+                // Публичные маршруты (регистрация, вход)
                 r.Post("/register", authHandler.Register)
                 r.Post("/login", authHandler.Login)
-        }</span>)
 
-        // Приватные маршруты (требуют аутентификации)
-        <span class="cov0" title="0">r.Group(func(r chi.Router) </span><span class="cov0" title="0">{
-                // Применяем middleware аутентификации ко всей группе
-                r.Use(appmiddleware.Authenticator)
+                // Приватные маршруты (требуют аутентификации)
+                r.Group(func(r chi.Router) </span><span class="cov0" title="0">{
+                        // Применяем middleware аутентификации ко всей группе
+                        r.Use(appmiddleware.Authenticator)
 
-                // Маршруты для работы с хранилищем
-                r.Route("/api/vault", func(r chi.Router) </span><span class="cov0" title="0">{
-                        r.Get("/", vaultHandler.GetMetadata)
-                        r.Post("/upload", vaultHandler.Upload)
-                        r.Get("/download", vaultHandler.Download)
-                        // Добавляем новые маршруты для версионирования
-                        r.Get("/versions", vaultHandler.ListVersions) // Получение списка версий
-                        r.Post("/rollback", vaultHandler.Rollback)    // Откат к указанной версии
-                }</span>)
+                        // Маршруты для работы с хранилищем
+                        r.Route("/vault", func(r chi.Router) </span><span class="cov0" title="0">{
+                                r.Get("/", vaultHandler.GetMetadata)
+                                r.Post("/upload", vaultHandler.Upload)
+                                r.Get("/download", vaultHandler.Download)
+                                r.Get("/versions", vaultHandler.ListVersions)
+                                r.Post("/rollback", vaultHandler.Rollback)
+                        }</span>)
+                        // Маршрут для удаления аккаунта (если он есть в AuthHandler)
+                        // r.Delete("/account", authHandler.DeleteAccount)
+                })
         })
-
-        // --- Запуск сервера --- //
-        <span class="cov0" title="0">port := getEnv("SERVER_PORT", defaultServerPort)
-        server := &amp;http.Server{
-                Addr:         fmt.Sprintf(":%s", port),
-                Handler:      r,
-                ReadTimeout:  defaultReadTimeout,
-                WriteTimeout: defaultWriteTimeout,
-                IdleTimeout:  defaultIdleTimeout,
-        }
-
-        log.Printf("Запуск HTTP-сервера на порту %s", port)
-        if err = server.ListenAndServe(); err != nil &amp;&amp; !errors.Is(err, http.ErrServerClosed) </span><span class="cov0" title="0">{
-                log.Fatalf("Ошибка запуска сервера: %v", err)
-        }</span>
+        <span class="cov0" title="0">return r</span>
 }
-
-// getDSNFromEnv формирует строку подключения к БД из переменных окружения.
-func getDSNFromEnv() string <span class="cov0" title="0">{
-        user := getEnv(envDBUser, defaultDBUser)
-        password := getEnv(envDBPass, defaultDBPass)
-        host := getEnv(envDBHost, defaultDBHost)
-        port := getEnv(envDBPort, defaultDBPort)
-        dbname := getEnv(envDBName, defaultDBName)
-
-        // sslmode=disable - небезопасно для продакшена, но удобно для локальной разработки с Docker
-        //nolint:nosprintfhostport // DSN - это URL, а не просто host:port
-        return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
-                user, password, host, port, dbname)
-}</span>
 
 // getEnv получает значение переменной окружения или возвращает значение по умолчанию.
 func getEnv(key, fallback string) string <span class="cov0" title="0">{
         if value, ok := os.LookupEnv(key); ok </span><span class="cov0" title="0">{
                 return value
         }</span>
-        <span class="cov0" title="0">return fallback</span>
+        <span class="cov0" title="0">log.Printf("Переменная окружения '%s' не установлена, используется значение по умолчанию: '%s'", key, fallback)
+        return fallback</span>
 }
 </pre>
 		
-		<pre class="file" id="file1" style="display: none">package handlers
+		<pre class="file" id="file2" style="display: none">package handlers
 
 import (
         "encoding/json"
@@ -266,7 +384,7 @@ import (
         "log"
         "net/http"
 
-        "github.com/maynagashev/gophkeeper/server/internal/models"   // Импортируем наши модели
+        "github.com/maynagashev/gophkeeper/models"                   // Импортируем наши модели
         "github.com/maynagashev/gophkeeper/server/internal/services" // Импортируем пакет сервисов
 )
 
@@ -376,7 +494,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) <span class=
 }
 </pre>
 		
-		<pre class="file" id="file2" style="display: none">package handlers
+		<pre class="file" id="file3" style="display: none">package handlers
 
 import (
         "encoding/json"
@@ -385,7 +503,9 @@ import (
         "log"
         "net/http"
         "strconv"
+        "time"
 
+        "github.com/maynagashev/gophkeeper/models"
         "github.com/maynagashev/gophkeeper/server/internal/middleware"
         "github.com/maynagashev/gophkeeper/server/internal/services"
 )
@@ -445,8 +565,25 @@ func (h *VaultHandler) Upload(w http.ResponseWriter, r *http.Request) <span clas
 
         <span class="cov8" title="1">log.Printf("[VaultHandler:Upload] Запрос на загрузку файла от пользователя %d", userID)
 
+        // === Чтение заголовка X-Kdbx-Content-Modified-At ===
+        contentModTimeStr := r.Header.Get("X-Kdbx-Content-Modified-At")
+        if contentModTimeStr == "" </span><span class="cov8" title="1">{
+                log.Printf("[VaultHandler:Upload] Отсутствует обязательный заголовок X-Kdbx-Content-Modified-At")
+                http.Error(w, "Отсутствует обязательный заголовок X-Kdbx-Content-Modified-At", http.StatusBadRequest)
+                return
+        }</span>
+
+        <span class="cov8" title="1">contentModTime, err := time.Parse(time.RFC3339, contentModTimeStr)
+        if err != nil </span><span class="cov8" title="1">{
+                log.Printf("[VaultHandler:Upload] Ошибка парсинга заголовка "+
+                        "X-Kdbx-Content-Modified-At ('%s'): %v", contentModTimeStr, err)
+                http.Error(w, "Неверный формат заголовка X-Kdbx-Content-Modified-At (ожидается RFC3339)", http.StatusBadRequest)
+                return
+        }</span>
+        // ===================================================
+
         // Получаем размер файла из заголовка Content-Length
-        sizeStr := r.Header.Get("Content-Length")
+        <span class="cov8" title="1">sizeStr := r.Header.Get("Content-Length")
         size, err := strconv.ParseInt(sizeStr, 10, 64)
         if err != nil || size &lt;= 0 </span><span class="cov8" title="1">{
                 log.Printf("[VaultHandler:Upload] Неверный или отсутствующий заголовок Content-Length: %s", sizeStr)
@@ -461,18 +598,27 @@ func (h *VaultHandler) Upload(w http.ResponseWriter, r *http.Request) <span clas
                 contentType = "application/octet-stream"
         }</span>
 
-        // Вызываем сервис для загрузки файла
-        <span class="cov8" title="1">err = h.vaultService.UploadVault(userID, r.Body, size, contentType)
+        // Вызываем сервис для загрузки файла, передавая contentModTime
+        <span class="cov8" title="1">err = h.vaultService.UploadVault(userID, r.Body, size, contentType, contentModTime)
         if err != nil </span><span class="cov8" title="1">{
-                // Обработка ошибок сервиса (пока только внутренние)
-                log.Printf("[VaultHandler:Upload] Ошибка сервиса при загрузке файла для пользователя %d: %v", userID, err)
-                http.Error(w, "Внутренняя ошибка сервера при загрузке файла", http.StatusInternalServerError)
-                return
-        }</span>
+                // Обработка ошибок сервиса
+                if errors.Is(err, services.ErrConflictVersion) </span><span class="cov0" title="0">{
+                        log.Printf("[VaultHandler:Upload] Конфликт версии при загрузке файла для пользователя %d: %v", userID, err)
+                        // Формируем строку ошибки для переноса
+                        conflictMsg := "Конфликт версий: на сервере уже есть более новая " +
+                                "или идентичная версия с другим содержимым."
+                        http.Error(w, conflictMsg, http.StatusConflict)
+                }</span> else<span class="cov8" title="1"> {
+                        // Другие ошибки считаем внутренними
+                        log.Printf("[VaultHandler:Upload] Ошибка сервиса при загрузке файла для пользователя %d: %v", userID, err)
+                        http.Error(w, "Внутренняя ошибка сервера при загрузке файла", http.StatusInternalServerError)
+                }</span>
+                <span class="cov8" title="1">return</span>
+        }
 
-        // Успешный ответ
+        // Успешный ответ (даже если версия была идентичной и не создавалась новая)
         <span class="cov8" title="1">w.WriteHeader(http.StatusOK)
-        _, _ = w.Write([]byte("Файл успешно загружен\n"))
+        _, _ = w.Write([]byte("Файл успешно загружен\n")) // TODO: Возможно, стоит вернуть ID версии как в api.md?
         log.Printf("[VaultHandler:Upload] Файл для пользователя %d успешно загружен", userID)</span>
 }
 
@@ -556,10 +702,34 @@ func (h *VaultHandler) ListVersions(w http.ResponseWriter, r *http.Request) <spa
                 return
         }</span>
 
+        // --- Формирование ответа с учетом current_version_id ---
+        // Получаем ID текущей версии, чтобы добавить его в ответ
+        <span class="cov8" title="1">currentVersionMeta, err := h.vaultService.GetVaultMetadata(userID)
+        var currentVersionID *int64
+        if err == nil &amp;&amp; currentVersionMeta != nil </span><span class="cov8" title="1">{ // Если ошибки нет и метаданные получены
+                cvID := currentVersionMeta.ID // Копируем значение ID
+                currentVersionID = &amp;cvID
+        }</span> else<span class="cov8" title="1"> if err != nil &amp;&amp; !errors.Is(err, services.ErrVaultNotFound) </span><span class="cov0" title="0">{
+                // Если произошла другая ошибка при получении метаданных
+                log.Printf("[VaultHandler:ListVersions] Ошибка при получении current_version_id для ответа: %v", err)
+                // Не прерываем выполнение, просто currentVersionID будет nil
+        }</span>
+
+        // Структура ответа для /versions
+        <span class="cov8" title="1">type listVersionsResponse struct {
+                Versions         []models.VaultVersion `json:"versions"`
+                CurrentVersionID *int64                `json:"current_version_id,omitempty"`
+        }
+
+        response := listVersionsResponse{
+                Versions:         versions,
+                CurrentVersionID: currentVersionID,
+        }
+
         // Отправляем список версий в JSON
-        <span class="cov8" title="1">w.Header().Set("Content-Type", "application/json")
+        w.Header().Set("Content-Type", "application/json")
         w.WriteHeader(http.StatusOK)
-        if err = json.NewEncoder(w).Encode(versions); err != nil </span><span class="cov0" title="0">{
+        if err = json.NewEncoder(w).Encode(response); err != nil </span><span class="cov0" title="0">{ // Отправляем новую структуру
                 log.Printf("[VaultHandler:ListVersions] Ошибка кодирования ответа со списком версий: %v", err)
         }</span>
 }
@@ -615,7 +785,7 @@ func (h *VaultHandler) Rollback(w http.ResponseWriter, r *http.Request) <span cl
 }
 </pre>
 		
-		<pre class="file" id="file3" style="display: none">package middleware
+		<pre class="file" id="file4" style="display: none">package middleware
 
 import (
         "context"
@@ -706,7 +876,7 @@ func GetUserIDFromContext(ctx context.Context) (int64, bool) <span class="cov0" 
 }</span>
 </pre>
 		
-		<pre class="file" id="file4" style="display: none">package repository
+		<pre class="file" id="file5" style="display: none">package repository
 
 import (
         "fmt"
@@ -754,7 +924,7 @@ func NewPostgresDB(dsn string) (*sqlx.DB, error) <span class="cov0" title="0">{
 }
 </pre>
 		
-		<pre class="file" id="file5" style="display: none">package repository
+		<pre class="file" id="file6" style="display: none">package repository
 
 import (
         "context"
@@ -765,7 +935,7 @@ import (
 
         "github.com/jmoiron/sqlx"
         "github.com/lib/pq"
-        "github.com/maynagashev/gophkeeper/server/internal/models"
+        "github.com/maynagashev/gophkeeper/models"
 )
 
 // Коды ошибок PostgreSQL.
@@ -838,7 +1008,7 @@ var (
 )
 </pre>
 		
-		<pre class="file" id="file6" style="display: none">package repository
+		<pre class="file" id="file7" style="display: none">package repository
 
 import (
         "context"
@@ -849,7 +1019,7 @@ import (
         "time"
 
         "github.com/jmoiron/sqlx"
-        "github.com/maynagashev/gophkeeper/server/internal/models"
+        "github.com/maynagashev/gophkeeper/models"
         // "github.com/lib/pq" // Больше не нужен здесь, т.к. убрали CreateVault/UpdateVaultMetadata с проверкой UNIQUE.
 )
 
@@ -939,26 +1109,30 @@ func (r *postgresVaultRepository) GetVaultWithCurrentVersionByUserID(
         ctx context.Context,
         userID int64,
 ) (*models.Vault, *models.VaultVersion, error) <span class="cov0" title="0">{
+        // Добавили выборку vv.content_modified_at
         query := `
                 SELECT
                     v.id AS vault_id, v.user_id, v.created_at AS vault_created_at, v.updated_at AS vault_updated_at,
-                    vv.id AS version_id, vv.object_key, vv.checksum, vv.size_bytes, vv.created_at AS version_created_at
+                    vv.id AS version_id, vv.object_key, vv.checksum, vv.size_bytes,
+                    vv.created_at AS version_created_at, vv.content_modified_at AS version_content_modified_at
                 FROM vaults v
                 LEFT JOIN vault_versions vv ON v.current_version_id = vv.id
                 WHERE v.user_id = $1
                 LIMIT 1`
 
         // Используем временную структуру для сканирования результата JOIN
+        // Добавили поле для content_modified_at
         type result struct {
-                VaultID          int64      `db:"vault_id"`
-                UserID           int64      `db:"user_id"`
-                VaultCreatedAt   time.Time  `db:"vault_created_at"`
-                VaultUpdatedAt   time.Time  `db:"vault_updated_at"`
-                VersionID        *int64     `db:"version_id"` // Указатель, т.к. LEFT JOIN может дать NULL
-                ObjectKey        *string    `db:"object_key"`
-                Checksum         *string    `db:"checksum"`
-                SizeBytes        *int64     `db:"size_bytes"`
-                VersionCreatedAt *time.Time `db:"version_created_at"`
+                VaultID                  int64      `db:"vault_id"`
+                UserID                   int64      `db:"user_id"`
+                VaultCreatedAt           time.Time  `db:"vault_created_at"`
+                VaultUpdatedAt           time.Time  `db:"vault_updated_at"`
+                VersionID                *int64     `db:"version_id"` // Указатель, т.к. LEFT JOIN может дать NULL
+                ObjectKey                *string    `db:"object_key"`
+                Checksum                 *string    `db:"checksum"`
+                SizeBytes                *int64     `db:"size_bytes"`
+                VersionCreatedAt         *time.Time `db:"version_created_at"`
+                VersionContentModifiedAt *time.Time `db:"version_content_modified_at"` // Указатель, т.к. LEFT JOIN может дать NULL
         }
 
         var res result
@@ -983,13 +1157,15 @@ func (r *postgresVaultRepository) GetVaultWithCurrentVersionByUserID(
 
         var currentVersion *models.VaultVersion
         if res.VersionID != nil </span><span class="cov0" title="0">{ // Если есть текущая версия
+                // Добавили заполнение ContentModifiedAt
                 currentVersion = &amp;models.VaultVersion{
-                        ID:        *res.VersionID,
-                        VaultID:   res.VaultID,
-                        ObjectKey: *res.ObjectKey,
-                        Checksum:  res.Checksum,
-                        SizeBytes: res.SizeBytes,
-                        CreatedAt: *res.VersionCreatedAt,
+                        ID:                *res.VersionID,
+                        VaultID:           res.VaultID,
+                        ObjectKey:         *res.ObjectKey,
+                        Checksum:          res.Checksum,
+                        SizeBytes:         res.SizeBytes,
+                        CreatedAt:         *res.VersionCreatedAt,
+                        ContentModifiedAt: res.VersionContentModifiedAt, // Указатель на время или nil
                 }
                 log.Printf("[VaultRepo] Найдено хранилище ID %d с текущей версией ID %d"+
                         " для пользователя %d", vault.ID, currentVersion.ID, userID)
@@ -1006,7 +1182,7 @@ var (
 )
 </pre>
 		
-		<pre class="file" id="file7" style="display: none">package repository
+		<pre class="file" id="file8" style="display: none">package repository
 
 import (
         "context"
@@ -1017,7 +1193,7 @@ import (
 
         "github.com/jmoiron/sqlx"
         "github.com/lib/pq"
-        "github.com/maynagashev/gophkeeper/server/internal/models"
+        "github.com/maynagashev/gophkeeper/models"
 )
 
 // VaultVersionRepository определяет методы для работы с версиями хранилищ.
@@ -1042,12 +1218,12 @@ func (r *postgresVaultVersionRepository) CreateVersion(
         ctx context.Context,
         version *models.VaultVersion,
 ) (int64, error) <span class="cov0" title="0">{
-        query := `INSERT INTO vault_versions (vault_id, object_key, checksum, size_bytes)
-                  VALUES ($1, $2, $3, $4) RETURNING id`
+        query := `INSERT INTO vault_versions (vault_id, object_key, checksum, size_bytes, content_modified_at)
+                  VALUES ($1, $2, $3, $4, $5) RETURNING id`
         var versionID int64
 
         err := r.db.QueryRowxContext(ctx, query,
-                version.VaultID, version.ObjectKey, version.Checksum, version.SizeBytes,
+                version.VaultID, version.ObjectKey, version.Checksum, version.SizeBytes, version.ContentModifiedAt,
         ).Scan(&amp;versionID)
 
         if err != nil </span><span class="cov0" title="0">{
@@ -1073,7 +1249,7 @@ func (r *postgresVaultVersionRepository) ListVersionsByVaultID(
         offset int,
 ) ([]models.VaultVersion, error) <span class="cov0" title="0">{
         // Запрос с сортировкой по убыванию времени создания (сначала новые)
-        query := `SELECT id, vault_id, object_key, checksum, size_bytes, created_at
+        query := `SELECT id, vault_id, object_key, checksum, size_bytes, created_at, content_modified_at
                   FROM vault_versions
                   WHERE vault_id=$1
                   ORDER BY created_at DESC
@@ -1096,8 +1272,8 @@ func (r *postgresVaultVersionRepository) GetVersionByID(
         ctx context.Context,
         versionID int64,
 ) (*models.VaultVersion, error) <span class="cov0" title="0">{
-        query := `SELECT id, vault_id, object_key, checksum, size_bytes, created_at` +
-                ` FROM vault_versions WHERE id=$1` // Разделяем длинный запрос
+        query := `SELECT id, vault_id, object_key, checksum, size_bytes, created_at, content_modified_at` +
+                ` FROM vault_versions WHERE id=$1`
         var version models.VaultVersion
 
         err := r.db.GetContext(ctx, &amp;version, query, versionID)
@@ -1120,7 +1296,7 @@ var (
 )
 </pre>
 		
-		<pre class="file" id="file8" style="display: none">package services
+		<pre class="file" id="file9" style="display: none">package services
 
 import (
         "context"
@@ -1130,7 +1306,7 @@ import (
         "time"
 
         "github.com/golang-jwt/jwt/v5"
-        "github.com/maynagashev/gophkeeper/server/internal/models"
+        "github.com/maynagashev/gophkeeper/models"
         "github.com/maynagashev/gophkeeper/server/internal/repository"
         "golang.org/x/crypto/bcrypt"
 )
@@ -1263,7 +1439,7 @@ var (
 )
 </pre>
 		
-		<pre class="file" id="file9" style="display: none">package services
+		<pre class="file" id="file10" style="display: none">package services
 
 import (
         "context"
@@ -1274,9 +1450,10 @@ import (
         "fmt"
         "io"
         "log"
+        "time"
 
         "github.com/google/uuid"
-        "github.com/maynagashev/gophkeeper/server/internal/models"
+        "github.com/maynagashev/gophkeeper/models"
         "github.com/maynagashev/gophkeeper/server/internal/repository"
         "github.com/maynagashev/gophkeeper/server/internal/storage"
 )
@@ -1284,7 +1461,7 @@ import (
 // VaultService определяет интерфейс для сервиса работы с хранилищами.
 type VaultService interface {
         GetVaultMetadata(userID int64) (*models.VaultVersion, error)
-        UploadVault(userID int64, reader io.Reader, size int64, contentType string) error
+        UploadVault(userID int64, reader io.Reader, size int64, contentType string, contentModifiedAt time.Time) error
         DownloadVault(userID int64) (io.ReadCloser, *models.VaultVersion, error)
         ListVersions(userID int64, limit, offset int) ([]models.VaultVersion, error)
         RollbackToVersion(userID int64, versionID int64) error
@@ -1306,7 +1483,7 @@ func NewVaultService(
         vaultRepo repository.VaultRepository,
         vaultVersionRepo repository.VaultVersionRepository,
         fileStorage storage.FileStorage,
-) VaultService <span class="cov0" title="0">{
+) VaultService <span class="cov8" title="1">{
         return &amp;vaultService{
                 db:               db,
                 vaultRepo:        vaultRepo,
@@ -1316,67 +1493,63 @@ func NewVaultService(
 }</span>
 
 // GetVaultMetadata получает метаданные ТЕКУЩЕЙ версии хранилища для пользователя.
-func (s *vaultService) GetVaultMetadata(userID int64) (*models.VaultVersion, error) <span class="cov0" title="0">{
+func (s *vaultService) GetVaultMetadata(userID int64) (*models.VaultVersion, error) <span class="cov8" title="1">{
         ctx := context.Background()
 
         _, currentVersion, err := s.vaultRepo.GetVaultWithCurrentVersionByUserID(ctx, userID)
-        if err != nil </span><span class="cov0" title="0">{
-                if errors.Is(err, repository.ErrVaultNotFound) </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, repository.ErrVaultNotFound) </span><span class="cov8" title="1">{
                         log.Printf("[VaultService] Метаданные (GetVaultWithCurrentVersion) для пользователя %d не найдены", userID)
                         return nil, ErrVaultNotFound
                 }</span>
-                <span class="cov0" title="0">log.Printf("[VaultService] Ошибка репозитория при получении хранилища с версией для пользователя %d: %v", userID, err)
+                <span class="cov8" title="1">log.Printf("[VaultService] Ошибка репозитория при получении хранилища с версией для пользователя %d: %v", userID, err)
                 return nil, errors.New("внутренняя ошибка сервера при получении метаданных")</span>
         }
 
-        <span class="cov0" title="0">if currentVersion == nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if currentVersion == nil </span><span class="cov8" title="1">{
                 // Хранилище есть, но текущей версии нет (например, после неудачного отката)
                 log.Printf("[VaultService] У пользователя %d есть хранилище, но нет текущей версии", userID)
                 return nil, ErrVaultNotFound // Считаем, что метаданных нет
         }</span>
 
-        <span class="cov0" title="0">log.Printf("[VaultService] Успешно получены метаданные текущей версии (ID: %d)"+
+        <span class="cov8" title="1">log.Printf("[VaultService] Успешно получены метаданные текущей версии (ID: %d)"+
                 " для пользователя %d", currentVersion.ID, userID)
         return currentVersion, nil</span>
 }
 
-// UploadVault обрабатывает загрузку файла хранилища, создавая новую версию.
-func (s *vaultService) UploadVault(userID int64, reader io.Reader, size int64, contentType string) error <span class="cov0" title="0">{
+// Добавили contentModifiedAt в параметры.
+func (s *vaultService) UploadVault(
+        userID int64,
+        reader io.Reader,
+        size int64,
+        contentType string,
+        contentModifiedAt time.Time,
+) error <span class="cov8" title="1">{
         ctx := context.Background()
 
-        // Генерируем УНИКАЛЬНЫЙ ключ объекта для MinIO
-        objectKey := fmt.Sprintf("user_%d/vault_%s.kdbx", userID, uuid.NewString())
-
-        // Создаем TeeReader для одновременной загрузки и расчета хеша
-        hash := sha256.New()
-        teeReader := io.TeeReader(reader, hash)
-
-        // Загружаем файл в MinIO
-        err := s.fileStorage.UploadFile(ctx, objectKey, teeReader, size, contentType)
-        if err != nil </span><span class="cov0" title="0">{
-                log.Printf("[VaultService] Ошибка загрузки файла в хранилище для пользователя %d: %v", userID, err)
-                return errors.New("внутренняя ошибка сервера при загрузке файла")
+        // Загружаем файл и получаем его чек-сумму
+        objectKey, checksumClient, err := s.uploadFileToStorage(ctx, userID, reader, size, contentType)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
         }</span>
-        <span class="cov0" title="0">checksum := hex.EncodeToString(hash.Sum(nil))
-        log.Printf("[VaultService] Файл для пользователя %d загружен в '%s', SHA256: %s", userID, objectKey, checksum)
 
         // --- Транзакция БД --- //
-        tx, err := s.db.BeginTx(ctx, nil)
+        <span class="cov8" title="1">tx, err := s.db.BeginTx(ctx, nil)
         if err != nil </span><span class="cov0" title="0">{
                 log.Printf("[VaultService] Ошибка начала транзакции для пользователя %d: %v", userID, err)
                 // TODO: Попытаться удалить загруженный файл из MinIO?
                 return errors.New("внутренняя ошибка сервера")
         }</span>
         // Гарантируем откат транзакции в случае паники или ошибки
-        <span class="cov0" title="0">defer func() </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">defer func() </span><span class="cov8" title="1">{
                 if p := recover(); p != nil </span><span class="cov0" title="0">{
                         _ = tx.Rollback()
                         panic(p)</span> // Передаем панику дальше
-                } else<span class="cov0" title="0"> if err != nil </span><span class="cov0" title="0">{
+                } else<span class="cov8" title="1"> if err != nil </span><span class="cov8" title="1">{
                         log.Printf("[VaultService] Ошибка во время транзакции, откат... Error: %v", err)
                         _ = tx.Rollback()
                         // TODO: Попытаться удалить загруженный файл из MinIO?
-                }</span> else<span class="cov0" title="0"> {
+                }</span> else<span class="cov8" title="1"> {
                         err = tx.Commit()
                         if err != nil </span><span class="cov0" title="0">{
                                 log.Printf("[VaultService] Ошибка коммита транзакции: %v", err)
@@ -1385,71 +1558,156 @@ func (s *vaultService) UploadVault(userID int64, reader io.Reader, size int64, c
                 }
         }()
 
-        // Используем транзакционные репозитории (если они есть) или передаем tx
-        // Пока будем передавать tx в существующие методы репозиториев,
-        // модифицировав их для приема tx или создав tx-варианты.
-        // Сейчас для простоты будем считать, что методы репо могут работать с tx (нужно будет доработать репозитории).
-
-        // 1. Найти или создать Vault для пользователя
-        <span class="cov0" title="0">vaultID, err := s.findOrCreateVault(ctx, userID) // Выносим логику в отдельный метод
-        if err != nil </span><span class="cov0" title="0">{
-                return err // Ошибка уже залогирована внутри findOrCreateVault
+        // Получаем текущее хранилище и его ВЕРСИЮ
+        <span class="cov8" title="1">vault, currentVersion, err := s.vaultRepo.GetVaultWithCurrentVersionByUserID(ctx, userID) // TODO: Передать tx
+        if err != nil &amp;&amp; !errors.Is(err, repository.ErrVaultNotFound) </span><span class="cov0" title="0">{
+                // Неожиданная ошибка при поиске
+                log.Printf("[VaultService] Ошибка поиска хранилища/версии для пользователя %d: %v", userID, err)
+                return errors.New("внутренняя ошибка сервера") // defer откатит транзакцию
         }</span>
 
-        // 2. Создать запись о новой версии
-        <span class="cov0" title="0">newVersion := &amp;models.VaultVersion{
-                VaultID:   vaultID,
-                ObjectKey: objectKey,
-                Checksum:  &amp;checksum,
-                SizeBytes: &amp;size,
+        // Сравниваем версии и решаем, нужно ли создавать новую
+        <span class="cov8" title="1">shouldCreateNewVersion, err := s.shouldCreateNewVersion(currentVersion, contentModifiedAt, checksumClient)
+        if err != nil </span><span class="cov8" title="1">{
+                return err // Возвращаем ошибку конфликта, если она возникла
+        }</span>
+
+        // Если нужно создать новую версию
+        <span class="cov8" title="1">if shouldCreateNewVersion </span><span class="cov8" title="1">{
+                err = s.createNewVersion(ctx, vault, userID, objectKey, checksumClient, size, contentModifiedAt)
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+        }
+
+        // Ошибки нет (либо была идентичная версия), defer выполнит Commit
+        <span class="cov8" title="1">return nil</span>
+}
+
+// uploadFileToStorage загружает файл в хранилище и возвращает ключ объекта и чек-сумму.
+func (s *vaultService) uploadFileToStorage(
+        ctx context.Context,
+        userID int64,
+        reader io.Reader,
+        size int64,
+        contentType string,
+) (string, string, error) <span class="cov8" title="1">{
+        // Используем io.TeeReader, чтобы одновременно считать хеш и передать данные дальше
+        hash := sha256.New()
+        teeReader := io.TeeReader(reader, hash)
+
+        // Генерируем уникальный ключ объекта для MinIO
+        objectKey := fmt.Sprintf("user_%d/vault_%s.kdbx", userID, uuid.New().String())
+
+        // Загружаем файл в MinIO
+        err := s.fileStorage.UploadFile(ctx, objectKey, teeReader, size, contentType)
+        if err != nil </span><span class="cov8" title="1">{
+                log.Printf("[VaultService] Ошибка загрузки файла в хранилище для пользователя %d: %v", userID, err)
+                return "", "", errors.New("внутренняя ошибка сервера при загрузке файла")
+        }</span>
+
+        // Получаем вычисленную чек-сумму клиента
+        <span class="cov8" title="1">checksumClient := hex.EncodeToString(hash.Sum(nil))
+        log.Printf("[VaultService] Файл для пользователя %d загружен в '%s', SHA256: %s",
+                userID, objectKey, checksumClient)
+
+        return objectKey, checksumClient, nil</span>
+}
+
+// shouldCreateNewVersion определяет, нужно ли создавать новую версию на основе сравнения с текущей.
+func (s *vaultService) shouldCreateNewVersion(
+        currentVersion *models.VaultVersion,
+        clientTime time.Time,
+        checksumClient string,
+) (bool, error) <span class="cov8" title="1">{
+        // Если текущей версии нет, то создаем новую
+        if currentVersion == nil || currentVersion.ContentModifiedAt == nil </span><span class="cov8" title="1">{
+                return true, nil
+        }</span>
+
+        <span class="cov8" title="1">serverTime := *currentVersion.ContentModifiedAt
+        checksumServer := ""
+        if currentVersion.Checksum != nil </span><span class="cov8" title="1">{
+                checksumServer = *currentVersion.Checksum
+        }</span>
+
+        <span class="cov8" title="1">log.Printf("[VaultService] Сравнение версий: Клиент T=%v C=%s | Сервер T=%v C=%s",
+                clientTime, checksumClient, serverTime, checksumServer)
+
+        if clientTime.Before(serverTime) </span><span class="cov8" title="1">{
+                // Время клиента &lt; времени сервера -&gt; Конфликт
+                log.Printf("[VaultService] Отклонено: время клиента (%v) раньше времени сервера (%v). Конфликт.",
+                        clientTime, serverTime)
+                return false, ErrConflictVersion
+        }</span> else<span class="cov8" title="1"> if clientTime.Equal(serverTime) </span><span class="cov8" title="1">{
+                // Время совпадает, проверяем чек-суммы
+                if checksumClient == checksumServer </span><span class="cov8" title="1">{
+                        // Идентичная версия
+                        log.Printf("[VaultService] Пропуск: идентичная версия (время и чек-сумма совпадают).")
+                        return false, nil
+                }</span>
+                // Время совпадает, чек-суммы разные -&gt; Конфликт
+                <span class="cov8" title="1">log.Printf("[VaultService] Отклонено: время совпадает (%v), но чек-суммы разные. Конфликт.", clientTime)
+                return false, ErrConflictVersion</span>
+        }
+
+        // Если clientTime.After(serverTime), создаем новую версию
+        <span class="cov8" title="1">return true, nil</span>
+}
+
+// createNewVersion создает новую версию хранилища или новое хранилище, если оно не существует.
+func (s *vaultService) createNewVersion(
+        ctx context.Context,
+        vault *models.Vault,
+        userID int64,
+        objectKey string,
+        checksumClient string,
+        size int64,
+        contentModifiedAt time.Time,
+) error <span class="cov8" title="1">{
+        // Найдем или создадим Vault
+        var vaultID int64
+        if vault == nil </span><span class="cov8" title="1">{
+                // Хранилище не найдено, создаем новое
+                log.Printf("[VaultService] Хранилище для пользователя %d не найдено, создаем новое.", userID)
+                newVault := &amp;models.Vault{UserID: userID}
+                var err error
+                vaultID, err = s.vaultRepo.CreateVault(ctx, newVault) // TODO: Передать tx
+                if err != nil </span><span class="cov0" title="0">{
+                        log.Printf("[VaultService] Ошибка создания хранилища в транзакции для пользователя %d: %v", userID, err)
+                        return errors.New("внутренняя ошибка сервера")
+                }</span>
+                <span class="cov8" title="1">log.Printf("[VaultService] Новое хранилище создано (ID: %d) для пользователя %d", vaultID, userID)</span>
+        } else<span class="cov8" title="1"> {
+                vaultID = vault.ID
+                log.Printf("[VaultService] Используется существующее хранилище (ID: %d) для пользователя %d", vaultID, userID)
+        }</span>
+
+        // Создаем запись о новой версии
+        <span class="cov8" title="1">newVersion := &amp;models.VaultVersion{
+                VaultID:           vaultID,
+                ObjectKey:         objectKey,
+                Checksum:          &amp;checksumClient,
+                SizeBytes:         &amp;size,
+                ContentModifiedAt: &amp;contentModifiedAt,
         }
         versionID, err := s.vaultVersionRepo.CreateVersion(ctx, newVersion) // TODO: Передать tx
         if err != nil </span><span class="cov0" title="0">{
                 log.Printf("[VaultService] Ошибка создания версии в транзакции для хранилища %d: %v", vaultID, err)
                 return errors.New("внутренняя ошибка сервера")
         }</span>
-        <span class="cov0" title="0">log.Printf("[VaultService] Новая версия создана (ID: %d) для хранилища %d", versionID, vaultID)
+        <span class="cov8" title="1">log.Printf("[VaultService] Новая версия создана (ID: %d) для хранилища %d", versionID, vaultID)
 
-        // 3. Обновить current_version_id в Vault
+        // Обновляем current_version_id в Vault
         err = s.vaultRepo.UpdateVaultCurrentVersion(ctx, vaultID, versionID) // TODO: Передать tx
         if err != nil </span><span class="cov0" title="0">{
                 log.Printf("[VaultService] Ошибка обновления current_version_id в транзакции для хранилища %d: %v", vaultID, err)
                 return errors.New("внутренняя ошибка сервера")
         }</span>
-        <span class="cov0" title="0">log.Printf("[VaultService] current_version_id для хранилища %d обновлен на %d", vaultID, versionID)
+        <span class="cov8" title="1">log.Printf("[VaultService] current_version_id для хранилища %d обновлен на %d", vaultID, versionID)
 
-        // Ошибки нет, defer выполнит Commit
         log.Printf("[VaultService] Загрузка и обновление метаданных для пользователя %d завершены успешно", userID)
         return nil</span>
-}
-
-// findOrCreateVault находит ID существующего хранилища или создает новое.
-// Возвращает ID хранилища или ошибку.
-// Эта функция предполагает, что она вызывается внутри существующей транзакции (передать tx?).
-func (s *vaultService) findOrCreateVault(ctx context.Context, userID int64) (int64, error) <span class="cov0" title="0">{
-        vault, err := s.vaultRepo.GetVaultByUserID(ctx, userID) // TODO: Передать tx
-        if err == nil </span><span class="cov0" title="0">{
-                // Хранилище найдено
-                log.Printf("[VaultService] Найдено существующее хранилище (ID: %d) для пользователя %d", vault.ID, userID)
-                return vault.ID, nil
-        }</span>
-
-        <span class="cov0" title="0">if !errors.Is(err, repository.ErrVaultNotFound) </span><span class="cov0" title="0">{
-                // Неожиданная ошибка при поиске
-                log.Printf("[VaultService] Ошибка поиска хранилища в транзакции для пользователя %d: %v", userID, err)
-                return 0, errors.New("внутренняя ошибка сервера")
-        }</span>
-
-        // Хранилище не найдено, создаем новое
-        <span class="cov0" title="0">log.Printf("[VaultService] Хранилище для пользователя %d не найдено, создаем новое.", userID)
-        newVault := &amp;models.Vault{UserID: userID}
-        vaultID, err := s.vaultRepo.CreateVault(ctx, newVault) // TODO: Передать tx
-        if err != nil </span><span class="cov0" title="0">{
-                log.Printf("[VaultService] Ошибка создания хранилища в транзакции для пользователя %d: %v", userID, err)
-                return 0, errors.New("внутренняя ошибка сервера")
-        }</span>
-        <span class="cov0" title="0">log.Printf("[VaultService] Новое хранилище создано (ID: %d) для пользователя %d", vaultID, userID)
-        return vaultID, nil</span>
 }
 
 // DownloadVault скачивает ТЕКУЩУЮ версию файла хранилища.
@@ -1571,10 +1829,11 @@ var (
         ErrVaultNotFound   = errors.New("хранилище или его версия не найдены")
         ErrVersionNotFound = errors.New("указанная версия хранилища не найдена")
         ErrForbidden       = errors.New("доступ запрещен") // Общая ошибка доступа
+        ErrConflictVersion = errors.New("конфликт версий")
 )
 </pre>
 		
-		<pre class="file" id="file10" style="display: none">package storage
+		<pre class="file" id="file11" style="display: none">package storage
 
 import (
         "context"
