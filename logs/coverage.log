@@ -1,14 +1,25 @@
+make test-coverage
+Генерация отчета о покрытии для клиента...
+make[1]: Entering directory '/home/dev/src/maynagashev/gophkeeper/gophkeeper/client'
+Запуск тестов с генерацией покрытия...
+go test -coverprofile=logs/coverage.out ./...
+	github.com/maynagashev/gophkeeper/client/cmd/gophkeeper		coverage: 0.0% of statements
+ok  	github.com/maynagashev/gophkeeper/client/internal/api	0.021s	coverage: 26.6% of statements
+ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	2.145s	coverage: 18.9% of statements
+	github.com/maynagashev/gophkeeper/client/internal/tui		coverage: 0.0% of statements
+go tool cover -html=logs/coverage.out -o logs/coverage.html
+go tool cover -func=logs/coverage.out | tee logs/coverage.log
 github.com/maynagashev/gophkeeper/client/cmd/gophkeeper/main.go:33:				setupLogging				0.0%
 github.com/maynagashev/gophkeeper/client/cmd/gophkeeper/main.go:56:				main					0.0%
 github.com/maynagashev/gophkeeper/client/internal/api/client.go:49:				NewHTTPClient				100.0%
-github.com/maynagashev/gophkeeper/client/internal/api/client.go:57:				Register				77.8%
-github.com/maynagashev/gophkeeper/client/internal/api/client.go:99:				Login					80.8%
+github.com/maynagashev/gophkeeper/client/internal/api/client.go:57:				Register				0.0%
+github.com/maynagashev/gophkeeper/client/internal/api/client.go:99:				Login					0.0%
 github.com/maynagashev/gophkeeper/client/internal/api/client.go:152:				setAuthHeader				100.0%
 github.com/maynagashev/gophkeeper/client/internal/api/client.go:161:				GetVaultMetadata			86.4%
 github.com/maynagashev/gophkeeper/client/internal/api/client.go:205:				UploadVault				83.3%
-github.com/maynagashev/gophkeeper/client/internal/api/client.go:252:				DownloadVault				85.0%
-github.com/maynagashev/gophkeeper/client/internal/api/client.go:299:				ListVersions				88.9%
-github.com/maynagashev/gophkeeper/client/internal/api/client.go:355:				RollbackToVersion			84.6%
+github.com/maynagashev/gophkeeper/client/internal/api/client.go:252:				DownloadVault				0.0%
+github.com/maynagashev/gophkeeper/client/internal/api/client.go:299:				ListVersions				0.0%
+github.com/maynagashev/gophkeeper/client/internal/api/client.go:355:				RollbackToVersion			0.0%
 github.com/maynagashev/gophkeeper/client/internal/api/client.go:404:				SetAuthToken				100.0%
 github.com/maynagashev/gophkeeper/client/internal/kdbx/auth.go:21:				setCustomDataValue			0.0%
 github.com/maynagashev/gophkeeper/client/internal/kdbx/auth.go:43:				removeCustomDataValue			0.0%
@@ -158,4 +169,66 @@ github.com/maynagashev/gophkeeper/client/internal/tui/update.go:431:				Update		
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:8:				deepCopyEntry				0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:45:				findEntryInDB				0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:53:				findEntryInGroups			0.0%
-total:												(statements)				8.6%
+total:												(statements)				3.5%
+make[1]: Leaving directory '/home/dev/src/maynagashev/gophkeeper/gophkeeper/client'
+Генерация отчета о покрытии для сервера...
+make[1]: Entering directory '/home/dev/src/maynagashev/gophkeeper/gophkeeper/server'
+Запуск тестов с генерацией покрытия...
+go test -coverprofile=logs/coverage.out ./...
+	github.com/maynagashev/gophkeeper/server/cmd/server		coverage: 0.0% of statements
+ok  	github.com/maynagashev/gophkeeper/server/internal/handlers	0.018s	coverage: 69.1% of statements
+	github.com/maynagashev/gophkeeper/server/internal/middleware		coverage: 0.0% of statements
+	github.com/maynagashev/gophkeeper/server/internal/repository		coverage: 0.0% of statements
+ok  	github.com/maynagashev/gophkeeper/server/internal/services	0.018s	coverage: 41.6% of statements
+	github.com/maynagashev/gophkeeper/server/internal/storage		coverage: 0.0% of statements
+go tool cover -html=logs/coverage.out -o logs/coverage.html
+go tool cover -func=logs/coverage.out | tee logs/coverage.log
+github.com/maynagashev/gophkeeper/server/cmd/server/flags.go:30:				parseFlags				0.0%
+github.com/maynagashev/gophkeeper/server/cmd/server/main.go:48:					main					0.0%
+github.com/maynagashev/gophkeeper/server/cmd/server/main.go:56:					run					0.0%
+github.com/maynagashev/gophkeeper/server/cmd/server/main.go:106:				setupDependencies			0.0%
+github.com/maynagashev/gophkeeper/server/cmd/server/main.go:154:				setupRouter				0.0%
+github.com/maynagashev/gophkeeper/server/cmd/server/main.go:193:				getEnv					0.0%
+github.com/maynagashev/gophkeeper/server/internal/handlers/auth.go:26:				NewAuthHandler				0.0%
+github.com/maynagashev/gophkeeper/server/internal/handlers/auth.go:31:				Register				0.0%
+github.com/maynagashev/gophkeeper/server/internal/handlers/auth.go:71:				Login					0.0%
+github.com/maynagashev/gophkeeper/server/internal/handlers/vault_handler.go:23:			NewVaultHandler				100.0%
+github.com/maynagashev/gophkeeper/server/internal/handlers/vault_handler.go:28:			GetMetadata				94.4%
+github.com/maynagashev/gophkeeper/server/internal/handlers/vault_handler.go:61:			Upload					89.2%
+github.com/maynagashev/gophkeeper/server/internal/handlers/vault_handler.go:130:		Download				88.9%
+github.com/maynagashev/gophkeeper/server/internal/handlers/vault_handler.go:178:		ListVersions				90.6%
+github.com/maynagashev/gophkeeper/server/internal/handlers/vault_handler.go:247:		Rollback				100.0%
+github.com/maynagashev/gophkeeper/server/internal/middleware/auth.go:29:			Authenticator				0.0%
+github.com/maynagashev/gophkeeper/server/internal/middleware/auth.go:86:			GetUserIDFromContext			0.0%
+github.com/maynagashev/gophkeeper/server/internal/repository/db.go:20:				NewPostgresDB				0.0%
+github.com/maynagashev/gophkeeper/server/internal/repository/user_repository.go:32:		NewPostgresUserRepository		0.0%
+github.com/maynagashev/gophkeeper/server/internal/repository/user_repository.go:38:		CreateUser				0.0%
+github.com/maynagashev/gophkeeper/server/internal/repository/user_repository.go:60:		GetUserByUsername			0.0%
+github.com/maynagashev/gophkeeper/server/internal/repository/vault_repository.go:30:		NewPostgresVaultRepository		0.0%
+github.com/maynagashev/gophkeeper/server/internal/repository/vault_repository.go:35:		GetVaultByUserID			0.0%
+github.com/maynagashev/gophkeeper/server/internal/repository/vault_repository.go:55:		CreateVault				0.0%
+github.com/maynagashev/gophkeeper/server/internal/repository/vault_repository.go:72:		UpdateVaultCurrentVersion		0.0%
+github.com/maynagashev/gophkeeper/server/internal/repository/vault_repository.go:98:		GetVaultWithCurrentVersionByUserID	0.0%
+github.com/maynagashev/gophkeeper/server/internal/repository/vault_version_repository.go:28:	NewPostgresVaultVersionRepository	0.0%
+github.com/maynagashev/gophkeeper/server/internal/repository/vault_version_repository.go:33:	CreateVersion				0.0%
+github.com/maynagashev/gophkeeper/server/internal/repository/vault_version_repository.go:61:	ListVersionsByVaultID			0.0%
+github.com/maynagashev/gophkeeper/server/internal/repository/vault_version_repository.go:87:	GetVersionByID				0.0%
+github.com/maynagashev/gophkeeper/server/internal/services/auth_service.go:43:			NewAuthService				0.0%
+github.com/maynagashev/gophkeeper/server/internal/services/auth_service.go:48:			Register				0.0%
+github.com/maynagashev/gophkeeper/server/internal/services/auth_service.go:79:			Login					0.0%
+github.com/maynagashev/gophkeeper/server/internal/services/auth_service.go:113:			generateJWT				0.0%
+github.com/maynagashev/gophkeeper/server/internal/services/vault_service.go:40:			NewVaultService				100.0%
+github.com/maynagashev/gophkeeper/server/internal/services/vault_service.go:55:			GetVaultMetadata			100.0%
+github.com/maynagashev/gophkeeper/server/internal/services/vault_service.go:80:			UploadVault				73.3%
+github.com/maynagashev/gophkeeper/server/internal/services/vault_service.go:147:		uploadFileToStorage			100.0%
+github.com/maynagashev/gophkeeper/server/internal/services/vault_service.go:177:		shouldCreateNewVersion			100.0%
+github.com/maynagashev/gophkeeper/server/internal/services/vault_service.go:218:		createNewVersion			76.0%
+github.com/maynagashev/gophkeeper/server/internal/services/vault_service.go:273:		DownloadVault				0.0%
+github.com/maynagashev/gophkeeper/server/internal/services/vault_service.go:311:		ListVersions				0.0%
+github.com/maynagashev/gophkeeper/server/internal/services/vault_service.go:338:		RollbackToVersion			0.0%
+github.com/maynagashev/gophkeeper/server/internal/storage/minio_client.go:38:			NewMinioClient				0.0%
+github.com/maynagashev/gophkeeper/server/internal/storage/minio_client.go:83:			UploadFile				0.0%
+github.com/maynagashev/gophkeeper/server/internal/storage/minio_client.go:112:			DownloadFile				0.0%
+total:												(statements)				31.8%
+make[1]: Leaving directory '/home/dev/src/maynagashev/gophkeeper/gophkeeper/server'
+Проверка покрытия тестами завершена для всех модулей.
