@@ -107,7 +107,7 @@
 				
 				<option value="file25">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (0.0%)</option>
 				
-				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/utils.go (0.0%)</option>
+				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/utils.go (85.7%)</option>
 				
 				</select>
 			</div>
@@ -4801,8 +4801,8 @@ import (
         "github.com/tobischo/gokeepasslib/v3"
 )
 
-// deepCopyEntry создает глубокую копию записи.
-func deepCopyEntry(original gokeepasslib.Entry) gokeepasslib.Entry <span class="cov0" title="0">{
+// DeepCopyEntry создает глубокую копию записи.
+func DeepCopyEntry(original gokeepasslib.Entry) gokeepasslib.Entry <span class="cov8" title="1">{
         newEntry := gokeepasslib.NewEntry()
 
         // Копируем UUID
@@ -4814,9 +4814,9 @@ func deepCopyEntry(original gokeepasslib.Entry) gokeepasslib.Entry <span class="
         newEntry.CustomData = original.CustomData
 
         // Глубокое копирование Values
-        if original.Values != nil </span><span class="cov0" title="0">{
+        if original.Values != nil </span><span class="cov8" title="1">{
                 newEntry.Values = make([]gokeepasslib.ValueData, len(original.Values))
-                for i, val := range original.Values </span><span class="cov0" title="0">{
+                for i, val := range original.Values </span><span class="cov8" title="1">{
                         newValue := gokeepasslib.ValueData{
                                 Key:   val.Key,
                                 Value: gokeepasslib.V{Content: val.Value.Content, Protected: val.Value.Protected},
@@ -4828,41 +4828,53 @@ func deepCopyEntry(original gokeepasslib.Entry) gokeepasslib.Entry <span class="
         // Копируем срез ссылок на бинарные данные (BinaryReference)
         // Сами структуры BinaryReference содержат простые типы (Name, Value.ID),
         // поэтому достаточно поверхностного копирования среза.
-        <span class="cov0" title="0">if original.Binaries != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if original.Binaries != nil </span><span class="cov0" title="0">{
                 newEntry.Binaries = make([]gokeepasslib.BinaryReference, len(original.Binaries))
                 copy(newEntry.Binaries, original.Binaries)
         }</span>
 
         // TODO: Добавить копирование History, если оно будет редактироваться
 
-        <span class="cov0" title="0">return newEntry</span>
+        <span class="cov8" title="1">return newEntry</span>
 }
 
-// findEntryInDB ищет запись по UUID в базе данных.
-func findEntryInDB(db *gokeepasslib.Database, uuid gokeepasslib.UUID) *gokeepasslib.Entry <span class="cov0" title="0">{
-        if db == nil || db.Content == nil || db.Content.Root == nil </span><span class="cov0" title="0">{
+// deepCopyEntry - алиас для совместимости со старым кодом.
+// Использует публичную функцию DeepCopyEntry.
+func deepCopyEntry(original gokeepasslib.Entry) gokeepasslib.Entry <span class="cov0" title="0">{
+        return DeepCopyEntry(original)
+}</span>
+
+// FindEntryInDB ищет запись по UUID в базе данных.
+func FindEntryInDB(db *gokeepasslib.Database, uuid gokeepasslib.UUID) *gokeepasslib.Entry <span class="cov8" title="1">{
+        if db == nil || db.Content == nil || db.Content.Root == nil </span><span class="cov8" title="1">{
                 return nil
         }</span>
-        <span class="cov0" title="0">return findEntryInGroups(db.Content.Root.Groups, uuid)</span>
+        <span class="cov8" title="1">return FindEntryInGroups(db.Content.Root.Groups, uuid)</span>
 }
 
-// findEntryInGroups рекурсивно ищет запись по UUID.
-func findEntryInGroups(groups []gokeepasslib.Group, uuid gokeepasslib.UUID) *gokeepasslib.Entry <span class="cov0" title="0">{
-        for i := range groups </span><span class="cov0" title="0">{
+// findEntryInDB - алиас для совместимости со старым кодом.
+// Использует публичную функцию FindEntryInDB.
+func findEntryInDB(db *gokeepasslib.Database, uuid gokeepasslib.UUID) *gokeepasslib.Entry <span class="cov0" title="0">{
+        return FindEntryInDB(db, uuid)
+}</span>
+
+// FindEntryInGroups рекурсивно ищет запись по UUID.
+func FindEntryInGroups(groups []gokeepasslib.Group, uuid gokeepasslib.UUID) *gokeepasslib.Entry <span class="cov8" title="1">{
+        for i := range groups </span><span class="cov8" title="1">{
                 group := &amp;groups[i]
                 // Поиск в текущей группе
-                for j := range group.Entries </span><span class="cov0" title="0">{
+                for j := range group.Entries </span><span class="cov8" title="1">{
                         entry := &amp;group.Entries[j]
-                        if entry.UUID == uuid </span><span class="cov0" title="0">{
+                        if entry.UUID == uuid </span><span class="cov8" title="1">{
                                 return entry
                         }</span>
                 }
                 // Поиск в подгруппах
-                <span class="cov0" title="0">if entry := findEntryInGroups(group.Groups, uuid); entry != nil </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">if entry := FindEntryInGroups(group.Groups, uuid); entry != nil </span><span class="cov8" title="1">{
                         return entry
                 }</span>
         }
-        <span class="cov0" title="0">return nil</span>
+        <span class="cov8" title="1">return nil</span>
 }
 </pre>
 		

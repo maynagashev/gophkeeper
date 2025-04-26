@@ -155,7 +155,9 @@ github.com/maynagashev/gophkeeper/client/internal/tui/update.go:373:				updateRo
 github.com/maynagashev/gophkeeper/client/internal/tui/update.go:393:				handleSaveKeyPress			0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/update.go:413:				handleGlobalKeys			0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/update.go:431:				Update					0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:8:				deepCopyEntry				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:45:				findEntryInDB				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:53:				findEntryInGroups			0.0%
-total:												(statements)				13.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:8:				DeepCopyEntry				85.7%
+github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:46:				deepCopyEntry				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:51:				FindEntryInDB				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:60:				findEntryInDB				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:65:				FindEntryInGroups			100.0%
+total:												(statements)				14.3%

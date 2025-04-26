@@ -4,8 +4,8 @@ import (
 	"github.com/tobischo/gokeepasslib/v3"
 )
 
-// deepCopyEntry создает глубокую копию записи.
-func deepCopyEntry(original gokeepasslib.Entry) gokeepasslib.Entry {
+// DeepCopyEntry создает глубокую копию записи.
+func DeepCopyEntry(original gokeepasslib.Entry) gokeepasslib.Entry {
 	newEntry := gokeepasslib.NewEntry()
 
 	// Копируем UUID
@@ -41,16 +41,28 @@ func deepCopyEntry(original gokeepasslib.Entry) gokeepasslib.Entry {
 	return newEntry
 }
 
-// findEntryInDB ищет запись по UUID в базе данных.
-func findEntryInDB(db *gokeepasslib.Database, uuid gokeepasslib.UUID) *gokeepasslib.Entry {
+// deepCopyEntry - алиас для совместимости со старым кодом.
+// Использует публичную функцию DeepCopyEntry.
+func deepCopyEntry(original gokeepasslib.Entry) gokeepasslib.Entry {
+	return DeepCopyEntry(original)
+}
+
+// FindEntryInDB ищет запись по UUID в базе данных.
+func FindEntryInDB(db *gokeepasslib.Database, uuid gokeepasslib.UUID) *gokeepasslib.Entry {
 	if db == nil || db.Content == nil || db.Content.Root == nil {
 		return nil
 	}
-	return findEntryInGroups(db.Content.Root.Groups, uuid)
+	return FindEntryInGroups(db.Content.Root.Groups, uuid)
 }
 
-// findEntryInGroups рекурсивно ищет запись по UUID.
-func findEntryInGroups(groups []gokeepasslib.Group, uuid gokeepasslib.UUID) *gokeepasslib.Entry {
+// findEntryInDB - алиас для совместимости со старым кодом.
+// Использует публичную функцию FindEntryInDB.
+func findEntryInDB(db *gokeepasslib.Database, uuid gokeepasslib.UUID) *gokeepasslib.Entry {
+	return FindEntryInDB(db, uuid)
+}
+
+// FindEntryInGroups рекурсивно ищет запись по UUID.
+func FindEntryInGroups(groups []gokeepasslib.Group, uuid gokeepasslib.UUID) *gokeepasslib.Entry {
 	for i := range groups {
 		group := &groups[i]
 		// Поиск в текущей группе
@@ -61,7 +73,7 @@ func findEntryInGroups(groups []gokeepasslib.Group, uuid gokeepasslib.UUID) *gok
 			}
 		}
 		// Поиск в подгруппах
-		if entry := findEntryInGroups(group.Groups, uuid); entry != nil {
+		if entry := FindEntryInGroups(group.Groups, uuid); entry != nil {
 			return entry
 		}
 	}
