@@ -65,7 +65,7 @@
 				
 				<option value="file4">github.com/maynagashev/gophkeeper/client/internal/tui/commands.go (86.0%)</option>
 				
-				<option value="file5">github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go (51.7%)</option>
+				<option value="file5">github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go (100.0%)</option>
 				
 				<option value="file6">github.com/maynagashev/gophkeeper/client/internal/tui/input_helpers.go (87.8%)</option>
 				
@@ -1437,7 +1437,7 @@ func initNewKdbxPasswordInputs() (textinput.Model, textinput.Model) <span class=
 }</span>
 
 // initSyncMenu инициализирует компонент списка для меню синхронизации/сервера.
-func initSyncMenu() list.Model <span class="cov0" title="0">{
+func initSyncMenu() list.Model <span class="cov8" title="1">{
         syncMenuDelegate := list.NewDefaultDelegate()
         // Устанавливаем ненулевые размеры по умолчанию для диагностики
         defaultSyncMenuWidth := 40
@@ -1458,7 +1458,7 @@ func initSyncMenu() list.Model <span class="cov0" title="0">{
 }</span>
 
 // initServerURLInput инициализирует поле ввода URL сервера.
-func initServerURLInput() textinput.Model <span class="cov0" title="0">{
+func initServerURLInput() textinput.Model <span class="cov8" title="1">{
         ti := textinput.New()
         ti.Placeholder = defaultServerURL // Предполагается, что константы доступны
         ti.CharLimit = initURLCharLimit
@@ -1467,7 +1467,7 @@ func initServerURLInput() textinput.Model <span class="cov0" title="0">{
 }</span>
 
 // initLoginInputs инициализирует поля для экрана входа.
-func initLoginInputs() (textinput.Model, textinput.Model) <span class="cov0" title="0">{
+func initLoginInputs() (textinput.Model, textinput.Model) <span class="cov8" title="1">{
         loginUserInput := textinput.New()
         loginUserInput.Placeholder = "Имя пользователя"
         loginUserInput.CharLimit = initUserCharLimit
@@ -1482,7 +1482,7 @@ func initLoginInputs() (textinput.Model, textinput.Model) <span class="cov0" tit
 }</span>
 
 // initRegisterInputs инициализирует поля для экрана регистрации.
-func initRegisterInputs() (textinput.Model, textinput.Model) <span class="cov0" title="0">{
+func initRegisterInputs() (textinput.Model, textinput.Model) <span class="cov8" title="1">{
         regUserInput := textinput.New()
         regUserInput.Placeholder = "Имя пользователя"
         regUserInput.CharLimit = initUserCharLimit
@@ -1497,13 +1497,13 @@ func initRegisterInputs() (textinput.Model, textinput.Model) <span class="cov0" 
 }</span>
 
 // initDocStyle инициализирует основной стиль документа.
-func initDocStyle() lipgloss.Style <span class="cov0" title="0">{
+func initDocStyle() lipgloss.Style <span class="cov8" title="1">{
         // Предполагается, что константы доступны
         return lipgloss.NewStyle().Margin(docStyleMarginVertical, docStyleMarginHorizontal)
 }</span>
 
 // initVersionList инициализирует список для отображения версий хранилища.
-func initVersionList() list.Model <span class="cov0" title="0">{
+func initVersionList() list.Model <span class="cov8" title="1">{
         versionDelegate := list.NewDefaultDelegate()
 
         // Настройка стилей для выделения текущей версии
@@ -1528,7 +1528,7 @@ func initVersionList() list.Model <span class="cov0" title="0">{
 }</span>
 
 // initModel создает начальное состояние модели.
-func initModel(kdbxPath string, debugMode bool, serverURL string, apiClient api.Client) model <span class="cov0" title="0">{
+func initModel(kdbxPath string, debugMode bool, serverURL string, apiClient api.Client) model <span class="cov8" title="1">{
         passwordInput := initPasswordInput()
         entryList := initEntryList()
         attachmentDelList := initAttachmentDeleteList()

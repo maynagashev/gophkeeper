@@ -27,9 +27,9 @@ make lint
 ```bash
 go test -coverprofile=logs/coverage.out ./...
 	github.com/maynagashev/gophkeeper/client/cmd/gophkeeper		coverage: 0.0% of statements
-ok  	github.com/maynagashev/gophkeeper/client/internal/api	0.018s	coverage: 84.6% of statements
-ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	0.690s	coverage: 94.6% of statements
-ok  	github.com/maynagashev/gophkeeper/client/internal/tui	0.052s	coverage: 25.3% of statements
+ok  	github.com/maynagashev/gophkeeper/client/internal/api	0.017s	coverage: 84.6% of statements
+ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	0.706s	coverage: 94.6% of statements
+ok  	github.com/maynagashev/gophkeeper/client/internal/tui	0.045s	coverage: 31.1% of statements
 go tool cover -html=logs/coverage.out -o logs/coverage.html
 go tool cover -func=logs/coverage.out | tee logs/coverage.log
 github.com/maynagashev/gophkeeper/client/cmd/gophkeeper/main.go:33:				setupLogging					0.0%
@@ -70,18 +70,18 @@ github.com/maynagashev/gophkeeper/client/internal/tui/commands.go:323:				applyU
 github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:36:			Title						100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:45:			Description					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:71:			FilterValue					100.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:77:			initPasswordInput				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:88:			initEntryList					0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:118:			initAttachmentDeleteList			0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:129:			initAttachmentPathInput				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:138:			initNewKdbxPasswordInputs			0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:155:			initSyncMenu					0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:176:			initServerURLInput				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:185:			initLoginInputs					0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:200:			initRegisterInputs				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:215:			initDocStyle					0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:221:			initVersionList					0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:246:			initModel					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:77:			initPasswordInput				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:88:			initEntryList					100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:118:			initAttachmentDeleteList			100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:129:			initAttachmentPathInput				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:138:			initNewKdbxPasswordInputs			100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:155:			initSyncMenu					100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:176:			initServerURLInput				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:185:			initLoginInputs					100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:200:			initRegisterInputs				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:215:			initDocStyle					100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:221:			initVersionList					100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:246:			initModel					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/input_helpers.go:15:			handleCredentialsKeys				82.6%
 github.com/maynagashev/gophkeeper/client/internal/tui/input_helpers.go:60:			handleCredentialsInput				94.4%
 github.com/maynagashev/gophkeeper/client/internal/tui/model.go:41:				String						0.0%
@@ -233,5 +233,5 @@ github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:46:				deepCopyEn
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:51:				FindEntryInDB					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:60:				findEntryInDB					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:65:				FindEntryInGroups				100.0%
-total:												(statements)					33.2%
+total:												(statements)					38.1%
 ```
