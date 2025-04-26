@@ -1,9 +1,9 @@
-package tui_test
+//nolint:testpackage // Тесты в том же пакете для доступа к непубличным функциям
+package tui
 
 import (
 	"testing"
 
-	"github.com/maynagashev/gophkeeper/client/internal/tui"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tobischo/gokeepasslib/v3"
@@ -86,7 +86,7 @@ func TestDeepCopyEntry(t *testing.T) {
 	original.Tags = "tag1, tag2"
 
 	// Создаем копию
-	entryCopy := tui.DeepCopyEntry(original)
+	entryCopy := DeepCopyEntry(original)
 
 	// Проверяем, что все поля скопированы корректно
 	assert.Equal(t, original.UUID, entryCopy.UUID, "UUID должны совпадать")
@@ -119,7 +119,7 @@ func TestFindEntryInDB(t *testing.T) {
 		targetUUID := db.Content.Root.Groups[0].Entries[0].UUID
 
 		// Выполняем поиск
-		entry := tui.FindEntryInDB(db, targetUUID)
+		entry := FindEntryInDB(db, targetUUID)
 
 		// Проверяем результат
 		require.NotNil(t, entry, "Должна быть найдена запись")
@@ -141,7 +141,7 @@ func TestFindEntryInDB(t *testing.T) {
 		targetUUID := db.Content.Root.Groups[0].Groups[0].Entries[0].UUID
 
 		// Выполняем поиск
-		entry := tui.FindEntryInDB(db, targetUUID)
+		entry := FindEntryInDB(db, targetUUID)
 
 		// Проверяем результат
 		require.NotNil(t, entry, "Должна быть найдена запись из подгруппы")
@@ -163,7 +163,7 @@ func TestFindEntryInDB(t *testing.T) {
 		nonexistentUUID := gokeepasslib.NewUUID()
 
 		// Выполняем поиск
-		entry := tui.FindEntryInDB(db, nonexistentUUID)
+		entry := FindEntryInDB(db, nonexistentUUID)
 
 		// Проверяем результат
 		assert.Nil(t, entry, "Запись с несуществующим UUID не должна быть найдена")
@@ -171,21 +171,21 @@ func TestFindEntryInDB(t *testing.T) {
 
 	t.Run("Nil_Database", func(t *testing.T) {
 		// Проверяем обработку nil базы данных
-		entry := tui.FindEntryInDB(nil, gokeepasslib.NewUUID())
+		entry := FindEntryInDB(nil, gokeepasslib.NewUUID())
 		assert.Nil(t, entry, "При nil базе данных результат должен быть nil")
 	})
 
 	t.Run("Nil_Content", func(t *testing.T) {
 		// Создаем базу без контента
 		dbWithoutContent := &gokeepasslib.Database{Content: nil}
-		entry := tui.FindEntryInDB(dbWithoutContent, gokeepasslib.NewUUID())
+		entry := FindEntryInDB(dbWithoutContent, gokeepasslib.NewUUID())
 		assert.Nil(t, entry, "При nil контенте результат должен быть nil")
 	})
 
 	t.Run("Nil_Root", func(t *testing.T) {
 		// Создаем базу с контентом, но без корня
 		dbWithoutRoot := &gokeepasslib.Database{Content: &gokeepasslib.DBContent{Root: nil}}
-		entry := tui.FindEntryInDB(dbWithoutRoot, gokeepasslib.NewUUID())
+		entry := FindEntryInDB(dbWithoutRoot, gokeepasslib.NewUUID())
 		assert.Nil(t, entry, "При nil корне результат должен быть nil")
 	})
 }
@@ -203,7 +203,7 @@ func TestFindEntryInGroups(t *testing.T) {
 		targetUUID := db.Content.Root.Groups[0].Entries[0].UUID
 
 		// Выполняем поиск
-		entry := tui.FindEntryInGroups(groups, targetUUID)
+		entry := FindEntryInGroups(groups, targetUUID)
 
 		// Проверяем результат
 		require.NotNil(t, entry, "Должна быть найдена запись")
@@ -215,7 +215,7 @@ func TestFindEntryInGroups(t *testing.T) {
 		targetUUID := db.Content.Root.Groups[0].Groups[0].Entries[0].UUID
 
 		// Выполняем поиск
-		entry := tui.FindEntryInGroups(groups, targetUUID)
+		entry := FindEntryInGroups(groups, targetUUID)
 
 		// Проверяем результат
 		require.NotNil(t, entry, "Должна быть найдена запись из подгруппы")
@@ -227,7 +227,7 @@ func TestFindEntryInGroups(t *testing.T) {
 		nonexistentUUID := gokeepasslib.NewUUID()
 
 		// Выполняем поиск
-		entry := tui.FindEntryInGroups(groups, nonexistentUUID)
+		entry := FindEntryInGroups(groups, nonexistentUUID)
 
 		// Проверяем результат
 		assert.Nil(t, entry, "Запись с несуществующим UUID не должна быть найдена")
@@ -235,7 +235,7 @@ func TestFindEntryInGroups(t *testing.T) {
 
 	t.Run("Empty_Groups", func(t *testing.T) {
 		// Проверяем пустой слайс групп
-		entry := tui.FindEntryInGroups([]gokeepasslib.Group{}, gokeepasslib.NewUUID())
+		entry := FindEntryInGroups([]gokeepasslib.Group{}, gokeepasslib.NewUUID())
 		assert.Nil(t, entry, "В пустом слайсе групп не должно быть записей")
 	})
 }
