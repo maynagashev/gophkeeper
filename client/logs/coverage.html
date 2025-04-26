@@ -81,7 +81,7 @@
 				
 				<option value="file12">github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go (61.8%)</option>
 				
-				<option value="file13">github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go (0.0%)</option>
+				<option value="file13">github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go (2.7%)</option>
 				
 				<option value="file14">github.com/maynagashev/gophkeeper/client/internal/tui/screen_list.go (0.0%)</option>
 				
@@ -2652,9 +2652,9 @@ type attachmentItem struct {
         id   int // ID из BinaryReference (Value.ID)
 }
 
-func (i attachmentItem) Title() string       <span class="cov0" title="0">{ return i.name }</span>
-func (i attachmentItem) Description() string <span class="cov0" title="0">{ return fmt.Sprintf("ID: %d", i.id) }</span>
-func (i attachmentItem) FilterValue() string <span class="cov0" title="0">{ return i.name }</span>
+func (i attachmentItem) Title() string       <span class="cov8" title="1">{ return i.name }</span>
+func (i attachmentItem) Description() string <span class="cov8" title="1">{ return fmt.Sprintf("ID: %d", i.id) }</span>
+func (i attachmentItem) FilterValue() string <span class="cov8" title="1">{ return i.name }</span>
 
 // prepareEditScreen инициализирует поля для экрана редактирования.
 func (m *model) prepareEditScreen() <span class="cov0" title="0">{

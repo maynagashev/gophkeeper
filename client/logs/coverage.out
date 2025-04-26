@@ -510,9 +510,9 @@ github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go:160.28,16
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go:164.2,168.51 3 1
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go:168.51,170.3 1 1
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go:173.2,181.10 4 1
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:27.46,27.63 1 0
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:28.46,28.84 1 0
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:29.46,29.63 1 0
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:27.46,27.63 1 1
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:28.46,28.84 1 1
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:29.46,29.63 1 1
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:32.37,33.28 1 0
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:33.28,35.3 1 0
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:38.2,58.35 6 0
