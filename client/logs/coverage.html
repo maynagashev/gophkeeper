@@ -65,7 +65,7 @@
 				
 				<option value="file4">github.com/maynagashev/gophkeeper/client/internal/tui/commands.go (86.0%)</option>
 				
-				<option value="file5">github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go (14.2%)</option>
+				<option value="file5">github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go (51.7%)</option>
 				
 				<option value="file6">github.com/maynagashev/gophkeeper/client/internal/tui/input_helpers.go (87.8%)</option>
 				
@@ -1359,7 +1359,7 @@ func (i versionItem) FilterValue() string <span class="cov8" title="1">{
 }</span>
 
 // initPasswordInput инициализирует основное поле ввода пароля.
-func initPasswordInput() textinput.Model <span class="cov0" title="0">{
+func initPasswordInput() textinput.Model <span class="cov8" title="1">{
         ti := textinput.New()
         ti.Placeholder = "Мастер-пароль"
         ti.Focus()
@@ -1370,7 +1370,7 @@ func initPasswordInput() textinput.Model <span class="cov0" title="0">{
 }</span>
 
 // initEntryList инициализирует основной компонент списка для записей.
-func initEntryList() list.Model <span class="cov0" title="0">{
+func initEntryList() list.Model <span class="cov8" title="1">{
         delegate := list.NewDefaultDelegate()
         // Настраиваем цвета для лучшей видимости
         delegate.Styles.NormalTitle = delegate.Styles.NormalTitle.
@@ -1400,7 +1400,7 @@ func initEntryList() list.Model <span class="cov0" title="0">{
 }</span>
 
 // initAttachmentDeleteList инициализирует список для удаления вложений.
-func initAttachmentDeleteList() list.Model <span class="cov0" title="0">{
+func initAttachmentDeleteList() list.Model <span class="cov8" title="1">{
         l := list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
         l.Title = "Выберите вложение для удаления"
         l.SetShowHelp(false)
@@ -1411,7 +1411,7 @@ func initAttachmentDeleteList() list.Model <span class="cov0" title="0">{
 }</span>
 
 // initAttachmentPathInput инициализирует поле ввода пути к вложению.
-func initAttachmentPathInput() textinput.Model <span class="cov0" title="0">{
+func initAttachmentPathInput() textinput.Model <span class="cov8" title="1">{
         ti := textinput.New()
         ti.Placeholder = "/path/to/your/file"
         ti.CharLimit = initPathCharLimit
@@ -1420,7 +1420,7 @@ func initAttachmentPathInput() textinput.Model <span class="cov0" title="0">{
 }</span>
 
 // initNewKdbxPasswordInputs инициализирует поля для создания нового пароля KDBX.
-func initNewKdbxPasswordInputs() (textinput.Model, textinput.Model) <span class="cov0" title="0">{
+func initNewKdbxPasswordInputs() (textinput.Model, textinput.Model) <span class="cov8" title="1">{
         newPass1 := textinput.New()
         newPass1.Placeholder = "Новый мастер-пароль"
         newPass1.Focus()

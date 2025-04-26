@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/charmbracelet/bubbles/list"
+	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/maynagashev/gophkeeper/models"
 	"github.com/stretchr/testify/assert"
 )
@@ -152,4 +154,63 @@ func TestVersionItem_FilterValue(t *testing.T) {
 			assert.Equal(t, tt.wantFilterValue, tt.item.FilterValue())
 		})
 	}
+}
+
+// TestInitPasswordInput проверяет инициализацию поля ввода пароля.
+func TestInitPasswordInput(t *testing.T) {
+	ti := initPasswordInput()
+	assert.Equal(t, "Мастер-пароль", ti.Placeholder)
+	assert.True(t, ti.Focused())
+	assert.Equal(t, initPasswordCharLimit, ti.CharLimit)
+	assert.Equal(t, initPasswordWidth, ti.Width)
+	assert.Equal(t, textinput.EchoPassword, ti.EchoMode)
+}
+
+// TestInitEntryList проверяет инициализацию списка записей.
+func TestInitEntryList(t *testing.T) {
+	l := initEntryList()
+	assert.Equal(t, "Записи", l.Title)
+	assert.False(t, l.ShowHelp())
+	assert.True(t, l.ShowStatusBar())
+	assert.Equal(t, list.Unfiltered, l.FilterState())
+	assert.True(t, l.Styles.Title.GetBold())
+}
+
+// TestInitAttachmentDeleteList проверяет инициализацию списка удаления вложений.
+func TestInitAttachmentDeleteList(t *testing.T) {
+	l := initAttachmentDeleteList()
+	assert.Equal(t, "Выберите вложение для удаления", l.Title)
+	assert.False(t, l.ShowHelp())
+	assert.False(t, l.ShowStatusBar())
+	assert.Equal(t, list.Unfiltered, l.FilterState()) // Фильтрация должна быть выключена (Unfiltered)
+	assert.True(t, l.Styles.Title.GetBold())
+}
+
+// TestInitAttachmentPathInput проверяет инициализацию поля ввода пути к вложению.
+func TestInitAttachmentPathInput(t *testing.T) {
+	ti := initAttachmentPathInput()
+	assert.Equal(t, "/path/to/your/file", ti.Placeholder)
+	assert.Equal(t, initPathCharLimit, ti.CharLimit)
+	// Используем константы, как в оригинальной функции
+	assert.Equal(t, defaultListWidth-passwordInputOffset, ti.Width)
+	assert.False(t, ti.Focused()) // По умолчанию фокуса нет
+}
+
+// TestInitNewKdbxPasswordInputs проверяет инициализацию полей для нового пароля KDBX.
+func TestInitNewKdbxPasswordInputs(t *testing.T) {
+	pass1, pass2 := initNewKdbxPasswordInputs()
+
+	// Проверка первого поля
+	assert.Equal(t, "Новый мастер-пароль", pass1.Placeholder)
+	assert.True(t, pass1.Focused()) // Первое поле должно быть в фокусе
+	assert.Equal(t, initPasswordCharLimit, pass1.CharLimit)
+	assert.Equal(t, initPasswordWidth, pass1.Width)
+	assert.Equal(t, textinput.EchoPassword, pass1.EchoMode)
+
+	// Проверка второго поля
+	assert.Equal(t, "Подтвердите пароль", pass2.Placeholder)
+	assert.False(t, pass2.Focused()) // Второе поле не должно быть в фокусе
+	assert.Equal(t, initPasswordCharLimit, pass2.CharLimit)
+	assert.Equal(t, initPasswordWidth, pass2.Width)
+	assert.Equal(t, textinput.EchoPassword, pass2.EchoMode)
 }

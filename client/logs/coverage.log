@@ -36,11 +36,11 @@ github.com/maynagashev/gophkeeper/client/internal/tui/commands.go:323:				applyU
 github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:36:			Title						100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:45:			Description					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:71:			FilterValue					100.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:77:			initPasswordInput				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:88:			initEntryList					0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:118:			initAttachmentDeleteList			0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:129:			initAttachmentPathInput				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:138:			initNewKdbxPasswordInputs			0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:77:			initPasswordInput				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:88:			initEntryList					100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:118:			initAttachmentDeleteList			100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:129:			initAttachmentPathInput				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:138:			initNewKdbxPasswordInputs			100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:155:			initSyncMenu					0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:176:			initServerURLInput				0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:185:			initLoginInputs					0.0%
@@ -199,4 +199,4 @@ github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:46:				deepCopyEn
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:51:				FindEntryInDB					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:60:				findEntryInDB					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:65:				FindEntryInGroups				100.0%
-total:												(statements)					33.2%
+total:												(statements)					35.4%
