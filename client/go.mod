@@ -6,6 +6,7 @@ require (
 	github.com/charmbracelet/bubbles v0.20.0
 	github.com/charmbracelet/bubbletea v1.3.4
 	github.com/gofrs/flock v0.12.1
+	github.com/maynagashev/gophkeeper/models v0.0.0-20250419170703-77449cf8005a
 	github.com/stretchr/testify v1.10.0
 	github.com/tobischo/gokeepasslib/v3 v3.6.1
 )

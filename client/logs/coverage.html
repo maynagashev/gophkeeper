@@ -63,11 +63,11 @@
 				
 				<option value="file3">github.com/maynagashev/gophkeeper/client/internal/kdbx/kdbx.go (88.1%)</option>
 				
-				<option value="file4">github.com/maynagashev/gophkeeper/client/internal/tui/commands.go (0.0%)</option>
+				<option value="file4">github.com/maynagashev/gophkeeper/client/internal/tui/commands.go (2.9%)</option>
 				
 				<option value="file5">github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go (0.0%)</option>
 				
-				<option value="file6">github.com/maynagashev/gophkeeper/client/internal/tui/input_helpers.go (0.0%)</option>
+				<option value="file6">github.com/maynagashev/gophkeeper/client/internal/tui/input_helpers.go (87.8%)</option>
 				
 				<option value="file7">github.com/maynagashev/gophkeeper/client/internal/tui/model.go (0.0%)</option>
 				
@@ -105,9 +105,9 @@
 				
 				<option value="file24">github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go (0.0%)</option>
 				
-				<option value="file25">github.com/maynagashev/gophkeeper/client/internal/tui/tui.go (0.0%)</option>
+				<option value="file25">github.com/maynagashev/gophkeeper/client/internal/tui/tui.go (3.5%)</option>
 				
-				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (0.0%)</option>
+				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (19.5%)</option>
 				
 				<option value="file27">github.com/maynagashev/gophkeeper/client/internal/tui/utils.go (85.7%)</option>
 				
@@ -970,7 +970,7 @@ func openKdbxCmd(path, password string) tea.Cmd <span class="cov0" title="0">{
 }
 
 // saveKdbxCmd асинхронно сохраняет файл базы.
-func saveKdbxCmd(db *gokeepasslib.Database, path, password string) tea.Cmd <span class="cov0" title="0">{
+func saveKdbxCmd(db *gokeepasslib.Database, path, password string) tea.Cmd <span class="cov8" title="1">{
         return func() tea.Msg </span><span class="cov0" title="0">{
                 err := kdbx.SaveFile(db, path, password)
                 if err != nil </span><span class="cov0" title="0">{
@@ -981,7 +981,7 @@ func saveKdbxCmd(db *gokeepasslib.Database, path, password string) tea.Cmd <span
 }
 
 // clearStatusCmd возвращает команду, которая отправит clearStatusMsg через delay.
-func clearStatusCmd(delay time.Duration) tea.Cmd <span class="cov0" title="0">{
+func clearStatusCmd(delay time.Duration) tea.Cmd <span class="cov8" title="1">{
         return tea.Tick(delay, func(_ time.Time) tea.Msg </span><span class="cov0" title="0">{
                 return clearStatusMsg{}
         }</span>)
@@ -1115,7 +1115,7 @@ func startSyncCmd(m *model) tea.Cmd <span class="cov0" title="0">{
 }
 
 // fetchServerMetadataCmd получает метаданные хранилища с сервера.
-func fetchServerMetadataCmd(m *model) tea.Cmd <span class="cov0" title="0">{
+func fetchServerMetadataCmd(m *model) tea.Cmd <span class="cov8" title="1">{
         return func() tea.Msg </span><span class="cov0" title="0">{
                 slog.Debug("Получение метаданных с сервера", "url", m.serverURL)
                 ctx := context.Background() // Используем background context
@@ -1144,7 +1144,7 @@ func fetchServerMetadataCmd(m *model) tea.Cmd <span class="cov0" title="0">{
 }
 
 // fetchLocalMetadataCmd получает время модификации локального файла.
-func fetchLocalMetadataCmd(m *model) tea.Cmd <span class="cov0" title="0">{
+func fetchLocalMetadataCmd(m *model) tea.Cmd <span class="cov8" title="1">{
         return func() tea.Msg </span><span class="cov0" title="0">{
                 slog.Debug("Получение метаданных локального файла", "path", m.kdbxPath)
                 // Используем os.Stat для получения времени модификации файла
@@ -1587,39 +1587,39 @@ func (m *model) handleCredentialsKeys(
         input2 *textinput.Model,
         focusedFieldIdx *int,
         onEnterCmd func() (tea.Model, tea.Cmd),
-) (tea.Model, tea.Cmd, bool) <span class="cov0" title="0">{
+) (tea.Model, tea.Cmd, bool) <span class="cov8" title="1">{
         switch keyMsg.String() </span>{
-        case keyTab:<span class="cov0" title="0">
+        case keyTab:<span class="cov8" title="1">
                 *focusedFieldIdx = (*focusedFieldIdx + 1) % numCredentialFields
                 if *focusedFieldIdx == 0 </span><span class="cov0" title="0">{
                         input2.Blur()
                         input1.Focus()
-                }</span> else<span class="cov0" title="0"> {
+                }</span> else<span class="cov8" title="1"> {
                         input1.Blur()
                         input2.Focus()
                 }</span>
-                <span class="cov0" title="0">return m, textinput.Blink, true</span> // Клавиша обработана
-        case keyShiftTab:<span class="cov0" title="0">
+                <span class="cov8" title="1">return m, textinput.Blink, true</span> // Клавиша обработана
+        case keyShiftTab:<span class="cov8" title="1">
                 *focusedFieldIdx = (*focusedFieldIdx + numCredentialFields - 1) % numCredentialFields
-                if *focusedFieldIdx == 0 </span><span class="cov0" title="0">{
+                if *focusedFieldIdx == 0 </span><span class="cov8" title="1">{
                         input2.Blur()
                         input1.Focus()
                 }</span> else<span class="cov0" title="0"> {
                         input1.Blur()
                         input2.Focus()
                 }</span>
-                <span class="cov0" title="0">return m, textinput.Blink, true</span> // Клавиша обработана
-        case keyEnter:<span class="cov0" title="0">
-                if *focusedFieldIdx == 0 </span><span class="cov0" title="0">{ // Активно первое поле
+                <span class="cov8" title="1">return m, textinput.Blink, true</span> // Клавиша обработана
+        case keyEnter:<span class="cov8" title="1">
+                if *focusedFieldIdx == 0 </span><span class="cov8" title="1">{ // Активно первое поле
                         *focusedFieldIdx = 1
                         input1.Blur()
                         input2.Focus()
                         return m, textinput.Blink, true // Клавиша обработана (переход фокуса)
                 }</span>
                 // Активно второе поле - вызываем действие
-                <span class="cov0" title="0">model, cmd := onEnterCmd()
+                <span class="cov8" title="1">model, cmd := onEnterCmd()
                 return model, cmd, true</span> // Клавиша обработана (вызов действия)
-        default:<span class="cov0" title="0">
+        default:<span class="cov8" title="1">
                 return m, nil, false</span> // Клавиша не обработана этим хендлером
         }
 }
@@ -1633,13 +1633,13 @@ func (m *model) handleCredentialsInput(
         focusedFieldIdx *int,
         onEnterCmd func() (tea.Model, tea.Cmd),
         previousState screenState,
-) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+) (tea.Model, tea.Cmd) <span class="cov8" title="1">{
         var cmds []tea.Cmd
         var cmd tea.Cmd
 
-        if keyMsg, ok := msg.(tea.KeyMsg); ok </span><span class="cov0" title="0">{
+        if keyMsg, ok := msg.(tea.KeyMsg); ok </span><span class="cov8" title="1">{
                 // Сначала обрабатываем Esc
-                if keyMsg.String() == keyEsc </span><span class="cov0" title="0">{
+                if keyMsg.String() == keyEsc </span><span class="cov8" title="1">{
                         m.state = previousState
                         input1.Blur()
                         input2.Blur()
@@ -1647,19 +1647,19 @@ func (m *model) handleCredentialsInput(
                 }</span>
 
                 // Затем обрабатываем Tab, Shift+Tab, Enter
-                <span class="cov0" title="0">newModel, keyCmd, handled := m.handleCredentialsKeys(keyMsg, input1, input2, focusedFieldIdx, onEnterCmd)
-                if handled </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">newModel, keyCmd, handled := m.handleCredentialsKeys(keyMsg, input1, input2, focusedFieldIdx, onEnterCmd)
+                if handled </span><span class="cov8" title="1">{
                         return newModel, keyCmd
                 }</span>
         }
 
         // Если это не Esc или другая обработанная клавиша, обновляем активное поле ввода
-        <span class="cov0" title="0">currentIdx := *focusedFieldIdx
+        <span class="cov8" title="1">currentIdx := *focusedFieldIdx
         activeInput := input1
         if currentIdx == 1 </span><span class="cov0" title="0">{
                 activeInput = input2
         }</span>
-        <span class="cov0" title="0">*activeInput, cmd = activeInput.Update(msg)
+        <span class="cov8" title="1">*activeInput, cmd = activeInput.Update(msg)
         cmds = append(cmds, cmd)
 
         return m, tea.Batch(cmds...)</span>
@@ -4171,7 +4171,7 @@ func (m *model) Init() tea.Cmd <span class="cov0" title="0">{
 }</span>
 
 // setStatusMessage устанавливает статусное сообщение и запускает таймер для его очистки.
-func (m *model) setStatusMessage(status string) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+func (m *model) setStatusMessage(status string) (tea.Model, tea.Cmd) <span class="cov8" title="1">{
         m.savingStatus = status
         // Если таймер уже есть, останавливаем его
         if m.statusTimer != nil </span><span class="cov0" title="0">{
@@ -4180,7 +4180,7 @@ func (m *model) setStatusMessage(status string) (tea.Model, tea.Cmd) <span class
                 m.statusTimer = nil
         }</span>
         // Запускаем команду для очистки статуса через заданное время
-        <span class="cov0" title="0">cmd := clearStatusCmd(statusMessageTimeout)
+        <span class="cov8" title="1">cmd := clearStatusCmd(statusMessageTimeout)
         // Примечание: Мы не сохраняем сам таймер, так как tea.Tick управляет им.
         // Если нужно будет отменять таймер до его срабатывания, понадобится другой подход.
         return m, cmd</span>
@@ -4497,27 +4497,27 @@ func handleErrorMsg(m *model, msg errMsg) tea.Model <span class="cov0" title="0"
         return m.handleErrorMsg(msg)
 }</span>
 
-func handleDBSavedMsg(m *model) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+func handleDBSavedMsg(m *model) (tea.Model, tea.Cmd) <span class="cov8" title="1">{
         // Добавляем tea.ClearScreen в Batch после установки статуса
         newM, statusCmd := m.setStatusMessage("Сохранено успешно!")
         return newM, tea.Batch(statusCmd, tea.ClearScreen)
 }</span>
 
-func handleDBSaveErrorMsg(m *model, msg dbSaveErrorMsg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+func handleDBSaveErrorMsg(m *model, msg dbSaveErrorMsg) (tea.Model, tea.Cmd) <span class="cov8" title="1">{
         return m.setStatusMessage(fmt.Sprintf("Ошибка сохранения: %v", msg.err))
 }</span>
 
-func handleClearStatusMsg(m *model) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+func handleClearStatusMsg(m *model) (tea.Model, tea.Cmd) <span class="cov8" title="1">{
         m.savingStatus = ""
         m.statusTimer = nil // Обнуляем таймер (хотя он и так не используется для отмены)
         // Возвращаем команду для принудительной перерисовки
         return m, tea.ClearScreen
 }</span>
 
-func handleSyncErrorMsg(m *model, msg SyncError) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+func handleSyncErrorMsg(m *model, msg SyncError) (tea.Model, tea.Cmd) <span class="cov8" title="1">{
         m.isSyncing = false
         // Проверяем на ошибку авторизации
-        if errors.Is(msg.err, api.ErrAuthorization) </span><span class="cov0" title="0">{
+        if errors.Is(msg.err, api.ErrAuthorization) </span><span class="cov8" title="1">{
                 m.state = loginRegisterChoiceScreen // Переходим на экран выбора входа/регистрации
                 // Можно добавить очистку экрана, если нужно
                 newM, statusCmd := m.setStatusMessage("Сессия истекла. Пожалуйста, войдите снова (L).")
@@ -4525,11 +4525,11 @@ func handleSyncErrorMsg(m *model, msg SyncError) (tea.Model, tea.Cmd) <span clas
         }</span>
         // Иначе показываем общую ошибку синхронизации
         // Добавляем ClearScreen и здесь
-        <span class="cov0" title="0">newM, statusCmd := m.setStatusMessage(fmt.Sprintf("Ошибка синхронизации: %v", msg.err))
+        <span class="cov8" title="1">newM, statusCmd := m.setStatusMessage(fmt.Sprintf("Ошибка синхронизации: %v", msg.err))
         return newM, tea.Batch(statusCmd, tea.ClearScreen)</span>
 }
 
-func handleSyncStartedMsg(m *model) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+func handleSyncStartedMsg(m *model) (tea.Model, tea.Cmd) <span class="cov8" title="1">{
         m.isSyncing = true
         m.receivedServerMeta = false
         m.receivedLocalMeta = false
@@ -4747,12 +4747,12 @@ func handleAPIMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) <span class=
 }
 
 // canSave checks if the application is in a state where saving is allowed.
-func (m *model) canSave() bool <span class="cov0" title="0">{
+func (m *model) canSave() bool <span class="cov8" title="1">{
         return !m.readOnlyMode &amp;&amp; m.db != nil &amp;&amp; (m.state == entryListScreen || m.state == entryDetailScreen)
 }</span>
 
 // updateDBFromList updates the in-memory database (m.db) with data from the TUI list (m.entryList).
-func (m *model) updateDBFromList() int <span class="cov0" title="0">{
+func (m *model) updateDBFromList() int <span class="cov8" title="1">{
         slog.Info("Начало обновления m.db перед сохранением")
         items := m.entryList.Items()
         updatedCount := 0
@@ -4773,37 +4773,37 @@ func (m *model) updateDBFromList() int <span class="cov0" title="0">{
                         slog.Warn("Запись из списка не найдена в m.db", "uuid", listItem.entry.UUID)
                 }</span>
         }
-        <span class="cov0" title="0">slog.Info("Обновление m.db завершено", "updated_count", updatedCount)
+        <span class="cov8" title="1">slog.Info("Обновление m.db завершено", "updated_count", updatedCount)
         return updatedCount</span>
 }
 
 // updateRootModTime updates the LastModificationTime of the root group.
-func (m *model) updateRootModTime() <span class="cov0" title="0">{
-        if m.db == nil || m.db.Content == nil || m.db.Content.Root == nil </span><span class="cov0" title="0">{
+func (m *model) updateRootModTime() <span class="cov8" title="1">{
+        if m.db == nil || m.db.Content == nil || m.db.Content.Root == nil </span><span class="cov8" title="1">{
                 slog.Warn("Не удалось обновить LastModificationTime: db, Content или Root is nil")
                 return
         }</span>
 
-        <span class="cov0" title="0">now := time.Now().UTC()
+        <span class="cov8" title="1">now := time.Now().UTC()
         modTimeWrapper := wrappers.TimeWrapper{Time: now}
 
         // Обновляем время модификации первой (корневой) группы
-        if len(m.db.Content.Root.Groups) &gt; 0 </span><span class="cov0" title="0">{
+        if len(m.db.Content.Root.Groups) &gt; 0 </span><span class="cov8" title="1">{
                 rootGroup := &amp;m.db.Content.Root.Groups[0]
                 rootGroup.Times.LastModificationTime = &amp;modTimeWrapper // Присваиваем указатель
                 slog.Debug("Обновлено LastModificationTime корневой группы перед сохранением", "newTime", now)
-        }</span> else<span class="cov0" title="0"> {
+        }</span> else<span class="cov8" title="1"> {
                 slog.Warn("Не удалось обновить LastModificationTime: нет корневой группы")
         }</span>
 }
 
 // handleSaveKeyPress handles the logic for the Ctrl+S key press.
-func (m *model) handleSaveKeyPress() (tea.Model, tea.Cmd) <span class="cov0" title="0">{
-        if !m.canSave() </span><span class="cov0" title="0">{
+func (m *model) handleSaveKeyPress() (tea.Model, tea.Cmd) <span class="cov8" title="1">{
+        if !m.canSave() </span><span class="cov8" title="1">{
                 return m, nil // Not in a state to save, or read-only
         }</span>
 
-        <span class="cov0" title="0">m.savingStatus = "Подготовка к сохранению..."
+        <span class="cov8" title="1">m.savingStatus = "Подготовка к сохранению..."
 
         // Update m.db from the list UI
         m.updateDBFromList()
@@ -4818,16 +4818,16 @@ func (m *model) handleSaveKeyPress() (tea.Model, tea.Cmd) <span class="cov0" tit
 }
 
 // handleGlobalKeys обрабатывает глобальные сочетания клавиш.
-func handleGlobalKeys(m *model, msg tea.KeyMsg) (tea.Model, tea.Cmd, bool) <span class="cov0" title="0">{
+func handleGlobalKeys(m *model, msg tea.KeyMsg) (tea.Model, tea.Cmd, bool) <span class="cov8" title="1">{
         switch msg.String() </span>{
-        case "ctrl+c":<span class="cov0" title="0">
+        case "ctrl+c":<span class="cov8" title="1">
                 return m, tea.Quit, true</span>
-        case "ctrl+s":<span class="cov0" title="0">
+        case "ctrl+s":<span class="cov8" title="1">
                 // Delegate saving logic to a separate function
                 updatedModel, cmd := m.handleSaveKeyPress()
                 // Return true only if saving was actually attempted (canSave was true)
                 return updatedModel, cmd, m.canSave()</span>
-        default:<span class="cov0" title="0">
+        default:<span class="cov8" title="1">
                 // Клавиша не является глобальной
                 return m, nil, false</span>
         }

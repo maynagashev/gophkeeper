@@ -1,9 +1,0 @@
-2025/04/25 21:56:01 [ubuntu/03oDjgQ6BG-000001] "POST https://localhost:8443/api/login HTTP/2.0" from 127.0.0.1:43254 - 200 214B in 163.742873ms
-2025/04/25 21:56:26 [ubuntu/03oDjgQ6BG-000002] "GET https://localhost:8443/api/vault HTTP/2.0" from 127.0.0.1:43254 - 200 271B in 8.534885ms
-2025/04/25 21:56:26 [ubuntu/03oDjgQ6BG-000003] "POST https://localhost:8443/api/vault/upload HTTP/2.0" from 127.0.0.1:43254 - 409 168B in 42.765551ms
-2025/04/25 21:56:30 [ubuntu/03oDjgQ6BG-000004] "GET https://localhost:8443/api/vault HTTP/2.0" from 127.0.0.1:43254 - 200 271B in 2.003058ms
-2025/04/25 21:56:30 [ubuntu/03oDjgQ6BG-000005] "POST https://localhost:8443/api/vault/upload HTTP/2.0" from 127.0.0.1:43254 - 409 168B in 11.751129ms
-2025/04/25 21:56:33 [ubuntu/03oDjgQ6BG-000006] "GET https://localhost:8443/api/vault HTTP/2.0" from 127.0.0.1:43254 - 200 271B in 2.897744ms
-2025/04/25 21:56:33 [ubuntu/03oDjgQ6BG-000007] "POST https://localhost:8443/api/vault/upload HTTP/2.0" from 127.0.0.1:43254 - 409 168B in 11.848634ms
-2025/04/25 21:56:47 [ubuntu/03oDjgQ6BG-000008] "GET https://localhost:8443/api/vault HTTP/2.0" from 127.0.0.1:43254 - 200 271B in 2.593654ms
-2025/04/25 21:56:47 [ubuntu/03oDjgQ6BG-000009] "POST https://localhost:8443/api/vault/upload HTTP/2.0" from 127.0.0.1:43254 - 200 41B in 28.680025ms
