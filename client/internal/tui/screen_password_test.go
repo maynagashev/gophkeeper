@@ -86,9 +86,9 @@ func TestPasswordInputScreen(t *testing.T) {
 		// Примечание: в реальном приложении это бы открыло файл KDBX,
 		// но в тесте это вернет ошибку, так как файл не существует
 		msg := suite.ExecuteCmd(cmd)
-		errMsg, ok := msg.(errMsg)
+		errorMsg, ok := msg.(errMsg)
 		require.True(t, ok, "Сообщение должно быть типа errMsg, т.к. файл не существует")
-		assert.Contains(t, errMsg.err.Error(), "open "+testPath, "Ошибка должна указывать на попытку открыть файл")
+		assert.Contains(t, errorMsg.err.Error(), "open "+testPath, "Ошибка должна указывать на попытку открыть файл")
 	})
 
 	t.Run("ОбработкаErrMsg", func(t *testing.T) {
@@ -101,10 +101,10 @@ func TestPasswordInputScreen(t *testing.T) {
 
 		// Создаем ошибку и сообщение
 		testError := errors.New("тестовая ошибка открытия")
-		msg := errMsg{err: testError}
+		errorMessage := errMsg{err: testError} // Переименовываем переменную msg в errorMessage
 
 		// Обрабатываем сообщение
-		newModel := suite.Model.handleErrorMsg(msg)
+		newModel := suite.Model.handleErrorMsg(errorMessage)
 		m := toModel(t, newModel)
 
 		// Проверяем результаты
@@ -129,7 +129,7 @@ func TestPasswordInputScreen(t *testing.T) {
 		m := toModel(t, newModel)
 
 		// Проверяем, что ошибка очищена и фокус возвращен
-		assert.NoError(t, m.err, "Ошибка должна быть очищена после нажатия клавиши")
+		require.NoError(t, m.err, "Ошибка должна быть очищена после нажатия клавиши")
 		assert.True(t, m.passwordInput.Focused(), "Поле ввода должно получить фокус")
 	})
 }

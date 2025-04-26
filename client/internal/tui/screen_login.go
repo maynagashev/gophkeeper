@@ -41,7 +41,8 @@ func (m *model) viewLoginScreen() string {
 	)
 }
 
-func TestLoginScreen_TabNavigation(t *testing.T) {
+// TestLoginScreenTabNavigation проверяет навигацию по полям с помощью клавиши Tab.
+func TestLoginScreenTabNavigation(t *testing.T) {
 	t.Run("ПереключениеФокусаПоTab", func(t *testing.T) {
 		// Создаем модель
 		m := &model{
@@ -97,7 +98,8 @@ func TestLoginScreen_TabNavigation(t *testing.T) {
 	})
 }
 
-func TestLoginScreen_EscapeKey(t *testing.T) {
+// TestLoginScreenEscapeKey проверяет поведение при нажатии Escape.
+func TestLoginScreenEscapeKey(t *testing.T) {
 	// Создаем модель
 	m := &model{
 		state:                     loginScreen,
@@ -118,7 +120,8 @@ func TestLoginScreen_EscapeKey(t *testing.T) {
 	assert.Equal(t, loginRegisterChoiceScreen, model.state, "Должен произойти переход на экран выбора")
 }
 
-func TestLoginScreen_EnterSubmit(t *testing.T) {
+// TestLoginScreenEnterSubmit проверяет отправку формы при нажатии Enter.
+func TestLoginScreenEnterSubmit(t *testing.T) {
 	// Создаем модель
 	m := &model{
 		state:                     loginScreen,
@@ -143,7 +146,8 @@ func TestLoginScreen_EnterSubmit(t *testing.T) {
 	assert.NotNil(t, cmd, "Должна быть возвращена команда")
 }
 
-func TestLoginScreen_View(t *testing.T) {
+// TestLoginScreenView проверяет отображение экрана входа.
+func TestLoginScreenView(t *testing.T) {
 	// Создаем модель
 	m := &model{
 		state:              loginScreen,

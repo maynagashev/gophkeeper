@@ -43,17 +43,31 @@ func (m *ScreenTestMockAPIClient) Register(ctx context.Context, username, passwo
 	return args.Error(0)
 }
 
+// Константы для индексов аргументов mock.
+const (
+	mockErrorIndex = 2 // Индекс ошибки в аргументах mock
+)
+
 // GetVaultMetadata мокирует метод GetVaultMetadata.
 func (m *ScreenTestMockAPIClient) GetVaultMetadata(ctx context.Context) (*models.VaultVersion, error) {
 	args := m.Called(ctx)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*models.VaultVersion), args.Error(1)
+	v, ok := args.Get(0).(*models.VaultVersion)
+	if !ok {
+		return nil, args.Error(1)
+	}
+	return v, args.Error(1)
 }
 
 // UploadVault мокирует метод UploadVault.
-func (m *ScreenTestMockAPIClient) UploadVault(ctx context.Context, data io.Reader, size int64, contentModifiedAt time.Time) error {
+func (m *ScreenTestMockAPIClient) UploadVault(
+	ctx context.Context,
+	data io.Reader,
+	size int64,
+	contentModifiedAt time.Time,
+) error {
 	args := m.Called(ctx, data, size, contentModifiedAt)
 	return args.Error(0)
 }
@@ -62,21 +76,51 @@ func (m *ScreenTestMockAPIClient) UploadVault(ctx context.Context, data io.Reade
 func (m *ScreenTestMockAPIClient) DownloadVault(ctx context.Context) (io.ReadCloser, *models.VaultVersion, error) {
 	args := m.Called(ctx)
 	if args.Get(0) == nil {
-		return nil, nil, args.Error(2)
+		return nil, nil, args.Error(mockErrorIndex)
 	}
 	if args.Get(1) == nil {
-		return args.Get(0).(io.ReadCloser), nil, args.Error(2)
+		readCloser, ok := args.Get(0).(io.ReadCloser)
+		if !ok {
+			return nil, nil, args.Error(mockErrorIndex)
+		}
+		return readCloser, nil, args.Error(mockErrorIndex)
 	}
-	return args.Get(0).(io.ReadCloser), args.Get(1).(*models.VaultVersion), args.Error(2)
+
+	readCloser, ok1 := args.Get(0).(io.ReadCloser)
+	if !ok1 {
+		return nil, nil, args.Error(mockErrorIndex)
+	}
+
+	version, ok2 := args.Get(1).(*models.VaultVersion)
+	if !ok2 {
+		return readCloser, nil, args.Error(mockErrorIndex)
+	}
+
+	return readCloser, version, args.Error(mockErrorIndex)
 }
 
 // ListVersions мокирует метод ListVersions.
-func (m *ScreenTestMockAPIClient) ListVersions(ctx context.Context, limit, offset int) ([]models.VaultVersion, int64, error) {
+func (m *ScreenTestMockAPIClient) ListVersions(
+	ctx context.Context,
+	limit,
+	offset int,
+) ([]models.VaultVersion, int64, error) {
 	args := m.Called(ctx, limit, offset)
 	if args.Get(0) == nil {
-		return nil, 0, args.Error(2)
+		return nil, 0, args.Error(mockErrorIndex)
 	}
-	return args.Get(0).([]models.VaultVersion), args.Get(1).(int64), args.Error(2)
+
+	versions, ok1 := args.Get(0).([]models.VaultVersion)
+	if !ok1 {
+		return nil, 0, args.Error(mockErrorIndex)
+	}
+
+	count, ok2 := args.Get(1).(int64)
+	if !ok2 {
+		return versions, 0, args.Error(mockErrorIndex)
+	}
+
+	return versions, count, args.Error(mockErrorIndex)
 }
 
 // RollbackToVersion мокирует метод RollbackToVersion.

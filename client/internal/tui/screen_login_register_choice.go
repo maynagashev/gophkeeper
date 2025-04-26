@@ -51,7 +51,8 @@ func (m *model) viewLoginRegisterChoiceScreen() string {
 	return b.String()
 }
 
-func TestLoginRegisterChoiceScreen_SimulateKeyPress(t *testing.T) {
+// TestLoginRegisterChoiceScreenSimulateKeyPress тесты для симуляции нажатий клавиш на экране выбора входа/регистрации.
+func TestLoginRegisterChoiceScreenSimulateKeyPress(t *testing.T) {
 	t.Run("ПереходНаЭкранРегистрации", func(t *testing.T) {
 		// Создаем модель
 		m := &model{
@@ -138,7 +139,8 @@ func TestLoginRegisterChoiceScreen_SimulateKeyPress(t *testing.T) {
 	})
 }
 
-func TestLoginRegisterChoiceScreen_View(t *testing.T) {
+// TestLoginRegisterChoiceScreenView тест отображения экрана выбора входа/регистрации.
+func TestLoginRegisterChoiceScreenView(t *testing.T) {
 	// Создаем модель
 	m := &model{
 		state:     loginRegisterChoiceScreen,

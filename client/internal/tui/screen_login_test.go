@@ -32,7 +32,7 @@ func TestUpdateLoginScreen(t *testing.T) {
 			expectedCmd:     true,
 			usernameFocused: false,
 			passwordFocused: true,
-			initModel:       func(m *model) {},
+			initModel:       func(_ *model) {},
 		},
 		{
 			name:            "ПереключениеПоляНазад",
@@ -43,7 +43,7 @@ func TestUpdateLoginScreen(t *testing.T) {
 			expectedCmd:     true,
 			usernameFocused: true,
 			passwordFocused: false,
-			initModel:       func(m *model) {},
+			initModel:       func(_ *model) {},
 		},
 		{
 			name:            "ОтменаВхода",
@@ -54,7 +54,7 @@ func TestUpdateLoginScreen(t *testing.T) {
 			expectedCmd:     true,
 			usernameFocused: false,
 			passwordFocused: false,
-			initModel:       func(m *model) {},
+			initModel:       func(_ *model) {},
 		},
 		{
 			name:            "НажатиеEnter_ПервоеПоле",
@@ -65,7 +65,7 @@ func TestUpdateLoginScreen(t *testing.T) {
 			expectedCmd:     true,
 			usernameFocused: false,
 			passwordFocused: true,
-			initModel:       func(m *model) {},
+			initModel:       func(_ *model) {},
 		},
 		{
 			name:            "НажатиеEnter_ВтороеПоле_ОтправкаФормы",

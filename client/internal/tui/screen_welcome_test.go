@@ -50,9 +50,8 @@ func TestWelcomeScreen(t *testing.T) {
 		suite.WithState(welcomeScreen)
 
 		// Имитируем нажатие 'q'
-		_, cmd := suite.SimulateKeyPress(tea.KeyRunes)
 		keyMsg := tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'q'}}
-		newModel, cmd := suite.Model.Update(keyMsg)
+		newModel, _ := suite.Model.Update(keyMsg) // Игнорируем возвращаемую команду
 
 		// Проверяем, что модель не изменилась
 		m := toModel(t, newModel)
@@ -60,13 +59,14 @@ func TestWelcomeScreen(t *testing.T) {
 		// Не проверяем cmd, так как в зависимости от реализации он может быть как nil, так и не nil
 
 		// Имитируем нажатие Ctrl+C
-		newModel, cmd = suite.SimulateKeyPress(tea.KeyCtrlC)
+		var quitCmd tea.Cmd
+		_, quitCmd = suite.SimulateKeyPress(tea.KeyCtrlC)
 
 		// Определяем тип возвращаемой команды
-		require.NotNil(t, cmd, "Команда не должна быть nil при нажатии Ctrl+C")
+		require.NotNil(t, quitCmd, "Команда не должна быть nil при нажатии Ctrl+C")
 
 		// Выполняем команду и проверяем тип сообщения
-		msg := suite.ExecuteCmd(cmd)
+		msg := suite.ExecuteCmd(quitCmd)
 		_, ok := msg.(tea.QuitMsg)
 		assert.True(t, ok, "Должно быть возвращено сообщение tea.QuitMsg при нажатии Ctrl+C")
 	})

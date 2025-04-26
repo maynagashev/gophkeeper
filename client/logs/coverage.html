@@ -99,7 +99,7 @@
 				
 				<option value="file21">github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go (0.0%)</option>
 				
-				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go (18.4%)</option>
+				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go (15.2%)</option>
 				
 				<option value="file23">github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go (25.2%)</option>
 				
@@ -3099,7 +3099,8 @@ func (m *model) viewLoginScreen() string <span class="cov8" title="1">{
         )
 }</span>
 
-func TestLoginScreen_TabNavigation(t *testing.T) <span class="cov0" title="0">{
+// TestLoginScreenTabNavigation проверяет навигацию по полям с помощью клавиши Tab.
+func TestLoginScreenTabNavigation(t *testing.T) <span class="cov0" title="0">{
         t.Run("ПереключениеФокусаПоTab", func(t *testing.T) </span><span class="cov0" title="0">{
                 // Создаем модель
                 m := &amp;model{
@@ -3155,7 +3156,8 @@ func TestLoginScreen_TabNavigation(t *testing.T) <span class="cov0" title="0">{
         }</span>)
 }
 
-func TestLoginScreen_EscapeKey(t *testing.T) <span class="cov0" title="0">{
+// TestLoginScreenEscapeKey проверяет поведение при нажатии Escape.
+func TestLoginScreenEscapeKey(t *testing.T) <span class="cov0" title="0">{
         // Создаем модель
         m := &amp;model{
                 state:                     loginScreen,
@@ -3176,7 +3178,8 @@ func TestLoginScreen_EscapeKey(t *testing.T) <span class="cov0" title="0">{
         assert.Equal(t, loginRegisterChoiceScreen, model.state, "Должен произойти переход на экран выбора")
 }</span>
 
-func TestLoginScreen_EnterSubmit(t *testing.T) <span class="cov0" title="0">{
+// TestLoginScreenEnterSubmit проверяет отправку формы при нажатии Enter.
+func TestLoginScreenEnterSubmit(t *testing.T) <span class="cov0" title="0">{
         // Создаем модель
         m := &amp;model{
                 state:                     loginScreen,
@@ -3201,7 +3204,8 @@ func TestLoginScreen_EnterSubmit(t *testing.T) <span class="cov0" title="0">{
         assert.NotNil(t, cmd, "Должна быть возвращена команда")
 }</span>
 
-func TestLoginScreen_View(t *testing.T) <span class="cov0" title="0">{
+// TestLoginScreenView проверяет отображение экрана входа.
+func TestLoginScreenView(t *testing.T) <span class="cov0" title="0">{
         // Создаем модель
         m := &amp;model{
                 state:              loginScreen,
@@ -3276,7 +3280,8 @@ func (m *model) viewLoginRegisterChoiceScreen() string <span class="cov8" title=
         return b.String()
 }</span>
 
-func TestLoginRegisterChoiceScreen_SimulateKeyPress(t *testing.T) <span class="cov0" title="0">{
+// TestLoginRegisterChoiceScreenSimulateKeyPress тесты для симуляции нажатий клавиш на экране выбора входа/регистрации.
+func TestLoginRegisterChoiceScreenSimulateKeyPress(t *testing.T) <span class="cov0" title="0">{
         t.Run("ПереходНаЭкранРегистрации", func(t *testing.T) </span><span class="cov0" title="0">{
                 // Создаем модель
                 m := &amp;model{
@@ -3363,7 +3368,8 @@ func TestLoginRegisterChoiceScreen_SimulateKeyPress(t *testing.T) <span class="c
         }</span>)
 }
 
-func TestLoginRegisterChoiceScreen_View(t *testing.T) <span class="cov0" title="0">{
+// TestLoginRegisterChoiceScreenView тест отображения экрана выбора входа/регистрации.
+func TestLoginRegisterChoiceScreenView(t *testing.T) <span class="cov0" title="0">{
         // Создаем модель
         m := &amp;model{
                 state:     loginRegisterChoiceScreen,
@@ -3960,17 +3966,31 @@ func (m *ScreenTestMockAPIClient) Register(ctx context.Context, username, passwo
         return args.Error(0)
 }</span>
 
+// Константы для индексов аргументов mock.
+const (
+        mockErrorIndex = 2 // Индекс ошибки в аргументах mock
+)
+
 // GetVaultMetadata мокирует метод GetVaultMetadata.
 func (m *ScreenTestMockAPIClient) GetVaultMetadata(ctx context.Context) (*models.VaultVersion, error) <span class="cov0" title="0">{
         args := m.Called(ctx)
         if args.Get(0) == nil </span><span class="cov0" title="0">{
                 return nil, args.Error(1)
         }</span>
-        <span class="cov0" title="0">return args.Get(0).(*models.VaultVersion), args.Error(1)</span>
+        <span class="cov0" title="0">v, ok := args.Get(0).(*models.VaultVersion)
+        if !ok </span><span class="cov0" title="0">{
+                return nil, args.Error(1)
+        }</span>
+        <span class="cov0" title="0">return v, args.Error(1)</span>
 }
 
 // UploadVault мокирует метод UploadVault.
-func (m *ScreenTestMockAPIClient) UploadVault(ctx context.Context, data io.Reader, size int64, contentModifiedAt time.Time) error <span class="cov0" title="0">{
+func (m *ScreenTestMockAPIClient) UploadVault(
+        ctx context.Context,
+        data io.Reader,
+        size int64,
+        contentModifiedAt time.Time,
+) error <span class="cov0" title="0">{
         args := m.Called(ctx, data, size, contentModifiedAt)
         return args.Error(0)
 }</span>
@@ -3979,21 +3999,51 @@ func (m *ScreenTestMockAPIClient) UploadVault(ctx context.Context, data io.Reade
 func (m *ScreenTestMockAPIClient) DownloadVault(ctx context.Context) (io.ReadCloser, *models.VaultVersion, error) <span class="cov0" title="0">{
         args := m.Called(ctx)
         if args.Get(0) == nil </span><span class="cov0" title="0">{
-                return nil, nil, args.Error(2)
+                return nil, nil, args.Error(mockErrorIndex)
         }</span>
         <span class="cov0" title="0">if args.Get(1) == nil </span><span class="cov0" title="0">{
-                return args.Get(0).(io.ReadCloser), nil, args.Error(2)
+                readCloser, ok := args.Get(0).(io.ReadCloser)
+                if !ok </span><span class="cov0" title="0">{
+                        return nil, nil, args.Error(mockErrorIndex)
+                }</span>
+                <span class="cov0" title="0">return readCloser, nil, args.Error(mockErrorIndex)</span>
+        }
+
+        <span class="cov0" title="0">readCloser, ok1 := args.Get(0).(io.ReadCloser)
+        if !ok1 </span><span class="cov0" title="0">{
+                return nil, nil, args.Error(mockErrorIndex)
         }</span>
-        <span class="cov0" title="0">return args.Get(0).(io.ReadCloser), args.Get(1).(*models.VaultVersion), args.Error(2)</span>
+
+        <span class="cov0" title="0">version, ok2 := args.Get(1).(*models.VaultVersion)
+        if !ok2 </span><span class="cov0" title="0">{
+                return readCloser, nil, args.Error(mockErrorIndex)
+        }</span>
+
+        <span class="cov0" title="0">return readCloser, version, args.Error(mockErrorIndex)</span>
 }
 
 // ListVersions мокирует метод ListVersions.
-func (m *ScreenTestMockAPIClient) ListVersions(ctx context.Context, limit, offset int) ([]models.VaultVersion, int64, error) <span class="cov0" title="0">{
+func (m *ScreenTestMockAPIClient) ListVersions(
+        ctx context.Context,
+        limit,
+        offset int,
+) ([]models.VaultVersion, int64, error) <span class="cov0" title="0">{
         args := m.Called(ctx, limit, offset)
         if args.Get(0) == nil </span><span class="cov0" title="0">{
-                return nil, 0, args.Error(2)
+                return nil, 0, args.Error(mockErrorIndex)
         }</span>
-        <span class="cov0" title="0">return args.Get(0).([]models.VaultVersion), args.Get(1).(int64), args.Error(2)</span>
+
+        <span class="cov0" title="0">versions, ok1 := args.Get(0).([]models.VaultVersion)
+        if !ok1 </span><span class="cov0" title="0">{
+                return nil, 0, args.Error(mockErrorIndex)
+        }</span>
+
+        <span class="cov0" title="0">count, ok2 := args.Get(1).(int64)
+        if !ok2 </span><span class="cov0" title="0">{
+                return versions, 0, args.Error(mockErrorIndex)
+        }</span>
+
+        <span class="cov0" title="0">return versions, count, args.Error(mockErrorIndex)</span>
 }
 
 // RollbackToVersion мокирует метод RollbackToVersion.

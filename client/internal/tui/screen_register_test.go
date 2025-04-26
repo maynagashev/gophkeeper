@@ -1,3 +1,4 @@
+//nolint:testpackage // Это тесты в том же пакете для доступа к приватным компонентам
 package tui
 
 import (
@@ -31,7 +32,7 @@ func TestUpdateRegisterScreen(t *testing.T) {
 			expectedCmd:     true,
 			usernameFocused: false,
 			passwordFocused: true,
-			initModel:       func(m *model) {},
+			initModel:       func(_ *model) {},
 		},
 		{
 			name:            "ПереключениеПоляНазад",
@@ -42,7 +43,7 @@ func TestUpdateRegisterScreen(t *testing.T) {
 			expectedCmd:     true,
 			usernameFocused: true,
 			passwordFocused: false,
-			initModel:       func(m *model) {},
+			initModel:       func(_ *model) {},
 		},
 		{
 			name:            "ОтменаРегистрации",
@@ -53,7 +54,7 @@ func TestUpdateRegisterScreen(t *testing.T) {
 			expectedCmd:     true,
 			usernameFocused: false,
 			passwordFocused: false,
-			initModel:       func(m *model) {},
+			initModel:       func(_ *model) {},
 		},
 		{
 			name:            "НажатиеEnter_ПервоеПоле",
@@ -64,7 +65,7 @@ func TestUpdateRegisterScreen(t *testing.T) {
 			expectedCmd:     true,
 			usernameFocused: false,
 			passwordFocused: true,
-			initModel:       func(m *model) {},
+			initModel:       func(_ *model) {},
 		},
 		{
 			name:            "НажатиеEnter_ВтороеПоле_ОтправкаФормы",
