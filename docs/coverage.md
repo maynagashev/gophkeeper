@@ -27,9 +27,9 @@ make lint
 ```bash
 go test -coverprofile=logs/coverage.out ./...
 	github.com/maynagashev/gophkeeper/client/cmd/gophkeeper		coverage: 0.0% of statements
-ok  	github.com/maynagashev/gophkeeper/client/internal/api	0.017s	coverage: 84.6% of statements
-ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	0.678s	coverage: 94.6% of statements
-ok  	github.com/maynagashev/gophkeeper/client/internal/tui	0.049s	coverage: 35.1% of statements
+ok  	github.com/maynagashev/gophkeeper/client/internal/api	0.018s	coverage: 84.6% of statements
+ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	0.828s	coverage: 94.6% of statements
+ok  	github.com/maynagashev/gophkeeper/client/internal/tui	0.074s	coverage: 37.7% of statements
 go tool cover -html=logs/coverage.out -o logs/coverage.html
 go tool cover -func=logs/coverage.out | tee logs/coverage.log
 github.com/maynagashev/gophkeeper/client/cmd/gophkeeper/main.go:33:				setupLogging					0.0%
@@ -90,8 +90,8 @@ github.com/maynagashev/gophkeeper/client/internal/tui/model.go:150:				Descripti
 github.com/maynagashev/gophkeeper/client/internal/tui/model.go:177:				FilterValue					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:15:				prepareAddScreen				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:57:				createEntryFromInputs				92.3%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:106:			updateEntryAddScreen				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:194:			updateFocus					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:106:			updateEntryAddScreen				78.7%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:194:			updateFocus					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:207:			viewEntryAddScreen				0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_delete.go:11:		updateAttachmentListDeleteScreen		0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_delete.go:71:		performAttachmentDelete				0.0%
@@ -159,22 +159,22 @@ github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:103
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:127:		RollbackToVersion				0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:133:		SetAuthToken					0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:138:		NewScreenTestSuite				100.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:168:		WithServerURL					0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:174:		WithAuthToken					0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:180:		WithDatabase					0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:186:		WithState					100.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:192:		SimulateKeyPress				100.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:198:		SimulateKeyRune					100.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:204:		ExecuteCmd					66.7%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:212:		AssertViewContains				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:218:		AssertState					0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:223:		toModel						100.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:230:		CaptureView					0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:240:		CaptureOutput					0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:253:		CreateBasicTestDB				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:298:		SetupMockAPILogin				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:310:		SetupMockAPIRegister				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:322:		RenderScreen					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:172:		WithServerURL					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:178:		WithAuthToken					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:184:		WithDatabase					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:190:		WithState					100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:196:		SimulateKeyPress				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:202:		SimulateKeyRune					100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:208:		ExecuteCmd					66.7%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:216:		AssertViewContains				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:222:		AssertState					100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:227:		toModel						100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:235:		CaptureView					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:245:		CaptureOutput					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:258:		CreateBasicTestDB				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:303:		SetupMockAPILogin				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:315:		SetupMockAPIRegister				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:327:		RenderScreen					0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:47:			loadVersionsCmd					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:76:			rollbackToVersionCmd				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:101:			handleVersionRollbackConfirm			0.0%
@@ -227,11 +227,11 @@ github.com/maynagashev/gophkeeper/client/internal/tui/update.go:347:				updateDB
 github.com/maynagashev/gophkeeper/client/internal/tui/update.go:373:				updateRootModTime				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/update.go:393:				handleSaveKeyPress				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/update.go:413:				handleGlobalKeys				100.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/update.go:431:				Update						39.5%
+github.com/maynagashev/gophkeeper/client/internal/tui/update.go:431:				Update						41.9%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:8:				DeepCopyEntry					85.7%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:46:				deepCopyEntry					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:51:				FindEntryInDB					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:60:				findEntryInDB					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:65:				FindEntryInGroups				100.0%
-total:												(statements)					41.5%
+total:												(statements)					43.7%   
 ```

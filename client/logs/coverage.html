@@ -1565,8 +1565,16 @@ func initModel(kdbxPath string, debugMode bool, serverURL string, apiClient api.
                 versionList:               versionList,
                 serverURL:                 serverURL,
                 apiClient:                 apiClient,
+                newKdbxPasswordScreen:     0, // Используем нулевое значение для screenState
+                entryListScreen:           0, // Используем нулевое значение для screenState
+                entryDetailScreen:         0, // Используем нулевое значение для screenState
         }
 }</span>
+
+// Константы для сообщений справки (могут быть перенесены в другое место).
+const (
+// Тут были константы
+)
 </pre>
 		
 		<pre class="file" id="file6" style="display: none">package tui
@@ -1904,6 +1912,11 @@ type model struct {
         confirmationPrompt string          // Текст запроса подтверждения
         itemToDelete       *attachmentItem // Вложение, выбранное для удаления
         err                error           // Последняя ошибка для отображения
+
+        // Сохраняем предыдущие состояния для этих экранов
+        newKdbxPasswordScreen screenState
+        entryListScreen       screenState
+        entryDetailScreen     screenState
 
         // -- Поля для интеграции с сервером --
         apiClient                 api.Client      // Клиент для взаимодействия с API

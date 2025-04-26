@@ -89,6 +89,9 @@ func (m *model) getContentAndHelp() (string, string) {
 	help, ok := m.helpTextMap[m.state]
 	if !ok {
 		help = "Unknown state" // Default help for unknown state
+		if m.debugMode {
+			help = fmt.Sprintf("State: %s", m.state.String()) // More informative for debug
+		}
 	}
 	return mainContent, help
 }
@@ -190,6 +193,25 @@ func Start(kdbxPath string, debugMode bool, serverURL string) {
 
 	// Создаем начальную модель, передавая флаг
 	m := initModel(kdbxPath, debugMode, serverURL, apiClient)
+
+	// --- Инициализация helpTextMap ---
+	m.helpTextMap = map[screenState]string{
+		welcomeScreen:              "(Enter - продолжить, Ctrl+C/q - выход)",
+		passwordInputScreen:        "(Enter - подтвердить, Ctrl+C - выход)",
+		newKdbxPasswordScreen:      "(Tab - сменить поле, Enter - создать, Esc/Ctrl+C - выход)",
+		entryListScreen:            "(↑/↓, Enter - детали, / - поиск, a - доб, s - синхр, l - логин, Ctrl+S - сохр, q - вых)",
+		entryDetailScreen:          "(e - ред., Ctrl+S - сохр., Esc/b - назад)",
+		entryEditScreen:            "(Tab/↑/↓, Enter - сохр., Esc - отмена, ^O - влож+, ^D - влож-)",
+		entryAddScreen:             "(Tab/↑/↓, Enter - доб., ^O - влож+, Esc - отмена)",
+		attachmentListDeleteScreen: "(↑/↓ - навигация, Enter/d - удалить, Esc/b - отмена)",
+		attachmentPathInputScreen:  "(Enter - подтвердить, Esc - отмена)",
+		syncServerScreen:           "(↑/↓ - навигация, Enter - выбрать, Esc/b - назад)",
+		serverURLInputScreen:       "(Enter - подтвердить, Esc - назад)",
+		loginRegisterChoiceScreen:  "(R - регистрация, L - вход, Esc/b - назад)",
+		loginScreen:                "(Tab - след. поле, Enter - войти, Esc - назад)",
+		registerScreen:             "(Tab - след. поле, Enter - зарегистрироваться, Esc - назад)",
+		versionListScreen:          "(↑/↓ - навигация, Enter - откатить, Esc/b - назад, r - обновить)",
+	}
 
 	// --- Реализация flock ---
 	lockPath := kdbxPath + ".lock"
