@@ -1489,3 +1489,22 @@ time=2025-04-25T21:56:47.345+07:00 level=INFO msg="Обновление m.db з�
 time=2025-04-25T21:56:47.352+07:00 level=INFO msg="Запуск загрузки KDBX на сервер..." fileModTime=2025-04-25T21:56:42.117+07:00
 time=2025-04-25T21:56:47.382+07:00 level=INFO msg="Загрузка KDBX на сервер успешно завершена."
 time=2025-04-25T22:07:56.410+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock
+time=2025-04-26T22:11:34.492+07:00 level=INFO msg="Логгер инициализирован" path=logs/client.log
+time=2025-04-26T22:11:34.493+07:00 level=INFO msg="Запуск GophKeeper" db_path=gophkeeper.kdbx source="по умолчанию" debug_mode=true server_url=https://localhost:8443
+time=2025-04-26T22:11:34.493+07:00 level=INFO msg="API клиент инициализирован" baseURL=https://localhost:8443
+time=2025-04-26T22:11:34.493+07:00 level=INFO msg="Эксклюзивная блокировка файла получена." lockPath=gophkeeper.kdbx.lock
+time=2025-04-26T22:11:34.493+07:00 level=INFO msg="Файл KDBX найден, запуск стандартного TUI." path=gophkeeper.kdbx
+time=2025-04-26T22:11:38.145+07:00 level=DEBUG msg="handleDBOpenedMsg: Начало"
+time=2025-04-26T22:11:38.145+07:00 level=INFO msg="База KDBX успешно открыта" path=gophkeeper.kdbx
+time=2025-04-26T22:11:38.145+07:00 level=DEBUG msg="Проверка URL из флага" urlFromFlag=true initialURL=https://localhost:8443
+time=2025-04-26T22:11:38.145+07:00 level=DEBUG msg="Попытка загрузки Auth данных из CustomData" count=2
+time=2025-04-26T22:11:38.145+07:00 level=DEBUG msg="Найден URL сервера в CustomData" key=GophKeeperServerURL value=https://localhost:8443
+time=2025-04-26T22:11:38.145+07:00 level=DEBUG msg="Найден токен в CustomData" key=GophKeeperAuthToken
+time=2025-04-26T22:11:38.145+07:00 level=INFO msg="URL сервера задан флагом, загружен только токен из KDBX" token_found=true
+time=2025-04-26T22:11:38.145+07:00 level=DEBUG msg="Установлен токен в API клиенте после загрузки/проверки KDBX" token_set=true
+time=2025-04-26T22:11:38.145+07:00 level=DEBUG msg="Записи, полученные из KDBX" count=2
+time=2025-04-26T22:11:38.145+07:00 level=DEBUG msg="Элементы, подготовленные для списка" count=2
+time=2025-04-26T22:11:38.145+07:00 level=DEBUG msg="Элементы в списке после SetItems" count=2
+time=2025-04-26T22:11:38.145+07:00 level=DEBUG msg="handleDBOpenedMsg: Конец, m.db обновлен"
+time=2025-04-26T22:12:01.350+07:00 level=INFO msg="Переход к деталям записи" title="Sample Entry"
+time=2025-04-26T22:12:17.257+07:00 level=INFO msg="Блокировка файла снята." lockPath=gophkeeper.kdbx.lock

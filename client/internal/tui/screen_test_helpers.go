@@ -152,9 +152,13 @@ func NewScreenTestSuite() *ScreenTestSuite {
 		registerUsernameInput: textinput.New(),
 		registerPasswordInput: textinput.New(),
 		serverURLInput:        textinput.New(),
+		// Инициализируем поля, используемые в тестах
+		passwordInput:       textinput.New(), // Поле для ввода пароля KDBX
+		attachmentPathInput: textinput.New(), // Поле для ввода пути вложения
 
 		// Компоненты UI
-		entryList: list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0),
+		entryList:   list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0),
+		versionList: list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0),
 	}
 
 	// Инициализируем моки
@@ -221,30 +225,31 @@ func (s *ScreenTestSuite) AssertState(t *testing.T, expected screenState) {
 
 // toModel безопасно приводит tea.Model к *model.
 func toModel(t *testing.T, m tea.Model) *model {
+	require.NotNil(t, m, "Модель не должна быть nil")
 	result, ok := m.(*model)
 	require.True(t, ok, "Модель должна быть типа *model")
 	return result
 }
 
 // CaptureView выполняет команду и возвращает результат View().
-func (s *ScreenTestSuite) CaptureView(cmd tea.Cmd) string {
+func (s *ScreenTestSuite) CaptureView(t *testing.T, cmd tea.Cmd) string {
 	if cmd != nil {
 		msg := cmd()
 		newModel, _ := s.Model.Update(msg)
-		s.Model = toModel(nil, newModel) // Игнорируем ошибку, так как мы контролируем типы
+		s.Model = toModel(t, newModel)
 	}
 	return s.Model.View()
 }
 
 // CaptureOutput выполняет последовательность команд и возвращает финальный View.
-func (s *ScreenTestSuite) CaptureOutput(cmds ...tea.Cmd) string {
+func (s *ScreenTestSuite) CaptureOutput(t *testing.T, cmds ...tea.Cmd) string {
 	for _, cmd := range cmds {
 		if cmd == nil {
 			continue
 		}
 		msg := cmd()
 		newModel, _ := s.Model.Update(msg)
-		s.Model = toModel(nil, newModel)
+		s.Model = toModel(t, newModel)
 	}
 	return s.Model.View()
 }

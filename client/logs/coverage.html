@@ -71,7 +71,7 @@
 				
 				<option value="file7">github.com/maynagashev/gophkeeper/client/internal/tui/model.go (100.0%)</option>
 				
-				<option value="file8">github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go (34.0%)</option>
+				<option value="file8">github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go (75.7%)</option>
 				
 				<option value="file9">github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_delete.go (0.0%)</option>
 				
@@ -99,7 +99,7 @@
 				
 				<option value="file21">github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go (0.0%)</option>
 				
-				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go (15.2%)</option>
+				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go (17.0%)</option>
 				
 				<option value="file23">github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go (25.2%)</option>
 				
@@ -109,7 +109,7 @@
 				
 				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/tui.go (3.6%)</option>
 				
-				<option value="file27">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (41.8%)</option>
+				<option value="file27">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (42.2%)</option>
 				
 				<option value="file28">github.com/maynagashev/gophkeeper/client/internal/tui/utils.go (92.9%)</option>
 				
@@ -2051,7 +2051,7 @@ func createEntryFromInputs(db *gokeepasslib.Database, inputs []textinput.Model, 
 // updateEntryAddScreen обрабатывает сообщения для экрана добавления записи.
 //
 //nolint:nestif // Сложность из-за обработки разных клавиш и навигации
-func (m *model) updateEntryAddScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+func (m *model) updateEntryAddScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov8" title="1">{
         // Если в режиме ReadOnly, сразу возвращаемся к списку
         if m.readOnlyMode </span><span class="cov0" title="0">{
                 slog.Warn("Попытка доступа к экрану добавления в режиме Read-Only.")
@@ -2059,12 +2059,12 @@ func (m *model) updateEntryAddScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span cla
                 return m, tea.ClearScreen
         }</span>
 
-        <span class="cov0" title="0">var cmds []tea.Cmd
+        <span class="cov8" title="1">var cmds []tea.Cmd
 
         // Обрабатываем только KeyMsg
-        if keyMsg, ok := msg.(tea.KeyMsg); ok </span><span class="cov0" title="0">{
+        if keyMsg, ok := msg.(tea.KeyMsg); ok </span><span class="cov8" title="1">{
                 switch keyMsg.String() </span>{
-                case keyEsc, keyBack:<span class="cov0" title="0">
+                case keyEsc, keyBack:<span class="cov8" title="1">
                         // Отмена добавления
                         m.state = entryListScreen
                         m.editInputs = nil // Очищаем поля ввода
@@ -2072,19 +2072,19 @@ func (m *model) updateEntryAddScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span cla
                         slog.Info("Отмена добавления, возврат к списку")
                         return m, tea.ClearScreen</span>
 
-                case keyTab, keyDown:<span class="cov0" title="0">
+                case keyTab, keyDown:<span class="cov8" title="1">
                         // Переход к следующему полю
                         m.focusedField = (m.focusedField + 1) % numEditableFields
                         cmds = m.updateFocus()
                         return m, tea.Batch(cmds...)</span>
 
-                case keyShiftTab, keyUp:<span class="cov0" title="0">
+                case keyShiftTab, keyUp:<span class="cov8" title="1">
                         // Переход к предыдущему полю
                         m.focusedField = (m.focusedField - 1 + numEditableFields) % numEditableFields
                         cmds = m.updateFocus()
                         return m, tea.Batch(cmds...)</span>
 
-                case keyEnter:<span class="cov0" title="0">
+                case keyEnter:<span class="cov8" title="1">
                         // Создаем запись из введенных данных и вложений
                         newEntry := createEntryFromInputs(m.db, m.editInputs, m.newEntryAttachments)
                         m.newEntryAttachments = nil // Очищаем временное хранилище
@@ -2101,12 +2101,12 @@ func (m *model) updateEntryAddScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span cla
                                         m.db.Content.Root.Groups = append(m.db.Content.Root.Groups, newGroup)
                                         slog.Warn("Группы не найдены, создана новая группа 'General'")
                                 }</span>
-                        } else<span class="cov0" title="0"> {
+                        } else<span class="cov8" title="1"> {
                                 slog.Error("Не удалось добавить запись в m.db: база данных или Root не инициализированы")
                         }</span>
 
                         // Добавляем newEntry в m.entryList
-                        <span class="cov0" title="0">newItem := entryItem{entry: newEntry}
+                        <span class="cov8" title="1">newItem := entryItem{entry: newEntry}
                         insertCmd := m.entryList.InsertItem(len(m.entryList.Items()), newItem)
                         m.entryList.Title = fmt.Sprintf("Записи в '%s' (%d)", m.kdbxPath, len(m.entryList.Items()))
                         slog.Info("Новая запись добавлена", "title", newEntry.GetTitle())
@@ -2116,7 +2116,7 @@ func (m *model) updateEntryAddScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span cla
                         m.editInputs = nil
                         return m, tea.Batch(tea.ClearScreen, insertCmd)</span>
 
-                case "ctrl+o":<span class="cov0" title="0"> // Добавить вложение
+                case "ctrl+o":<span class="cov8" title="1"> // Добавить вложение
                         slog.Info("Переход к экрану ввода пути для добавления вложения")
                         m.previousScreenState = m.state // Запоминаем текущий экран (entryAddScreen)
                         m.state = attachmentPathInputScreen
@@ -2130,7 +2130,7 @@ func (m *model) updateEntryAddScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span cla
 
         // Если сообщение не KeyMsg или было обработано выше (кроме навигации/Enter/Esc),
         // обновляем активное поле ввода.
-        <span class="cov0" title="0">var cmd tea.Cmd
+        <span class="cov8" title="1">var cmd tea.Cmd
         m.editInputs[m.focusedField], cmd = m.editInputs[m.focusedField].Update(msg)
         cmds = append(cmds, cmd)
 
@@ -2139,16 +2139,16 @@ func (m *model) updateEntryAddScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span cla
 
 // updateFocus обновляет фокус полей ввода для экрана добавления И редактирования.
 // Переименована из updateFocusAdd.
-func (m *model) updateFocus() []tea.Cmd <span class="cov0" title="0">{
+func (m *model) updateFocus() []tea.Cmd <span class="cov8" title="1">{
         cmds := make([]tea.Cmd, len(m.editInputs))
-        for i := range len(m.editInputs) </span><span class="cov0" title="0">{
-                if i == m.focusedField </span><span class="cov0" title="0">{
+        for i := range len(m.editInputs) </span><span class="cov8" title="1">{
+                if i == m.focusedField </span><span class="cov8" title="1">{
                         cmds[i] = m.editInputs[i].Focus()
-                }</span> else<span class="cov0" title="0"> {
+                }</span> else<span class="cov8" title="1"> {
                         m.editInputs[i].Blur()
                 }</span>
         }
-        <span class="cov0" title="0">return cmds</span>
+        <span class="cov8" title="1">return cmds</span>
 }
 
 // viewEntryAddScreen отрисовывает экран добавления новой записи.
@@ -4075,9 +4075,13 @@ func NewScreenTestSuite() *ScreenTestSuite <span class="cov8" title="1">{
                 registerUsernameInput: textinput.New(),
                 registerPasswordInput: textinput.New(),
                 serverURLInput:        textinput.New(),
+                // Инициализируем поля, используемые в тестах
+                passwordInput:       textinput.New(), // Поле для ввода пароля KDBX
+                attachmentPathInput: textinput.New(), // Поле для ввода пути вложения
 
                 // Компоненты UI
-                entryList: list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0),
+                entryList:   list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0),
+                versionList: list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0),
         }
 
         // Инициализируем моки
@@ -4138,36 +4142,37 @@ func (s *ScreenTestSuite) AssertViewContains(t *testing.T, substring string) <sp
 }</span>
 
 // AssertState проверяет, что состояние модели соответствует ожидаемому.
-func (s *ScreenTestSuite) AssertState(t *testing.T, expected screenState) <span class="cov0" title="0">{
+func (s *ScreenTestSuite) AssertState(t *testing.T, expected screenState) <span class="cov8" title="1">{
         assert.Equal(t, expected, s.Model.state, "Состояние модели должно быть %s, но получено %s", expected, s.Model.state)
 }</span>
 
 // toModel безопасно приводит tea.Model к *model.
 func toModel(t *testing.T, m tea.Model) *model <span class="cov8" title="1">{
+        require.NotNil(t, m, "Модель не должна быть nil")
         result, ok := m.(*model)
         require.True(t, ok, "Модель должна быть типа *model")
         return result
 }</span>
 
 // CaptureView выполняет команду и возвращает результат View().
-func (s *ScreenTestSuite) CaptureView(cmd tea.Cmd) string <span class="cov0" title="0">{
+func (s *ScreenTestSuite) CaptureView(t *testing.T, cmd tea.Cmd) string <span class="cov0" title="0">{
         if cmd != nil </span><span class="cov0" title="0">{
                 msg := cmd()
                 newModel, _ := s.Model.Update(msg)
-                s.Model = toModel(nil, newModel) // Игнорируем ошибку, так как мы контролируем типы
+                s.Model = toModel(t, newModel)
         }</span>
         <span class="cov0" title="0">return s.Model.View()</span>
 }
 
 // CaptureOutput выполняет последовательность команд и возвращает финальный View.
-func (s *ScreenTestSuite) CaptureOutput(cmds ...tea.Cmd) string <span class="cov0" title="0">{
+func (s *ScreenTestSuite) CaptureOutput(t *testing.T, cmds ...tea.Cmd) string <span class="cov0" title="0">{
         for _, cmd := range cmds </span><span class="cov0" title="0">{
                 if cmd == nil </span><span class="cov0" title="0">{
                         continue</span>
                 }
                 <span class="cov0" title="0">msg := cmd()
                 newModel, _ := s.Model.Update(msg)
-                s.Model = toModel(nil, newModel)</span>
+                s.Model = toModel(t, newModel)</span>
         }
         <span class="cov0" title="0">return s.Model.View()</span>
 }
@@ -5473,7 +5478,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov8" titl
                 updatedModel, stateCmd = m.updateEntryDetailScreen(msg)</span>
         case entryEditScreen:<span class="cov0" title="0">
                 updatedModel, stateCmd = m.updateEntryEditScreen(msg)</span>
-        case entryAddScreen:<span class="cov0" title="0">
+        case entryAddScreen:<span class="cov8" title="1">
                 updatedModel, stateCmd = m.updateEntryAddScreen(msg)</span>
         case attachmentListDeleteScreen:<span class="cov0" title="0">
                 updatedModel, stateCmd = m.updateAttachmentListDeleteScreen(msg)</span>
