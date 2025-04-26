@@ -69,7 +69,7 @@
 				
 				<option value="file6">github.com/maynagashev/gophkeeper/client/internal/tui/input_helpers.go (87.8%)</option>
 				
-				<option value="file7">github.com/maynagashev/gophkeeper/client/internal/tui/model.go (0.0%)</option>
+				<option value="file7">github.com/maynagashev/gophkeeper/client/internal/tui/model.go (100.0%)</option>
 				
 				<option value="file8">github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go (0.0%)</option>
 				
@@ -1708,39 +1708,39 @@ const (
 )
 
 // String возвращает строковое представление screenState.
-func (s screenState) String() string <span class="cov0" title="0">{
+func (s screenState) String() string <span class="cov8" title="1">{
         switch s </span>{
-        case welcomeScreen:<span class="cov0" title="0">
+        case welcomeScreen:<span class="cov8" title="1">
                 return "welcomeScreen"</span>
-        case passwordInputScreen:<span class="cov0" title="0">
+        case passwordInputScreen:<span class="cov8" title="1">
                 return "passwordInputScreen"</span>
-        case newKdbxPasswordScreen:<span class="cov0" title="0">
+        case newKdbxPasswordScreen:<span class="cov8" title="1">
                 return "newKdbxPasswordScreen"</span>
-        case entryListScreen:<span class="cov0" title="0">
+        case entryListScreen:<span class="cov8" title="1">
                 return "entryListScreen"</span>
-        case entryDetailScreen:<span class="cov0" title="0">
+        case entryDetailScreen:<span class="cov8" title="1">
                 return "entryDetailScreen"</span>
-        case entryEditScreen:<span class="cov0" title="0">
+        case entryEditScreen:<span class="cov8" title="1">
                 return "entryEditScreen"</span>
-        case entryAddScreen:<span class="cov0" title="0">
+        case entryAddScreen:<span class="cov8" title="1">
                 return "entryAddScreen"</span>
-        case attachmentListDeleteScreen:<span class="cov0" title="0">
+        case attachmentListDeleteScreen:<span class="cov8" title="1">
                 return "attachmentListDeleteScreen"</span>
-        case attachmentPathInputScreen:<span class="cov0" title="0">
+        case attachmentPathInputScreen:<span class="cov8" title="1">
                 return "attachmentPathInputScreen"</span>
-        case syncServerScreen:<span class="cov0" title="0">
+        case syncServerScreen:<span class="cov8" title="1">
                 return "syncServerScreen"</span>
-        case serverURLInputScreen:<span class="cov0" title="0">
+        case serverURLInputScreen:<span class="cov8" title="1">
                 return "serverURLInputScreen"</span>
-        case loginRegisterChoiceScreen:<span class="cov0" title="0">
+        case loginRegisterChoiceScreen:<span class="cov8" title="1">
                 return "loginRegisterChoiceScreen"</span>
-        case loginScreen:<span class="cov0" title="0">
+        case loginScreen:<span class="cov8" title="1">
                 return "loginScreen"</span>
-        case registerScreen:<span class="cov0" title="0">
+        case registerScreen:<span class="cov8" title="1">
                 return "registerScreen"</span>
-        case versionListScreen:<span class="cov0" title="0">
+        case versionListScreen:<span class="cov8" title="1">
                 return "versionListScreen"</span>
-        default:<span class="cov0" title="0">
+        default:<span class="cov8" title="1">
                 return fmt.Sprintf("unknownScreen(%d)", s)</span>
         }
 }
@@ -1803,48 +1803,48 @@ type entryItem struct {
         entry gokeepasslib.Entry
 }
 
-func (i entryItem) Title() string <span class="cov0" title="0">{
+func (i entryItem) Title() string <span class="cov8" title="1">{
         // Пытаемся получить значение поля "Title"
         title := i.entry.GetTitle()
-        if title == "" </span><span class="cov0" title="0">{
+        if title == "" </span><span class="cov8" title="1">{
                 // Если Title пустой, используем Username
                 title = i.entry.GetContent("UserName")
         }</span>
-        <span class="cov0" title="0">if title == "" </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if title == "" </span><span class="cov8" title="1">{
                 // Если и Username пустой, используем UUID
                 title = hex.EncodeToString(i.entry.UUID[:])
         }</span>
-        <span class="cov0" title="0">return title</span>
+        <span class="cov8" title="1">return title</span>
 }
 
-func (i entryItem) Description() string <span class="cov0" title="0">{
+func (i entryItem) Description() string <span class="cov8" title="1">{
         // В описании можно показать Username или URL
         username := i.entry.GetContent("UserName")
         url := i.entry.GetContent("URL")
         var desc string // Объявляем переменную без инициализации
         switch </span>{
-        case username != "" &amp;&amp; url != "":<span class="cov0" title="0">
+        case username != "" &amp;&amp; url != "":<span class="cov8" title="1">
                 desc = fmt.Sprintf("User: %s | URL: %s", username, url)</span>
-        case username != "":<span class="cov0" title="0">
+        case username != "":<span class="cov8" title="1">
                 desc = fmt.Sprintf("User: %s", username)</span>
-        case url != "":<span class="cov0" title="0">
+        case url != "":<span class="cov8" title="1">
                 desc = fmt.Sprintf("URL: %s", url)</span>
-        default:<span class="cov0" title="0">
+        default:<span class="cov8" title="1">
                 desc = ""</span>
         }
 
         // Добавляем индикатор наличия вложений
-        <span class="cov0" title="0">if len(i.entry.Binaries) &gt; 0 </span><span class="cov0" title="0">{
-                if desc != "" </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if len(i.entry.Binaries) &gt; 0 </span><span class="cov8" title="1">{
+                if desc != "" </span><span class="cov8" title="1">{
                         desc += " " // Добавляем пробел, если описание уже есть
                 }</span>
-                <span class="cov0" title="0">desc += fmt.Sprintf("[A:%d]", len(i.entry.Binaries))</span> // Показываем количество вложений
+                <span class="cov8" title="1">desc += fmt.Sprintf("[A:%d]", len(i.entry.Binaries))</span> // Показываем количество вложений
         }
 
-        <span class="cov0" title="0">return desc</span>
+        <span class="cov8" title="1">return desc</span>
 }
 
-func (i entryItem) FilterValue() string <span class="cov0" title="0">{ return i.Title() }</span>
+func (i entryItem) FilterValue() string <span class="cov8" title="1">{ return i.Title() }</span>
 
 // Структура для сообщения об успешном открытии файла.
 type dbOpenedMsg struct {
