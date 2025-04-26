@@ -63,7 +63,7 @@
 				
 				<option value="file3">github.com/maynagashev/gophkeeper/client/internal/kdbx/kdbx.go (88.1%)</option>
 				
-				<option value="file4">github.com/maynagashev/gophkeeper/client/internal/tui/commands.go (83.1%)</option>
+				<option value="file4">github.com/maynagashev/gophkeeper/client/internal/tui/commands.go (86.0%)</option>
 				
 				<option value="file5">github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go (0.0%)</option>
 				
@@ -91,7 +91,7 @@
 				
 				<option value="file17">github.com/maynagashev/gophkeeper/client/internal/tui/screen_new_kdbx.go (0.0%)</option>
 				
-				<option value="file18">github.com/maynagashev/gophkeeper/client/internal/tui/screen_password.go (0.0%)</option>
+				<option value="file18">github.com/maynagashev/gophkeeper/client/internal/tui/screen_password.go (100.0%)</option>
 				
 				<option value="file19">github.com/maynagashev/gophkeeper/client/internal/tui/screen_register.go (0.0%)</option>
 				
@@ -99,17 +99,19 @@
 				
 				<option value="file21">github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go (0.0%)</option>
 				
-				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go (25.2%)</option>
+				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go (16.1%)</option>
 				
-				<option value="file23">github.com/maynagashev/gophkeeper/client/internal/tui/screen_welcome.go (0.0%)</option>
+				<option value="file23">github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go (25.2%)</option>
 				
-				<option value="file24">github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go (0.0%)</option>
+				<option value="file24">github.com/maynagashev/gophkeeper/client/internal/tui/screen_welcome.go (100.0%)</option>
 				
-				<option value="file25">github.com/maynagashev/gophkeeper/client/internal/tui/tui.go (3.5%)</option>
+				<option value="file25">github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go (0.0%)</option>
 				
-				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (35.1%)</option>
+				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/tui.go (3.5%)</option>
 				
-				<option value="file27">github.com/maynagashev/gophkeeper/client/internal/tui/utils.go (92.9%)</option>
+				<option value="file27">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (41.4%)</option>
+				
+				<option value="file28">github.com/maynagashev/gophkeeper/client/internal/tui/utils.go (92.9%)</option>
 				
 				</select>
 			</div>
@@ -959,10 +961,10 @@ import (
 )
 
 // openKdbxCmd асинхронно открывает файл базы.
-func openKdbxCmd(path, password string) tea.Cmd <span class="cov0" title="0">{
-        return func() tea.Msg </span><span class="cov0" title="0">{
+func openKdbxCmd(path, password string) tea.Cmd <span class="cov8" title="1">{
+        return func() tea.Msg </span><span class="cov8" title="1">{
                 db, err := kdbx.OpenFile(path, password)
-                if err != nil </span><span class="cov0" title="0">{
+                if err != nil </span><span class="cov8" title="1">{
                         return errMsg{err: err}
                 }</span>
                 <span class="cov0" title="0">return dbOpenedMsg{db: db}</span>
@@ -3362,7 +3364,7 @@ import (
 )
 
 // updatePasswordInputScreen обрабатывает сообщения для экрана ввода пароля.
-func (m *model) updatePasswordInputScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+func (m *model) updatePasswordInputScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov8" title="1">{
         var cmd tea.Cmd
         var cmds []tea.Cmd
 
@@ -3371,14 +3373,14 @@ func (m *model) updatePasswordInputScreen(msg tea.Msg) (tea.Model, tea.Cmd) <spa
         cmds = append(cmds, cmd)
 
         // Обработка клавиш для экрана ввода пароля
-        if keyMsg, ok := msg.(tea.KeyMsg); ok </span><span class="cov0" title="0">{
+        if keyMsg, ok := msg.(tea.KeyMsg); ok </span><span class="cov8" title="1">{
                 // Если была ошибка, любое нажатие ее скрывает
-                if m.err != nil </span><span class="cov0" title="0">{
+                if m.err != nil </span><span class="cov8" title="1">{
                         m.err = nil
                         m.passwordInput.Focus() // Возвращаем фокус
                         cmds = append(cmds, textinput.Blink)
                         // Не обрабатываем другие клавиши в этом цикле
-                }</span> else<span class="cov0" title="0"> if keyMsg.String() == keyEnter </span><span class="cov0" title="0">{
+                }</span> else<span class="cov8" title="1"> if keyMsg.String() == keyEnter </span><span class="cov8" title="1">{
                         password := m.passwordInput.Value()
                         m.passwordInput.Blur()
                         m.passwordInput.Reset()
@@ -3387,23 +3389,23 @@ func (m *model) updatePasswordInputScreen(msg tea.Msg) (tea.Model, tea.Cmd) <spa
                         cmds = append(cmds, openKdbxCmd(m.kdbxPath, password))
                 }</span>
         }
-        <span class="cov0" title="0">return m, tea.Batch(cmds...)</span>
+        <span class="cov8" title="1">return m, tea.Batch(cmds...)</span>
 }
 
 // viewPasswordInputScreen отрисовывает экран ввода пароля.
-func (m *model) viewPasswordInputScreen() string <span class="cov0" title="0">{
+func (m *model) viewPasswordInputScreen() string <span class="cov8" title="1">{
         var s strings.Builder
         s.WriteString("Введите мастер-пароль для " + m.kdbxPath + ":\n")
         s.WriteString(m.passwordInput.View() + "\n\n")
-        if m.err != nil </span><span class="cov0" title="0">{
+        if m.err != nil </span><span class="cov8" title="1">{
                 errMsgStr := fmt.Sprintf("\nОшибка: %s\n\n(Нажмите любую клавишу для продолжения)", m.err)
                 return s.String() + errMsgStr // Возвращаем основной текст + текст ошибки
         }</span>
-        <span class="cov0" title="0">return s.String()</span>
+        <span class="cov8" title="1">return s.String()</span>
 }
 
 // handleErrorMsg обрабатывает сообщение об ошибке.
-func (m *model) handleErrorMsg(msg errMsg) tea.Model /*, tea.Cmd */ <span class="cov0" title="0">{
+func (m *model) handleErrorMsg(msg errMsg) tea.Model /*, tea.Cmd */ <span class="cov8" title="1">{
         // Устанавливаем статус ошибки и возвращаемся к экрану ввода пароля
         m.err = msg.err // Сохраняем ошибку в модели
         m.state = passwordInputScreen
@@ -3672,7 +3674,301 @@ func (m *model) handleSyncMenuAction() tea.Cmd <span class="cov0" title="0">{
 }
 </pre>
 		
-		<pre class="file" id="file22" style="display: none">package tui
+		<pre class="file" id="file22" style="display: none">//nolint:testpackage // Это файл с вспомогательными функциями для тестов в том же пакете
+package tui
+
+import (
+        "bytes"
+        "context"
+        "io"
+        "strings"
+        "testing"
+        "time"
+
+        "github.com/charmbracelet/bubbles/list"
+        "github.com/charmbracelet/bubbles/textinput"
+        tea "github.com/charmbracelet/bubbletea"
+        "github.com/maynagashev/gophkeeper/models"
+        "github.com/stretchr/testify/assert"
+        "github.com/stretchr/testify/mock"
+        "github.com/stretchr/testify/require"
+        "github.com/tobischo/gokeepasslib/v3"
+)
+
+// ScreenTestSuite содержит общую инфраструктуру для тестирования экранов
+type ScreenTestSuite struct {
+        Model *model
+        Mocks struct {
+                APIClient *ScreenTestMockAPIClient
+        }
+}
+
+// ScreenTestMockAPIClient - мок для API клиента
+type ScreenTestMockAPIClient struct {
+        mock.Mock
+}
+
+// Login мокирует метод Login
+func (m *ScreenTestMockAPIClient) Login(ctx context.Context, username, password string) (string, error) <span class="cov0" title="0">{
+        args := m.Called(ctx, username, password)
+        return args.String(0), args.Error(1)
+}</span>
+
+// Register мокирует метод Register
+func (m *ScreenTestMockAPIClient) Register(ctx context.Context, username, password string) error <span class="cov0" title="0">{
+        args := m.Called(ctx, username, password)
+        return args.Error(0)
+}</span>
+
+// GetVaultMetadata мокирует метод GetVaultMetadata
+func (m *ScreenTestMockAPIClient) GetVaultMetadata(ctx context.Context) (*models.VaultVersion, error) <span class="cov0" title="0">{
+        args := m.Called(ctx)
+        if args.Get(0) == nil </span><span class="cov0" title="0">{
+                return nil, args.Error(1)
+        }</span>
+        <span class="cov0" title="0">return args.Get(0).(*models.VaultVersion), args.Error(1)</span>
+}
+
+// UploadVault мокирует метод UploadVault
+func (m *ScreenTestMockAPIClient) UploadVault(ctx context.Context, data io.Reader, size int64, contentModifiedAt time.Time) error <span class="cov0" title="0">{
+        args := m.Called(ctx, data, size, contentModifiedAt)
+        return args.Error(0)
+}</span>
+
+// DownloadVault мокирует метод DownloadVault
+func (m *ScreenTestMockAPIClient) DownloadVault(ctx context.Context) (io.ReadCloser, *models.VaultVersion, error) <span class="cov0" title="0">{
+        args := m.Called(ctx)
+        if args.Get(0) == nil </span><span class="cov0" title="0">{
+                return nil, nil, args.Error(2)
+        }</span>
+        <span class="cov0" title="0">if args.Get(1) == nil </span><span class="cov0" title="0">{
+                return args.Get(0).(io.ReadCloser), nil, args.Error(2)
+        }</span>
+        <span class="cov0" title="0">return args.Get(0).(io.ReadCloser), args.Get(1).(*models.VaultVersion), args.Error(2)</span>
+}
+
+// ListVersions мокирует метод ListVersions
+func (m *ScreenTestMockAPIClient) ListVersions(ctx context.Context, limit, offset int) ([]models.VaultVersion, int64, error) <span class="cov0" title="0">{
+        args := m.Called(ctx, limit, offset)
+        if args.Get(0) == nil </span><span class="cov0" title="0">{
+                return nil, 0, args.Error(2)
+        }</span>
+        <span class="cov0" title="0">return args.Get(0).([]models.VaultVersion), args.Get(1).(int64), args.Error(2)</span>
+}
+
+// RollbackToVersion мокирует метод RollbackToVersion
+func (m *ScreenTestMockAPIClient) RollbackToVersion(ctx context.Context, versionID int64) error <span class="cov0" title="0">{
+        args := m.Called(ctx, versionID)
+        return args.Error(0)
+}</span>
+
+// SetAuthToken мокирует метод SetAuthToken
+func (m *ScreenTestMockAPIClient) SetAuthToken(token string) <span class="cov0" title="0">{
+        m.Called(token)
+}</span>
+
+// NewScreenTestSuite создает новую тестовую среду для экранов
+func NewScreenTestSuite() *ScreenTestSuite <span class="cov8" title="1">{
+        s := &amp;ScreenTestSuite{}
+
+        // Инициализируем модель
+        s.Model = &amp;model{
+                // Базовые поля модели
+                db:           nil,
+                kdbxPath:     "/tmp/test.kdbx",
+                readOnlyMode: false,
+                password:     "test-password",
+
+                // Текстовые поля
+                loginUsernameInput:    textinput.New(),
+                loginPasswordInput:    textinput.New(),
+                registerUsernameInput: textinput.New(),
+                registerPasswordInput: textinput.New(),
+                serverURLInput:        textinput.New(),
+
+                // Компоненты UI
+                entryList: list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0),
+        }
+
+        // Инициализируем моки
+        s.Mocks.APIClient = new(ScreenTestMockAPIClient)
+        s.Model.apiClient = s.Mocks.APIClient
+
+        return s
+}</span>
+
+// WithServerURL устанавливает URL сервера в модели
+func (s *ScreenTestSuite) WithServerURL(url string) *ScreenTestSuite <span class="cov0" title="0">{
+        s.Model.serverURL = url
+        return s
+}</span>
+
+// WithAuthToken устанавливает токен авторизации в модели
+func (s *ScreenTestSuite) WithAuthToken(token string) *ScreenTestSuite <span class="cov0" title="0">{
+        s.Model.authToken = token
+        return s
+}</span>
+
+// WithDatabase устанавливает базу данных в модели
+func (s *ScreenTestSuite) WithDatabase(db *gokeepasslib.Database) *ScreenTestSuite <span class="cov0" title="0">{
+        s.Model.db = db
+        return s
+}</span>
+
+// WithState устанавливает состояние экрана в модели
+func (s *ScreenTestSuite) WithState(state screenState) *ScreenTestSuite <span class="cov8" title="1">{
+        s.Model.state = state
+        return s
+}</span>
+
+// SimulateKeyPress симулирует нажатие клавиши
+func (s *ScreenTestSuite) SimulateKeyPress(key tea.KeyType) (tea.Model, tea.Cmd) <span class="cov8" title="1">{
+        msg := tea.KeyMsg{Type: key}
+        return s.Model.Update(msg)
+}</span>
+
+// SimulateKeyRune симулирует ввод символа
+func (s *ScreenTestSuite) SimulateKeyRune(r rune) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+        msg := tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{r}}
+        return s.Model.Update(msg)
+}</span>
+
+// ExecuteCmd выполняет команду и возвращает результат
+func (s *ScreenTestSuite) ExecuteCmd(cmd tea.Cmd) tea.Msg <span class="cov8" title="1">{
+        if cmd == nil </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+        <span class="cov8" title="1">return cmd()</span>
+}
+
+// AssertViewContains проверяет, что View() модели содержит указанный текст
+func (s *ScreenTestSuite) AssertViewContains(t *testing.T, substring string) <span class="cov0" title="0">{
+        view := s.Model.View()
+        assert.Contains(t, view, substring, "View должен содержать указанный текст")
+}</span>
+
+// AssertState проверяет, что состояние модели соответствует ожидаемому
+func (s *ScreenTestSuite) AssertState(t *testing.T, expected screenState) <span class="cov0" title="0">{
+        assert.Equal(t, expected, s.Model.state, "Состояние модели должно быть %s, но получено %s", expected, s.Model.state)
+}</span>
+
+// toModel безопасно приводит tea.Model к *model
+func toModel(t *testing.T, m tea.Model) *model <span class="cov8" title="1">{
+        result, ok := m.(*model)
+        require.True(t, ok, "Модель должна быть типа *model")
+        return result
+}</span>
+
+// CaptureView выполняет команду и возвращает результат View()
+func (s *ScreenTestSuite) CaptureView(cmd tea.Cmd) string <span class="cov0" title="0">{
+        if cmd != nil </span><span class="cov0" title="0">{
+                msg := cmd()
+                newModel, _ := s.Model.Update(msg)
+                s.Model = toModel(nil, newModel) // Игнорируем ошибку, так как мы контролируем типы
+        }</span>
+        <span class="cov0" title="0">return s.Model.View()</span>
+}
+
+// CaptureOutput выполняет последовательность команд и возвращает финальный View
+func (s *ScreenTestSuite) CaptureOutput(cmds ...tea.Cmd) string <span class="cov0" title="0">{
+        for _, cmd := range cmds </span><span class="cov0" title="0">{
+                if cmd == nil </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+                <span class="cov0" title="0">msg := cmd()
+                newModel, _ := s.Model.Update(msg)
+                s.Model = toModel(nil, newModel)</span>
+        }
+        <span class="cov0" title="0">return s.Model.View()</span>
+}
+
+// CreateBasicTestDB создает простую тестовую базу данных
+func CreateBasicTestDB() *gokeepasslib.Database <span class="cov0" title="0">{
+        db := gokeepasslib.NewDatabase()
+        db.Content = gokeepasslib.NewContent()
+
+        rootGroup := gokeepasslib.Group{
+                Name: "Root",
+        }
+
+        // Создаем пару записей для тестирования
+        entry1 := gokeepasslib.NewEntry()
+        entry1.Values = append(entry1.Values, gokeepasslib.ValueData{
+                Key:   "Title",
+                Value: gokeepasslib.V{Content: "Тестовая запись 1"},
+        })
+        entry1.Values = append(entry1.Values, gokeepasslib.ValueData{
+                Key:   "UserName",
+                Value: gokeepasslib.V{Content: "user1"},
+        })
+        entry1.Values = append(entry1.Values, gokeepasslib.ValueData{
+                Key:   "Password",
+                Value: gokeepasslib.V{Content: "pass1"},
+        })
+
+        entry2 := gokeepasslib.NewEntry()
+        entry2.Values = append(entry2.Values, gokeepasslib.ValueData{
+                Key:   "Title",
+                Value: gokeepasslib.V{Content: "Тестовая запись 2"},
+        })
+
+        rootGroup.Entries = append(rootGroup.Entries, entry1, entry2)
+        db.Content.Root = &amp;gokeepasslib.RootData{
+                Groups: []gokeepasslib.Group{rootGroup},
+        }
+
+        return db
+}</span>
+
+// MockResponse создает ответ для мока API клиента
+type MockResponse struct {
+        Success bool
+        Token   string
+        Error   error
+}
+
+// SetupMockAPILogin настраивает мок API клиента для метода Login
+func (s *ScreenTestSuite) SetupMockAPILogin(username, password string, response MockResponse) *ScreenTestSuite <span class="cov0" title="0">{
+        if response.Success </span><span class="cov0" title="0">{
+                s.Mocks.APIClient.On("Login", mock.Anything, username, password).
+                        Return(response.Token, nil).Once()
+        }</span> else<span class="cov0" title="0"> {
+                s.Mocks.APIClient.On("Login", mock.Anything, username, password).
+                        Return("", response.Error).Once()
+        }</span>
+        <span class="cov0" title="0">return s</span>
+}
+
+// SetupMockAPIRegister настраивает мок API клиента для метода Register
+func (s *ScreenTestSuite) SetupMockAPIRegister(username, password string, response MockResponse) *ScreenTestSuite <span class="cov0" title="0">{
+        if response.Success </span><span class="cov0" title="0">{
+                s.Mocks.APIClient.On("Register", mock.Anything, username, password).
+                        Return(nil).Once()
+        }</span> else<span class="cov0" title="0"> {
+                s.Mocks.APIClient.On("Register", mock.Anything, username, password).
+                        Return(response.Error).Once()
+        }</span>
+        <span class="cov0" title="0">return s</span>
+}
+
+// RenderScreen выполняет рендеринг View() для тестирования отображения
+func (s *ScreenTestSuite) RenderScreen() string <span class="cov0" title="0">{
+        var buf bytes.Buffer
+
+        // Получаем View текущей модели
+        view := s.Model.View()
+
+        // Очищаем ANSI-последовательности для упрощения тестирования
+        // Это простая очистка, для более точной можно использовать библиотеки
+        cleanView := strings.ReplaceAll(view, "\033[", "")
+        cleanView = strings.ReplaceAll(cleanView, "\r", "")
+
+        buf.WriteString(cleanView)
+        return buf.String()
+}</span>
+</pre>
+		
+		<pre class="file" id="file23" style="display: none">package tui
 
 import (
         "context"
@@ -3976,7 +4272,7 @@ func formatTime(t *time.Time) string <span class="cov0" title="0">{
 }
 </pre>
 		
-		<pre class="file" id="file23" style="display: none">package tui
+		<pre class="file" id="file24" style="display: none">package tui
 
 import (
         "github.com/charmbracelet/bubbles/textinput"
@@ -3984,28 +4280,28 @@ import (
 )
 
 // updateWelcomeScreen обрабатывает сообщения для экрана приветствия.
-func (m *model) updateWelcomeScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+func (m *model) updateWelcomeScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov8" title="1">{
         var cmds []tea.Cmd
-        if keyMsg, ok := msg.(tea.KeyMsg); ok </span><span class="cov0" title="0">{
+        if keyMsg, ok := msg.(tea.KeyMsg); ok </span><span class="cov8" title="1">{
                 switch keyMsg.String() </span>{
-                case keyQuit:<span class="cov0" title="0">
+                case keyQuit:<span class="cov8" title="1">
                         return m, tea.Quit</span>
-                case keyEnter:<span class="cov0" title="0">
+                case keyEnter:<span class="cov8" title="1">
                         m.state = passwordInputScreen
                         m.passwordInput.Focus()
                         cmds = append(cmds, textinput.Blink, tea.ClearScreen)</span>
                 }
         }
-        <span class="cov0" title="0">return m, tea.Batch(cmds...)</span>
+        <span class="cov8" title="1">return m, tea.Batch(cmds...)</span>
 }
 
 // viewWelcomeScreen отрисовывает приветственный экран.
-func (m *model) viewWelcomeScreen() string <span class="cov0" title="0">{
+func (m *model) viewWelcomeScreen() string <span class="cov8" title="1">{
         return "Добро пожаловать в GophKeeper!\n\nНажмите Enter для продолжения..."
 }</span>
 </pre>
 		
-		<pre class="file" id="file24" style="display: none">package tui
+		<pre class="file" id="file25" style="display: none">package tui
 
 import (
         "time"
@@ -4140,7 +4436,7 @@ func (m *testModel) MakeRegisterCmd(username, password string) tea.Cmd <span cla
 }</span>
 </pre>
 		
-		<pre class="file" id="file25" style="display: none">package tui
+		<pre class="file" id="file26" style="display: none">package tui
 
 import (
         "fmt"
@@ -4406,7 +4702,7 @@ func (m *model) viewServerURLInputScreen() string <span class="cov0" title="0">{
 }</span>
 </pre>
 		
-		<pre class="file" id="file26" style="display: none">package tui
+		<pre class="file" id="file27" style="display: none">package tui
 
 import (
         "errors"
@@ -4836,7 +5132,7 @@ func handleGlobalKeys(m *model, msg tea.KeyMsg) (tea.Model, tea.Cmd, bool) <span
 // Update обрабатывает входящие сообщения.
 //
 //nolint:funlen // TODO: Рефакторить роутинг и длину функции (убрали gocyclo)
-func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov8" title="1">{
         var cmds []tea.Cmd         // Собираем команды для батчинга
         var cmd tea.Cmd            // Команда от обработчика
         var handled bool           // Флаг: сообщение было обработано глобальным хендлером
@@ -4848,10 +5144,10 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov0" titl
                 handleWindowSizeMsg(m, msg)
                 return m, nil</span> // Возвращаем nil команду здесь, так как команда не нужна
 
-        case tea.KeyMsg:<span class="cov0" title="0">
+        case tea.KeyMsg:<span class="cov8" title="1">
                 // Обработка глобальных клавиш
                 updatedModel, cmd, handled = handleGlobalKeys(m, msg)
-                if handled </span><span class="cov0" title="0">{
+                if handled </span><span class="cov8" title="1">{
                         return updatedModel, cmd
                 }</span>
                 // Если не глобальная клавиша, передаем дальше для обработки по состоянию
@@ -4878,11 +5174,11 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov0" titl
 
         // == Обработка сообщения в зависимости от текущего состояния ==
         // (Вызывается, только если сообщение не было обработано глобально)
-        <span class="cov0" title="0">var stateCmd tea.Cmd
+        <span class="cov8" title="1">var stateCmd tea.Cmd
         switch m.state </span>{
-        case welcomeScreen:<span class="cov0" title="0">
+        case welcomeScreen:<span class="cov8" title="1">
                 updatedModel, stateCmd = m.updateWelcomeScreen(msg)</span>
-        case passwordInputScreen:<span class="cov0" title="0">
+        case passwordInputScreen:<span class="cov8" title="1">
                 updatedModel, stateCmd = m.updatePasswordInputScreen(msg)</span>
         case newKdbxPasswordScreen:<span class="cov0" title="0">
                 updatedModel, stateCmd = m.updateNewKdbxPasswordScreen(msg)</span>
@@ -4917,7 +5213,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov0" titl
                 updatedModel = m</span> // Присваиваем m, если ни один case не сработал
                 // stateCmd остается nil
         }
-        <span class="cov0" title="0">cmds = append(cmds, stateCmd) // Добавляем команду от обработчика состояния
+        <span class="cov8" title="1">cmds = append(cmds, stateCmd) // Добавляем команду от обработчика состояния
 
         // Кастуем тип обратно к *model перед возвратом
         finalModel, ok := updatedModel.(*model)
@@ -4928,11 +5224,11 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov0" titl
                 return m, tea.Quit // Выход в случае серьезной ошибки
         }</span>
 
-        <span class="cov0" title="0">return finalModel, tea.Batch(cmds...)</span>
+        <span class="cov8" title="1">return finalModel, tea.Batch(cmds...)</span>
 }
 </pre>
 		
-		<pre class="file" id="file27" style="display: none">package tui
+		<pre class="file" id="file28" style="display: none">package tui
 
 import (
         "github.com/tobischo/gokeepasslib/v3"
