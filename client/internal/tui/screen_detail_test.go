@@ -115,3 +115,74 @@ func TestRenderCustomFields(t *testing.T) {
 }
 
 // TODO: Добавить тесты для getBinariesFromDB, renderAttachments, viewEntryDetailScreen, updateEntryDetailScreen
+
+func TestViewEntryDetailScreen(t *testing.T) {
+	// Создаем тестовую модель с выбранной записью
+	testModel := &model{}
+
+	// Создаем базу данных версии 4 для тестирования вложений
+	db := gokeepasslib.NewDatabase(gokeepasslib.WithDatabaseKDBXVersion4())
+
+	// Добавляем бинарные данные в InnerHeader
+	db.Content.InnerHeader.Binaries = []gokeepasslib.Binary{
+		{ID: 0, Content: []byte("test content")},
+	}
+	testModel.db = db
+
+	// Создаем тестовую запись с различными полями и вложением
+	entry := createTestEntry("Тестовая запись", "testuser", "http://example.com", true)
+
+	// Добавляем стандартные и дополнительные поля
+	entry.Values = append(entry.Values,
+		gokeepasslib.ValueData{
+			Key:   fieldNamePassword,
+			Value: gokeepasslib.V{Content: "SecretPass", Protected: w.NewBoolWrapper(true)},
+		},
+		gokeepasslib.ValueData{Key: fieldNameNotes, Value: gokeepasslib.V{Content: "Тестовые заметки"}},
+		gokeepasslib.ValueData{Key: fieldNameCardNumber, Value: gokeepasslib.V{Content: "1234567890123456"}},
+		gokeepasslib.ValueData{Key: fieldNameCardHolderName, Value: gokeepasslib.V{Content: "Иван Иванов"}},
+		gokeepasslib.ValueData{Key: fieldNameExpiryDate, Value: gokeepasslib.V{Content: "12/25"}},
+		gokeepasslib.ValueData{
+			Key:   fieldNameCVV,
+			Value: gokeepasslib.V{Content: "123", Protected: w.NewBoolWrapper(true)},
+		},
+		gokeepasslib.ValueData{
+			Key:   fieldNamePIN,
+			Value: gokeepasslib.V{Content: "4321", Protected: w.NewBoolWrapper(true)},
+		},
+		gokeepasslib.ValueData{Key: "ДополнительноеПоле", Value: gokeepasslib.V{Content: "ДополнительноеЗначение"}},
+	)
+
+	// Устанавливаем запись в модель
+	testModel.selectedEntry = &entryItem{entry: entry}
+
+	// Получаем результат отрисовки
+	result := testModel.viewEntryDetailScreen()
+
+	// Проверяем наличие ожидаемых элементов в результате
+	assert.Contains(t, result, "Детали записи: Тестовая запись")
+
+	// Проверяем стандартные поля
+	assert.Contains(t, result, "Title: Тестовая запись")
+	assert.Contains(t, result, "UserName: testuser")
+	assert.Contains(t, result, "Password: ********")
+	assert.Contains(t, result, "URL: http://example.com")
+	assert.Contains(t, result, "Notes: Тестовые заметки")
+	assert.Contains(t, result, "CardNumber: 1234********3456")
+	assert.Contains(t, result, "CardHolderName: Иван Иванов")
+	assert.Contains(t, result, "ExpiryDate: 12/25")
+	assert.Contains(t, result, "CVV: ********")
+	assert.Contains(t, result, "PIN: ********")
+
+	// Проверяем дополнительные поля
+	assert.Contains(t, result, "--- Дополнительные поля ---")
+	assert.Contains(t, result, "ДополнительноеПоле: ДополнительноеЗначение")
+
+	// Проверяем вложения
+	assert.Contains(t, result, "--- Вложения ---")
+	assert.Contains(t, result, "- test.txt (12 байт)") // "test content" = 12 байт
+
+	// Проверяем случай с отсутствующей записью
+	testModel.selectedEntry = nil
+	assert.Equal(t, "Ошибка: запись не выбрана.", testModel.viewEntryDetailScreen())
+}

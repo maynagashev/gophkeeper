@@ -79,7 +79,7 @@
 				
 				<option value="file11">github.com/maynagashev/gophkeeper/client/internal/tui/screen_credentials.go (90.9%)</option>
 				
-				<option value="file12">github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go (27.6%)</option>
+				<option value="file12">github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go (61.8%)</option>
 				
 				<option value="file13">github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go (0.0%)</option>
 				
@@ -2534,19 +2534,19 @@ func renderCustomFields(valuesMap map[string]gokeepasslib.ValueData) string <spa
 // getBinariesFromDB возвращает срез бинарных данных из базы данных,
 // учитывая версию формата KDBX.
 // Возвращает срез и bool (true, если путь к данным корректен, даже если срез пуст).
-func getBinariesFromDB(db *gokeepasslib.Database) ([]gokeepasslib.Binary, bool) <span class="cov0" title="0">{
+func getBinariesFromDB(db *gokeepasslib.Database) ([]gokeepasslib.Binary, bool) <span class="cov8" title="1">{
         if db == nil || db.Content == nil || db.Header == nil </span><span class="cov0" title="0">{
                 slog.Warn("Cannot get binaries: db, db.Content, or db.Header is nil")
                 return nil, false
         }</span>
 
-        <span class="cov0" title="0">if db.Header.IsKdbx4() </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if db.Header.IsKdbx4() </span><span class="cov8" title="1">{
                 // KDBX v4
                 if db.Content.InnerHeader == nil </span><span class="cov0" title="0">{
                         slog.Warn("Cannot get KDBX4 binaries: db.Content.InnerHeader is nil")
                         return nil, false // Структура некорректна
                 }</span>
-                <span class="cov0" title="0">return db.Content.InnerHeader.Binaries, true</span>
+                <span class="cov8" title="1">return db.Content.InnerHeader.Binaries, true</span>
         }
 
         // KDBX v3 (если не KDBX4)
@@ -2558,11 +2558,11 @@ func getBinariesFromDB(db *gokeepasslib.Database) ([]gokeepasslib.Binary, bool) 
 }
 
 // renderAttachments форматирует список вложений для отображения.
-func renderAttachments(db *gokeepasslib.Database, entry gokeepasslib.Entry) string <span class="cov0" title="0">{
+func renderAttachments(db *gokeepasslib.Database, entry gokeepasslib.Entry) string <span class="cov8" title="1">{
         if len(entry.Binaries) == 0 </span><span class="cov0" title="0">{
                 return ""
         }</span>
-        <span class="cov0" title="0">s := "\n--- Вложения ---\n"
+        <span class="cov8" title="1">s := "\n--- Вложения ---\n"
         binaries, pathOk := getBinariesFromDB(db)
 
         // Определяем путь к бинарным данным в зависимости от версии KDBX
@@ -2574,15 +2574,15 @@ func renderAttachments(db *gokeepasslib.Database, entry gokeepasslib.Entry) stri
                 <span class="cov0" title="0">return s</span>
         }
 
-        <span class="cov0" title="0">if len(binaries) &gt; 0 </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if len(binaries) &gt; 0 </span><span class="cov8" title="1">{
                 // Создаем map длин, если бинарные данные найдены
                 binaryLens := make(map[int]int)
-                for _, bin := range binaries </span><span class="cov0" title="0">{
+                for _, bin := range binaries </span><span class="cov8" title="1">{
                         binaryLens[bin.ID] = len(bin.Content)
                 }</span>
                 // Выводим вложения с размерами
-                <span class="cov0" title="0">for _, binaryRef := range entry.Binaries </span><span class="cov0" title="0">{
-                        if binaryLen, ok := binaryLens[binaryRef.Value.ID]; ok </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">for _, binaryRef := range entry.Binaries </span><span class="cov8" title="1">{
+                        if binaryLen, ok := binaryLens[binaryRef.Value.ID]; ok </span><span class="cov8" title="1">{
                                 s += fmt.Sprintf("- %s (%d байт)\n", binaryRef.Name, binaryLen)
                         }</span> else<span class="cov0" title="0"> {
                                 s += fmt.Sprintf("- %s (данные не найдены!)\n", binaryRef.Name)
@@ -2596,25 +2596,25 @@ func renderAttachments(db *gokeepasslib.Database, entry gokeepasslib.Entry) stri
                         s += fmt.Sprintf("- %s (размер неизвестен)\n", binaryRef.Name)
                 }</span>
         }
-        <span class="cov0" title="0">return s</span>
+        <span class="cov8" title="1">return s</span>
 }
 
 // viewEntryDetailScreen отрисовывает экран деталей записи.
-func (m *model) viewEntryDetailScreen() string <span class="cov0" title="0">{
-        if m.selectedEntry == nil </span><span class="cov0" title="0">{
+func (m *model) viewEntryDetailScreen() string <span class="cov8" title="1">{
+        if m.selectedEntry == nil </span><span class="cov8" title="1">{
                 return "Ошибка: запись не выбрана."
         }</span>
 
-        <span class="cov0" title="0">s := fmt.Sprintf("Детали записи: %s\n\n", m.selectedEntry.Title())
+        <span class="cov8" title="1">s := fmt.Sprintf("Детали записи: %s\n\n", m.selectedEntry.Title())
 
         // Собираем все значения в map для дальнейшего использования
         valuesMap := make(map[string]gokeepasslib.ValueData)
-        for _, val := range m.selectedEntry.entry.Values </span><span class="cov0" title="0">{
+        for _, val := range m.selectedEntry.entry.Values </span><span class="cov8" title="1">{
                 valuesMap[val.Key] = val
         }</span>
 
         // Отображаем стандартные поля (и удаляем их из map)
-        <span class="cov0" title="0">s += renderStandardFields(m.selectedEntry.entry, valuesMap) // Передаем map
+        <span class="cov8" title="1">s += renderStandardFields(m.selectedEntry.entry, valuesMap) // Передаем map
 
         // Отображаем дополнительные поля (оставшиеся в map)
         s += renderCustomFields(valuesMap)

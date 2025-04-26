@@ -70,9 +70,9 @@ github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go:17:			upd
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go:40:			renderStandardFields				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go:69:			maskCardNumber					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go:78:			renderCustomFields				100.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go:93:			getBinariesFromDB				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go:117:			renderAttachments				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go:159:			viewEntryDetailScreen				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go:93:			getBinariesFromDB				33.3%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go:117:			renderAttachments				57.1%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go:159:			viewEntryDetailScreen				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:27:			Title						0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:28:			Description					0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:29:			FilterValue					0.0%
@@ -199,4 +199,4 @@ github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:46:				deepCopyEn
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:51:				FindEntryInDB					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:60:				findEntryInDB					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:65:				FindEntryInGroups				100.0%
-total:												(statements)					49.3%
+total:												(statements)					50.5%
