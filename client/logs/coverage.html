@@ -63,7 +63,7 @@
 				
 				<option value="file3">github.com/maynagashev/gophkeeper/client/internal/kdbx/kdbx.go (88.1%)</option>
 				
-				<option value="file4">github.com/maynagashev/gophkeeper/client/internal/tui/commands.go (77.9%)</option>
+				<option value="file4">github.com/maynagashev/gophkeeper/client/internal/tui/commands.go (83.1%)</option>
 				
 				<option value="file5">github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go (0.0%)</option>
 				
@@ -107,9 +107,9 @@
 				
 				<option value="file25">github.com/maynagashev/gophkeeper/client/internal/tui/tui.go (3.5%)</option>
 				
-				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (31.9%)</option>
+				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (35.1%)</option>
 				
-				<option value="file27">github.com/maynagashev/gophkeeper/client/internal/tui/utils.go (85.7%)</option>
+				<option value="file27">github.com/maynagashev/gophkeeper/client/internal/tui/utils.go (92.9%)</option>
 				
 				</select>
 			</div>
@@ -1265,14 +1265,14 @@ func applyUIChangesToDB(m *model) <span class="cov8" title="1">{
         // TODO: Избежать дублирования кода с handleGlobalKeys
         items := m.entryList.Items()
         updatedCount := 0
-        for _, item := range items </span><span class="cov0" title="0">{
-                if listItem, ok := item.(entryItem); ok </span><span class="cov0" title="0">{
+        for _, item := range items </span><span class="cov8" title="1">{
+                if listItem, ok := item.(entryItem); ok </span><span class="cov8" title="1">{
                         dbEntryPtr := findEntryInDB(m.db, listItem.entry.UUID)
-                        if dbEntryPtr != nil </span><span class="cov0" title="0">{
+                        if dbEntryPtr != nil </span><span class="cov8" title="1">{
                                 entryToSave := deepCopyEntry(listItem.entry)
                                 *dbEntryPtr = entryToSave
                                 updatedCount++
-                        }</span> else<span class="cov0" title="0"> {
+                        }</span> else<span class="cov8" title="1"> {
                                 slog.Warn("Запись из списка не найдена в m.db при подготовке к загрузке", "uuid", listItem.entry.UUID)
                         }</span>
                 }
@@ -4756,20 +4756,20 @@ func (m *model) updateDBFromList() int <span class="cov8" title="1">{
         slog.Info("Начало обновления m.db перед сохранением")
         items := m.entryList.Items()
         updatedCount := 0
-        for _, item := range items </span><span class="cov0" title="0">{
+        for _, item := range items </span><span class="cov8" title="1">{
                 listItem, ok := item.(entryItem)
                 if !ok </span><span class="cov0" title="0">{
                         continue</span> // Skip if not an entryItem
                 }
                 // Находим соответствующую запись в m.db по UUID
-                <span class="cov0" title="0">dbEntryPtr := findEntryInDB(m.db, listItem.entry.UUID)
-                if dbEntryPtr != nil </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">dbEntryPtr := findEntryInDB(m.db, listItem.entry.UUID)
+                if dbEntryPtr != nil </span><span class="cov8" title="1">{
                         // Обновляем найденную запись данными из элемента списка
                         // Создаем копию перед присваиванием, чтобы не менять listItem
                         entryToSave := deepCopyEntry(listItem.entry)
                         *dbEntryPtr = entryToSave
                         updatedCount++
-                }</span> else<span class="cov0" title="0"> {
+                }</span> else<span class="cov8" title="1"> {
                         slog.Warn("Запись из списка не найдена в m.db", "uuid", listItem.entry.UUID)
                 }</span>
         }
@@ -4977,7 +4977,7 @@ func DeepCopyEntry(original gokeepasslib.Entry) gokeepasslib.Entry <span class="
 
 // deepCopyEntry - алиас для совместимости со старым кодом.
 // Использует публичную функцию DeepCopyEntry.
-func deepCopyEntry(original gokeepasslib.Entry) gokeepasslib.Entry <span class="cov0" title="0">{
+func deepCopyEntry(original gokeepasslib.Entry) gokeepasslib.Entry <span class="cov8" title="1">{
         return DeepCopyEntry(original)
 }</span>
 
@@ -4991,7 +4991,7 @@ func FindEntryInDB(db *gokeepasslib.Database, uuid gokeepasslib.UUID) *gokeepass
 
 // findEntryInDB - алиас для совместимости со старым кодом.
 // Использует публичную функцию FindEntryInDB.
-func findEntryInDB(db *gokeepasslib.Database, uuid gokeepasslib.UUID) *gokeepasslib.Entry <span class="cov0" title="0">{
+func findEntryInDB(db *gokeepasslib.Database, uuid gokeepasslib.UUID) *gokeepasslib.Entry <span class="cov8" title="1">{
         return FindEntryInDB(db, uuid)
 }</span>
 

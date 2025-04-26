@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/maynagashev/gophkeeper/client/internal/api"
 	"github.com/maynagashev/gophkeeper/models"
@@ -1513,4 +1514,178 @@ func TestRollbackToVersionCmd(t *testing.T) {
 			}
 		})
 	}
+}
+
+// TestApplyUIChangesToDB проверяет функцию applyUIChangesToDB, которая применяет изменения из TUI к базе данных.
+func TestApplyUIChangesToDB(t *testing.T) {
+	// Создаем временную директорию для тестов
+	tempDir, err := os.MkdirTemp("", "gophkeeper_test_*")
+	require.NoError(t, err, "Не удалось создать временную директорию")
+	defer os.RemoveAll(tempDir)
+
+	// Создаем тестовую базу данных с группой и записями
+	db := gokeepasslib.NewDatabase()
+	db.Content = gokeepasslib.NewContent()
+
+	// Создаем UUID для записей, которые мы сможем использовать для поиска и сравнения
+	uuid1 := gokeepasslib.NewUUID()
+	uuid2 := gokeepasslib.NewUUID()
+
+	// Создаем корневую группу с записями
+	rootGroup := gokeepasslib.Group{
+		Name: "Root",
+		Entries: []gokeepasslib.Entry{
+			{
+				UUID: uuid1,
+				Values: []gokeepasslib.ValueData{
+					{
+						Key:   "Title",
+						Value: gokeepasslib.V{Content: "Запись 1"},
+					},
+					{
+						Key:   "UserName",
+						Value: gokeepasslib.V{Content: "user1"},
+					},
+				},
+			},
+			{
+				UUID: uuid2,
+				Values: []gokeepasslib.ValueData{
+					{
+						Key:   "Title",
+						Value: gokeepasslib.V{Content: "Запись 2"},
+					},
+					{
+						Key:   "UserName",
+						Value: gokeepasslib.V{Content: "user2"},
+					},
+				},
+			},
+		},
+	}
+
+	db.Content.Root = &gokeepasslib.RootData{
+		Groups: []gokeepasslib.Group{rootGroup},
+	}
+
+	t.Run("УспешноеОбновлениеЗаписей", func(t *testing.T) {
+		// Создаем модифицированные записи для entryList
+		modifiedEntry1 := gokeepasslib.Entry{
+			UUID: uuid1,
+			Values: []gokeepasslib.ValueData{
+				{
+					Key:   "Title",
+					Value: gokeepasslib.V{Content: "Запись 1 (изменено)"},
+				},
+				{
+					Key:   "UserName",
+					Value: gokeepasslib.V{Content: "user1_modified"},
+				},
+				{
+					Key:   "Password",
+					Value: gokeepasslib.V{Content: "password1"},
+				},
+			},
+		}
+
+		// Вторая запись не изменяется
+
+		// Создаем модель с базой данных и entryList
+		m := &model{
+			db: db,
+		}
+
+		// Создаем список с модифицированными записями
+		items := []list.Item{
+			entryItem{entry: modifiedEntry1},
+			// Вторую запись не включаем в список, чтобы проверить, что она не изменится
+		}
+		m.entryList = list.New(items, list.NewDefaultDelegate(), 0, 0)
+
+		// Вызываем тестируемую функцию
+		applyUIChangesToDB(m)
+
+		// Проверяем, что первая запись была обновлена
+		entry1 := findEntryInDB(m.db, uuid1)
+		require.NotNil(t, entry1, "Запись 1 должна существовать")
+
+		// Функция для получения значения по ключу
+		getValue := func(entry *gokeepasslib.Entry, key string) string {
+			for _, v := range entry.Values {
+				if v.Key == key {
+					return v.Value.Content
+				}
+			}
+			return ""
+		}
+
+		// Проверяем модифицированные поля
+		assert.Equal(t, "Запись 1 (изменено)", getValue(entry1, "Title"), "Заголовок должен быть обновлен")
+		assert.Equal(t, "user1_modified", getValue(entry1, "UserName"), "Имя пользователя должно быть обновлено")
+		assert.Equal(t, "password1", getValue(entry1, "Password"), "Пароль должен быть добавлен")
+
+		// Проверяем, что вторая запись не изменилась
+		entry2 := findEntryInDB(m.db, uuid2)
+		require.NotNil(t, entry2, "Запись 2 должна существовать")
+		assert.Equal(t, "Запись 2", getValue(entry2, "Title"), "Заголовок не должен быть изменен")
+		assert.Equal(t, "user2", getValue(entry2, "UserName"), "Имя пользователя не должно быть изменено")
+	})
+
+	t.Run("НесуществующийUUID", func(t *testing.T) {
+		// Создаем запись с UUID, которого нет в базе
+		nonExistentUUID := gokeepasslib.NewUUID()
+		nonExistentEntry := gokeepasslib.Entry{
+			UUID: nonExistentUUID,
+			Values: []gokeepasslib.ValueData{
+				{
+					Key:   "Title",
+					Value: gokeepasslib.V{Content: "Несуществующая запись"},
+				},
+			},
+		}
+
+		// Создаем модель с базой данных и entryList
+		m := &model{
+			db: db,
+		}
+
+		// Создаем список только с несуществующей записью
+		items := []list.Item{
+			entryItem{entry: nonExistentEntry},
+		}
+		m.entryList = list.New(items, list.NewDefaultDelegate(), 0, 0)
+
+		// Вызываем тестируемую функцию
+		applyUIChangesToDB(m)
+
+		// Проверяем, что запись не добавилась в базу
+		entry := findEntryInDB(m.db, nonExistentUUID)
+		assert.Nil(t, entry, "Несуществующая запись не должна быть добавлена в базу")
+
+		// Проверяем, что количество записей в базе не изменилось
+		assert.Len(t, db.Content.Root.Groups[0].Entries, 2, "Количество записей не должно измениться")
+	})
+
+	t.Run("ПустойСписок", func(t *testing.T) {
+		// Создаем модель с базой данных и пустым entryList
+		m := &model{
+			db: db,
+		}
+
+		// Создаем пустой список
+		m.entryList = list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
+
+		// Запоминаем состояние базы
+		original := deepCopyEntry(db.Content.Root.Groups[0].Entries[0])
+
+		// Вызываем тестируемую функцию
+		applyUIChangesToDB(m)
+
+		// Проверяем, что записи не изменились
+		entry1 := findEntryInDB(m.db, uuid1)
+		require.NotNil(t, entry1, "Запись 1 должна существовать")
+
+		// Проверяем, что значения в первой записи не изменились
+		assert.Equal(t, original.Values[0].Value.Content, entry1.Values[0].Value.Content, "Значение Title не должно измениться")
+	})
 }

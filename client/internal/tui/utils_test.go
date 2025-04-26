@@ -108,6 +108,30 @@ func TestDeepCopyEntry(t *testing.T) {
 	}
 }
 
+// TestDeepCopyEntryAlias проверяет функцию-алиас deepCopyEntry.
+func TestDeepCopyEntryAlias(t *testing.T) {
+	// Создаем оригинальную запись с несколькими полями
+	original := gokeepasslib.NewEntry()
+	original.UUID = gokeepasslib.NewUUID()
+	original.Values = append(original.Values, gokeepasslib.ValueData{
+		Key:   "Title",
+		Value: gokeepasslib.V{Content: "Test Entry for Alias"},
+	})
+
+	// Создаем копию через функцию-алиас
+	entryCopy := deepCopyEntry(original)
+
+	// Проверяем основные параметры
+	assert.Equal(t, original.UUID, entryCopy.UUID, "UUID должны совпадать")
+	require.Equal(t, len(original.Values), len(entryCopy.Values), "Количество Values должно совпадать")
+	assert.Equal(t, original.Values[0].Value.Content, entryCopy.Values[0].Value.Content, "Содержимое должно совпадать")
+
+	// Изменяем копию и проверяем независимость
+	entryCopy.Values[0].Value.Content = "Modified in Alias Test"
+	assert.NotEqual(t, original.Values[0].Value.Content, entryCopy.Values[0].Value.Content,
+		"Изменение копии через алиас не должно влиять на оригинал")
+}
+
 // TestFindEntryInDB проверяет поиск записи в базе данных по UUID.
 func TestFindEntryInDB(t *testing.T) {
 	// Создаем тестовую базу данных
@@ -238,4 +262,24 @@ func TestFindEntryInGroups(t *testing.T) {
 		entry := FindEntryInGroups([]gokeepasslib.Group{}, gokeepasslib.NewUUID())
 		assert.Nil(t, entry, "В пустом слайсе групп не должно быть записей")
 	})
+}
+
+// TestFindEntryInDBAlias проверяет функцию-алиас findEntryInDB.
+func TestFindEntryInDBAlias(t *testing.T) {
+	// Создаем тестовую базу данных
+	db := createTestDB()
+
+	// Получаем UUID существующей записи из корневой группы
+	targetUUID := db.Content.Root.Groups[0].Entries[0].UUID
+
+	// Выполняем поиск через алиас
+	entry := findEntryInDB(db, targetUUID)
+
+	// Проверяем результат
+	require.NotNil(t, entry, "Должна быть найдена запись через алиас")
+	assert.Equal(t, targetUUID, entry.UUID, "UUID найденной записи должен совпадать с искомым")
+
+	// Проверяем nil-обработку
+	nilEntry := findEntryInDB(nil, targetUUID)
+	assert.Nil(t, nilEntry, "При nil базе данных результат через алиас должен быть nil")
 }

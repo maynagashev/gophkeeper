@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/maynagashev/gophkeeper/client/internal/api"
@@ -287,17 +288,114 @@ func TestHandleGlobalKeys(t *testing.T) {
 	})
 }
 
-// TestHandleSaveKeyPress_disabled проверяет обработку нажатия Ctrl+S.
-func TestHandleSaveKeyPress_disabled(t *testing.T) {
-	t.Skip("Тест временно отключен из-за проблем с линтером")
-}
+// TestUpdateDBFromList проверяет обновление базы данных из списка записей.
+func TestUpdateDBFromList(t *testing.T) {
+	// Создаем базовую модель для тестирования
+	m := createTestModelForUpdate()
 
-// TestUpdateDBFromList_disabled проверяет обновление базы данных из списка записей.
-func TestUpdateDBFromList_disabled(t *testing.T) {
-	t.Skip("Тест временно отключен из-за проблем с линтером")
-}
+	// Создаем тестовую базу данных
+	db := gokeepasslib.NewDatabase()
+	db.Content = &gokeepasslib.DBContent{
+		Root: &gokeepasslib.RootData{
+			Groups: []gokeepasslib.Group{
+				{
+					Name: "TestGroup",
+					Entries: []gokeepasslib.Entry{
+						{
+							UUID: gokeepasslib.NewUUID(),
+							Values: []gokeepasslib.ValueData{
+								{
+									Key:   "Title",
+									Value: gokeepasslib.V{Content: "Original Entry"},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	m.db = db
 
-// TestHandleWindowSizeMsg_disabled проверяет обработку изменения размера окна.
-func TestHandleWindowSizeMsg_disabled(t *testing.T) {
-	t.Skip("Тест временно отключен из-за проблем с линтером")
+	t.Run("ОбновлениеСуществующейЗаписи", func(t *testing.T) {
+		// Получаем UUID существующей записи
+		entryUUID := m.db.Content.Root.Groups[0].Entries[0].UUID
+
+		// Создаем модифицированную запись для списка
+		modifiedEntry := gokeepasslib.Entry{
+			UUID: entryUUID,
+			Values: []gokeepasslib.ValueData{
+				{
+					Key:   "Title",
+					Value: gokeepasslib.V{Content: "Modified Entry"},
+				},
+				{
+					Key:   "UserName",
+					Value: gokeepasslib.V{Content: "test_user"},
+				},
+			},
+		}
+
+		// Создаем список с модифицированной записью
+		m.entryList = list.New([]list.Item{entryItem{entry: modifiedEntry}}, list.NewDefaultDelegate(), 0, 0)
+
+		// Вызываем тестируемый метод
+		updatedCount := m.updateDBFromList()
+
+		// Проверяем результаты
+		require.Equal(t, 1, updatedCount, "Должна быть обновлена одна запись")
+
+		// Проверяем, что запись в базе данных обновилась
+		dbEntry := &m.db.Content.Root.Groups[0].Entries[0]
+
+		// Находим значение поля Title
+		var titleValue, userNameValue string
+		for _, val := range dbEntry.Values {
+			if val.Key == "Title" {
+				titleValue = val.Value.Content
+			}
+			if val.Key == "UserName" {
+				userNameValue = val.Value.Content
+			}
+		}
+
+		require.Equal(t, "Modified Entry", titleValue, "Заголовок должен быть обновлен")
+		require.Equal(t, "test_user", userNameValue, "Имя пользователя должно быть добавлено")
+	})
+
+	t.Run("ЗаписьНеНайденаВБазе", func(t *testing.T) {
+		// Создаем запись с несуществующим UUID
+		nonExistentEntry := gokeepasslib.Entry{
+			UUID: gokeepasslib.NewUUID(), // Новый UUID, который не существует в базе
+			Values: []gokeepasslib.ValueData{
+				{
+					Key:   "Title",
+					Value: gokeepasslib.V{Content: "New Entry"},
+				},
+			},
+		}
+
+		// Создаем список с новой записью
+		m.entryList = list.New([]list.Item{entryItem{entry: nonExistentEntry}}, list.NewDefaultDelegate(), 0, 0)
+
+		// Вызываем тестируемый метод
+		updatedCount := m.updateDBFromList()
+
+		// Проверяем результаты
+		require.Equal(t, 0, updatedCount, "Не должно быть обновленных записей")
+
+		// Проверяем, что база данных не изменилась (осталась только одна запись)
+		require.Len(t, m.db.Content.Root.Groups[0].Entries, 1, "Количество записей не должно измениться")
+	})
+
+	t.Run("ПустойСписок", func(t *testing.T) {
+		// Создаем пустой список
+		m.entryList = list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
+
+		// Вызываем тестируемый метод
+		updatedCount := m.updateDBFromList()
+
+		// Проверяем результаты
+		require.Equal(t, 0, updatedCount, "При пустом списке не должно быть обновленных записей")
+	})
 }
