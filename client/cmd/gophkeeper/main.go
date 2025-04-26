@@ -25,6 +25,8 @@ var (
 	version = "dev" // Значение по умолчанию, если не установлено при сборке
 	//nolint:gochecknoglobals // Устанавливается через ldflags при сборке
 	buildDate = "unknown" // Значение по умолчанию
+	//nolint:gochecknoglobals // Устанавливается через ldflags при сборке
+	commitHash = "N/A" // Значение по умолчанию
 )
 
 // setupLogging настраивает логирование в файл logs/gophkeeper.log.
@@ -74,6 +76,7 @@ func main() {
 		log.Println("GophKeeper Client")
 		log.Printf("Version: %s", version)
 		log.Printf("Build Date: %s", buildDate)
+		log.Printf("Commit Hash: %s", commitHash)
 		os.Exit(0)
 	}
 

@@ -70,3 +70,37 @@ test-coverage:
 migrate:
 	@echo "Применение миграций..."
 	@make -C server migrate
+
+# --- Релизная сборка клиента --- #
+# Переменные для ldflags
+VERSION := $(shell git describe --tags --always --dirty || echo "dev")
+BUILD_DATE := $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
+COMMIT_HASH := $(shell git rev-parse --short HEAD || echo "N/A")
+LDFLAGS := -ldflags "-X 'main.version=$(VERSION)' -X 'main.buildDate=$(BUILD_DATE)' -X 'main.commitHash=$(COMMIT_HASH)'"
+
+# Директория для бинарников
+BIN_DIR := ./bin
+CLIENT_CMD := ./client/cmd/gophkeeper
+CLIENT_TARGET_BASE := gophkeeper
+
+# Цель для сборки всех релизных версий клиента
+.PHONY: build-client-release
+build-client-release: build-client-linux build-client-windows build-client-darwin
+	@echo "Релизная сборка клиента завершена. Бинарники в $(BIN_DIR)"
+
+# Цели для конкретных платформ
+.PHONY: build-client-linux build-client-windows build-client-darwin
+build-client-linux:
+	@echo "Сборка клиента для Linux (amd64)..."
+	@mkdir -p $(BIN_DIR)
+	@GOOS=linux GOARCH=amd64 go build $(LDFLAGS) -o $(BIN_DIR)/$(CLIENT_TARGET_BASE)-linux-amd64 $(CLIENT_CMD)
+
+build-client-windows:
+	@echo "Сборка клиента для Windows (amd64)..."
+	@mkdir -p $(BIN_DIR)
+	@GOOS=windows GOARCH=amd64 go build $(LDFLAGS) -o $(BIN_DIR)/$(CLIENT_TARGET_BASE)-windows-amd64.exe $(CLIENT_CMD)
+
+build-client-darwin:
+	@echo "Сборка клиента для macOS (amd64)..."
+	@mkdir -p $(BIN_DIR)
+	@GOOS=darwin GOARCH=amd64 go build $(LDFLAGS) -o $(BIN_DIR)/$(CLIENT_TARGET_BASE)-darwin-amd64 $(CLIENT_CMD)
