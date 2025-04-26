@@ -1,0 +1,237 @@
+# Увеличение покрытия тестами клиента
+
+Основное требование: общее покрытием тестами должно составлять не менее 80%.
+
+## Команды и пути для запуска тестов (не удалять!)
+
+Директория клиента
+
+```bash
+cd /home/dev/src/maynagashev/gophkeeper/gophkeeper/client
+```
+
+Запуск тестов с покрытием
+
+```bash
+make test-coverage
+```
+
+Запуск линтера
+
+```bash
+make lint
+```
+
+## Текущее покрытие
+
+```bash
+go test -coverprofile=logs/coverage.out ./...
+	github.com/maynagashev/gophkeeper/client/cmd/gophkeeper		coverage: 0.0% of statements
+ok  	github.com/maynagashev/gophkeeper/client/internal/api	0.018s	coverage: 84.6% of statements
+ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	1.256s	coverage: 94.6% of statements
+ok  	github.com/maynagashev/gophkeeper/client/internal/tui	0.071s	coverage: 24.4% of statements
+go tool cover -html=logs/coverage.out -o logs/coverage.html
+go tool cover -func=logs/coverage.out | tee logs/coverage.log
+github.com/maynagashev/gophkeeper/client/cmd/gophkeeper/main.go:33:				setupLogging					0.0%
+github.com/maynagashev/gophkeeper/client/cmd/gophkeeper/main.go:56:				main						0.0%
+github.com/maynagashev/gophkeeper/client/internal/api/client.go:49:				NewHTTPClient					100.0%
+github.com/maynagashev/gophkeeper/client/internal/api/client.go:57:				Register					77.8%
+github.com/maynagashev/gophkeeper/client/internal/api/client.go:99:				Login						80.8%
+github.com/maynagashev/gophkeeper/client/internal/api/client.go:152:				setAuthHeader					100.0%
+github.com/maynagashev/gophkeeper/client/internal/api/client.go:161:				GetVaultMetadata				86.4%
+github.com/maynagashev/gophkeeper/client/internal/api/client.go:205:				UploadVault					83.3%
+github.com/maynagashev/gophkeeper/client/internal/api/client.go:252:				DownloadVault					85.0%
+github.com/maynagashev/gophkeeper/client/internal/api/client.go:299:				ListVersions					88.9%
+github.com/maynagashev/gophkeeper/client/internal/api/client.go:355:				RollbackToVersion				84.6%
+github.com/maynagashev/gophkeeper/client/internal/api/client.go:404:				SetAuthToken					100.0%
+github.com/maynagashev/gophkeeper/client/internal/kdbx/auth.go:21:				setCustomDataValue				100.0%
+github.com/maynagashev/gophkeeper/client/internal/kdbx/auth.go:43:				removeCustomDataValue				100.0%
+github.com/maynagashev/gophkeeper/client/internal/kdbx/auth.go:61:				SaveAuthData					96.3%
+github.com/maynagashev/gophkeeper/client/internal/kdbx/auth.go:125:				LoadAuthData					100.0%
+github.com/maynagashev/gophkeeper/client/internal/kdbx/kdbx.go:16:				OpenFile					92.3%
+github.com/maynagashev/gophkeeper/client/internal/kdbx/kdbx.go:45:				GetAllEntries					100.0%
+github.com/maynagashev/gophkeeper/client/internal/kdbx/kdbx.go:55:				collectEntries					100.0%
+github.com/maynagashev/gophkeeper/client/internal/kdbx/kdbx.go:66:				CreateDatabase					100.0%
+github.com/maynagashev/gophkeeper/client/internal/kdbx/kdbx.go:71:				SaveFile					80.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/commands.go:21:				openKdbxCmd					80.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/commands.go:32:				saveKdbxCmd					20.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/commands.go:43:				clearStatusCmd					100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/commands.go:59:				Error						100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/commands.go:64:				makeLoginCmd					100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/commands.go:84:				Error						100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/commands.go:89:				makeRegisterCmd					100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/commands.go:108:				Error						100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/commands.go:139:				startSyncCmd					100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/commands.go:177:				fetchServerMetadataCmd				71.4%
+github.com/maynagashev/gophkeeper/client/internal/tui/commands.go:206:				fetchLocalMetadataCmd				83.3%
+github.com/maynagashev/gophkeeper/client/internal/tui/commands.go:229:				uploadVaultCmd					81.2%
+github.com/maynagashev/gophkeeper/client/internal/tui/commands.go:288:				downloadVaultCmd				90.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/commands.go:323:				applyUIChangesToDB				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:36:			Title						0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:45:			Description					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:71:			FilterValue					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:77:			initPasswordInput				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:88:			initEntryList					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:118:			initAttachmentDeleteList			0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:129:			initAttachmentPathInput				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:138:			initNewKdbxPasswordInputs			0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:155:			initSyncMenu					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:176:			initServerURLInput				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:185:			initLoginInputs					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:200:			initRegisterInputs				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:215:			initDocStyle					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:221:			initVersionList					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:246:			initModel					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/input_helpers.go:15:			handleCredentialsKeys				82.6%
+github.com/maynagashev/gophkeeper/client/internal/tui/input_helpers.go:60:			handleCredentialsInput				94.4%
+github.com/maynagashev/gophkeeper/client/internal/tui/model.go:41:				String						0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/model.go:136:				Title						0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/model.go:150:				Description					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/model.go:177:				FilterValue					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:15:				prepareAddScreen				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:57:				createEntryFromInputs				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:106:			updateEntryAddScreen				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:194:			updateFocus					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:207:			viewEntryAddScreen				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_delete.go:11:		updateAttachmentListDeleteScreen		0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_delete.go:71:		performAttachmentDelete				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_delete.go:109:		viewAttachmentListDeleteScreen			0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_input.go:15:		updateAttachmentPathInputScreen			0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_input.go:44:		handleAttachmentPathConfirm			0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_input.go:99:		viewAttachmentPathInputScreen			0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_credentials.go:11:			viewCredentialsScreen				90.9%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go:17:			updateEntryDetailScreen				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go:40:			renderStandardFields				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go:69:			maskCardNumber					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go:78:			renderCustomFields				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go:93:			getBinariesFromDB				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go:117:			renderAttachments				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go:159:			viewEntryDetailScreen				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:27:			Title						0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:28:			Description					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:29:			FilterValue					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:32:			prepareEditScreen				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:82:			updateEntryEditScreen				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:98:			handleEditScreenKeys				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:180:			handleAttachmentDeleteAction			0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:197:			saveEntryChanges				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:232:			viewEntryEditScreen				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_list.go:21:			updateEntryListScreen				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_list.go:75:			_handleAuthLoadError				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_list.go:86:			_handleAuthLoadSuccess				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_list.go:113:			handleDBOpenedMsg				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_login.go:12:			updateLoginScreen				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_login.go:34:			viewLoginScreen					100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_login.go:45:			TestLoginScreenTabNavigation			0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_login.go:102:			TestLoginScreenEscapeKey			0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_login.go:124:			TestLoginScreenEnterSubmit			0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_login.go:150:			TestLoginScreenView				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_login_register_choice.go:14:	updateLoginRegisterChoiceScreen			100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_login_register_choice.go:37:	viewLoginRegisterChoiceScreen			100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_login_register_choice.go:55:	TestLoginRegisterChoiceScreenSimulateKeyPress	0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_login_register_choice.go:143:	TestLoginRegisterChoiceScreenView		0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_new_kdbx.go:25:			updateNewKdbxPasswordScreen			0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_new_kdbx.go:180:			viewNewKdbxPasswordScreen			0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_password.go:12:			updatePasswordInputScreen			100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_password.go:41:			viewPasswordInputScreen				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_password.go:53:			handleErrorMsg					100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_register.go:8:			updateRegisterScreen				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_register.go:29:			viewRegisterScreen				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_server_url.go:12:			updateServerURLInputScreen			100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_server_url.go:45:			viewServerURLInputScreen			100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go:21:			Title						0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go:22:			Description					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go:23:			FilterValue					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go:28:			viewSyncServerScreen				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go:47:			handleSyncMenuConfigureURL			0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go:59:			handleSyncMenuLoginRegister			0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go:72:			handleSyncMenuSyncNow				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go:90:			handleSyncMenuViewVersions			0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go:101:			handleSyncMenuLogout				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go:131:			updateSyncServerScreen				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go:156:			handleSyncMenuAction				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:35:		Login						0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:41:		Register					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:52:		GetVaultMetadata				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:65:		UploadVault					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:76:		DownloadVault					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:103:		ListVersions					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:127:		RollbackToVersion				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:133:		SetAuthToken					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:138:		NewScreenTestSuite				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:168:		WithServerURL					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:174:		WithAuthToken					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:180:		WithDatabase					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:186:		WithState					100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:192:		SimulateKeyPress				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:198:		SimulateKeyRune					100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:204:		ExecuteCmd					66.7%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:212:		AssertViewContains				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:218:		AssertState					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:223:		toModel						100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:230:		CaptureView					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:240:		CaptureOutput					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:253:		CreateBasicTestDB				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:298:		SetupMockAPILogin				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:310:		SetupMockAPIRegister				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:322:		RenderScreen					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:47:			loadVersionsCmd					100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:76:			rollbackToVersionCmd				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:101:			handleVersionRollbackConfirm			0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:122:			handleVersionRollbackError			0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:132:			handleVersionListKeys				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:164:			viewVersionListScreen				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:195:			updateVersionListScreen				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:227:			handleVersionsLoadedMsg				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:256:			handleVersionsLoadErrorMsg			0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:273:			handleRollbackSuccessMsg			0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:283:			handleRollbackErrorMsg				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:297:			formatTime					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_welcome.go:9:			updateWelcomeScreen				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_welcome.go:25:			viewWelcomeScreen				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go:69:			NewSyncError					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go:101:			NewTestModel					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go:106:			SetAPIClient					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go:111:			SetAuthToken					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go:116:			SetServerURL					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go:121:			SetDB						0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go:126:			MakeLoginCmd					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go:131:			MakeRegisterCmd					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:27:				Init						0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:32:				setStatusMessage				66.7%
+github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:48:				getMainContentView				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:86:				getContentAndHelp				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:97:				getDBModTimeString				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:113:				getDBDebugInfo					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:129:				getDebugInfoString				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:144:				View						0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:180:				Start						0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/update.go:17:				handleWindowSizeMsg				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/update.go:42:				handleDBMsg					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/update.go:84:				handleDBOpenedMsg				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/update.go:88:				handleErrorMsg					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/update.go:92:				handleDBSavedMsg				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/update.go:98:				handleDBSaveErrorMsg				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/update.go:102:				handleClearStatusMsg				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/update.go:109:				handleSyncErrorMsg				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/update.go:124:				handleSyncStartedMsg				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/update.go:133:				handleServerMetadataMsg				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/update.go:148:				handleLocalMetadataMsg				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/update.go:163:				handleSyncUploadSuccessMsg			0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/update.go:170:				handleSyncDownloadSuccessMsg			0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/update.go:180:				processMetadataResults				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/update.go:253:				handleVersionMsg				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/update.go:273:				handleAPIMsg					79.5%
+github.com/maynagashev/gophkeeper/client/internal/tui/update.go:342:				canSave						100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/update.go:347:				updateDBFromList				93.3%
+github.com/maynagashev/gophkeeper/client/internal/tui/update.go:373:				updateRootModTime				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/update.go:393:				handleSaveKeyPress				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/update.go:413:				handleGlobalKeys				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/update.go:431:				Update						39.5%
+github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:8:				DeepCopyEntry					85.7%
+github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:46:				deepCopyEntry					100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:51:				FindEntryInDB					100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:60:				findEntryInDB					100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:65:				FindEntryInGroups				100.0%
+total:												(statements)					32.4%
+```
