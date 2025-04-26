@@ -75,7 +75,7 @@
 				
 				<option value="file9">github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_delete.go (96.5%)</option>
 				
-				<option value="file10">github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_input.go (0.0%)</option>
+				<option value="file10">github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_input.go (82.7%)</option>
 				
 				<option value="file11">github.com/maynagashev/gophkeeper/client/internal/tui/screen_credentials.go (90.9%)</option>
 				
@@ -2315,7 +2315,7 @@ import (
 )
 
 // updateAttachmentPathInputScreen обрабатывает ввод пути к файлу вложения.
-func (m *model) updateAttachmentPathInputScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+func (m *model) updateAttachmentPathInputScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov8" title="1">{
         var cmds []tea.Cmd
         var cmd tea.Cmd
 
@@ -2323,9 +2323,9 @@ func (m *model) updateAttachmentPathInputScreen(msg tea.Msg) (tea.Model, tea.Cmd
         m.attachmentPathInput, cmd = m.attachmentPathInput.Update(msg)
         cmds = append(cmds, cmd)
 
-        if keyMsg, ok := msg.(tea.KeyMsg); ok </span><span class="cov0" title="0">{
+        if keyMsg, ok := msg.(tea.KeyMsg); ok </span><span class="cov8" title="1">{
                 switch keyMsg.String() </span>{
-                case keyEsc:<span class="cov0" title="0">
+                case keyEsc:<span class="cov8" title="1">
                         // Отмена ввода, возврат на предыдущий экран
                         slog.Info("Отмена ввода пути вложения")
                         m.state = m.previousScreenState
@@ -2335,41 +2335,41 @@ func (m *model) updateAttachmentPathInputScreen(msg tea.Msg) (tea.Model, tea.Cmd
                         // Зависит от previousScreenState. Пока просто ClearScreen.
                         return m, tea.ClearScreen</span>
 
-                case keyEnter:<span class="cov0" title="0">
+                case keyEnter:<span class="cov8" title="1">
                         return m.handleAttachmentPathConfirm()</span>
                 }
         }
 
-        <span class="cov0" title="0">return m, tea.Batch(cmds...)</span>
+        <span class="cov8" title="1">return m, tea.Batch(cmds...)</span>
 }
 
 // handleAttachmentPathConfirm обрабатывает подтверждение ввода пути и чтение файла.
-func (m *model) handleAttachmentPathConfirm() (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+func (m *model) handleAttachmentPathConfirm() (tea.Model, tea.Cmd) <span class="cov8" title="1">{
         filePath := m.attachmentPathInput.Value()
         slog.Info("Попытка добавить вложение из файла", "path", filePath)
 
         content, err := os.ReadFile(filePath)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 m.attachmentError = fmt.Errorf("ошибка чтения файла: %w", err)
                 slog.Error("Ошибка чтения файла для вложения", "path", filePath, "error", err)
                 return m, nil // Остаемся на экране ввода
         }</span>
 
-        <span class="cov0" title="0">fileName := filepath.Base(filePath)
+        <span class="cov8" title="1">fileName := filepath.Base(filePath)
         slog.Info("Файл успешно прочитан", "name", fileName, "size", len(content))
 
         // Добавляем вложение
         //nolint:exhaustive // Игнорируем exhaustive, т.к. другие состояния не должны сюда приводить
         switch m.previousScreenState </span>{
-        case entryEditScreen:<span class="cov0" title="0">
-                if m.editingEntry != nil &amp;&amp; m.db != nil </span><span class="cov0" title="0">{
+        case entryEditScreen:<span class="cov8" title="1">
+                if m.editingEntry != nil &amp;&amp; m.db != nil </span><span class="cov8" title="1">{
                         binary := m.db.AddBinary(content)
                         if binary == nil </span><span class="cov0" title="0">{
                                 m.attachmentError = fmt.Errorf("не удалось добавить бинарные данные '%s' в базу", fileName)
                                 slog.Error("Ошибка при добавлении бинарных данных в базу (edit screen)", "name", fileName)
                                 return m, nil // Остаемся на экране ввода
                         }</span>
-                        <span class="cov0" title="0">binaryRef := binary.CreateReference(fileName)
+                        <span class="cov8" title="1">binaryRef := binary.CreateReference(fileName)
                         m.editingEntry.Binaries = append(m.editingEntry.Binaries, binaryRef)
                         slog.Info("Вложение добавлено к редактируемой записи", "name", fileName, "binary_id", binary.ID)</span>
                 } else<span class="cov0" title="0"> {
@@ -2383,7 +2383,7 @@ func (m *model) handleAttachmentPathConfirm() (tea.Model, tea.Cmd) <span class="
                         Content []byte
                 }{fileName, content})
                 slog.Info("Вложение добавлено во временный список для новой записи", "name", fileName)</span>
-        default:<span class="cov0" title="0">
+        default:<span class="cov8" title="1">
                 // Этого не должно происходить
                 slog.Error("Неожиданный предыдущий экран при добавлении вложения", "state", m.previousScreenState)
                 m.attachmentError = fmt.Errorf("внутренняя ошибка: неизвестный контекст %v", m.previousScreenState)
@@ -2391,7 +2391,7 @@ func (m *model) handleAttachmentPathConfirm() (tea.Model, tea.Cmd) <span class="
         }
 
         // Возвращаемся на предыдущий экран
-        <span class="cov0" title="0">m.state = m.previousScreenState
+        <span class="cov8" title="1">m.state = m.previousScreenState
         m.attachmentPathInput.Blur()
         m.attachmentError = nil                                            // Очищаем ошибку после успеха
         m.savingStatus = fmt.Sprintf("Вложение '%s' добавлено.", fileName) // Устанавливаем статус
@@ -2399,7 +2399,7 @@ func (m *model) handleAttachmentPathConfirm() (tea.Model, tea.Cmd) <span class="
 }
 
 // viewAttachmentPathInputScreen отрисовывает экран ввода пути к файлу вложения.
-func (m *model) viewAttachmentPathInputScreen() string <span class="cov0" title="0">{
+func (m *model) viewAttachmentPathInputScreen() string <span class="cov8" title="1">{
         var b strings.Builder
         b.WriteString("Введите полный путь к файлу для добавления вложения:\n")
         b.WriteString(m.attachmentPathInput.View())
@@ -2409,7 +2409,7 @@ func (m *model) viewAttachmentPathInputScreen() string <span class="cov0" title=
                 b.WriteString(fmt.Sprintf("Ошибка: %s\n", m.attachmentError))
         }</span>
 
-        <span class="cov0" title="0">return b.String()</span>
+        <span class="cov8" title="1">return b.String()</span>
 }
 </pre>
 		
