@@ -10,15 +10,15 @@ github.com/maynagashev/gophkeeper/client/internal/api/client.go:252:				Download
 github.com/maynagashev/gophkeeper/client/internal/api/client.go:299:				ListVersions				88.9%
 github.com/maynagashev/gophkeeper/client/internal/api/client.go:355:				RollbackToVersion			84.6%
 github.com/maynagashev/gophkeeper/client/internal/api/client.go:404:				SetAuthToken				100.0%
-github.com/maynagashev/gophkeeper/client/internal/kdbx/auth.go:21:				setCustomDataValue			0.0%
-github.com/maynagashev/gophkeeper/client/internal/kdbx/auth.go:43:				removeCustomDataValue			0.0%
-github.com/maynagashev/gophkeeper/client/internal/kdbx/auth.go:61:				SaveAuthData				0.0%
-github.com/maynagashev/gophkeeper/client/internal/kdbx/auth.go:125:				LoadAuthData				0.0%
+github.com/maynagashev/gophkeeper/client/internal/kdbx/auth.go:21:				setCustomDataValue			100.0%
+github.com/maynagashev/gophkeeper/client/internal/kdbx/auth.go:43:				removeCustomDataValue			100.0%
+github.com/maynagashev/gophkeeper/client/internal/kdbx/auth.go:61:				SaveAuthData				96.3%
+github.com/maynagashev/gophkeeper/client/internal/kdbx/auth.go:125:				LoadAuthData				100.0%
 github.com/maynagashev/gophkeeper/client/internal/kdbx/kdbx.go:16:				OpenFile				92.3%
 github.com/maynagashev/gophkeeper/client/internal/kdbx/kdbx.go:45:				GetAllEntries				100.0%
 github.com/maynagashev/gophkeeper/client/internal/kdbx/kdbx.go:55:				collectEntries				100.0%
 github.com/maynagashev/gophkeeper/client/internal/kdbx/kdbx.go:66:				CreateDatabase				100.0%
-github.com/maynagashev/gophkeeper/client/internal/kdbx/kdbx.go:71:				SaveFile				0.0%
+github.com/maynagashev/gophkeeper/client/internal/kdbx/kdbx.go:71:				SaveFile				80.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/commands.go:21:				openKdbxCmd				0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/commands.go:32:				saveKdbxCmd				0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/commands.go:43:				clearStatusCmd				0.0%
@@ -158,4 +158,4 @@ github.com/maynagashev/gophkeeper/client/internal/tui/update.go:431:				Update		
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:8:				deepCopyEntry				0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:45:				findEntryInDB				0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:53:				findEntryInGroups			0.0%
-total:												(statements)				8.6%
+total:												(statements)				13.0%

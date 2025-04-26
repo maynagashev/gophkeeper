@@ -59,9 +59,9 @@
 				
 				<option value="file1">github.com/maynagashev/gophkeeper/client/internal/api/client.go (84.6%)</option>
 				
-				<option value="file2">github.com/maynagashev/gophkeeper/client/internal/kdbx/auth.go (0.0%)</option>
+				<option value="file2">github.com/maynagashev/gophkeeper/client/internal/kdbx/auth.go (98.6%)</option>
 				
-				<option value="file3">github.com/maynagashev/gophkeeper/client/internal/kdbx/kdbx.go (50.0%)</option>
+				<option value="file3">github.com/maynagashev/gophkeeper/client/internal/kdbx/kdbx.go (88.1%)</option>
 				
 				<option value="file4">github.com/maynagashev/gophkeeper/client/internal/tui/commands.go (0.0%)</option>
 				
@@ -679,77 +679,77 @@ const (
 
 // setCustomDataValue обновляет или добавляет значение в слайс CustomData.
 // Возвращает обновленный слайс.
-func setCustomDataValue(customDataSlice []gokeepasslib.CustomData, key, value string) []gokeepasslib.CustomData <span class="cov0" title="0">{
+func setCustomDataValue(customDataSlice []gokeepasslib.CustomData, key, value string) []gokeepasslib.CustomData <span class="cov8" title="1">{
         found := false
-        for i := range customDataSlice </span><span class="cov0" title="0">{
-                if customDataSlice[i].Key == key </span><span class="cov0" title="0">{
+        for i := range customDataSlice </span><span class="cov8" title="1">{
+                if customDataSlice[i].Key == key </span><span class="cov8" title="1">{
                         customDataSlice[i].Value = value
                         found = true
                         slog.Debug("Обновлено значение CustomData", "key", key)
                         break</span>
                 }
         }
-        <span class="cov0" title="0">if !found </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if !found </span><span class="cov8" title="1">{
                 customDataSlice = append(customDataSlice, gokeepasslib.CustomData{
                         Key:   key,
                         Value: value,
                 })
                 slog.Debug("Добавлено новое значение CustomData", "key", key)
         }</span>
-        <span class="cov0" title="0">return customDataSlice</span>
+        <span class="cov8" title="1">return customDataSlice</span>
 }
 
 // removeCustomDataValue удаляет значение из слайса CustomData по ключу.
 // Возвращает обновленный слайс.
-func removeCustomDataValue(customDataSlice []gokeepasslib.CustomData, key string) []gokeepasslib.CustomData <span class="cov0" title="0">{
+func removeCustomDataValue(customDataSlice []gokeepasslib.CustomData, key string) []gokeepasslib.CustomData <span class="cov8" title="1">{
         newSlice := make([]gokeepasslib.CustomData, 0, len(customDataSlice))
         removed := false
-        for _, item := range customDataSlice </span><span class="cov0" title="0">{
-                if item.Key != key </span><span class="cov0" title="0">{
+        for _, item := range customDataSlice </span><span class="cov8" title="1">{
+                if item.Key != key </span><span class="cov8" title="1">{
                         newSlice = append(newSlice, item)
-                }</span> else<span class="cov0" title="0"> {
+                }</span> else<span class="cov8" title="1"> {
                         removed = true
                 }</span>
         }
-        <span class="cov0" title="0">if removed </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if removed </span><span class="cov8" title="1">{
                 slog.Debug("Удалено значение из CustomData", "key", key)
         }</span>
-        <span class="cov0" title="0">return newSlice</span>
+        <span class="cov8" title="1">return newSlice</span>
 }
 
 // SaveAuthData сохраняет URL сервера и токен аутентификации
 // в пользовательских данных метаданных базы KDBX.
-func SaveAuthData(db *gokeepasslib.Database, serverURL, authToken string) error <span class="cov0" title="0">{
-        if db == nil || db.Content == nil || db.Content.Meta == nil </span><span class="cov0" title="0">{
+func SaveAuthData(db *gokeepasslib.Database, serverURL, authToken string) error <span class="cov8" title="1">{
+        if db == nil || db.Content == nil || db.Content.Meta == nil </span><span class="cov8" title="1">{
                 return errors.New("база данных, ее содержимое или метаданные не инициализированы")
         }</span>
 
-        <span class="cov0" title="0">meta := db.Content.Meta
+        <span class="cov8" title="1">meta := db.Content.Meta
         initialCustomData := make([]gokeepasslib.CustomData, len(meta.CustomData)) // Копируем исходные данные
         copy(initialCustomData, meta.CustomData)
         changed := false // Флаг, что данные действительно изменились
 
         // Сохраняем/удаляем URL
-        if serverURL != "" </span><span class="cov0" title="0">{
+        if serverURL != "" </span><span class="cov8" title="1">{
                 meta.CustomData = setCustomDataValue(meta.CustomData, CustomDataKeyServerURL, serverURL)
-        }</span> else<span class="cov0" title="0"> {
+        }</span> else<span class="cov8" title="1"> {
                 meta.CustomData = removeCustomDataValue(meta.CustomData, CustomDataKeyServerURL)
         }</span>
 
         // Сохраняем/удаляем токен
-        <span class="cov0" title="0">if authToken != "" </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if authToken != "" </span><span class="cov8" title="1">{
                 meta.CustomData = setCustomDataValue(meta.CustomData, CustomDataKeyAuthToken, authToken)
-        }</span> else<span class="cov0" title="0"> {
+        }</span> else<span class="cov8" title="1"> {
                 meta.CustomData = removeCustomDataValue(meta.CustomData, CustomDataKeyAuthToken)
         }</span>
 
         // Проверяем, изменился ли слайс CustomData
-        <span class="cov0" title="0">if len(initialCustomData) != len(meta.CustomData) </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if len(initialCustomData) != len(meta.CustomData) </span><span class="cov8" title="1">{
                 changed = true
-        }</span> else<span class="cov0" title="0"> {
+        }</span> else<span class="cov8" title="1"> {
                 // Если длина одинаковая, проверяем содержимое
-                for i := range meta.CustomData </span><span class="cov0" title="0">{
-                        if initialCustomData[i].Key != meta.CustomData[i].Key || initialCustomData[i].Value != meta.CustomData[i].Value </span><span class="cov0" title="0">{
+                for i := range meta.CustomData </span><span class="cov8" title="1">{
+                        if initialCustomData[i].Key != meta.CustomData[i].Key || initialCustomData[i].Value != meta.CustomData[i].Value </span><span class="cov8" title="1">{
                                 changed = true
                                 break</span>
                         }
@@ -757,10 +757,10 @@ func SaveAuthData(db *gokeepasslib.Database, serverURL, authToken string) error 
         }
 
         // Обновляем время модификации корневой группы, только если CustomData действительно изменились
-        <span class="cov0" title="0">if changed </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if changed </span><span class="cov8" title="1">{
                 now := time.Now().UTC()
                 // Обновляем время модификации корневой группы
-                if db.Content != nil &amp;&amp; db.Content.Root != nil &amp;&amp; len(db.Content.Root.Groups) &gt; 0 </span><span class="cov0" title="0">{
+                if db.Content != nil &amp;&amp; db.Content.Root != nil &amp;&amp; len(db.Content.Root.Groups) &gt; 0 </span><span class="cov8" title="1">{
                         // Получаем указатель на корневую группу
                         rootGroup := &amp;db.Content.Root.Groups[0]
                         // Тип Times не указатель, поэтому присваиваем обертку напрямую
@@ -778,47 +778,47 @@ func SaveAuthData(db *gokeepasslib.Database, serverURL, authToken string) error 
         // TODO: Как правильно установить флаг DatabaseChanged? Возможно, не нужно.
         // meta.SetDatabaseChanged(true) // Пока комментируем
 
-        <span class="cov0" title="0">return nil</span>
+        <span class="cov8" title="1">return nil</span>
 }
 
 // LoadAuthData извлекает URL сервера и токен аутентификации
 // из пользовательских данных метаданных базы KDBX.
-func LoadAuthData(db *gokeepasslib.Database) (string, string, error) <span class="cov0" title="0">{
+func LoadAuthData(db *gokeepasslib.Database) (string, string, error) <span class="cov8" title="1">{
         var serverURL, authToken string
-        if db == nil || db.Content == nil || db.Content.Meta == nil </span><span class="cov0" title="0">{
+        if db == nil || db.Content == nil || db.Content.Meta == nil </span><span class="cov8" title="1">{
                 return "", "", errors.New("база данных, ее содержимое или метаданные не инициализированы для загрузки AuthData")
         }</span>
 
-        <span class="cov0" title="0">meta := db.Content.Meta
+        <span class="cov8" title="1">meta := db.Content.Meta
         foundURL := false
         foundToken := false
 
         slog.Debug("Попытка загрузки Auth данных из CustomData", "count", len(meta.CustomData))
 
-        for _, item := range meta.CustomData </span><span class="cov0" title="0">{
+        for _, item := range meta.CustomData </span><span class="cov8" title="1">{
                 switch item.Key </span>{
-                case CustomDataKeyServerURL:<span class="cov0" title="0">
+                case CustomDataKeyServerURL:<span class="cov8" title="1">
                         serverURL = item.Value
                         foundURL = true
                         slog.Debug("Найден URL сервера в CustomData", "key", item.Key, "value", serverURL)</span>
-                case CustomDataKeyAuthToken:<span class="cov0" title="0">
+                case CustomDataKeyAuthToken:<span class="cov8" title="1">
                         authToken = item.Value
                         foundToken = true
                         slog.Debug("Найден токен в CustomData", "key", item.Key)</span>
                 }
-                <span class="cov0" title="0">if foundURL &amp;&amp; foundToken </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">if foundURL &amp;&amp; foundToken </span><span class="cov8" title="1">{
                         break</span>
                 }
         }
 
-        <span class="cov0" title="0">if !foundURL </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if !foundURL </span><span class="cov8" title="1">{
                 slog.Debug("URL сервера не найден в CustomData KDBX")
         }</span>
-        <span class="cov0" title="0">if !foundToken </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if !foundToken </span><span class="cov8" title="1">{
                 slog.Debug("Токен аутентификации не найден в CustomData KDBX")
         }</span>
 
-        <span class="cov0" title="0">return serverURL, authToken, nil</span>
+        <span class="cov8" title="1">return serverURL, authToken, nil</span>
 }
 </pre>
 		
@@ -892,32 +892,32 @@ func CreateDatabase(_ string, _ string) (*gokeepasslib.Database, error) <span cl
 }</span>
 
 // SaveFile кодирует и сохраняет базу данных KDBX в указанный файл.
-func SaveFile(db *gokeepasslib.Database, filePath string, password string) error <span class="cov0" title="0">{
-        if db == nil </span><span class="cov0" title="0">{
+func SaveFile(db *gokeepasslib.Database, filePath string, password string) error <span class="cov8" title="1">{
+        if db == nil </span><span class="cov8" title="1">{
                 return errors.New("база данных не инициализирована (nil)")
         }</span>
 
         // Устанавливаем учетные данные, если их нет (нужны для сохранения)
-        <span class="cov0" title="0">if db.Credentials == nil </span><span class="cov0" title="0">{
-                if password == "" </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if db.Credentials == nil </span><span class="cov8" title="1">{
+                if password == "" </span><span class="cov8" title="1">{
                         return errors.New("пароль не может быть пустым при сохранении")
                 }</span>
                 <span class="cov0" title="0">db.Credentials = gokeepasslib.NewPasswordCredentials(password)</span>
         }
 
         // Важно: перед сохранением нужно заблокировать защищенные поля!
-        <span class="cov0" title="0">err := db.LockProtectedEntries()
+        <span class="cov8" title="1">err := db.LockProtectedEntries()
         if err != nil </span><span class="cov0" title="0">{
                 // Логируем ошибку, но не прерываем сохранение, если не критично
                 slog.Warn("Не удалось заблокировать поля перед сохранением", "error", err)
         }</span>
 
         // Открываем файл для записи (перезаписываем существующий)
-        <span class="cov0" title="0">file, err := os.Create(filePath)
-        if err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">file, err := os.Create(filePath)
+        if err != nil </span><span class="cov8" title="1">{
                 return fmt.Errorf("ошибка создания/открытия файла '%s' для записи: %w", filePath, err)
         }</span>
-        <span class="cov0" title="0">defer file.Close()
+        <span class="cov8" title="1">defer file.Close()
 
         // Кодируем и записываем БД в файл
         keepassEncoder := gokeepasslib.NewEncoder(file)
@@ -927,13 +927,13 @@ func SaveFile(db *gokeepasslib.Database, filePath string, password string) error
 
         // Разблокируем обратно после сохранения (если нужно продолжить работу)
         // TODO: Решить, нужно ли это делать здесь или после вызова SaveFile
-        <span class="cov0" title="0">err = db.UnlockProtectedEntries()
+        <span class="cov8" title="1">err = db.UnlockProtectedEntries()
         if err != nil </span><span class="cov0" title="0">{
                 slog.Warn("Не удалось разблокировать поля после сохранения", "error", err)
                 // Не возвращаем ошибку, так как сохранение прошло успешно
         }</span>
 
-        <span class="cov0" title="0">return nil</span> // Сохранение успешно
+        <span class="cov8" title="1">return nil</span> // Сохранение успешно
 }
 </pre>
 		
