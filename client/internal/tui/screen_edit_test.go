@@ -4,7 +4,12 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/charmbracelet/bubbles/list"
+	"github.com/charmbracelet/bubbles/textinput"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/stretchr/testify/assert"
+	"github.com/tobischo/gokeepasslib/v3"
+	w "github.com/tobischo/gokeepasslib/v3/wrappers"
 )
 
 // TestAttachmentItem_Title проверяет метод Title для attachmentItem.
@@ -113,4 +118,196 @@ func TestAttachmentItem_FilterValue(t *testing.T) {
 			assert.Equal(t, tc.item.Title(), tc.item.FilterValue())
 		})
 	}
+}
+
+// TestPrepareEditScreen проверяет функцию prepareEditScreen.
+func TestPrepareEditScreen(t *testing.T) {
+	t.Run("С выбранной записью", func(t *testing.T) {
+		// Создаем тестовую запись
+		entry := gokeepasslib.Entry{
+			Values: []gokeepasslib.ValueData{
+				{Key: fieldNameTitle, Value: gokeepasslib.V{Content: "Тестовая запись"}},
+				{Key: fieldNameUserName, Value: gokeepasslib.V{Content: "user123"}},
+				{Key: fieldNamePassword, Value: gokeepasslib.V{Content: "pass123", Protected: w.NewBoolWrapper(true)}},
+			},
+		}
+
+		// Создаем модель с выбранной записью
+		m := &model{
+			selectedEntry: &entryItem{entry: entry},
+		}
+
+		// Вызываем тестируемую функцию
+		m.prepareEditScreen()
+
+		// Проверяем, что поля редактирования были инициализированы корректно
+		assert.NotNil(t, m.editingEntry, "Должна быть создана копия для редактирования")
+		assert.Len(t, m.editInputs, numEditableFields, "Должны быть созданы все поля ввода")
+		assert.Equal(t, "Тестовая запись", m.editInputs[editableFieldTitle].Value(),
+			"Поле заголовка должно содержать значение из записи")
+		assert.Equal(t, "user123", m.editInputs[editableFieldUserName].Value(),
+			"Поле имени пользователя должно содержать значение из записи")
+		assert.Equal(t, "pass123", m.editInputs[editableFieldPassword].Value(),
+			"Поле пароля должно содержать значение из записи")
+
+		// Проверяем, что чувствительные поля правильно замаскированы
+		assert.Equal(t, textinput.EchoPassword, m.editInputs[editableFieldPassword].EchoMode,
+			"Поле пароля должно быть замаскировано")
+		assert.Equal(t, textinput.EchoPassword, m.editInputs[editableFieldCVV].EchoMode, "Поле CVV должно быть замаскировано")
+		assert.Equal(t, textinput.EchoPassword, m.editInputs[editableFieldPIN].EchoMode, "Поле PIN должно быть замаскировано")
+	})
+
+	t.Run("Без выбранной записи", func(t *testing.T) {
+		// Создаем модель без выбранной записи
+		m := &model{
+			selectedEntry: nil,
+		}
+
+		// Вызываем тестируемую функцию
+		m.prepareEditScreen()
+
+		// Проверяем, что редактирование не инициализировалось
+		assert.Nil(t, m.editingEntry, "Не должна быть создана копия для редактирования")
+		assert.Nil(t, m.editInputs, "Не должны быть созданы поля ввода")
+	})
+}
+
+// TestUpdateEntryEditScreen проверяет функцию updateEntryEditScreen и handleEditScreenKeys.
+func TestUpdateEntryEditScreen(t *testing.T) {
+	t.Run("Обработка клавиши Escape", func(t *testing.T) {
+		// Создаем базовую модель для теста
+		entry := gokeepasslib.Entry{
+			Values: []gokeepasslib.ValueData{
+				{Key: fieldNameTitle, Value: gokeepasslib.V{Content: "Тестовая запись"}},
+			},
+		}
+
+		m := &model{
+			state:         entryEditScreen,
+			selectedEntry: &entryItem{entry: entry},
+		}
+
+		// Подготавливаем экран редактирования
+		m.prepareEditScreen()
+
+		// Моделируем нажатие клавиши Escape
+		escKeyMsg := tea.KeyMsg{Type: tea.KeyEsc}
+		resultModel, _ := m.updateEntryEditScreen(escKeyMsg)
+		modelAfter, ok := resultModel.(*model)
+		assert.True(t, ok, "Приведение типа к *model должно быть успешным")
+
+		// Проверяем, что состояние изменилось обратно на экран деталей
+		assert.Equal(t, entryDetailScreen, modelAfter.state, "После нажатия Escape должен быть переход на экран деталей")
+		assert.Nil(t, modelAfter.editingEntry, "Редактируемая запись должна быть очищена")
+		assert.Nil(t, modelAfter.editInputs, "Поля ввода должны быть очищены")
+	})
+
+	t.Run("Навигация с помощью Tab", func(t *testing.T) {
+		// Создаем базовую модель для теста
+		entry := gokeepasslib.Entry{
+			Values: []gokeepasslib.ValueData{
+				{Key: fieldNameTitle, Value: gokeepasslib.V{Content: "Тестовая запись"}},
+			},
+		}
+
+		m := &model{
+			state:         entryEditScreen,
+			selectedEntry: &entryItem{entry: entry},
+			focusedField:  0,
+		}
+
+		// Подготавливаем экран редактирования
+		m.prepareEditScreen()
+
+		// Моделируем нажатие клавиши Tab
+		tabKeyMsg := tea.KeyMsg{Type: tea.KeyTab}
+		resultModel, _ := m.updateEntryEditScreen(tabKeyMsg)
+		modelAfter, ok := resultModel.(*model)
+		assert.True(t, ok, "Приведение типа к *model должно быть успешным")
+
+		// Проверяем, что фокус переместился на следующее поле
+		assert.Equal(t, 1, modelAfter.focusedField, "После нажатия Tab фокус должен переместиться на следующее поле")
+	})
+
+	t.Run("Сохранение изменений по Enter", func(t *testing.T) {
+		// Создаем базовую модель для теста с мок-списком
+		entry := gokeepasslib.Entry{
+			Values: []gokeepasslib.ValueData{
+				{Key: fieldNameTitle, Value: gokeepasslib.V{Content: "Тестовая запись"}},
+			},
+		}
+
+		// Создаем мок-список для тестирования
+		mockList := list.New([]list.Item{entryItem{entry: entry}}, list.NewDefaultDelegate(), 0, 0)
+		mockList.Select(0)
+
+		m := &model{
+			state:         entryEditScreen,
+			selectedEntry: &entryItem{entry: entry},
+			entryList:     mockList,
+			readOnlyMode:  false,
+		}
+
+		// Подготавливаем экран редактирования
+		m.prepareEditScreen()
+
+		// Моделируем ввод нового текста в поле Title
+		// Сначала очищаем поле (если там что-то было)
+		// (В данном тесте поле изначально "Тестовая запись")
+		// Симулируем удаление старого значения (Backspace несколько раз)
+		for range len(m.editInputs[editableFieldTitle].Value()) {
+			backspaceKeyMsg := tea.KeyMsg{Type: tea.KeyBackspace}
+			m.updateEntryEditScreen(backspaceKeyMsg) // Обновляем модель
+		}
+
+		// Симулируем ввод нового значения
+		newValue := "Обновленная запись"
+		for _, r := range newValue {
+			runeKeyMsg := tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{r}}
+			m.updateEntryEditScreen(runeKeyMsg) // Обновляем модель
+		}
+
+		// Моделируем нажатие клавиши Enter
+		enterKeyMsg := tea.KeyMsg{Type: tea.KeyEnter}
+		resultModel, _ := m.updateEntryEditScreen(enterKeyMsg)
+		modelAfter, ok := resultModel.(*model)
+		assert.True(t, ok, "Приведение типа к *model должно быть успешным")
+
+		// Проверяем, что состояние изменилось и изменения сохранены
+		assert.Equal(t, entryDetailScreen, modelAfter.state, "После нажатия Enter должен быть переход на экран деталей")
+		assert.Equal(t, "Обновленная запись", modelAfter.selectedEntry.entry.GetContent(fieldNameTitle),
+			"Значение поля Title должно быть обновлено")
+	})
+
+	t.Run("Редактирование значения поля", func(t *testing.T) {
+		// Создаем базовую модель для теста
+		entry := gokeepasslib.Entry{
+			Values: []gokeepasslib.ValueData{
+				{Key: fieldNameTitle, Value: gokeepasslib.V{Content: "Тестовая запись"}},
+			},
+		}
+
+		m := &model{
+			state:         entryEditScreen,
+			selectedEntry: &entryItem{entry: entry},
+			readOnlyMode:  false,
+			focusedField:  editableFieldTitle,
+		}
+
+		// Подготавливаем экран редактирования
+		m.prepareEditScreen()
+
+		// Моделируем ввод текста
+		keyMsg := tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'A'}}
+		resultModel, _ := m.updateEntryEditScreen(keyMsg)
+		modelAfter, ok := resultModel.(*model)
+		assert.True(t, ok, "Приведение типа к *model должно быть успешным")
+
+		// Получаем текущее значение поля заголовка
+		updatedValue := modelAfter.editInputs[editableFieldTitle].Value()
+
+		// Проверяем, что значение поля изменилось
+		// Ожидаем "Тестовая записьA", так как мы добавили символ 'A' к существующему значению
+		assert.Contains(t, updatedValue, "A", "Введенный символ должен быть добавлен к значению поля")
+	})
 }

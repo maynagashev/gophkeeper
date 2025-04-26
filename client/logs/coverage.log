@@ -76,11 +76,11 @@ github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go:159:			vi
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:27:			Title						100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:28:			Description					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:29:			FilterValue					100.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:32:			prepareEditScreen				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:82:			updateEntryEditScreen				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:98:			handleEditScreenKeys				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:32:			prepareEditScreen				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:82:			updateEntryEditScreen				66.7%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:98:			handleEditScreenKeys				55.1%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:180:			handleAttachmentDeleteAction			0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:197:			saveEntryChanges				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:197:			saveEntryChanges				88.9%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:232:			viewEntryEditScreen				0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_list.go:21:			updateEntryListScreen				0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_list.go:75:			_handleAuthLoadError				0.0%
@@ -199,4 +199,4 @@ github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:46:				deepCopyEn
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:51:				FindEntryInDB					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:60:				findEntryInDB					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:65:				FindEntryInGroups				100.0%
-total:												(statements)					50.7%
+total:												(statements)					53.6%
