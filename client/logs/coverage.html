@@ -73,7 +73,7 @@
 				
 				<option value="file8">github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go (75.7%)</option>
 				
-				<option value="file9">github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_delete.go (0.0%)</option>
+				<option value="file9">github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_delete.go (96.5%)</option>
 				
 				<option value="file10">github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_input.go (0.0%)</option>
 				
@@ -107,7 +107,7 @@
 				
 				<option value="file25">github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go (0.0%)</option>
 				
-				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/tui.go (3.6%)</option>
+				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/tui.go (3.5%)</option>
 				
 				<option value="file27">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (42.2%)</option>
 				
@@ -1565,16 +1565,8 @@ func initModel(kdbxPath string, debugMode bool, serverURL string, apiClient api.
                 versionList:               versionList,
                 serverURL:                 serverURL,
                 apiClient:                 apiClient,
-                newKdbxPasswordScreen:     0, // Используем нулевое значение для screenState
-                entryListScreen:           0, // Используем нулевое значение для screenState
-                entryDetailScreen:         0, // Используем нулевое значение для screenState
         }
 }</span>
-
-// Константы для сообщений справки (могут быть перенесены в другое место).
-const (
-// Тут были константы
-)
 </pre>
 		
 		<pre class="file" id="file6" style="display: none">package tui
@@ -1913,11 +1905,6 @@ type model struct {
         itemToDelete       *attachmentItem // Вложение, выбранное для удаления
         err                error           // Последняя ошибка для отображения
 
-        // Сохраняем предыдущие состояния для этих экранов
-        newKdbxPasswordScreen screenState
-        entryListScreen       screenState
-        entryDetailScreen     screenState
-
         // -- Поля для интеграции с сервером --
         apiClient                 api.Client      // Клиент для взаимодействия с API
         serverURL                 string          // URL сервера
@@ -2202,23 +2189,23 @@ import (
 )
 
 // updateAttachmentListDeleteScreen обрабатывает сообщения для экрана удаления вложений.
-func (m *model) updateAttachmentListDeleteScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+func (m *model) updateAttachmentListDeleteScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov8" title="1">{
         // Если в режиме ReadOnly, сразу возвращаемся к редактированию
-        if m.readOnlyMode </span><span class="cov0" title="0">{
+        if m.readOnlyMode </span><span class="cov8" title="1">{
                 slog.Warn("Попытка доступа к экрану удаления вложения в режиме Read-Only.")
                 m.state = entryEditScreen
                 return m, tea.ClearScreen
         }</span>
 
-        <span class="cov0" title="0">var cmds []tea.Cmd
+        <span class="cov8" title="1">var cmds []tea.Cmd
 
         // Если есть активный запрос на подтверждение, обрабатываем его
-        if m.confirmationPrompt != "" </span><span class="cov0" title="0">{
-                if keyMsg, ok := msg.(tea.KeyMsg); ok </span><span class="cov0" title="0">{
+        if m.confirmationPrompt != "" </span><span class="cov8" title="1">{
+                if keyMsg, ok := msg.(tea.KeyMsg); ok </span><span class="cov8" title="1">{
                         switch keyMsg.String() </span>{
-                        case keyEnter, "y", "d":<span class="cov0" title="0"> // Подтверждение
+                        case keyEnter, "y", "d":<span class="cov8" title="1"> // Подтверждение
                                 return m.performAttachmentDelete()</span>
-                        case keyEsc, keyBack, "n":<span class="cov0" title="0"> // Отмена
+                        case keyEsc, keyBack, "n":<span class="cov8" title="1"> // Отмена
                                 m.confirmationPrompt = ""
                                 m.itemToDelete = nil
                                 return m, nil</span> // Остаемся на экране, убираем промпт
@@ -2229,22 +2216,22 @@ func (m *model) updateAttachmentListDeleteScreen(msg tea.Msg) (tea.Model, tea.Cm
         }
 
         // Обновляем список вложений (если нет активного промпта)
-        <span class="cov0" title="0">var listCmd tea.Cmd
+        <span class="cov8" title="1">var listCmd tea.Cmd
         m.attachmentList, listCmd = m.attachmentList.Update(msg)
         cmds = append(cmds, listCmd)
 
-        if keyMsg, ok := msg.(tea.KeyMsg); ok </span><span class="cov0" title="0">{
+        if keyMsg, ok := msg.(tea.KeyMsg); ok </span><span class="cov8" title="1">{
                 switch keyMsg.String() </span>{
-                case keyEsc, keyBack:<span class="cov0" title="0">
+                case keyEsc, keyBack:<span class="cov8" title="1">
                         // Отмена удаления, возврат к редактированию
                         m.state = entryEditScreen
                         slog.Info("Отмена удаления вложения, возврат к редактированию")
                         return m, tea.ClearScreen</span>
 
-                case keyEnter, "d":<span class="cov0" title="0">
+                case keyEnter, "d":<span class="cov8" title="1">
                         selectedItem := m.attachmentList.SelectedItem()
-                        if selectedItem != nil </span><span class="cov0" title="0">{
-                                if item, itemOk := selectedItem.(attachmentItem); itemOk </span><span class="cov0" title="0">{
+                        if selectedItem != nil </span><span class="cov8" title="1">{
+                                if item, itemOk := selectedItem.(attachmentItem); itemOk </span><span class="cov8" title="1">{
                                         // Запрашиваем подтверждение
                                         m.itemToDelete = &amp;item
                                         m.confirmationPrompt = fmt.Sprintf("Удалить вложение '%s'? (y/n)", item.name)
@@ -2254,45 +2241,45 @@ func (m *model) updateAttachmentListDeleteScreen(msg tea.Msg) (tea.Model, tea.Cm
                                 <span class="cov0" title="0">slog.Error("Не удалось преобразовать выбранный элемент к attachmentItem")</span>
                         }
                         // Если selectedItem == nil, тоже остаемся
-                        <span class="cov0" title="0">return m, nil</span>
+                        <span class="cov8" title="1">return m, nil</span>
                 }
         }
 
-        <span class="cov0" title="0">return m, tea.Batch(cmds...)</span>
+        <span class="cov8" title="1">return m, tea.Batch(cmds...)</span>
 }
 
 // performAttachmentDelete выполняет фактическое удаление вложения после подтверждения.
-func (m *model) performAttachmentDelete() (tea.Model, tea.Cmd) <span class="cov0" title="0">{
-        if m.itemToDelete == nil </span><span class="cov0" title="0">{
+func (m *model) performAttachmentDelete() (tea.Model, tea.Cmd) <span class="cov8" title="1">{
+        if m.itemToDelete == nil </span><span class="cov8" title="1">{
                 slog.Error("Попытка удаления без выбранного itemToDelete")
                 m.confirmationPrompt = ""
                 return m, nil
         }</span>
 
-        <span class="cov0" title="0">itemName := m.itemToDelete.name
+        <span class="cov8" title="1">itemName := m.itemToDelete.name
         itemID := m.itemToDelete.id
         slog.Info("Подтверждено удаление ссылки на вложение", "name", itemName, "id", itemID)
 
         // Находим и удаляем BinaryReference из среза m.editingEntry.Binaries
         foundIndex := -1
-        for i, binRef := range m.editingEntry.Binaries </span><span class="cov0" title="0">{
-                if binRef.Value.ID == itemID </span><span class="cov0" title="0">{
+        for i, binRef := range m.editingEntry.Binaries </span><span class="cov8" title="1">{
+                if binRef.Value.ID == itemID </span><span class="cov8" title="1">{
                         foundIndex = i
                         break</span>
                 }
         }
 
-        <span class="cov0" title="0">if foundIndex != -1 </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if foundIndex != -1 </span><span class="cov8" title="1">{
                 m.editingEntry.Binaries = append(m.editingEntry.Binaries[:foundIndex], m.editingEntry.Binaries[foundIndex+1:]...)
                 slog.Info("Ссылка на вложение успешно удалена из редактируемой записи")
                 m.savingStatus = fmt.Sprintf("Вложение '%s' удалено.", itemName) // Устанавливаем статус
-        }</span> else<span class="cov0" title="0"> {
+        }</span> else<span class="cov8" title="1"> {
                 slog.Warn("Не удалось найти BinaryReference для удаления в editingEntry")
                 m.savingStatus = fmt.Sprintf("Не удалось удалить вложение '%s'.", itemName) // Устанавливаем статус ошибки
         }</span>
 
         // Сбрасываем состояние подтверждения и возвращаемся к экрану редактирования
-        <span class="cov0" title="0">m.confirmationPrompt = ""
+        <span class="cov8" title="1">m.confirmationPrompt = ""
         m.itemToDelete = nil
         m.state = entryEditScreen
         // Возвращаем ClearScreen, чтобы статус был виден на чистом экране редактирования
@@ -2300,17 +2287,17 @@ func (m *model) performAttachmentDelete() (tea.Model, tea.Cmd) <span class="cov0
 }
 
 // viewAttachmentListDeleteScreen отрисовывает экран удаления вложений.
-func (m *model) viewAttachmentListDeleteScreen() string <span class="cov0" title="0">{
+func (m *model) viewAttachmentListDeleteScreen() string <span class="cov8" title="1">{
         var s string
-        if m.confirmationPrompt != "" </span><span class="cov0" title="0">{
+        if m.confirmationPrompt != "" </span><span class="cov8" title="1">{
                 // Отображаем только промпт подтверждения
                 s = m.confirmationPrompt
-        }</span> else<span class="cov0" title="0"> {
+        }</span> else<span class="cov8" title="1"> {
                 // Отображаем список вложений
                 // TODO: Устанавливать размер списка корректно
                 s = m.attachmentList.View()
         }</span>
-        <span class="cov0" title="0">return s</span>
+        <span class="cov8" title="1">return s</span>
 }
 </pre>
 		
@@ -4835,7 +4822,10 @@ func (m *model) getContentAndHelp() (string, string) <span class="cov0" title="0
         help, ok := m.helpTextMap[m.state]
         if !ok </span><span class="cov0" title="0">{
                 help = "Unknown state" // Default help for unknown state
-        }</span>
+                if m.debugMode </span><span class="cov0" title="0">{
+                        help = fmt.Sprintf("State: %s", m.state.String()) // More informative for debug
+                }</span>
+        }
         <span class="cov0" title="0">return mainContent, help</span>
 }
 
@@ -4936,6 +4926,25 @@ func Start(kdbxPath string, debugMode bool, serverURL string) <span class="cov0"
 
         // Создаем начальную модель, передавая флаг
         <span class="cov0" title="0">m := initModel(kdbxPath, debugMode, serverURL, apiClient)
+
+        // --- Инициализация helpTextMap ---
+        m.helpTextMap = map[screenState]string{
+                welcomeScreen:              "(Enter - продолжить, Ctrl+C/q - выход)",
+                passwordInputScreen:        "(Enter - подтвердить, Ctrl+C - выход)",
+                newKdbxPasswordScreen:      "(Tab - сменить поле, Enter - создать, Esc/Ctrl+C - выход)",
+                entryListScreen:            "(↑/↓, Enter - детали, / - поиск, a - доб, s - синхр, l - логин, Ctrl+S - сохр, q - вых)",
+                entryDetailScreen:          "(e - ред., Ctrl+S - сохр., Esc/b - назад)",
+                entryEditScreen:            "(Tab/↑/↓, Enter - сохр., Esc - отмена, ^O - влож+, ^D - влож-)",
+                entryAddScreen:             "(Tab/↑/↓, Enter - доб., ^O - влож+, Esc - отмена)",
+                attachmentListDeleteScreen: "(↑/↓ - навигация, Enter/d - удалить, Esc/b - отмена)",
+                attachmentPathInputScreen:  "(Enter - подтвердить, Esc - отмена)",
+                syncServerScreen:           "(↑/↓ - навигация, Enter - выбрать, Esc/b - назад)",
+                serverURLInputScreen:       "(Enter - подтвердить, Esc - назад)",
+                loginRegisterChoiceScreen:  "(R - регистрация, L - вход, Esc/b - назад)",
+                loginScreen:                "(Tab - след. поле, Enter - войти, Esc - назад)",
+                registerScreen:             "(Tab - след. поле, Enter - зарегистрироваться, Esc - назад)",
+                versionListScreen:          "(↑/↓ - навигация, Enter - откатить, Esc/b - назад, r - обновить)",
+        }
 
         // --- Реализация flock ---
         lockPath := kdbxPath + ".lock"

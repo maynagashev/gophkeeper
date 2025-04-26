@@ -10,17 +10,6 @@ import (
 	"github.com/tobischo/gokeepasslib/v3"
 )
 
-// attachmentListItem реализует list.Item для вложений (для тестов).
-type attachmentListItem struct {
-	Name string
-	UUID gokeepasslib.UUID // Оставим UUID для логики теста, хоть его нет в BinaryReference
-}
-
-func (i attachmentListItem) Title() string       { return i.Name }
-func (i attachmentListItem) Description() string { return "Attachment" }
-func (i attachmentListItem) FilterValue() string { return i.Name }
-
-// TestUpdateAttachmentListDeleteScreen проверяет обработку сообщений на экране удаления вложений.
 func TestUpdateAttachmentListDeleteScreen(t *testing.T) {
 	t.Run("Возврат к редактированию в режиме ReadOnly", func(t *testing.T) {
 		s := NewScreenTestSuite()

@@ -59,9 +59,9 @@ github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:57:				creat
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:106:			updateEntryAddScreen				78.7%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:194:			updateFocus					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:207:			viewEntryAddScreen				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_delete.go:11:		updateAttachmentListDeleteScreen		0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_delete.go:71:		performAttachmentDelete				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_delete.go:109:		viewAttachmentListDeleteScreen			0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_delete.go:11:		updateAttachmentListDeleteScreen		93.3%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_delete.go:71:		performAttachmentDelete				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_delete.go:109:		viewAttachmentListDeleteScreen			100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_input.go:15:		updateAttachmentPathInputScreen			0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_input.go:44:		handleAttachmentPathConfirm			0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_input.go:99:		viewAttachmentPathInputScreen			0.0%
@@ -167,11 +167,11 @@ github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:27:				Init						0.
 github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:32:				setStatusMessage				66.7%
 github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:48:				getMainContentView				0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:86:				getContentAndHelp				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:97:				getDBModTimeString				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:113:				getDBDebugInfo					0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:129:				getDebugInfoString				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:144:				View						0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:180:				Start						0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:100:				getDBModTimeString				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:116:				getDBDebugInfo					0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:132:				getDebugInfoString				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:147:				View						0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:183:				Start						0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/update.go:17:				handleWindowSizeMsg				0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/update.go:42:				handleDBMsg					0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/update.go:84:				handleDBOpenedMsg				0.0%
@@ -199,4 +199,4 @@ github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:46:				deepCopyEn
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:51:				FindEntryInDB					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:60:				findEntryInDB					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:65:				FindEntryInGroups				100.0%
-total:												(statements)					43.7%
+total:												(statements)					46.3%
