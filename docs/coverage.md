@@ -28,8 +28,8 @@ make lint
 go test -coverprofile=logs/coverage.out ./...
 	github.com/maynagashev/gophkeeper/client/cmd/gophkeeper		coverage: 0.0% of statements
 ok  	github.com/maynagashev/gophkeeper/client/internal/api	0.017s	coverage: 84.6% of statements
-ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	0.706s	coverage: 94.6% of statements
-ok  	github.com/maynagashev/gophkeeper/client/internal/tui	0.045s	coverage: 31.1% of statements
+ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	0.678s	coverage: 94.6% of statements
+ok  	github.com/maynagashev/gophkeeper/client/internal/tui	0.049s	coverage: 35.1% of statements
 go tool cover -html=logs/coverage.out -o logs/coverage.html
 go tool cover -func=logs/coverage.out | tee logs/coverage.log
 github.com/maynagashev/gophkeeper/client/cmd/gophkeeper/main.go:33:				setupLogging					0.0%
@@ -84,12 +84,12 @@ github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:221:			i
 github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:246:			initModel					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/input_helpers.go:15:			handleCredentialsKeys				82.6%
 github.com/maynagashev/gophkeeper/client/internal/tui/input_helpers.go:60:			handleCredentialsInput				94.4%
-github.com/maynagashev/gophkeeper/client/internal/tui/model.go:41:				String						0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/model.go:136:				Title						0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/model.go:150:				Description					0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/model.go:177:				FilterValue					0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:15:				prepareAddScreen				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:57:				createEntryFromInputs				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/model.go:41:				String						100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/model.go:136:				Title						100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/model.go:150:				Description					100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/model.go:177:				FilterValue					100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:15:				prepareAddScreen				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:57:				createEntryFromInputs				92.3%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:106:			updateEntryAddScreen				0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:194:			updateFocus					0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:207:			viewEntryAddScreen				0.0%
@@ -233,5 +233,5 @@ github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:46:				deepCopyEn
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:51:				FindEntryInDB					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:60:				findEntryInDB					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:65:				FindEntryInGroups				100.0%
-total:												(statements)					38.1%
+total:												(statements)					41.5%
 ```

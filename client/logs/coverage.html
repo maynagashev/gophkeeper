@@ -71,7 +71,7 @@
 				
 				<option value="file7">github.com/maynagashev/gophkeeper/client/internal/tui/model.go (100.0%)</option>
 				
-				<option value="file8">github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go (0.0%)</option>
+				<option value="file8">github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go (34.0%)</option>
 				
 				<option value="file9">github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_delete.go (0.0%)</option>
 				
@@ -1960,7 +1960,7 @@ import (
 )
 
 // prepareAddScreen инициализирует поля для экрана добавления.
-func (m *model) prepareAddScreen() <span class="cov0" title="0">{
+func (m *model) prepareAddScreen() <span class="cov8" title="1">{
         m.editInputs = make([]textinput.Model, numEditableFields)
         m.focusedField = editableFieldTitle // Начинаем с поля Title
         // Сбрасываем вложения, которые могли остаться от предыдущего добавления
@@ -1980,20 +1980,20 @@ func (m *model) prepareAddScreen() <span class="cov0" title="0">{
                 editableFieldPIN:            fieldNamePIN,
         }
 
-        for i := range numEditableFields </span><span class="cov0" title="0">{
+        for i := range numEditableFields </span><span class="cov8" title="1">{
                 m.editInputs[i] = textinput.New()
                 m.editInputs[i].Placeholder = placeholders[i]
 
                 // Настраиваем маскирование для чувствительных полей
                 switch i </span>{
-                case editableFieldPassword, editableFieldCVV, editableFieldPIN:<span class="cov0" title="0">
+                case editableFieldPassword, editableFieldCVV, editableFieldPIN:<span class="cov8" title="1">
                         m.editInputs[i].EchoMode = textinput.EchoPassword</span>
-                case editableFieldCardNumber:<span class="cov0" title="0"></span>
+                case editableFieldCardNumber:<span class="cov8" title="1"></span>
                         // Пока оставляем обычным
                 }
 
                 // Первое поле делаем активным
-                <span class="cov0" title="0">if i == m.focusedField </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">if i == m.focusedField </span><span class="cov8" title="1">{
                         m.editInputs[i].Focus()
                 }</span>
         }
@@ -2005,7 +2005,7 @@ func (m *model) prepareAddScreen() <span class="cov0" title="0">{
 func createEntryFromInputs(db *gokeepasslib.Database, inputs []textinput.Model, attachments []struct {
         Name    string
         Content []byte
-}) gokeepasslib.Entry <span class="cov0" title="0">{
+}) gokeepasslib.Entry <span class="cov8" title="1">{
         newEntry := gokeepasslib.NewEntry()
         now := time.Now()
         creationTime := w.TimeWrapper{Time: now}
@@ -2016,36 +2016,36 @@ func createEntryFromInputs(db *gokeepasslib.Database, inputs []textinput.Model, 
         newEntry.Times.LastAccessTime = &amp;accessTime
 
         // Добавляем обычные поля
-        for _, input := range inputs </span><span class="cov0" title="0">{
+        for _, input := range inputs </span><span class="cov8" title="1">{
                 fieldName := input.Placeholder
                 newValue := input.Value()
-                if newValue != "" </span><span class="cov0" title="0">{
+                if newValue != "" </span><span class="cov8" title="1">{
                         valueData := gokeepasslib.ValueData{
                                 Key:   fieldName,
                                 Value: gokeepasslib.V{Content: newValue},
                         }
-                        if fieldName == fieldNamePassword </span><span class="cov0" title="0">{
+                        if fieldName == fieldNamePassword </span><span class="cov8" title="1">{
                                 valueData.Value.Protected = w.NewBoolWrapper(true)
                         }</span>
-                        <span class="cov0" title="0">newEntry.Values = append(newEntry.Values, valueData)</span>
+                        <span class="cov8" title="1">newEntry.Values = append(newEntry.Values, valueData)</span>
                 }
         }
 
         // Добавляем вложения
-        <span class="cov0" title="0">if db != nil &amp;&amp; len(attachments) &gt; 0 </span><span class="cov0" title="0">{
-                for _, att := range attachments </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if db != nil &amp;&amp; len(attachments) &gt; 0 </span><span class="cov8" title="1">{
+                for _, att := range attachments </span><span class="cov8" title="1">{
                         binary := db.AddBinary(att.Content)
                         if binary == nil </span><span class="cov0" title="0">{
                                 slog.Error("Не удалось добавить бинарные данные в базу", "name", att.Name)
                                 continue</span>
                         }
-                        <span class="cov0" title="0">binaryRef := binary.CreateReference(att.Name)
+                        <span class="cov8" title="1">binaryRef := binary.CreateReference(att.Name)
                         newEntry.Binaries = append(newEntry.Binaries, binaryRef)
                         slog.Info("Добавлено вложение к новой записи", "name", att.Name, "binary_id", binary.ID)</span>
                 }
         }
 
-        <span class="cov0" title="0">return newEntry</span>
+        <span class="cov8" title="1">return newEntry</span>
 }
 
 // updateEntryAddScreen обрабатывает сообщения для экрана добавления записи.

@@ -54,8 +54,8 @@ github.com/maynagashev/gophkeeper/client/internal/tui/model.go:41:				String				
 github.com/maynagashev/gophkeeper/client/internal/tui/model.go:136:				Title						100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/model.go:150:				Description					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/model.go:177:				FilterValue					100.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:15:				prepareAddScreen				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:57:				createEntryFromInputs				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:15:				prepareAddScreen				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:57:				createEntryFromInputs				92.3%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:106:			updateEntryAddScreen				0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:194:			updateFocus					0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:207:			viewEntryAddScreen				0.0%
@@ -199,4 +199,4 @@ github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:46:				deepCopyEn
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:51:				FindEntryInDB					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:60:				findEntryInDB					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:65:				FindEntryInGroups				100.0%
-total:												(statements)					39.9%
+total:												(statements)					41.5%
