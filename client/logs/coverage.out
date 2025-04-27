@@ -930,7 +930,7 @@ github.com/maynagashev/gophkeeper/client/internal/tui/update.go:71.28,73.25 2 0
 github.com/maynagashev/gophkeeper/client/internal/tui/update.go:74.30,76.25 2 0
 github.com/maynagashev/gophkeeper/client/internal/tui/update.go:77.10,78.23 1 0
 github.com/maynagashev/gophkeeper/client/internal/tui/update.go:84.72,86.2 1 1
-github.com/maynagashev/gophkeeper/client/internal/tui/update.go:88.53,90.2 1 0
+github.com/maynagashev/gophkeeper/client/internal/tui/update.go:88.53,90.2 1 1
 github.com/maynagashev/gophkeeper/client/internal/tui/update.go:92.54,96.2 2 1
 github.com/maynagashev/gophkeeper/client/internal/tui/update.go:98.78,100.2 1 1
 github.com/maynagashev/gophkeeper/client/internal/tui/update.go:102.58,107.2 3 1

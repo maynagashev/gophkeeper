@@ -161,7 +161,7 @@ github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:183:				Start					0
 github.com/maynagashev/gophkeeper/client/internal/tui/update.go:17:				handleWindowSizeMsg			0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/update.go:42:				handleDBMsg				12.5%
 github.com/maynagashev/gophkeeper/client/internal/tui/update.go:84:				handleDBOpenedMsg			100.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/update.go:88:				handleErrorMsg				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/update.go:88:				handleErrorMsg				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/update.go:92:				handleDBSavedMsg			100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/update.go:98:				handleDBSaveErrorMsg			100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/update.go:102:				handleClearStatusMsg			100.0%

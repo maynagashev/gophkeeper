@@ -25,6 +25,7 @@ func createTestModelForUpdate() *model {
 		kdbxPath: "/tmp/test.kdbx",
 
 		// Инициализируем текстовые поля, необходимые для тестов
+		passwordInput:         textinput.New(),
 		loginUsernameInput:    textinput.New(),
 		loginPasswordInput:    textinput.New(),
 		registerUsernameInput: textinput.New(),
@@ -35,6 +36,20 @@ func createTestModelForUpdate() *model {
 	m.loginRegisterFocusedField = 0
 	m.serverURLInput = textinput.New()
 	m.serverURL = "https://example.com"
+
+	// Фокусируемся на полях ввода, чтобы инициализировать их курсоры
+	m.passwordInput.Focus()
+	m.loginUsernameInput.Focus()
+	m.loginPasswordInput.Focus()
+	m.registerUsernameInput.Focus()
+	m.registerPasswordInput.Focus()
+	m.serverURLInput.Focus()
+	// Убираем фокус с остальных, чтобы избежать неожиданного поведения в тестах
+	m.loginUsernameInput.Blur()
+	m.loginPasswordInput.Blur()
+	m.registerUsernameInput.Blur()
+	m.registerPasswordInput.Blur()
+	m.serverURLInput.Blur()
 
 	return m
 }
@@ -398,4 +413,17 @@ func TestUpdateDBFromList(t *testing.T) {
 		// Проверяем результаты
 		require.Equal(t, 0, updatedCount, "При пустом списке не должно быть обновленных записей")
 	})
+}
+
+// TestHandleErrorMsg проверяет обработку общего сообщения об ошибке.
+func TestHandleErrorMsg(t *testing.T) {
+	m := createTestModelForUpdate()
+	testErr := errors.New("общая тестовая ошибка")
+	msg := errMsg{err: testErr}
+
+	// Проверяем обработку
+	newM := handleErrorMsg(m, msg)
+
+	// Проверяем результаты
+	require.Equal(t, testErr, newM.(*model).err, "Поле err должно содержать ошибку из сообщения")
 }
