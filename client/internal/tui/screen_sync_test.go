@@ -91,4 +91,48 @@ func TestViewSyncServerScreen(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
+// Mock API Client for testing - УДАЛЕНО, т.к. уже есть в api_messages_test.go
+
+// TestHandleSyncMenuConfigureURL проверяет функцию handleSyncMenuConfigureURL.
+func TestHandleSyncMenuConfigureURL(t *testing.T) {
+	tests := []struct {
+		name             string
+		initialServerURL string
+		expectedValue    string
+	}{
+		{
+			name:             "URL не задан",
+			initialServerURL: "",
+			expectedValue:    "",
+		},
+		{
+			name:             "URL задан",
+			initialServerURL: "http://example.com",
+			expectedValue:    "http://example.com",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Используем существующий mock API клиента из screen_test_helpers.go или api_messages_test.go
+			mockAPI := new(MockAPIClient) // Предполагаем, что MockAPIClient доступен
+			m := initModel("", false, "", mockAPI)
+			m.serverURL = tt.initialServerURL
+			m.state = syncServerScreen // Устанавливаем начальное состояние
+
+			cmd := m.handleSyncMenuConfigureURL()
+
+			assert.Equal(t, serverURLInputScreen, m.state, "Состояние должно измениться на serverURLInputScreen")
+			assert.True(t, m.serverURLInput.Focused(), "Поле ввода URL должно быть в фокусе")
+			assert.Equal(t, "https://...", m.serverURLInput.Placeholder, "Placeholder должен быть 'https://...'")
+			assert.Equal(t, tt.expectedValue, m.serverURLInput.Value(), "Значение поля ввода должно соответствовать ожидаемому")
+
+			// Проверяем, что возвращается команда Blink
+			assert.NotNil(t, cmd, "Команда не должна быть nil")
+			// Прямая проверка типа команды Blink затруднительна,
+			// поэтому просто убеждаемся, что команда возвращена.
+		})
+	}
+}
+
 // TODO: Добавить тест для viewSyncServerScreen

@@ -127,9 +127,14 @@ func (m *model) handleSyncMenuLogout() tea.Cmd {
 	return saveCmd
 }
 
-// updateSyncServerScreen обрабатывает сообщения для экрана синхронизации/сервера.
-func (m *model) updateSyncServerScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
+// Меняем возвращаемый тип на *model.
+func (m *model) updateSyncServerScreen(msg tea.Msg) (*model, tea.Cmd) {
 	var cmds []tea.Cmd
+	var listCmd tea.Cmd
+
+	// Обновляем список меню сначала
+	m.syncServerMenu, listCmd = m.syncServerMenu.Update(msg)
+	cmds = append(cmds, listCmd)
 
 	if keyMsg, ok := msg.(tea.KeyMsg); ok {
 		switch keyMsg.String() {
@@ -140,15 +145,12 @@ func (m *model) updateSyncServerScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// Может потребоваться ClearScreen в зависимости от действия
 		case keyEsc, keyBack:
 			m.state = entryListScreen
+			// Возвращаем указатель на модель
 			return m, tea.ClearScreen // Очистка экрана добавлена
 		}
 	}
 
-	// Обновляем список меню
-	var listCmd tea.Cmd
-	m.syncServerMenu, listCmd = m.syncServerMenu.Update(msg)
-	cmds = append(cmds, listCmd)
-
+	// Возвращаем указатель на модель
 	return m, tea.Batch(cmds...)
 }
 

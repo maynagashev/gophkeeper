@@ -97,7 +97,7 @@
 				
 				<option value="file20">github.com/maynagashev/gophkeeper/client/internal/tui/screen_server_url.go (100.0%)</option>
 				
-				<option value="file21">github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go (9.9%)</option>
+				<option value="file21">github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go (18.5%)</option>
 				
 				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go (17.0%)</option>
 				
@@ -3551,14 +3551,14 @@ func (m *model) viewSyncServerScreen() string <span class="cov8" title="1">{
 }
 
 // handleSyncMenuConfigureURL обрабатывает выбор пункта "Настроить URL сервера".
-func (m *model) handleSyncMenuConfigureURL() tea.Cmd <span class="cov0" title="0">{
+func (m *model) handleSyncMenuConfigureURL() tea.Cmd <span class="cov8" title="1">{
         m.serverURLInput.Reset()
         m.serverURLInput.Placeholder = "https://..."
         m.serverURLInput.Focus()
-        if m.serverURL != "" </span><span class="cov0" title="0">{
+        if m.serverURL != "" </span><span class="cov8" title="1">{
                 m.serverURLInput.SetValue(m.serverURL)
         }</span>
-        <span class="cov0" title="0">m.state = serverURLInputScreen
+        <span class="cov8" title="1">m.state = serverURLInputScreen
         return textinput.Blink</span>
 }
 
@@ -3634,9 +3634,14 @@ func (m *model) handleSyncMenuLogout() tea.Cmd <span class="cov0" title="0">{
         return saveCmd</span>
 }
 
-// updateSyncServerScreen обрабатывает сообщения для экрана синхронизации/сервера.
-func (m *model) updateSyncServerScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+// Меняем возвращаемый тип на *model.
+func (m *model) updateSyncServerScreen(msg tea.Msg) (*model, tea.Cmd) <span class="cov0" title="0">{
         var cmds []tea.Cmd
+        var listCmd tea.Cmd
+
+        // Обновляем список меню сначала
+        m.syncServerMenu, listCmd = m.syncServerMenu.Update(msg)
+        cmds = append(cmds, listCmd)
 
         if keyMsg, ok := msg.(tea.KeyMsg); ok </span><span class="cov0" title="0">{
                 switch keyMsg.String() </span>{
@@ -3647,16 +3652,13 @@ func (m *model) updateSyncServerScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span c
                         // Может потребоваться ClearScreen в зависимости от действия
                 case keyEsc, keyBack:<span class="cov0" title="0">
                         m.state = entryListScreen
+                        // Возвращаем указатель на модель
                         return m, tea.ClearScreen</span> // Очистка экрана добавлена
                 }
         }
 
-        // Обновляем список меню
-        <span class="cov0" title="0">var listCmd tea.Cmd
-        m.syncServerMenu, listCmd = m.syncServerMenu.Update(msg)
-        cmds = append(cmds, listCmd)
-
-        return m, tea.Batch(cmds...)</span>
+        // Возвращаем указатель на модель
+        <span class="cov0" title="0">return m, tea.Batch(cmds...)</span>
 }
 
 // handleSyncMenuAction обрабатывает действие выбора в меню синхронизации.
