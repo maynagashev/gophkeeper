@@ -63,7 +63,7 @@
 				
 				<option value="file3">github.com/maynagashev/gophkeeper/server/internal/handlers/vault_handler.go (92.2%)</option>
 				
-				<option value="file4">github.com/maynagashev/gophkeeper/server/internal/middleware/auth.go (0.0%)</option>
+				<option value="file4">github.com/maynagashev/gophkeeper/server/internal/middleware/auth.go (86.7%)</option>
 				
 				<option value="file5">github.com/maynagashev/gophkeeper/server/internal/repository/db.go (0.0%)</option>
 				
@@ -827,52 +827,52 @@ type jwtClaims struct {
 }
 
 // Authenticator проверяет JWT токен аутентификации.
-func Authenticator(next http.Handler) http.Handler <span class="cov0" title="0">{
-        return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
+func Authenticator(next http.Handler) http.Handler <span class="cov8" title="1">{
+        return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov8" title="1">{
                 // Получаем заголовок Authorization
                 authHeader := r.Header.Get("Authorization")
-                if authHeader == "" </span><span class="cov0" title="0">{
+                if authHeader == "" </span><span class="cov8" title="1">{
                         log.Println("[AuthMiddleware] Заголовок Authorization отсутствует")
                         http.Error(w, "Требуется аутентификация", http.StatusUnauthorized)
                         return
                 }</span>
 
                 // Проверяем формат "Bearer token"
-                <span class="cov0" title="0">headerParts := strings.Split(authHeader, " ")
-                if len(headerParts) != 2 || strings.ToLower(headerParts[0]) != "bearer" </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">headerParts := strings.Split(authHeader, " ")
+                if len(headerParts) != 2 || strings.ToLower(headerParts[0]) != "bearer" </span><span class="cov8" title="1">{
                         log.Printf("[AuthMiddleware] Неверный формат заголовка Authorization: %s", authHeader)
                         http.Error(w, "Неверный формат токена", http.StatusUnauthorized)
                         return
                 }</span>
 
-                <span class="cov0" title="0">tokenString := headerParts[1]
+                <span class="cov8" title="1">tokenString := headerParts[1]
 
                 // Парсим и валидируем токен
                 claims := &amp;jwtClaims{}
-                token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) </span><span class="cov0" title="0">{
+                token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) </span><span class="cov8" title="1">{
                         // Убеждаемся, что метод подписи - HS256
                         if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok </span><span class="cov0" title="0">{
                                 return nil, fmt.Errorf("неожиданный метод подписи: %v", token.Header["alg"])
                         }</span>
                         // Возвращаем секретный ключ
-                        <span class="cov0" title="0">return []byte(jwtSecretKey), nil</span>
+                        <span class="cov8" title="1">return []byte(jwtSecretKey), nil</span>
                 })
 
-                <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">if err != nil </span><span class="cov8" title="1">{
                         log.Printf("[AuthMiddleware] Ошибка парсинга/валидации токена: %v", err)
                         http.Error(w, "Невалидный токен", http.StatusUnauthorized)
                         return
                 }</span>
 
                 // Проверяем валидность токена (включая время жизни, issuer и т.д.)
-                <span class="cov0" title="0">if !token.Valid </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">if !token.Valid </span><span class="cov0" title="0">{
                         log.Println("[AuthMiddleware] Предоставлен невалидный токен (возможно, истек)")
                         http.Error(w, "Невалидный токен", http.StatusUnauthorized)
                         return
                 }</span>
 
                 // Добавляем UserID в контекст запроса
-                <span class="cov0" title="0">ctx := context.WithValue(r.Context(), UserIDKey, claims.UserID)
+                <span class="cov8" title="1">ctx := context.WithValue(r.Context(), UserIDKey, claims.UserID)
 
                 // Логируем успешную аутентификацию
                 log.Printf("[AuthMiddleware] Пользователь %d успешно аутентифицирован", claims.UserID)
@@ -884,7 +884,7 @@ func Authenticator(next http.Handler) http.Handler <span class="cov0" title="0">
 
 // GetUserIDFromContext извлекает UserID из контекста запроса.
 // Возвращает ID пользователя и true, если ID найден, иначе 0 и false.
-func GetUserIDFromContext(ctx context.Context) (int64, bool) <span class="cov0" title="0">{
+func GetUserIDFromContext(ctx context.Context) (int64, bool) <span class="cov8" title="1">{
         userID, ok := ctx.Value(UserIDKey).(int64)
         return userID, ok
 }</span>
