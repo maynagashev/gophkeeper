@@ -41,15 +41,18 @@ test:
 
 # Тест с генерацией отчёта о покрытии
 test-coverage:
-	@echo "Запуск тестов с генерацией покрытия (исключая моки)..."
-	# Используем -coverpkg для явного указания пакетов, исключая /mocks
-	go test -coverprofile=logs/coverage.out -coverpkg=$(shell go list ./... | grep -v /mocks) ./...
+	@echo "Запуск тестов с генерацией покрытия..."
+	# 1. Генерируем сырой профиль покрытия
+	go test -coverprofile=logs/coverage.raw.out ./...
+	# 2. Фильтруем сырой профиль, исключая моки
+	@echo "Фильтрация профиля покрытия (исключая моки)..."
+	@cat logs/coverage.raw.out | grep -v '^github.com/maynagashev/gophkeeper/server/internal/mocks' > logs/coverage.out
+	# 3. Генерируем HTML отчет из очищенного профиля
 	go tool cover -html=logs/coverage.out -o logs/coverage.html
-	# Выводим общий процент покрытия и покрытие по функциям (моки должны быть исключены)
+	# 4. Выводим покрытие по функциям и общий итог из очищенного профиля
 	@echo "\nПокрытие по функциям (без моков):"
-	go tool cover -func=logs/coverage.out | grep -v /mocks | tee logs/coverage.log
-	@echo "\nОбщее покрытие (без моков):"
-	@go tool cover -func=logs/coverage.out | grep -v /mocks | grep total
+	go tool cover -func=logs/coverage.out | tee logs/coverage.log
+	# Общий итог уже будет в конце вывода tee logs/coverage.log
 
 
 # Линтер
