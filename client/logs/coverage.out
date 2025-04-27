@@ -846,14 +846,6 @@ github.com/maynagashev/gophkeeper/client/internal/tui/screen_welcome.go:13.16,14
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_welcome.go:15.17,18.57 3 1
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_welcome.go:21.2,21.30 1 1
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_welcome.go:25.44,27.2 1 1
-github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go:69.40,71.2 1 0
-github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go:101.31,103.2 1 0
-github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go:106.53,108.2 1 0
-github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go:111.48,113.2 1 0
-github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go:116.46,118.2 1 0
-github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go:121.54,123.2 1 0
-github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go:126.69,128.2 1 0
-github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go:131.72,133.2 1 0
 github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:27.32,29.2 1 0
 github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:32.70,35.26 2 1
 github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:35.26,39.3 2 0

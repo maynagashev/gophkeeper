@@ -105,13 +105,11 @@
 				
 				<option value="file24">github.com/maynagashev/gophkeeper/client/internal/tui/screen_welcome.go (100.0%)</option>
 				
-				<option value="file25">github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go (0.0%)</option>
+				<option value="file25">github.com/maynagashev/gophkeeper/client/internal/tui/tui.go (18.3%)</option>
 				
-				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/tui.go (18.3%)</option>
+				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (46.6%)</option>
 				
-				<option value="file27">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (46.6%)</option>
-				
-				<option value="file28">github.com/maynagashev/gophkeeper/client/internal/tui/utils.go (92.9%)</option>
+				<option value="file27">github.com/maynagashev/gophkeeper/client/internal/tui/utils.go (92.9%)</option>
 				
 				</select>
 			</div>
@@ -4418,141 +4416,6 @@ func (m *model) viewWelcomeScreen() string <span class="cov8" title="1">{
 		<pre class="file" id="file25" style="display: none">package tui
 
 import (
-        "time"
-
-        tea "github.com/charmbracelet/bubbletea"
-        "github.com/tobischo/gokeepasslib/v3"
-
-        "github.com/maynagashev/gophkeeper/client/internal/api"
-        "github.com/maynagashev/gophkeeper/models"
-)
-
-// Экспортируем типы сообщений для тестирования.
-type (
-        // DBOpenedMsg сообщение об успешном открытии базы данных.
-        DBOpenedMsg struct {
-                DB *gokeepasslib.Database
-        }
-
-        // ErrMsg сообщение об ошибке.
-        ErrMsg struct {
-                Err error
-        }
-
-        // DBSavedMsg сообщение об успешном сохранении базы данных.
-        DBSavedMsg struct{}
-
-        // DBSaveErrorMsg сообщение об ошибке сохранения базы данных.
-        DBSaveErrorMsg struct {
-                Err error
-        }
-
-        // ClearStatusMsg сообщение для очистки статусного сообщения.
-        ClearStatusMsg struct{}
-
-        // SyncStartedMsg сообщение о начале синхронизации.
-        SyncStartedMsg struct{}
-
-        // ServerMetadataMsg содержит метаданные, полученные с сервера.
-        ServerMetadataMsg struct {
-                Metadata *models.VaultVersion
-                Found    bool
-        }
-
-        // LocalMetadataMsg содержит метаданные локального файла.
-        LocalMetadataMsg struct {
-                ModTime time.Time
-                Found   bool
-        }
-
-        // SyncUploadSuccessMsg сигнализирует об успешной загрузке.
-        SyncUploadSuccessMsg struct{}
-
-        // SyncDownloadSuccessMsg сигнализирует об успешном скачивании.
-        SyncDownloadSuccessMsg struct {
-                ReloadNeeded bool
-        }
-
-        // LoginSuccessMsg сообщение об успешном входе.
-        LoginSuccessMsg struct {
-                Token string
-        }
-
-        // RegisterSuccessMsg сообщение об успешной регистрации.
-        RegisterSuccessMsg struct{}
-)
-
-// NewSyncError создает новый экземпляр SyncError для тестирования.
-func NewSyncError(err error) SyncError <span class="cov0" title="0">{
-        return SyncError{err: err}
-}</span>
-
-// Экспортируем функции-команды для тестирования.
-//
-//nolint:gochecknoglobals // Эти переменные нужны только для тестирования
-var (
-        OpenKdbxCmd            = openKdbxCmd
-        SaveKdbxCmd            = saveKdbxCmd
-        ClearStatusCmd         = clearStatusCmd
-        StartSyncCmd           = startSyncCmd
-        FetchServerMetadataCmd = fetchServerMetadataCmd
-)
-
-// TestModel представляет собой интерфейс для тестирования команд,
-// который предоставляет доступ к необходимым методам модели.
-type TestModel interface {
-        SetAPIClient(client api.Client)
-        SetAuthToken(token string)
-        SetServerURL(url string)
-        SetDB(db *gokeepasslib.Database)
-        MakeLoginCmd(username, password string) tea.Cmd
-        MakeRegisterCmd(username, password string) tea.Cmd
-}
-
-// testModel реализует интерфейс TestModel для тестирования.
-type testModel struct {
-        model
-}
-
-// NewTestModel создает новую модель для тестирования.
-func NewTestModel() TestModel <span class="cov0" title="0">{
-        return &amp;testModel{}
-}</span>
-
-// SetAPIClient устанавливает API клиент в модель.
-func (m *testModel) SetAPIClient(client api.Client) <span class="cov0" title="0">{
-        m.apiClient = client
-}</span>
-
-// SetAuthToken устанавливает токен авторизации в модель.
-func (m *testModel) SetAuthToken(token string) <span class="cov0" title="0">{
-        m.authToken = token
-}</span>
-
-// SetServerURL устанавливает URL сервера в модель.
-func (m *testModel) SetServerURL(url string) <span class="cov0" title="0">{
-        m.serverURL = url
-}</span>
-
-// SetDB устанавливает базу данных в модель.
-func (m *testModel) SetDB(db *gokeepasslib.Database) <span class="cov0" title="0">{
-        m.db = db
-}</span>
-
-// MakeLoginCmd возвращает команду для входа.
-func (m *testModel) MakeLoginCmd(username, password string) tea.Cmd <span class="cov0" title="0">{
-        return m.makeLoginCmd(username, password)
-}</span>
-
-// MakeRegisterCmd возвращает команду для регистрации.
-func (m *testModel) MakeRegisterCmd(username, password string) tea.Cmd <span class="cov0" title="0">{
-        return m.makeRegisterCmd(username, password)
-}</span>
-</pre>
-		
-		<pre class="file" id="file26" style="display: none">package tui
-
-import (
         "fmt"
         "log/slog"
         "os"
@@ -4833,7 +4696,7 @@ func Start(kdbxPath string, debugMode bool, serverURL string) <span class="cov0"
 }
 </pre>
 		
-		<pre class="file" id="file27" style="display: none">package tui
+		<pre class="file" id="file26" style="display: none">package tui
 
 import (
         "errors"
@@ -5359,7 +5222,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov8" titl
 }
 </pre>
 		
-		<pre class="file" id="file28" style="display: none">package tui
+		<pre class="file" id="file27" style="display: none">package tui
 
 import (
         "github.com/tobischo/gokeepasslib/v3"

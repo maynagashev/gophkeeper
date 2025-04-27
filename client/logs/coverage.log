@@ -149,14 +149,6 @@ github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:288:			h
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:302:			formatTime				66.7%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_welcome.go:9:			updateWelcomeScreen			100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_welcome.go:25:			viewWelcomeScreen			100.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go:69:			NewSyncError				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go:101:			NewTestModel				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go:106:			SetAPIClient				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go:111:			SetAuthToken				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go:116:			SetServerURL				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go:121:			SetDB					0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go:126:			MakeLoginCmd				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go:131:			MakeRegisterCmd				0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:27:				Init					0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:32:				setStatusMessage			66.7%
 github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:48:				getMainContentView			23.5%
@@ -193,4 +185,4 @@ github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:46:				deepCopyEn
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:51:				FindEntryInDB				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:60:				findEntryInDB				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:65:				FindEntryInGroups			100.0%
-total:												(statements)				78.0%
+total:												(statements)				78.3%
