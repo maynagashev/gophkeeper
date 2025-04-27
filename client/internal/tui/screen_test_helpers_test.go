@@ -293,3 +293,23 @@ func TestScreenTestSuite_BuilderMethods(t *testing.T) {
 		assert.Equal(t, db, s.Model.db, "Model.db должен быть обновлен")
 	})
 }
+
+// TestScreenTestSuite_AssertViewContains проверяет хелпер AssertViewContains.
+func TestScreenTestSuite_AssertViewContains(t *testing.T) {
+	s := NewScreenTestSuite() // Создаем тестовый набор
+	// Устанавливаем состояние, для которого View() известен
+	s.WithState(welcomeScreen)
+
+	// Ожидаемые подстроки в welcomeScreen View
+	expectedSubstring1 := "GophKeeper"
+	expectedSubstring2 := "Добро пожаловать"
+
+	// Проверяем позитивный случай: AssertViewContains не должен паниковать или фейлить тест,
+	// если подстрока присутствует.
+	s.AssertViewContains(t, expectedSubstring1)
+	s.AssertViewContains(t, expectedSubstring2)
+
+	// Негативный случай (когда подстрока отсутствует) не проверяем явно,
+	// так как он полагается на корректную работу assert.Contains из testify,
+	// которая вызовет t.FailNow(), прервав тест, что сложно перехватить.
+}

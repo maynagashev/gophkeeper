@@ -99,7 +99,7 @@
 				
 				<option value="file21">github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go (92.8%)</option>
 				
-				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go (67.0%)</option>
+				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go (68.8%)</option>
 				
 				<option value="file23">github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go (25.2%)</option>
 				
@@ -107,7 +107,7 @@
 				
 				<option value="file25">github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go (0.0%)</option>
 				
-				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/tui.go (3.5%)</option>
+				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/tui.go (18.3%)</option>
 				
 				<option value="file27">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (46.6%)</option>
 				
@@ -3919,7 +3919,7 @@ func (s *ScreenTestSuite) ExecuteCmd(cmd tea.Cmd) tea.Msg <span class="cov8" tit
 }
 
 // AssertViewContains проверяет, что View() модели содержит указанный текст.
-func (s *ScreenTestSuite) AssertViewContains(t *testing.T, substring string) <span class="cov0" title="0">{
+func (s *ScreenTestSuite) AssertViewContains(t *testing.T, substring string) <span class="cov8" title="1">{
         view := s.Model.View()
         assert.Contains(t, view, substring, "View должен содержать указанный текст")
 }</span>
@@ -4561,9 +4561,9 @@ func (m *model) setStatusMessage(status string) (tea.Model, tea.Cmd) <span class
 }
 
 // getMainContentView возвращает основное содержимое для текущего состояния.
-func (m *model) getMainContentView() string <span class="cov0" title="0">{
+func (m *model) getMainContentView() string <span class="cov8" title="1">{
         switch m.state </span>{
-        case welcomeScreen:<span class="cov0" title="0">
+        case welcomeScreen:<span class="cov8" title="1">
                 return m.viewWelcomeScreen()</span>
         case passwordInputScreen:<span class="cov0" title="0">
                 return m.viewPasswordInputScreen()</span>
@@ -4599,17 +4599,17 @@ func (m *model) getMainContentView() string <span class="cov0" title="0">{
 }
 
 // Helper function to get the main content and help string based on the state.
-func (m *model) getContentAndHelp() (string, string) <span class="cov0" title="0">{
+func (m *model) getContentAndHelp() (string, string) <span class="cov8" title="1">{
         mainContent := m.getMainContentView()
         // Используем карту из модели
         help, ok := m.helpTextMap[m.state]
-        if !ok </span><span class="cov0" title="0">{
+        if !ok </span><span class="cov8" title="1">{
                 help = "Unknown state" // Default help for unknown state
                 if m.debugMode </span><span class="cov0" title="0">{
                         help = fmt.Sprintf("State: %s", m.state.String()) // More informative for debug
                 }</span>
         }
-        <span class="cov0" title="0">return mainContent, help</span>
+        <span class="cov8" title="1">return mainContent, help</span>
 }
 
 // getDBModTimeString возвращает отформатированную строку времени модификации для БД.
@@ -4660,7 +4660,7 @@ func (m *model) getDebugInfoString() string <span class="cov0" title="0">{
 }</span>
 
 // View отрисовывает пользовательский интерфейс.
-func (m *model) View() string <span class="cov0" title="0">{
+func (m *model) View() string <span class="cov8" title="1">{
         mainContent, help := m.getContentAndHelp()
 
         // --- Формируем подвал (статус + отладка) --- //
@@ -4671,7 +4671,7 @@ func (m *model) View() string <span class="cov0" title="0">{
         if m.readOnlyMode </span><span class="cov0" title="0">{
                 readOnlyIndicator = " [Read-Only]"
         }</span>
-        <span class="cov0" title="0">displayStatus := m.savingStatus != "" || m.readOnlyMode
+        <span class="cov8" title="1">displayStatus := m.savingStatus != "" || m.readOnlyMode
         if displayStatus </span><span class="cov0" title="0">{
                 footer.WriteString("\n") // Перенос перед статусом
                 footer.WriteString(m.savingStatus)
@@ -4679,7 +4679,7 @@ func (m *model) View() string <span class="cov0" title="0">{
         }</span>
 
         // Добавляем отладку, если включен режим
-        <span class="cov0" title="0">if m.debugMode </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if m.debugMode </span><span class="cov0" title="0">{
                 // Убедимся, что help для неизвестного состояния установлен, если нужно
                 if help == "Unknown state" </span><span class="cov0" title="0">{
                         help = fmt.Sprintf("State: %s", m.state.String())
@@ -4690,7 +4690,7 @@ func (m *model) View() string <span class="cov0" title="0">{
         }
 
         // Собираем финальный вывод
-        <span class="cov0" title="0">styledContent := m.docStyle.Render(mainContent)
+        <span class="cov8" title="1">styledContent := m.docStyle.Render(mainContent)
         // Сначала основной контент, потом помощь, потом весь подвал
         return fmt.Sprintf("%s\n%s%s", styledContent, help, footer.String())</span>
 }
