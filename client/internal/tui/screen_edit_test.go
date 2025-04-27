@@ -311,3 +311,57 @@ func TestUpdateEntryEditScreen(t *testing.T) {
 		assert.Contains(t, updatedValue, "A", "Введенный символ должен быть добавлен к значению поля")
 	})
 }
+
+// TestViewEntryEditScreen проверяет функцию viewEntryEditScreen.
+func TestViewEntryEditScreen(t *testing.T) {
+	// Создаем тестовую запись с несколькими полями и вложениями
+	entry := gokeepasslib.Entry{
+		Values: []gokeepasslib.ValueData{
+			{Key: fieldNameTitle, Value: gokeepasslib.V{Content: "Просмотр"}},
+			{Key: fieldNameUserName, Value: gokeepasslib.V{Content: "tester"}},
+		},
+	}
+
+	// Создаем ссылки на бинарные данные отдельно
+	binRef1 := gokeepasslib.BinaryReference{Name: "attach1.txt"}
+	binRef1.Value.ID = 1
+	binRef2 := gokeepasslib.BinaryReference{Name: "image.png"}
+	binRef2.Value.ID = 2
+	entry.Binaries = []gokeepasslib.BinaryReference{binRef1, binRef2}
+
+	// Создаем модель и подготавливаем экран редактирования
+	m := &model{
+		state:         entryEditScreen,
+		selectedEntry: &entryItem{entry: entry},
+		focusedField:  editableFieldUserName, // Фокус на втором поле
+	}
+	m.prepareEditScreen()
+
+	// Получаем отрисованный вид
+	view := m.viewEntryEditScreen()
+
+	// Проверяем основные элементы
+	assert.Contains(t, view, "Редактирование записи: Просмотр", "Должен отображаться заголовок редактирования")
+	assert.Contains(t, view, "> Title: > Просмотр", "Поле Title должно быть с индикатором фокуса и '>' перед значением")
+	assert.Contains(t, view, "  UserName: > tester",
+		"Поле UserName должно быть без индикатора фокуса и с '>' перед значением")
+
+	// Проверяем отображение вложений
+	assert.Contains(t, view, "--- Вложения ---", "Должен быть раздел вложений")
+	assert.Contains(t, view, "[0] attach1.txt", "Должно отображаться первое вложение")
+	assert.Contains(t, view, "[1] image.png", "Должно отображаться второе вложение")
+
+	// Проверяем случай без вложений
+	entryNoAttachments := gokeepasslib.Entry{
+		Values: []gokeepasslib.ValueData{
+			{Key: fieldNameTitle, Value: gokeepasslib.V{Content: "Без вложений"}},
+		},
+	}
+	m = &model{
+		state:         entryEditScreen,
+		selectedEntry: &entryItem{entry: entryNoAttachments},
+	}
+	m.prepareEditScreen()
+	viewNoAttachments := m.viewEntryEditScreen()
+	assert.Contains(t, viewNoAttachments, "(Нет вложений)", "Должно отображаться сообщение об отсутствии вложений")
+}

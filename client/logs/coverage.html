@@ -71,7 +71,7 @@
 				
 				<option value="file7">github.com/maynagashev/gophkeeper/client/internal/tui/model.go (100.0%)</option>
 				
-				<option value="file8">github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go (75.7%)</option>
+				<option value="file8">github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go (76.2%)</option>
 				
 				<option value="file9">github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_delete.go (96.5%)</option>
 				
@@ -81,9 +81,9 @@
 				
 				<option value="file12">github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go (61.8%)</option>
 				
-				<option value="file13">github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go (56.6%)</option>
+				<option value="file13">github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go (68.1%)</option>
 				
-				<option value="file14">github.com/maynagashev/gophkeeper/client/internal/tui/screen_list.go (0.0%)</option>
+				<option value="file14">github.com/maynagashev/gophkeeper/client/internal/tui/screen_list.go (72.4%)</option>
 				
 				<option value="file15">github.com/maynagashev/gophkeeper/client/internal/tui/screen_login.go (16.3%)</option>
 				
@@ -109,9 +109,9 @@
 				
 				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/tui.go (3.5%)</option>
 				
-				<option value="file27">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (42.2%)</option>
+				<option value="file27">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (46.2%)</option>
 				
-				<option value="file28">github.com/maynagashev/gophkeeper/client/internal/tui/utils.go (92.9%)</option>
+				<option value="file28">github.com/maynagashev/gophkeeper/client/internal/tui/utils.go (100.0%)</option>
 				
 				</select>
 			</div>
@@ -1962,6 +1962,9 @@ import (
 // prepareAddScreen инициализирует поля для экрана добавления.
 func (m *model) prepareAddScreen() <span class="cov8" title="1">{
         m.editInputs = make([]textinput.Model, numEditableFields)
+        // Создаем пустую запись для заполнения
+        newEntry := gokeepasslib.NewEntry()
+        m.editingEntry = &amp;newEntry
         m.focusedField = editableFieldTitle // Начинаем с поля Title
         // Сбрасываем вложения, которые могли остаться от предыдущего добавления
         m.newEntryAttachments = nil
@@ -2857,30 +2860,30 @@ func (m *model) saveEntryChanges() (tea.Model, tea.Cmd) <span class="cov8" title
 }
 
 // viewEntryEditScreen отрисовывает экран редактирования записи.
-func (m *model) viewEntryEditScreen() string <span class="cov0" title="0">{
+func (m *model) viewEntryEditScreen() string <span class="cov8" title="1">{
         var s strings.Builder
         s.WriteString("Редактирование записи: " + m.editingEntry.GetTitle() + "\n\n")
         // Отображаем все поля ввода (включая поля карты)
-        for i, input := range m.editInputs </span><span class="cov0" title="0">{
+        for i, input := range m.editInputs </span><span class="cov8" title="1">{
                 focusIndicator := "  "
-                if m.focusedField == i </span><span class="cov0" title="0">{
+                if m.focusedField == i </span><span class="cov8" title="1">{
                         focusIndicator = "&gt; "
                 }</span>
-                <span class="cov0" title="0">s.WriteString(fmt.Sprintf("%s%s: %s\n", focusIndicator, input.Placeholder, input.View()))</span>
+                <span class="cov8" title="1">s.WriteString(fmt.Sprintf("%s%s: %s\n", focusIndicator, input.Placeholder, input.View()))</span>
         }
 
         // Отображаем вложения
-        <span class="cov0" title="0">s.WriteString("\n--- Вложения ---\n")
-        if len(m.editingEntry.Binaries) == 0 </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">s.WriteString("\n--- Вложения ---\n")
+        if len(m.editingEntry.Binaries) == 0 </span><span class="cov8" title="1">{
                 s.WriteString("(Нет вложений)\n")
-        }</span> else<span class="cov0" title="0"> {
-                for i, binaryRef := range m.editingEntry.Binaries </span><span class="cov0" title="0">{
+        }</span> else<span class="cov8" title="1"> {
+                for i, binaryRef := range m.editingEntry.Binaries </span><span class="cov8" title="1">{
                         // TODO: Добавить индикатор выбора для удаления?
                         s.WriteString(fmt.Sprintf(" [%d] %s\n", i, binaryRef.Name))
                 }</span>
         }
 
-        <span class="cov0" title="0">return s.String()</span>
+        <span class="cov8" title="1">return s.String()</span>
 }
 </pre>
 		
@@ -2904,7 +2907,7 @@ const (
 )
 
 // updateEntryListScreen обрабатывает сообщения для экрана списка записей.
-func (m *model) updateEntryListScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+func (m *model) updateEntryListScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov8" title="1">{
         var cmd tea.Cmd
         var cmds []tea.Cmd
 
@@ -2914,27 +2917,27 @@ func (m *model) updateEntryListScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span cl
 
         // Обработка клавиш для экрана списка
         //nolint:nestif // Вложенность из-за разных клавиш
-        if keyMsg, ok := msg.(tea.KeyMsg); ok </span><span class="cov0" title="0">{
+        if keyMsg, ok := msg.(tea.KeyMsg); ok </span><span class="cov8" title="1">{
                 switch keyMsg.String() </span>{
                 case keyQuit:<span class="cov0" title="0">
                         // Выход по 'q', если не активен режим фильтрации
                         if m.entryList.FilterState() == list.Unfiltered </span><span class="cov0" title="0">{
                                 return m, tea.Quit
                         }</span>
-                case keyEnter:<span class="cov0" title="0">
+                case keyEnter:<span class="cov8" title="1">
                         selectedItem := m.entryList.SelectedItem()
-                        if selectedItem != nil </span><span class="cov0" title="0">{
+                        if selectedItem != nil </span><span class="cov8" title="1">{
                                 // Убеждаемся, что это наш тип entryItem
-                                if item, isEntryItem := selectedItem.(entryItem); isEntryItem </span><span class="cov0" title="0">{
+                                if item, isEntryItem := selectedItem.(entryItem); isEntryItem </span><span class="cov8" title="1">{
                                         m.selectedEntry = &amp;item
                                         m.state = entryDetailScreen
                                         slog.Info("Переход к деталям записи", "title", item.Title())
                                         cmds = append(cmds, tea.ClearScreen)
                                 }</span>
                         }
-                case keyAdd:<span class="cov0" title="0">
+                case keyAdd:<span class="cov8" title="1">
                         // Переход к добавлению новой записи (только если не Read-Only)
-                        if !m.readOnlyMode </span><span class="cov0" title="0">{
+                        if !m.readOnlyMode </span><span class="cov8" title="1">{
                                 m.prepareAddScreen()
                                 m.state = entryAddScreen
                                 slog.Info("Переход к добавлению новой записи")
@@ -2954,7 +2957,7 @@ func (m *model) updateEntryListScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span cl
                         return m, nil</span>
                 }
         }
-        <span class="cov0" title="0">return m, tea.Batch(cmds...)</span>
+        <span class="cov8" title="1">return m, tea.Batch(cmds...)</span>
 }
 
 // _handleAuthLoadError обрабатывает ошибку загрузки Auth данных.
@@ -2969,34 +2972,34 @@ func (m *model) _handleAuthLoadError(errLoad error, urlFromFlag bool) <span clas
 }
 
 // _handleAuthLoadSuccess обрабатывает успешную загрузку Auth данных.
-func (m *model) _handleAuthLoadSuccess(loadedURL, loadedToken string, urlFromFlag bool) <span class="cov0" title="0">{
+func (m *model) _handleAuthLoadSuccess(loadedURL, loadedToken string, urlFromFlag bool) <span class="cov8" title="1">{
         if urlFromFlag </span><span class="cov0" title="0">{
                 // URL задан флагом, загружаем только токен
                 m.authToken = loadedToken
                 slog.Info("URL сервера задан флагом, загружен только токен из KDBX", "token_found", m.authToken != "")
-        }</span> else<span class="cov0" title="0"> {
+        }</span> else<span class="cov8" title="1"> {
                 // URL не задан флагом, используем загруженный URL
                 m.serverURL = loadedURL
                 m.authToken = loadedToken
                 if m.serverURL != "" </span><span class="cov0" title="0">{
                         m.apiClient = api.NewHTTPClient(m.serverURL)
                         slog.Info("URL сервера загружен из KDBX, создан API клиент", "url", m.serverURL, "token_found", m.authToken != "")
-                }</span> else<span class="cov0" title="0"> {
+                }</span> else<span class="cov8" title="1"> {
                         m.apiClient = nil
                         slog.Info("URL сервера не задан и не найден в KDBX.")
                 }</span>
         }
 
         // Обновляем статус входа
-        <span class="cov0" title="0">if m.authToken != "" </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if m.authToken != "" </span><span class="cov0" title="0">{
                 m.loginStatus = "Вход выполнен (сессия загружена)"
-        }</span> else<span class="cov0" title="0"> {
+        }</span> else<span class="cov8" title="1"> {
                 m.loginStatus = statusNotLoggedIn
         }</span>
 }
 
 // handleDBOpenedMsg обрабатывает сообщение об успешном открытии базы.
-func (m *model) handleDBOpenedMsg(msg dbOpenedMsg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+func (m *model) handleDBOpenedMsg(msg dbOpenedMsg) (tea.Model, tea.Cmd) <span class="cov8" title="1">{
         slog.Debug("handleDBOpenedMsg: Начало")
         m.db = msg.db
         m.err = nil
@@ -3013,29 +3016,29 @@ func (m *model) handleDBOpenedMsg(msg dbOpenedMsg) (tea.Model, tea.Cmd) <span cl
         // Вызываем соответствующие хелперы
         if errLoad != nil </span><span class="cov0" title="0">{
                 m._handleAuthLoadError(errLoad, urlFromFlag)
-        }</span> else<span class="cov0" title="0"> {
+        }</span> else<span class="cov8" title="1"> {
                 m._handleAuthLoadSuccess(loadedURL, loadedToken, urlFromFlag)
         }</span>
 
         // Устанавливаем токен в API клиенте, если клиент существует
-        <span class="cov0" title="0">if m.apiClient != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if m.apiClient != nil </span><span class="cov0" title="0">{
                 m.apiClient.SetAuthToken(m.authToken) // m.authToken будет либо загруженным, либо пустым
                 slog.Debug("Установлен токен в API клиенте после загрузки/проверки KDBX", "token_set", m.authToken != "")
-        }</span> else<span class="cov0" title="0"> {
+        }</span> else<span class="cov8" title="1"> {
                 // Эта ситуация возможна, если URL не задан ни флагом, ни в KDBX
                 slog.Warn("API клиент не инициализирован (URL не задан), токен не установлен.")
         }</span>
 
         // --- Существующий код для заполнения списка ---
-        <span class="cov0" title="0">entries := kdbx.GetAllEntries(m.db)
+        <span class="cov8" title="1">entries := kdbx.GetAllEntries(m.db)
         slog.Debug("Записи, полученные из KDBX", "count", len(entries))
 
         items := make([]list.Item, len(entries))
-        for i, entry := range entries </span><span class="cov0" title="0">{
+        for i, entry := range entries </span><span class="cov8" title="1">{
                 items[i] = entryItem{entry: entry}
         }</span>
 
-        <span class="cov0" title="0">slog.Debug("Элементы, подготовленные для списка", "count", len(items))
+        <span class="cov8" title="1">slog.Debug("Элементы, подготовленные для списка", "count", len(items))
         // Используем m.entryList.SetItems, а не listCmd, так как команда теперь не используется
         _ = m.entryList.SetItems(items) // Команду от SetItems пока игнорируем
 
@@ -3051,7 +3054,7 @@ func (m *model) handleDBOpenedMsg(msg dbOpenedMsg) (tea.Model, tea.Cmd) <span cl
                 dbOpenedCmds = append(dbOpenedCmds, tea.ClearScreen)
         }</span>
 
-        <span class="cov0" title="0">slog.Debug("handleDBOpenedMsg: Конец, m.db обновлен")
+        <span class="cov8" title="1">slog.Debug("handleDBOpenedMsg: Конец, m.db обновлен")
         return m, tea.Batch(dbOpenedCmds...)</span>
 }
 </pre>
@@ -5055,9 +5058,9 @@ func handleWindowSizeMsg(m *model, msg tea.WindowSizeMsg) <span class="cov0" tit
 }</span>
 
 // handleDBMsg обрабатывает сообщения, связанные с базой данных или статусом.
-func handleDBMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) <span class="cov0" title="0">{
+func handleDBMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) <span class="cov8" title="1">{
         switch msg := msg.(type) </span>{
-        case dbOpenedMsg:<span class="cov0" title="0">
+        case dbOpenedMsg:<span class="cov8" title="1">
                 newM, cmd := handleDBOpenedMsg(m, msg)
                 return newM, cmd, true</span>
         case errMsg:<span class="cov0" title="0">
@@ -5097,7 +5100,7 @@ func handleDBMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) <span class="
 
 // --- Обработчики для handleDBMsg ---
 
-func handleDBOpenedMsg(m *model, msg dbOpenedMsg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+func handleDBOpenedMsg(m *model, msg dbOpenedMsg) (tea.Model, tea.Cmd) <span class="cov8" title="1">{
         return m.handleDBOpenedMsg(msg)
 }</span>
 
@@ -5464,7 +5467,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov8" titl
                 }</span>
                 // Если не глобальная клавиша, передаем дальше для обработки по состоянию
 
-        default:<span class="cov0" title="0">
+        default:<span class="cov8" title="1">
                 // Сначала пытаемся обработать сообщения API
                 updatedModel, cmd, handled = handleAPIMsg(m, msg)
                 if handled </span><span class="cov0" title="0">{
@@ -5472,8 +5475,8 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov8" titl
                 }</span>
 
                 // Затем пытаемся обработать сообщения БД/статуса
-                <span class="cov0" title="0">updatedModel, cmd, handled = handleDBMsg(m, msg)
-                if handled </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">updatedModel, cmd, handled = handleDBMsg(m, msg)
+                if handled </span><span class="cov8" title="1">{
                         return updatedModel, cmd
                 }</span>
 
@@ -5494,7 +5497,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov8" titl
                 updatedModel, stateCmd = m.updatePasswordInputScreen(msg)</span>
         case newKdbxPasswordScreen:<span class="cov0" title="0">
                 updatedModel, stateCmd = m.updateNewKdbxPasswordScreen(msg)</span>
-        case entryListScreen:<span class="cov0" title="0">
+        case entryListScreen:<span class="cov8" title="1">
                 updatedModel, stateCmd = m.updateEntryListScreen(msg)</span>
         case entryDetailScreen:<span class="cov0" title="0">
                 updatedModel, stateCmd = m.updateEntryDetailScreen(msg)</span>
@@ -5573,7 +5576,7 @@ func DeepCopyEntry(original gokeepasslib.Entry) gokeepasslib.Entry <span class="
         // Копируем срез ссылок на бинарные данные (BinaryReference)
         // Сами структуры BinaryReference содержат простые типы (Name, Value.ID),
         // поэтому достаточно поверхностного копирования среза.
-        <span class="cov8" title="1">if original.Binaries != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if original.Binaries != nil </span><span class="cov8" title="1">{
                 newEntry.Binaries = make([]gokeepasslib.BinaryReference, len(original.Binaries))
                 copy(newEntry.Binaries, original.Binaries)
         }</span>
