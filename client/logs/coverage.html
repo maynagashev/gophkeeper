@@ -81,7 +81,7 @@
 				
 				<option value="file12">github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go (76.3%)</option>
 				
-				<option value="file13">github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go (66.4%)</option>
+				<option value="file13">github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go (67.6%)</option>
 				
 				<option value="file14">github.com/maynagashev/gophkeeper/client/internal/tui/screen_list.go (86.8%)</option>
 				
@@ -2670,7 +2670,6 @@ func (m *model) prepareEditScreen() <span class="cov8" title="1">{
         m.editingEntry = &amp;entryCopy
 
         m.editInputs = make([]textinput.Model, numEditableFields)
-        m.focusedField = editableFieldTitle // Начинаем с поля Title
 
         // Используем константы имен полей как плейсхолдеры
         placeholders := map[int]string{
@@ -2702,11 +2701,15 @@ func (m *model) prepareEditScreen() <span class="cov8" title="1">{
                         // Пока оставим обычным текстом
                 }
 
-                // Первое поле делаем активным
-                <span class="cov8" title="1">if i == m.focusedField </span><span class="cov8" title="1">{
-                        m.editInputs[i].Focus()
-                }</span>
+                // Убираем установку фокуса здесь
+                // // Первое поле делаем активным
+                // if i == m.focusedField {
+                //         m.editInputs[i].Focus()
+                // }
         }
+        // Вызываем updateFocus после инициализации всех полей,
+        // чтобы установить фокус на основе m.focusedField
+        <span class="cov8" title="1">m.updateFocus()</span> // Эта функция должна вызывать Focus() / Blur() для нужных инпутов
 }
 
 // updateEntryEditScreen обрабатывает сообщения для экрана редактирования записи.
@@ -2863,14 +2866,11 @@ func (m *model) saveEntryChanges() (tea.Model, tea.Cmd) <span class="cov8" title
 func (m *model) viewEntryEditScreen() string <span class="cov0" title="0">{
         var s strings.Builder
         s.WriteString("Редактирование записи: " + m.editingEntry.GetTitle() + "\n\n")
-        // Отображаем все поля ввода (включая поля карты)
-        for i, input := range m.editInputs </span><span class="cov0" title="0">{
-                focusIndicator := "  "
-                if m.focusedField == i </span><span class="cov0" title="0">{
-                        focusIndicator = "&gt; "
-                }</span>
-                <span class="cov0" title="0">s.WriteString(fmt.Sprintf("%s%s: %s\n", focusIndicator, input.Placeholder, input.View()))</span>
-        }
+
+        // Отображаем все поля ввода, полагаясь на их метод View()
+        for _, input := range m.editInputs </span><span class="cov0" title="0">{
+                s.WriteString(input.View() + "\n")
+        }</span>
 
         // Отображаем вложения
         <span class="cov0" title="0">s.WriteString("\n--- Вложения ---\n")

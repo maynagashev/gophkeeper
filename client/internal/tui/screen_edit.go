@@ -39,7 +39,6 @@ func (m *model) prepareEditScreen() {
 	m.editingEntry = &entryCopy
 
 	m.editInputs = make([]textinput.Model, numEditableFields)
-	m.focusedField = editableFieldTitle // Начинаем с поля Title
 
 	// Используем константы имен полей как плейсхолдеры
 	placeholders := map[int]string{
@@ -71,11 +70,15 @@ func (m *model) prepareEditScreen() {
 			// Пока оставим обычным текстом
 		}
 
-		// Первое поле делаем активным
-		if i == m.focusedField {
-			m.editInputs[i].Focus()
-		}
+		// Убираем установку фокуса здесь
+		// // Первое поле делаем активным
+		// if i == m.focusedField {
+		// 	m.editInputs[i].Focus()
+		// }
 	}
+	// Вызываем updateFocus после инициализации всех полей,
+	// чтобы установить фокус на основе m.focusedField
+	m.updateFocus() // Эта функция должна вызывать Focus() / Blur() для нужных инпутов
 }
 
 // updateEntryEditScreen обрабатывает сообщения для экрана редактирования записи.
@@ -232,13 +235,10 @@ func (m *model) saveEntryChanges() (tea.Model, tea.Cmd) {
 func (m *model) viewEntryEditScreen() string {
 	var s strings.Builder
 	s.WriteString("Редактирование записи: " + m.editingEntry.GetTitle() + "\n\n")
-	// Отображаем все поля ввода (включая поля карты)
-	for i, input := range m.editInputs {
-		focusIndicator := "  "
-		if m.focusedField == i {
-			focusIndicator = "> "
-		}
-		s.WriteString(fmt.Sprintf("%s%s: %s\n", focusIndicator, input.Placeholder, input.View()))
+
+	// Отображаем все поля ввода, полагаясь на их метод View()
+	for _, input := range m.editInputs {
+		s.WriteString(input.View() + "\n")
 	}
 
 	// Отображаем вложения

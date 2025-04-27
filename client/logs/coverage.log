@@ -77,11 +77,11 @@ github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:27:			Title
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:28:			Description					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:29:			FilterValue					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:32:			prepareEditScreen				100.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:82:			updateEntryEditScreen				66.7%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:98:			handleEditScreenKeys				55.1%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:180:			handleAttachmentDeleteAction			100.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:197:			saveEntryChanges				88.9%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:232:			viewEntryEditScreen				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:85:			updateEntryEditScreen				66.7%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:101:			handleEditScreenKeys				55.1%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:183:			handleAttachmentDeleteAction			100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:200:			saveEntryChanges				88.9%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:235:			viewEntryEditScreen				0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_list.go:21:			updateEntryListScreen				76.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_list.go:75:			_handleAuthLoadError				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_list.go:86:			_handleAuthLoadSuccess				100.0%
