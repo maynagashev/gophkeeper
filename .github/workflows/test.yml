@@ -70,7 +70,7 @@ jobs:
         # Переменные окружения для подключения к сервисам из docker-compose
         # Используем стандартные порты и креды, если не переопределены
         POSTGRES_PORT: 5432 # Указываем порт внутри сети docker
-        DATABASE_DSN: "postgres://gophkeeper:secret@localhost:5432/gophkeeper?sslmode=disable" # Используем localhost, так как порты проброшены
+        DATABASE_DSN: "postgres://gophkeeper:secret@127.0.0.1:5432/gophkeeper?sslmode=disable"
         MINIO_ENDPOINT: "localhost:9000"
         MINIO_USER: "minioadmin"
         MINIO_PASSWORD: "minioadmin"
