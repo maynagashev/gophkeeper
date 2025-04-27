@@ -110,8 +110,8 @@ github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go:99:			handl
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go:110:			handleSyncMenuLogout			90.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go:140:			updateSyncServerScreen			100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go:170:			handleSyncMenuAction			90.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:35:		Login					0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:41:		Register				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:35:		Login					100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:41:		Register				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:52:		GetVaultMetadata			0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:65:		UploadVault				0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:76:		DownloadVault				0.0%
@@ -193,4 +193,4 @@ github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:46:				deepCopyEn
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:51:				FindEntryInDB				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:60:				findEntryInDB				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:65:				FindEntryInGroups			100.0%
-total:												(statements)				69.3%
+total:												(statements)				69.5%

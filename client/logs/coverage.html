@@ -99,7 +99,7 @@
 				
 				<option value="file21">github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go (92.8%)</option>
 				
-				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go (17.0%)</option>
+				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go (20.8%)</option>
 				
 				<option value="file23">github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go (25.2%)</option>
 				
@@ -3731,13 +3731,13 @@ type ScreenTestMockAPIClient struct {
 }
 
 // Login мокирует метод Login.
-func (m *ScreenTestMockAPIClient) Login(ctx context.Context, username, password string) (string, error) <span class="cov0" title="0">{
+func (m *ScreenTestMockAPIClient) Login(ctx context.Context, username, password string) (string, error) <span class="cov8" title="1">{
         args := m.Called(ctx, username, password)
         return args.String(0), args.Error(1)
 }</span>
 
 // Register мокирует метод Register.
-func (m *ScreenTestMockAPIClient) Register(ctx context.Context, username, password string) error <span class="cov0" title="0">{
+func (m *ScreenTestMockAPIClient) Register(ctx context.Context, username, password string) error <span class="cov8" title="1">{
         args := m.Called(ctx, username, password)
         return args.Error(0)
 }</span>

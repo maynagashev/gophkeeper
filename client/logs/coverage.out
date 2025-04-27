@@ -639,8 +639,8 @@ github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go:181.25,182.
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go:183.30,184.40 1 1
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go:185.24,186.34 1 1
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go:189.2,189.12 1 0
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:35.105,38.2 2 0
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:41.98,44.2 2 0
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:35.105,38.2 2 1
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:41.98,44.2 2 1
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:52.103,54.24 2 0
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:54.24,56.3 1 0
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:57.2,58.9 2 0
