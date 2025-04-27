@@ -107,7 +107,7 @@
 				
 				<option value="file25">github.com/maynagashev/gophkeeper/client/internal/tui/tui.go (18.3%)</option>
 				
-				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (64.5%)</option>
+				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (68.5%)</option>
 				
 				<option value="file27">github.com/maynagashev/gophkeeper/client/internal/tui/utils.go (92.9%)</option>
 				
@@ -4948,21 +4948,21 @@ func (m *model) processMetadataResults() (tea.Model, tea.Cmd) <span class="cov8"
 }
 
 // handleVersionMsg обрабатывает сообщения, связанные с версиями.
-func handleVersionMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) <span class="cov0" title="0">{
+func handleVersionMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) <span class="cov8" title="1">{
         switch msg := msg.(type) </span>{
-        case versionsLoadedMsg:<span class="cov0" title="0">
+        case versionsLoadedMsg:<span class="cov8" title="1">
                 newM, cmd := handleVersionsLoadedMsg(m, msg)
                 return newM, cmd, true</span>
-        case versionsLoadErrorMsg:<span class="cov0" title="0">
+        case versionsLoadErrorMsg:<span class="cov8" title="1">
                 newM, cmd := handleVersionsLoadErrorMsg(m, msg)
                 return newM, cmd, true</span>
-        case rollbackSuccessMsg:<span class="cov0" title="0">
+        case rollbackSuccessMsg:<span class="cov8" title="1">
                 newM, cmd := handleRollbackSuccessMsg(m, msg)
                 return newM, cmd, true</span>
-        case rollbackErrorMsg:<span class="cov0" title="0">
+        case rollbackErrorMsg:<span class="cov8" title="1">
                 newM, cmd := handleRollbackErrorMsg(m, msg)
                 return newM, cmd, true</span>
-        default:<span class="cov0" title="0">
+        default:<span class="cov8" title="1">
                 return m, nil, false</span> // Не обработали сообщение этого типа
         }
 }

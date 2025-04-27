@@ -52,6 +52,9 @@ func createTestModelForUpdate() *model {
 	m.registerPasswordInput.Blur()
 	m.serverURLInput.Blur()
 
+	// Инициализируем список версий
+	m.versionList = initVersionList() // Добавляем инициализацию списка версий
+
 	return m
 }
 
@@ -263,6 +266,99 @@ func TestHandleSyncUploadSuccessMsg(t *testing.T) {
 		"Статус должен содержать сообщение об успешной загрузке")
 	require.NotNil(t, cmd, "Должна быть возвращена команда (Batch)")
 	// TODO: Проверить, что время последней синхронизации обновлено, когда это будет реализовано
+}
+
+// TestHandleVersionMsg проверяет обработку сообщений, связанных с версиями.
+func TestHandleVersionMsg(t *testing.T) {
+	t.Run("versionsLoadedMsg", func(t *testing.T) {
+		m := createTestModelForUpdate()
+		m.loadingVersions = true // Имитируем состояние загрузки
+		versions := []models.VaultVersion{{ID: 1}, {ID: 2}}
+		currentID := int64(2)
+		msg := versionsLoadedMsg{versions: versions, currentVersionID: currentID}
+
+		newM, cmd, handled := handleVersionMsg(m, msg)
+
+		require.True(t, handled, "Сообщение должно быть обработано")
+		require.NotNil(t, cmd, "Должна быть возвращена команда (от списка)")
+		updatedModel := newM.(*model)
+		require.False(t, updatedModel.loadingVersions, "Флаг loadingVersions должен быть сброшен")
+		require.Len(t, updatedModel.versions, 2, "Список версий должен обновиться")
+		require.Equal(t, versions, updatedModel.versions, "Содержимое списка версий должно обновиться")
+		// Проверяем, что текущая версия отмечена правильно в списке TUI (не напрямую в m.versions)
+		require.NotNil(t, updatedModel.versionList, "Список версий TUI должен быть инициализирован")
+		items := updatedModel.versionList.Items()
+		require.Len(t, items, 2, "В списке TUI должно быть 2 элемента")
+		foundCurrent := false
+		for _, item := range items {
+			vItem, ok := item.(versionItem)
+			require.True(t, ok, "Элемент списка должен быть типа versionItem")
+			if vItem.version.ID == currentID {
+				require.True(t, vItem.isCurrent, "Версия с currentID должна быть отмечена как текущая")
+				foundCurrent = true
+			} else {
+				require.False(t, vItem.isCurrent, "Другие версии не должны быть отмечены как текущие")
+			}
+		}
+		require.True(t, foundCurrent, "Текущая версия должна быть найдена в списке TUI")
+	})
+
+	t.Run("versionsLoadErrorMsg", func(t *testing.T) {
+		m := createTestModelForUpdate()
+		m.loadingVersions = true // Имитируем состояние загрузки
+		testErr := errors.New("ошибка загрузки версий")
+		msg := versionsLoadErrorMsg{err: testErr}
+
+		newM, cmd, handled := handleVersionMsg(m, msg)
+
+		require.True(t, handled, "Сообщение должно быть обработано")
+		require.NotNil(t, cmd, "Должна быть возвращена команда статуса")
+		updatedModel := newM.(*model)
+		require.False(t, updatedModel.loadingVersions, "Флаг loadingVersions должен быть сброшен")
+		expectedStatusPart := "Ошибка загрузки версий: ошибка загрузки версий" // Исправляем на "списка"
+		require.Contains(t, updatedModel.savingStatus, expectedStatusPart,
+			"Статус должен содержать сообщение об ошибке")
+	})
+
+	t.Run("rollbackSuccessMsg", func(t *testing.T) {
+		m := createTestModelForUpdate()
+		versionID := int64(123)
+		msg := rollbackSuccessMsg{versionID: versionID}
+
+		newM, cmd, handled := handleVersionMsg(m, msg)
+
+		require.True(t, handled, "Сообщение должно быть обработано")
+		require.NotNil(t, cmd, "Должна быть возвращена команда статуса и обновления версий")
+		updatedModel := newM.(*model)
+		expectedStatus := "Откат к версии #123 успешен. Загрузка..." // Исправляем ожидаемый статус
+		require.Contains(t, updatedModel.savingStatus, expectedStatus,
+			"Статус должен содержать сообщение об успехе")
+		require.NoError(t, updatedModel.rollbackError, "Ошибка отката должна быть сброшена")
+	})
+
+	t.Run("rollbackErrorMsg", func(t *testing.T) {
+		m := createTestModelForUpdate()
+		testErr := errors.New("ошибка отката")
+		msg := rollbackErrorMsg{err: testErr}
+
+		newM, cmd, handled := handleVersionMsg(m, msg)
+
+		require.True(t, handled, "Сообщение должно быть обработано")
+		require.NotNil(t, cmd, "Должна быть возвращена команда статуса")
+		updatedModel := newM.(*model)
+		require.ErrorIs(t, updatedModel.rollbackError, testErr, "Ошибка отката должна быть установлена в модели")
+	})
+
+	t.Run("НеизвестноеСообщение", func(t *testing.T) {
+		m := createTestModelForUpdate()
+		msg := "неизвестное сообщение" // Не тот тип
+
+		newM, cmd, handled := handleVersionMsg(m, msg)
+
+		require.False(t, handled, "Неизвестное сообщение не должно быть обработано")
+		require.Nil(t, cmd, "Команда должна быть nil")
+		require.Same(t, m, newM, "Модель не должна измениться")
+	})
 }
 
 // TestCanSave проверяет логику разрешения сохранения.
