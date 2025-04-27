@@ -57,7 +57,7 @@
 				
 				<option value="file0">github.com/maynagashev/gophkeeper/server/cmd/server/flags.go (100.0%)</option>
 				
-				<option value="file1">github.com/maynagashev/gophkeeper/server/cmd/server/main.go (64.6%)</option>
+				<option value="file1">github.com/maynagashev/gophkeeper/server/cmd/server/main.go (61.8%)</option>
 				
 				<option value="file2">github.com/maynagashev/gophkeeper/server/internal/handlers/auth.go (0.0%)</option>
 				
@@ -224,6 +224,28 @@ type dependencies struct {
         vaultHandler *handlers.VaultHandler
 }
 
+// Функция для запуска HTTP сервера (для удобства мокирования в тестах).
+var startHTTPServer = //nolint:gochecknoglobals // Используется для мокирования в тестах
+func(cfg *config, handler http.Handler) error <span class="cov0" title="0">{
+        server := &amp;http.Server{
+                Addr:         fmt.Sprintf(":%s", cfg.Port),
+                Handler:      handler,
+                ReadTimeout:  defaultReadTimeout,
+                WriteTimeout: defaultWriteTimeout,
+                IdleTimeout:  defaultIdleTimeout,
+        }
+
+        log.Printf("Запуск HTTPS-сервера на порту %s...", cfg.Port)
+        log.Printf("Используется сертификат: %s", cfg.CertFile)
+        log.Printf("Используется ключ: %s", cfg.KeyFile)
+
+        // Запускаем сервер с TLS
+        if err := server.ListenAndServeTLS(cfg.CertFile, cfg.KeyFile); err != nil &amp;&amp; !errors.Is(err, http.ErrServerClosed) </span><span class="cov0" title="0">{
+                return fmt.Errorf("ошибка запуска HTTPS-сервера: %w", err)
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
 // main - точка входа. Вызывает run и обрабатывает ошибку.
 func main() <span class="cov0" title="0">{
         if err := run(); err != nil </span><span class="cov0" title="0">{
@@ -240,6 +262,8 @@ func run() error <span class="cov0" title="0">{
         cfg, err := parseFlags()
         if err != nil </span><span class="cov0" title="0">{
                 // Используем log.Fatalf, так как ошибка фатальна для запуска сервера.
+                // В реальном тесте это приведет к завершению, нужна стратегия обхода.
+                // Пока оставляем так, но тест должен будет мокировать parseFlags.
                 log.Fatalf("Ошибка конфигурации сервера: %v", err)
         }</span>
 
@@ -262,22 +286,9 @@ func run() error <span class="cov0" title="0">{
         <span class="cov0" title="0">r := setupRouter(deps.authHandler, deps.vaultHandler)
 
         // --- Запуск сервера --- //
-        server := &amp;http.Server{
-                Addr:         fmt.Sprintf(":%s", cfg.Port),
-                Handler:      r,
-                ReadTimeout:  defaultReadTimeout,
-                WriteTimeout: defaultWriteTimeout,
-                IdleTimeout:  defaultIdleTimeout,
-        }
-
-        log.Printf("Запуск HTTPS-сервера на порту %s...", cfg.Port)
-        log.Printf("Используется сертификат: %s", cfg.CertFile)
-        log.Printf("Используется ключ: %s", cfg.KeyFile)
-
-        // Запускаем сервер с TLS
-        if err = server.ListenAndServeTLS(cfg.CertFile, cfg.KeyFile); err != nil &amp;&amp; !errors.Is(err, http.ErrServerClosed) </span><span class="cov0" title="0">{
-                // Возвращаем ошибку вместо Fatalf
-                return fmt.Errorf("ошибка запуска HTTPS-сервера: %w", err)
+        // Используем переменную startHTTPServer вместо прямого кода запуска
+        if err = startHTTPServer(cfg, r); err != nil </span><span class="cov0" title="0">{
+                return err // Возвращаем ошибку от startHTTPServer
         }</span>
         <span class="cov0" title="0">return nil</span> // Успешное завершение run()
 }

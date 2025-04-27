@@ -47,6 +47,28 @@ type dependencies struct {
 	vaultHandler *handlers.VaultHandler
 }
 
+// Функция для запуска HTTP сервера (для удобства мокирования в тестах).
+var startHTTPServer = //nolint:gochecknoglobals // Используется для мокирования в тестах
+func(cfg *config, handler http.Handler) error {
+	server := &http.Server{
+		Addr:         fmt.Sprintf(":%s", cfg.Port),
+		Handler:      handler,
+		ReadTimeout:  defaultReadTimeout,
+		WriteTimeout: defaultWriteTimeout,
+		IdleTimeout:  defaultIdleTimeout,
+	}
+
+	log.Printf("Запуск HTTPS-сервера на порту %s...", cfg.Port)
+	log.Printf("Используется сертификат: %s", cfg.CertFile)
+	log.Printf("Используется ключ: %s", cfg.KeyFile)
+
+	// Запускаем сервер с TLS
+	if err := server.ListenAndServeTLS(cfg.CertFile, cfg.KeyFile); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		return fmt.Errorf("ошибка запуска HTTPS-сервера: %w", err)
+	}
+	return nil
+}
+
 // main - точка входа. Вызывает run и обрабатывает ошибку.
 func main() {
 	if err := run(); err != nil {
@@ -63,6 +85,8 @@ func run() error {
 	cfg, err := parseFlags()
 	if err != nil {
 		// Используем log.Fatalf, так как ошибка фатальна для запуска сервера.
+		// В реальном тесте это приведет к завершению, нужна стратегия обхода.
+		// Пока оставляем так, но тест должен будет мокировать parseFlags.
 		log.Fatalf("Ошибка конфигурации сервера: %v", err)
 	}
 
@@ -85,22 +109,9 @@ func run() error {
 	r := setupRouter(deps.authHandler, deps.vaultHandler)
 
 	// --- Запуск сервера --- //
-	server := &http.Server{
-		Addr:         fmt.Sprintf(":%s", cfg.Port),
-		Handler:      r,
-		ReadTimeout:  defaultReadTimeout,
-		WriteTimeout: defaultWriteTimeout,
-		IdleTimeout:  defaultIdleTimeout,
-	}
-
-	log.Printf("Запуск HTTPS-сервера на порту %s...", cfg.Port)
-	log.Printf("Используется сертификат: %s", cfg.CertFile)
-	log.Printf("Используется ключ: %s", cfg.KeyFile)
-
-	// Запускаем сервер с TLS
-	if err = server.ListenAndServeTLS(cfg.CertFile, cfg.KeyFile); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		// Возвращаем ошибку вместо Fatalf
-		return fmt.Errorf("ошибка запуска HTTPS-сервера: %w", err)
+	// Используем переменную startHTTPServer вместо прямого кода запуска
+	if err = startHTTPServer(cfg, r); err != nil {
+		return err // Возвращаем ошибку от startHTTPServer
 	}
 	return nil // Успешное завершение run()
 }
