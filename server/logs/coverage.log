@@ -38,10 +38,10 @@ github.com/maynagashev/gophkeeper/server/internal/services/vault_service.go:80:	
 github.com/maynagashev/gophkeeper/server/internal/services/vault_service.go:147:		uploadFileToStorage			100.0%
 github.com/maynagashev/gophkeeper/server/internal/services/vault_service.go:177:		shouldCreateNewVersion			100.0%
 github.com/maynagashev/gophkeeper/server/internal/services/vault_service.go:218:		createNewVersion			76.0%
-github.com/maynagashev/gophkeeper/server/internal/services/vault_service.go:273:		DownloadVault				0.0%
-github.com/maynagashev/gophkeeper/server/internal/services/vault_service.go:311:		ListVersions				0.0%
-github.com/maynagashev/gophkeeper/server/internal/services/vault_service.go:338:		RollbackToVersion			0.0%
+github.com/maynagashev/gophkeeper/server/internal/services/vault_service.go:273:		DownloadVault				100.0%
+github.com/maynagashev/gophkeeper/server/internal/services/vault_service.go:311:		ListVersions				100.0%
+github.com/maynagashev/gophkeeper/server/internal/services/vault_service.go:338:		RollbackToVersion			92.6%
 github.com/maynagashev/gophkeeper/server/internal/storage/minio_client.go:38:			NewMinioClient				0.0%
 github.com/maynagashev/gophkeeper/server/internal/storage/minio_client.go:83:			UploadFile				0.0%
 github.com/maynagashev/gophkeeper/server/internal/storage/minio_client.go:112:			DownloadFile				0.0%
-total:												(statements)				76.0%
+total:												(statements)				84.9%

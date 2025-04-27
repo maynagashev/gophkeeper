@@ -75,7 +75,7 @@
 				
 				<option value="file9">github.com/maynagashev/gophkeeper/server/internal/services/auth_service.go (87.5%)</option>
 				
-				<option value="file10">github.com/maynagashev/gophkeeper/server/internal/services/vault_service.go (52.2%)</option>
+				<option value="file10">github.com/maynagashev/gophkeeper/server/internal/services/vault_service.go (89.8%)</option>
 				
 				<option value="file11">github.com/maynagashev/gophkeeper/server/internal/storage/minio_client.go (0.0%)</option>
 				
@@ -1725,116 +1725,116 @@ func (s *vaultService) createNewVersion(
 }
 
 // DownloadVault скачивает ТЕКУЩУЮ версию файла хранилища.
-func (s *vaultService) DownloadVault(userID int64) (io.ReadCloser, *models.VaultVersion, error) <span class="cov0" title="0">{
+func (s *vaultService) DownloadVault(userID int64) (io.ReadCloser, *models.VaultVersion, error) <span class="cov8" title="1">{
         ctx := context.Background()
 
         // Получаем хранилище и текущую версию одним запросом
         _, currentVersion, err := s.vaultRepo.GetVaultWithCurrentVersionByUserID(ctx, userID)
-        if err != nil </span><span class="cov0" title="0">{
-                if errors.Is(err, repository.ErrVaultNotFound) </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, repository.ErrVaultNotFound) </span><span class="cov8" title="1">{
                         log.Printf("[VaultService] Запрос на скачивание: хранилище или версия для пользователя %d не найдены", userID)
                         return nil, nil, ErrVaultNotFound
                 }</span>
-                <span class="cov0" title="0">log.Printf("[VaultService] Ошибка получения хранилища/версии для скачивания (пользователь %d): %v", userID, err)
+                <span class="cov8" title="1">log.Printf("[VaultService] Ошибка получения хранилища/версии для скачивания (пользователь %d): %v", userID, err)
                 return nil, nil, errors.New("внутренняя ошибка сервера при получении метаданных")</span>
         }
 
-        <span class="cov0" title="0">if currentVersion == nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if currentVersion == nil </span><span class="cov8" title="1">{
                 log.Printf("[VaultService] Запрос на скачивание: нет текущей активной версии для пользователя %d", userID)
                 return nil, nil, ErrVaultNotFound
         }</span>
 
         // Скачиваем файл из MinIO по ключу текущей версии
-        <span class="cov0" title="0">fileReader, err := s.fileStorage.DownloadFile(ctx, currentVersion.ObjectKey)
-        if err != nil </span><span class="cov0" title="0">{
-                if errors.Is(err, storage.ErrObjectNotFound) </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">fileReader, err := s.fileStorage.DownloadFile(ctx, currentVersion.ObjectKey)
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, storage.ErrObjectNotFound) </span><span class="cov8" title="1">{
                         log.Printf("[VaultService] Файл '%s' не найден в хранилище"+
                                 " (пользователь %d, версия %d)", currentVersion.ObjectKey, userID, currentVersion.ID)
                         return nil, nil, ErrVaultNotFound
                 }</span>
-                <span class="cov0" title="0">log.Printf("[VaultService] Ошибка скачивания файла '%s' из хранилища"+
+                <span class="cov8" title="1">log.Printf("[VaultService] Ошибка скачивания файла '%s' из хранилища"+
                         " (пользователь %d, версия %d): %v", currentVersion.ObjectKey, userID, currentVersion.ID, err)
                 return nil, nil, errors.New("внутренняя ошибка сервера при скачивании файла")</span>
         }
 
-        <span class="cov0" title="0">log.Printf("[VaultService] Файл '%s' (версия %d) для пользователя %d"+
+        <span class="cov8" title="1">log.Printf("[VaultService] Файл '%s' (версия %d) для пользователя %d"+
                 " готов к скачиванию", currentVersion.ObjectKey, currentVersion.ID, userID)
         return fileReader, currentVersion, nil</span>
 }
 
 // ListVersions возвращает список версий хранилища пользователя.
-func (s *vaultService) ListVersions(userID int64, limit, offset int) ([]models.VaultVersion, error) <span class="cov0" title="0">{
+func (s *vaultService) ListVersions(userID int64, limit, offset int) ([]models.VaultVersion, error) <span class="cov8" title="1">{
         ctx := context.Background()
 
         // Сначала находим ID хранилища пользователя
         vault, err := s.vaultRepo.GetVaultByUserID(ctx, userID)
-        if err != nil </span><span class="cov0" title="0">{
-                if errors.Is(err, repository.ErrVaultNotFound) </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, repository.ErrVaultNotFound) </span><span class="cov8" title="1">{
                         log.Printf("[VaultService] Запрос списка версий: хранилище для пользователя %d не найдено", userID)
                         return []models.VaultVersion{}, nil // Возвращаем пустой слайс, а не ошибку
                 }</span>
-                <span class="cov0" title="0">log.Printf("[VaultService] Ошибка поиска хранилища для списка версий (пользователь %d): %v", userID, err)
+                <span class="cov8" title="1">log.Printf("[VaultService] Ошибка поиска хранилища для списка версий (пользователь %d): %v", userID, err)
                 return nil, errors.New("внутренняя ошибка сервера")</span>
         }
 
         // Получаем список версий для найденного vaultID
-        <span class="cov0" title="0">versions, err := s.vaultVersionRepo.ListVersionsByVaultID(ctx, vault.ID, limit, offset)
-        if err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">versions, err := s.vaultVersionRepo.ListVersionsByVaultID(ctx, vault.ID, limit, offset)
+        if err != nil </span><span class="cov8" title="1">{
                 log.Printf("[VaultService] Ошибка получения списка версий для хранилища %d"+
                         " (пользователь %d): %v", vault.ID, userID, err)
                 return nil, errors.New("внутренняя ошибка сервера")
         }</span>
 
-        <span class="cov0" title="0">log.Printf("[VaultService] Возвращено %d версий для пользователя %d", len(versions), userID)
+        <span class="cov8" title="1">log.Printf("[VaultService] Возвращено %d версий для пользователя %d", len(versions), userID)
         return versions, nil</span>
 }
 
 // RollbackToVersion откатывает хранилище пользователя к указанной версии.
-func (s *vaultService) RollbackToVersion(userID int64, versionID int64) error <span class="cov0" title="0">{
+func (s *vaultService) RollbackToVersion(userID int64, versionID int64) error <span class="cov8" title="1">{
         ctx := context.Background()
 
         // 1. Найти хранилище пользователя
         vault, err := s.vaultRepo.GetVaultByUserID(ctx, userID)
-        if err != nil </span><span class="cov0" title="0">{
-                if errors.Is(err, repository.ErrVaultNotFound) </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, repository.ErrVaultNotFound) </span><span class="cov8" title="1">{
                         log.Printf("[VaultService] Попытка отката: хранилище для пользователя %d не найдено", userID)
                         return ErrVaultNotFound
                 }</span>
-                <span class="cov0" title="0">log.Printf("[VaultService] Ошибка поиска хранилища для отката (пользователь %d): %v", userID, err)
+                <span class="cov8" title="1">log.Printf("[VaultService] Ошибка поиска хранилища для отката (пользователь %d): %v", userID, err)
                 return errors.New("внутренняя ошибка сервера")</span>
         }
 
         // 2. Проверить, что указанная версия принадлежит этому хранилищу
-        <span class="cov0" title="0">version, err := s.vaultVersionRepo.GetVersionByID(ctx, versionID)
-        if err != nil </span><span class="cov0" title="0">{
-                if errors.Is(err, repository.ErrVersionNotFound) </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">version, err := s.vaultVersionRepo.GetVersionByID(ctx, versionID)
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, repository.ErrVersionNotFound) </span><span class="cov8" title="1">{
                         log.Printf("[VaultService] Попытка отката: версия %d не найдена (пользователь %d)", versionID, userID)
                         return ErrVersionNotFound // А возвращаем ошибку сервиса
                 }</span>
-                <span class="cov0" title="0">log.Printf("[VaultService] Ошибка поиска версии %d для отката (пользователь %d): %v", versionID, userID, err)
+                <span class="cov8" title="1">log.Printf("[VaultService] Ошибка поиска версии %d для отката (пользователь %d): %v", versionID, userID, err)
                 return errors.New("внутренняя ошибка сервера")</span>
         }
-        <span class="cov0" title="0">if version.VaultID != vault.ID </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if version.VaultID != vault.ID </span><span class="cov8" title="1">{
                 log.Printf("[VaultService] Попытка отката: версия %d не принадлежит хранилищу %d"+
                         " (пользователь %d)", versionID, vault.ID, userID)
                 return ErrForbidden // Другая ошибка: попытка доступа к чужой версии
         }</span>
 
         // 3. Обновить current_version_id в хранилище
-        <span class="cov0" title="0">err = s.vaultRepo.UpdateVaultCurrentVersion(ctx, vault.ID, versionID)
-        if err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">err = s.vaultRepo.UpdateVaultCurrentVersion(ctx, vault.ID, versionID)
+        if err != nil </span><span class="cov8" title="1">{
                 // Обрабатываем случай, если хранилище вдруг не нашлось (хотя мы его только что нашли)
                 if errors.Is(err, repository.ErrVaultNotFound) </span><span class="cov0" title="0">{
                         log.Printf("[VaultService] Ошибка отката: хранилище %d исчезло во время обновления?"+
                                 " (пользователь %d)", vault.ID, userID)
                         return ErrVaultNotFound
                 }</span>
-                <span class="cov0" title="0">log.Printf("[VaultService] Ошибка обновления current_version_id при откате"+
+                <span class="cov8" title="1">log.Printf("[VaultService] Ошибка обновления current_version_id при откате"+
                         " для хранилища %d (пользователь %d): %v", vault.ID, userID, err)
                 return errors.New("внутренняя ошибка сервера при откате")</span>
         }
 
-        <span class="cov0" title="0">log.Printf("[VaultService] Пользователь %d успешно откатил хранилище %d к версии %d", userID, vault.ID, versionID)
+        <span class="cov8" title="1">log.Printf("[VaultService] Пользователь %d успешно откатил хранилище %d к версии %d", userID, vault.ID, versionID)
         return nil</span>
 }
 
