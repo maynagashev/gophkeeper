@@ -12,6 +12,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/maynagashev/gophkeeper/client/internal/api"
+	"github.com/maynagashev/gophkeeper/models"
 	"github.com/stretchr/testify/require"
 	"github.com/tobischo/gokeepasslib/v3"
 	"github.com/tobischo/gokeepasslib/v3/wrappers"
@@ -145,6 +146,123 @@ func TestHandleSyncStartedMsg(t *testing.T) {
 	require.False(t, newM.(*model).receivedServerMeta, "Флаг receivedServerMeta должен быть сброшен")
 	require.False(t, newM.(*model).receivedLocalMeta, "Флаг receivedLocalMeta должен быть сброшен")
 	require.Contains(t, newM.(*model).savingStatus, "метаданн", "Статус должен содержать сообщение о метаданных")
+}
+
+// TestHandleServerMetadataMsg проверяет обработку сообщения с метаданными сервера.
+func TestHandleServerMetadataMsg(t *testing.T) {
+	t.Run("Не в состоянии синхронизации", func(t *testing.T) {
+		m := createTestModelForUpdate()
+		m.isSyncing = false
+		msg := serverMetadataMsg{}
+
+		newM, cmd := handleServerMetadataMsg(m, msg)
+
+		require.Same(t, m, newM, "Модель не должна меняться")
+		require.Nil(t, cmd, "Команда должна быть nil")
+		require.False(t, m.receivedServerMeta, "receivedServerMeta должен остаться false")
+	})
+
+	t.Run("В состоянии синхронизации, локальные метаданные не получены", func(t *testing.T) {
+		m := createTestModelForUpdate()
+		m.isSyncing = true
+		m.receivedLocalMeta = false
+		meta := &models.VaultVersion{ID: 1}
+		msg := serverMetadataMsg{metadata: meta, found: true}
+
+		newM, cmd := handleServerMetadataMsg(m, msg)
+
+		updatedModel := newM.(*model)
+		require.True(t, updatedModel.receivedServerMeta, "receivedServerMeta должен стать true")
+		require.Same(t, meta, updatedModel.serverMeta, "serverMeta должен обновиться")
+		require.True(t, updatedModel.serverMetaFound, "serverMetaFound должен обновиться")
+		require.Nil(t, cmd, "Команда должна быть nil, так как локальные метаданные еще не получены")
+	})
+
+	t.Run("В состоянии синхронизации, локальные метаданные уже получены", func(t *testing.T) {
+		m := createTestModelForUpdate()
+		m.isSyncing = true
+		m.receivedLocalMeta = true // Локальные метаданные уже есть
+		m.localMetaFound = true
+		m.localMetaModTime = time.Now().Add(-time.Hour) // Устанавливаем какое-то время
+		meta := &models.VaultVersion{ID: 1, ContentModifiedAt: &m.localMetaModTime}
+		msg := serverMetadataMsg{metadata: meta, found: true}
+
+		newM, cmd := handleServerMetadataMsg(m, msg)
+		updatedModel := newM.(*model)
+
+		// Проверяем, что processMetadataResults был вызван (по побочным эффектам)
+		require.False(t, updatedModel.receivedServerMeta, "receivedServerMeta должен быть сброшен в processMetadataResults")
+		require.False(t, updatedModel.receivedLocalMeta, "receivedLocalMeta должен быть сброшен в processMetadataResults")
+		require.False(t, updatedModel.isSyncing, "isSyncing должен быть сброшен в processMetadataResults")
+		require.NotNil(t, cmd, "Должна быть возвращена команда из processMetadataResults")
+	})
+}
+
+// TestHandleLocalMetadataMsg проверяет обработку сообщения с локальными метаданными.
+func TestHandleLocalMetadataMsg(t *testing.T) {
+	t.Run("Не в состоянии синхронизации", func(t *testing.T) {
+		m := createTestModelForUpdate()
+		m.isSyncing = false
+		msg := localMetadataMsg{}
+
+		newM, cmd := handleLocalMetadataMsg(m, msg)
+
+		require.Same(t, m, newM, "Модель не должна меняться")
+		require.Nil(t, cmd, "Команда должна быть nil")
+		require.False(t, m.receivedLocalMeta, "receivedLocalMeta должен остаться false")
+	})
+
+	t.Run("В состоянии синхронизации, метаданные сервера не получены", func(t *testing.T) {
+		m := createTestModelForUpdate()
+		m.isSyncing = true
+		m.receivedServerMeta = false
+		modTime := time.Now()
+		msg := localMetadataMsg{modTime: modTime, found: true}
+
+		newM, cmd := handleLocalMetadataMsg(m, msg)
+
+		updatedModel := newM.(*model)
+		require.True(t, updatedModel.receivedLocalMeta, "receivedLocalMeta должен стать true")
+		require.Equal(t, modTime, updatedModel.localMetaModTime, "localMetaModTime должен обновиться")
+		require.True(t, updatedModel.localMetaFound, "localMetaFound должен обновиться")
+		require.Nil(t, cmd, "Команда должна быть nil, так как метаданные сервера еще не получены")
+	})
+
+	t.Run("В состоянии синхронизации, метаданные сервера уже получены", func(t *testing.T) {
+		m := createTestModelForUpdate()
+		m.isSyncing = true
+		m.receivedServerMeta = true // Метаданные сервера уже есть
+		m.serverMetaFound = true
+		serverTime := time.Now().Add(-time.Hour)
+		m.serverMeta = &models.VaultVersion{ID: 1, ContentModifiedAt: &serverTime}
+		modTime := time.Now()
+		msg := localMetadataMsg{modTime: modTime, found: true}
+
+		newM, cmd := handleLocalMetadataMsg(m, msg)
+
+		updatedModel := newM.(*model)
+
+		// Проверяем, что processMetadataResults был вызван (по побочным эффектам)
+		require.False(t, updatedModel.receivedServerMeta, "receivedServerMeta должен быть сброшен в processMetadataResults")
+		require.False(t, updatedModel.receivedLocalMeta, "receivedLocalMeta должен быть сброшен в processMetadataResults")
+		require.False(t, updatedModel.isSyncing, "isSyncing должен быть сброшен в processMetadataResults")
+		require.NotNil(t, cmd, "Должна быть возвращена команда из processMetadataResults")
+	})
+}
+
+// TestHandleSyncUploadSuccessMsg проверяет обработку сообщения об успешной загрузке.
+func TestHandleSyncUploadSuccessMsg(t *testing.T) {
+	m := createTestModelForUpdate()
+
+	newM, cmd := handleSyncUploadSuccessMsg(m)
+
+	updatedModel := newM.(*model)
+	// Разбиваем строку для линтера
+	expectedStatus := "завершена (загружено)"
+	require.Contains(t, updatedModel.savingStatus, expectedStatus,
+		"Статус должен содержать сообщение об успешной загрузке")
+	require.NotNil(t, cmd, "Должна быть возвращена команда (Batch)")
+	// TODO: Проверить, что время последней синхронизации обновлено, когда это будет реализовано
 }
 
 // TestCanSave проверяет логику разрешения сохранения.

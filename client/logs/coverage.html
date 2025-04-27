@@ -107,7 +107,7 @@
 				
 				<option value="file25">github.com/maynagashev/gophkeeper/client/internal/tui/tui.go (18.3%)</option>
 				
-				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (47.0%)</option>
+				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (64.5%)</option>
 				
 				<option value="file27">github.com/maynagashev/gophkeeper/client/internal/tui/utils.go (92.9%)</option>
 				
@@ -4828,37 +4828,37 @@ func handleSyncStartedMsg(m *model) (tea.Model, tea.Cmd) <span class="cov8" titl
         return newM, tea.Batch(statusCmd, fetchCmds)
 }</span>
 
-func handleServerMetadataMsg(m *model, msg serverMetadataMsg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
-        if !m.isSyncing </span><span class="cov0" title="0">{
+func handleServerMetadataMsg(m *model, msg serverMetadataMsg) (tea.Model, tea.Cmd) <span class="cov8" title="1">{
+        if !m.isSyncing </span><span class="cov8" title="1">{
                 return m, nil
         }</span>
-        <span class="cov0" title="0">m.serverMeta = msg.metadata
+        <span class="cov8" title="1">m.serverMeta = msg.metadata
         m.serverMetaFound = msg.found
         m.receivedServerMeta = true
         slog.Debug("Получено сообщение serverMetadataMsg", "found", msg.found)
-        if m.receivedLocalMeta </span><span class="cov0" title="0">{
+        if m.receivedLocalMeta </span><span class="cov8" title="1">{
                 newM, cmd := m.processMetadataResults()
                 return newM, cmd
         }</span>
-        <span class="cov0" title="0">return m, nil</span>
+        <span class="cov8" title="1">return m, nil</span>
 }
 
-func handleLocalMetadataMsg(m *model, msg localMetadataMsg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
-        if !m.isSyncing </span><span class="cov0" title="0">{
+func handleLocalMetadataMsg(m *model, msg localMetadataMsg) (tea.Model, tea.Cmd) <span class="cov8" title="1">{
+        if !m.isSyncing </span><span class="cov8" title="1">{
                 return m, nil
         }</span>
-        <span class="cov0" title="0">m.localMetaModTime = msg.modTime
+        <span class="cov8" title="1">m.localMetaModTime = msg.modTime
         m.localMetaFound = msg.found
         m.receivedLocalMeta = true
         slog.Debug("Получено сообщение localMetadataMsg", "found", msg.found)
-        if m.receivedServerMeta </span><span class="cov0" title="0">{
+        if m.receivedServerMeta </span><span class="cov8" title="1">{
                 newM, cmd := m.processMetadataResults()
                 return newM, cmd
         }</span>
-        <span class="cov0" title="0">return m, nil</span>
+        <span class="cov8" title="1">return m, nil</span>
 }
 
-func handleSyncUploadSuccessMsg(m *model) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+func handleSyncUploadSuccessMsg(m *model) (tea.Model, tea.Cmd) <span class="cov8" title="1">{
         // TODO: Обновить время последней синхронизации в m
         newM, statusCmd := m.setStatusMessage("Синхронизация завершена (загружено)")
         // Добавляем ClearScreen
@@ -4875,17 +4875,17 @@ func handleSyncDownloadSuccessMsg(m *model, msg syncDownloadSuccessMsg) (tea.Mod
 }
 
 // processMetadataResults обрабатывает ситуацию, когда получены и локальные, и серверные метаданные.
-func (m *model) processMetadataResults() (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+func (m *model) processMetadataResults() (tea.Model, tea.Cmd) <span class="cov8" title="1">{
         slog.Info("Получены метаданные сервера и локального файла. Запуск сравнения...")
 
         // Определяем время модификации контента с сервера
         // (Используем новое поле ContentModifiedAt)
         var serverModTime time.Time
-        if m.serverMeta != nil &amp;&amp; m.serverMeta.ContentModifiedAt != nil </span><span class="cov0" title="0">{
+        if m.serverMeta != nil &amp;&amp; m.serverMeta.ContentModifiedAt != nil </span><span class="cov8" title="1">{
                 serverModTime = *m.serverMeta.ContentModifiedAt
         }</span>
 
-        <span class="cov0" title="0">slog.Debug("Данные для сравнения",
+        <span class="cov8" title="1">slog.Debug("Данные для сравнения",
                 "serverFound", m.serverMetaFound,
                 "serverMetaTime", serverModTime, // Теперь это ContentModifiedAt
                 "localFound", m.localMetaFound,
@@ -4913,17 +4913,17 @@ func (m *model) processMetadataResults() (tea.Model, tea.Cmd) <span class="cov0"
                         cmd = nil // Ничего не делаем
                 }</span>
         // Случай 2: Хранилище есть на сервере
-        case m.serverMetaFound:<span class="cov0" title="0">
+        case m.serverMetaFound:<span class="cov8" title="1">
                 if !m.localMetaFound </span><span class="cov0" title="0">{
                         // Случай 3: Локального файла нет, но на сервере есть
                         slog.Info("Локального файла нет, но есть на сервере. Скачивание с сервера.")
                         statusMsg = "Скачивание с сервера..."
                         cmd = downloadVaultCmd(m) // Команда скачивания
-                }</span> else<span class="cov0" title="0"> {
+                }</span> else<span class="cov8" title="1"> {
                         // Обе версии существуют, сравниваем время
                         // Переписываем if-else на switch для gocritic
                         switch </span>{
-                        case m.localMetaModTime.After(serverModTime):<span class="cov0" title="0">
+                        case m.localMetaModTime.After(serverModTime):<span class="cov8" title="1">
                                 slog.Info("Локальная версия новее. Загрузка на сервер.")
                                 statusMsg = "Загрузка на сервер..."
                                 cmd = uploadVaultCmd(m)</span> // Команда загрузки
@@ -4931,7 +4931,7 @@ func (m *model) processMetadataResults() (tea.Model, tea.Cmd) <span class="cov0"
                                 slog.Info("Серверная версия новее. Скачивание с сервера.")
                                 statusMsg = "Скачивание с сервера..."
                                 cmd = downloadVaultCmd(m)</span> // Команда скачивания
-                        default:<span class="cov0" title="0"> // Времена равны
+                        default:<span class="cov8" title="1"> // Времена равны
                                 slog.Info("Версии идентичны. Синхронизация не требуется.")
                                 statusMsg = "Уже синхронизировано."
                                 cmd = nil</span> // Ничего не делаем
@@ -4940,7 +4940,7 @@ func (m *model) processMetadataResults() (tea.Model, tea.Cmd) <span class="cov0"
         }
 
         // Устанавливаем статус и возвращаем команду
-        <span class="cov0" title="0">newM, statusCmd := m.setStatusMessage(statusMsg)
+        <span class="cov8" title="1">newM, statusCmd := m.setStatusMessage(statusMsg)
         // Объединяем команду установки статуса с командой загрузки/скачивания (если она есть)
         finalCmd := tea.Batch(statusCmd, cmd)
 
