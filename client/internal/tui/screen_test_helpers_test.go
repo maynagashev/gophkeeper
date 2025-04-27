@@ -267,3 +267,29 @@ func TestScreenTestMockAPIClient_SetAuthToken(t *testing.T) {
 	mockClient.SetAuthToken(token)
 	mockClient.AssertExpectations(t)
 }
+
+// TestScreenTestSuite_BuilderMethods проверяет методы-конструкторы ScreenTestSuite.
+func TestScreenTestSuite_BuilderMethods(t *testing.T) {
+	s := NewScreenTestSuite() // Создаем тестовый набор
+
+	// Проверяем WithServerURL
+	t.Run("WithServerURL", func(t *testing.T) {
+		url := "http://localhost:8080"
+		s.WithServerURL(url)
+		assert.Equal(t, url, s.Model.serverURL, "Model.serverURL должен быть обновлен")
+	})
+
+	// Проверяем WithAuthToken
+	t.Run("WithAuthToken", func(t *testing.T) {
+		token := "builder-token"
+		s.WithAuthToken(token)
+		assert.Equal(t, token, s.Model.authToken, "Model.authToken должен быть обновлен")
+	})
+
+	// Проверяем WithDatabase
+	t.Run("WithDatabase", func(t *testing.T) {
+		db := CreateBasicTestDB() // Используем хелпер для создания тестовой БД
+		s.WithDatabase(db)
+		assert.Equal(t, db, s.Model.db, "Model.db должен быть обновлен")
+	})
+}

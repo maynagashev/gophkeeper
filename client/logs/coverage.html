@@ -99,7 +99,7 @@
 				
 				<option value="file21">github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go (92.8%)</option>
 				
-				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go (50.5%)</option>
+				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go (67.0%)</option>
 				
 				<option value="file23">github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go (25.2%)</option>
 				
@@ -3875,19 +3875,19 @@ func NewScreenTestSuite() *ScreenTestSuite <span class="cov8" title="1">{
 }</span>
 
 // WithServerURL устанавливает URL сервера в модели.
-func (s *ScreenTestSuite) WithServerURL(url string) *ScreenTestSuite <span class="cov0" title="0">{
+func (s *ScreenTestSuite) WithServerURL(url string) *ScreenTestSuite <span class="cov8" title="1">{
         s.Model.serverURL = url
         return s
 }</span>
 
 // WithAuthToken устанавливает токен авторизации в модели.
-func (s *ScreenTestSuite) WithAuthToken(token string) *ScreenTestSuite <span class="cov0" title="0">{
+func (s *ScreenTestSuite) WithAuthToken(token string) *ScreenTestSuite <span class="cov8" title="1">{
         s.Model.authToken = token
         return s
 }</span>
 
 // WithDatabase устанавливает базу данных в модели.
-func (s *ScreenTestSuite) WithDatabase(db *gokeepasslib.Database) *ScreenTestSuite <span class="cov0" title="0">{
+func (s *ScreenTestSuite) WithDatabase(db *gokeepasslib.Database) *ScreenTestSuite <span class="cov8" title="1">{
         s.Model.db = db
         return s
 }</span>
@@ -3961,7 +3961,7 @@ func (s *ScreenTestSuite) CaptureOutput(t *testing.T, cmds ...tea.Cmd) string <s
 }
 
 // CreateBasicTestDB создает простую тестовую базу данных.
-func CreateBasicTestDB() *gokeepasslib.Database <span class="cov0" title="0">{
+func CreateBasicTestDB() *gokeepasslib.Database <span class="cov8" title="1">{
         db := gokeepasslib.NewDatabase()
         db.Content = gokeepasslib.NewContent()
 

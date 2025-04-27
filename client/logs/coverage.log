@@ -119,9 +119,9 @@ github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:110
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:134:		RollbackToVersion			100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:140:		SetAuthToken				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:145:		NewScreenTestSuite			100.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:179:		WithServerURL				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:185:		WithAuthToken				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:191:		WithDatabase				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:179:		WithServerURL				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:185:		WithAuthToken				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:191:		WithDatabase				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:197:		WithState				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:203:		SimulateKeyPress			100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:209:		SimulateKeyRune				100.0%
@@ -131,7 +131,7 @@ github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:229
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:234:		toModel					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:242:		CaptureView				0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:252:		CaptureOutput				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:265:		CreateBasicTestDB			0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:265:		CreateBasicTestDB			100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:310:		SetupMockAPILogin			0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:322:		SetupMockAPIRegister			0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:334:		RenderScreen				0.0%
@@ -193,4 +193,4 @@ github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:46:				deepCopyEn
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:51:				FindEntryInDB				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:60:				findEntryInDB				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:65:				FindEntryInGroups			100.0%
-total:												(statements)				71.0%
+total:												(statements)				71.9%
