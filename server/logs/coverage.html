@@ -57,7 +57,7 @@
 				
 				<option value="file0">github.com/maynagashev/gophkeeper/server/cmd/server/flags.go (100.0%)</option>
 				
-				<option value="file1">github.com/maynagashev/gophkeeper/server/cmd/server/main.go (0.0%)</option>
+				<option value="file1">github.com/maynagashev/gophkeeper/server/cmd/server/main.go (64.6%)</option>
 				
 				<option value="file2">github.com/maynagashev/gophkeeper/server/internal/handlers/auth.go (0.0%)</option>
 				
@@ -213,6 +213,9 @@ const (
         minioUseSSL          = false // Для локальной разработки
 )
 
+// Переменная для функции создания соединения с БД, для возможности мокирования в тестах.
+var newPostgresDB = repository.NewPostgresDB //nolint:gochecknoglobals // Используется для мокирования в тестах
+
 // Структура для хранения инициализированных зависимостей.
 type dependencies struct {
         db           *sqlx.DB            // Используем тип *sqlx.DB
@@ -280,16 +283,16 @@ func run() error <span class="cov0" title="0">{
 }
 
 // setupDependencies инициализирует и возвращает все необходимые зависимости сервера.
-func setupDependencies(cfg *config) (*dependencies, error) <span class="cov0" title="0">{
+func setupDependencies(cfg *config) (*dependencies, error) <span class="cov8" title="1">{
         deps := &amp;dependencies{}
         var err error
 
         // 1. Подключение к БД
-        deps.db, err = repository.NewPostgresDB(cfg.DatabaseDSN)
-        if err != nil </span><span class="cov0" title="0">{
+        deps.db, err = newPostgresDB(cfg.DatabaseDSN)
+        if err != nil </span><span class="cov8" title="1">{
                 return nil, fmt.Errorf("ошибка инициализации БД: %w", err)
         }</span>
-        <span class="cov0" title="0">log.Println("Соединение с БД успешно установлено.")
+        <span class="cov8" title="1">log.Println("Соединение с БД успешно установлено.")
 
         // 2. Инициализация клиента MinIO
         minioCfg := storage.MinioConfig{
@@ -301,17 +304,17 @@ func setupDependencies(cfg *config) (*dependencies, error) <span class="cov0" ti
         }
         // storage.NewMinioClient возвращает *storage.MinioClient, который реализует storage.FileStorage
         deps.fileStorage, err = storage.NewMinioClient(minioCfg)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 // Закрываем соединение с БД перед выходом
-                if dbCloseErr := deps.db.Close(); dbCloseErr != nil </span><span class="cov0" title="0">{
+                if dbCloseErr := deps.db.Close(); dbCloseErr != nil </span><span class="cov8" title="1">{
                         log.Printf("Ошибка закрытия соединения с БД при ошибке MinIO: %v", dbCloseErr)
                 }</span>
-                <span class="cov0" title="0">return nil, fmt.Errorf("ошибка инициализации клиента MinIO: %w", err)</span>
+                <span class="cov8" title="1">return nil, fmt.Errorf("ошибка инициализации клиента MinIO: %w", err)</span>
         }
 
         // 3. Создание репозиториев
         // Передаем *sqlx.DB в конструкторы репозиториев
-        <span class="cov0" title="0">userRepo := repository.NewPostgresUserRepository(deps.db)
+        <span class="cov8" title="1">userRepo := repository.NewPostgresUserRepository(deps.db)
         vaultRepo := repository.NewPostgresVaultRepository(deps.db)
         vaultVersionRepo := repository.NewPostgresVaultVersionRepository(deps.db)
 
@@ -328,7 +331,7 @@ func setupDependencies(cfg *config) (*dependencies, error) <span class="cov0" ti
 }
 
 // setupRouter настраивает и возвращает роутер chi.
-func setupRouter(authHandler *handlers.AuthHandler, vaultHandler *handlers.VaultHandler) *chi.Mux <span class="cov0" title="0">{
+func setupRouter(authHandler *handlers.AuthHandler, vaultHandler *handlers.VaultHandler) *chi.Mux <span class="cov8" title="1">{
         r := chi.NewRouter()
         r.Use(middleware.RequestID)
         r.Use(middleware.RealIP)
@@ -341,18 +344,18 @@ func setupRouter(authHandler *handlers.AuthHandler, vaultHandler *handlers.Vault
         }</span>)
 
         // Определяем базовый маршрут /api
-        <span class="cov0" title="0">r.Route("/api", func(r chi.Router) </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">r.Route("/api", func(r chi.Router) </span><span class="cov8" title="1">{
                 // Публичные маршруты (регистрация, вход)
                 r.Post("/register", authHandler.Register)
                 r.Post("/login", authHandler.Login)
 
                 // Приватные маршруты (требуют аутентификации)
-                r.Group(func(r chi.Router) </span><span class="cov0" title="0">{
+                r.Group(func(r chi.Router) </span><span class="cov8" title="1">{
                         // Применяем middleware аутентификации ко всей группе
                         r.Use(appmiddleware.Authenticator)
 
                         // Маршруты для работы с хранилищем
-                        r.Route("/vault", func(r chi.Router) </span><span class="cov0" title="0">{
+                        r.Route("/vault", func(r chi.Router) </span><span class="cov8" title="1">{
                                 r.Get("/", vaultHandler.GetMetadata)
                                 r.Post("/upload", vaultHandler.Upload)
                                 r.Get("/download", vaultHandler.Download)
@@ -363,15 +366,15 @@ func setupRouter(authHandler *handlers.AuthHandler, vaultHandler *handlers.Vault
                         // r.Delete("/account", authHandler.DeleteAccount)
                 })
         })
-        <span class="cov0" title="0">return r</span>
+        <span class="cov8" title="1">return r</span>
 }
 
 // getEnv получает значение переменной окружения или возвращает значение по умолчанию.
-func getEnv(key, fallback string) string <span class="cov0" title="0">{
-        if value, ok := os.LookupEnv(key); ok </span><span class="cov0" title="0">{
+func getEnv(key, fallback string) string <span class="cov8" title="1">{
+        if value, ok := os.LookupEnv(key); ok </span><span class="cov8" title="1">{
                 return value
         }</span>
-        <span class="cov0" title="0">log.Printf("Переменная окружения '%s' не установлена, используется значение по умолчанию: '%s'", key, fallback)
+        <span class="cov8" title="1">log.Printf("Переменная окружения '%s' не установлена, используется значение по умолчанию: '%s'", key, fallback)
         return fallback</span>
 }
 </pre>

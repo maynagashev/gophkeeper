@@ -36,6 +36,9 @@ const (
 	minioUseSSL          = false // Для локальной разработки
 )
 
+// Переменная для функции создания соединения с БД, для возможности мокирования в тестах.
+var newPostgresDB = repository.NewPostgresDB //nolint:gochecknoglobals // Используется для мокирования в тестах
+
 // Структура для хранения инициализированных зависимостей.
 type dependencies struct {
 	db           *sqlx.DB            // Используем тип *sqlx.DB
@@ -108,7 +111,7 @@ func setupDependencies(cfg *config) (*dependencies, error) {
 	var err error
 
 	// 1. Подключение к БД
-	deps.db, err = repository.NewPostgresDB(cfg.DatabaseDSN)
+	deps.db, err = newPostgresDB(cfg.DatabaseDSN)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка инициализации БД: %w", err)
 	}
