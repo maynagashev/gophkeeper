@@ -140,13 +140,13 @@ github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:76:			ro
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:101:			handleVersionRollbackConfirm		100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:122:			handleVersionRollbackError		100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:132:			handleVersionListKeys			100.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:164:			viewVersionListScreen			0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:164:			viewVersionListScreen			100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:195:			updateVersionListScreen			0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:229:			handleVersionsLoadedMsg			0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:258:			handleVersionsLoadErrorMsg		0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:275:			handleRollbackSuccessMsg		0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:285:			handleRollbackErrorMsg			0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:299:			formatTime				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:299:			formatTime				66.7%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_welcome.go:9:			updateWelcomeScreen			100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_welcome.go:25:			viewWelcomeScreen			100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go:69:			NewSyncError				0.0%
@@ -193,4 +193,4 @@ github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:46:				deepCopyEn
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:51:				FindEntryInDB				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:60:				findEntryInDB				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:65:				FindEntryInGroups			100.0%
-total:												(statements)				75.6%
+total:												(statements)				76.2%

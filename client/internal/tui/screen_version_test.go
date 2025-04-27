@@ -3,6 +3,7 @@ package tui
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -355,5 +356,103 @@ func TestHandleVersionListKeys(t *testing.T) {
 		assert.Equal(t, initialSelected, m.selectedVersionForRollback, "selectedVersionForRollback should not change")
 		assert.Equal(t, initialConfirm, m.confirmRollback, "confirmRollback should not change")
 		assert.Nil(t, cmd, "Command should be nil")
+	})
+}
+
+func TestViewVersionListScreen(t *testing.T) {
+	// Подготовка общих данных
+	now := time.Now()
+	testVersion := models.VaultVersion{ID: 123, ContentModifiedAt: &now}
+	testError := errors.New("test rollback error")
+	items := []list.Item{
+		versionItem{version: models.VaultVersion{ID: 1, ContentModifiedAt: &now}, isCurrent: true},
+		versionItem{version: models.VaultVersion{ID: 2, ContentModifiedAt: &now}, isCurrent: false},
+	}
+
+	t.Run("View when loading", func(t *testing.T) {
+		s := NewScreenTestSuite()
+		m := s.Model
+		m.state = versionListScreen
+		m.loadingVersions = true
+
+		view := m.viewVersionListScreen()
+		assert.Contains(t, view, "Загрузка списка версий...", "View should show loading message")
+	})
+
+	t.Run("View when confirming rollback", func(t *testing.T) {
+		s := NewScreenTestSuite()
+		m := s.Model
+		m.state = versionListScreen
+		m.confirmRollback = true
+		m.selectedVersionForRollback = &testVersion
+
+		view := m.viewVersionListScreen()
+		expectedConfirm := fmt.Sprintf("Вы уверены, что хотите откатиться к версии #%d?", testVersion.ID)
+		expectedTime := fmt.Sprintf("Время изменения: %s", formatTime(testVersion.ContentModifiedAt))
+		assert.Contains(t, view, expectedConfirm, "View should show confirmation message")
+		assert.Contains(t, view, expectedTime, "View should show modification time")
+		assert.Contains(t, view, "Enter - подтвердить, Esc - отменить", "View should show confirmation keys")
+	})
+
+	t.Run("View when rollback error occurred", func(t *testing.T) {
+		s := NewScreenTestSuite()
+		m := s.Model
+		m.state = versionListScreen
+		m.rollbackError = testError
+
+		view := m.viewVersionListScreen()
+		expectedErrorMsg := fmt.Sprintf("Ошибка отката: %v", testError)
+		assert.Contains(t, view, expectedErrorMsg, "View should show rollback error message")
+		// Проверяем правильный текст подсказки при ошибке
+		assert.Contains(t, view,
+			"Нажмите Esc для возврата к списку версий",
+			"View should show error keys")
+	})
+
+	t.Run("View when version history is empty", func(t *testing.T) {
+		s := NewScreenTestSuite()
+		m := s.Model
+		m.state = versionListScreen
+		m.versions = []models.VaultVersion{}                                     // Пустой список
+		m.versionList = list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0) // Пустой list
+
+		view := m.viewVersionListScreen()
+		assert.Contains(t, view, "История версий пуста.", "View should show empty history message")
+		// Проверяем детали сообщения для пустой истории
+		assert.Contains(t, view,
+			"После успешной синхронизации здесь появятся версии.",
+			"View should show empty history details")
+	})
+
+	t.Run("View with version list", func(t *testing.T) {
+		s := NewScreenTestSuite()
+		m := s.Model
+		m.state = versionListScreen
+		// Безопасно извлекаем версии
+		var version1, version2 models.VaultVersion
+		var vItem0, vItem1 versionItem
+		var ok bool
+		require.IsType(t, versionItem{}, items[0], "Item 0 should be versionItem")
+		vItem0, ok = items[0].(versionItem)
+		require.True(t, ok, "Type assertion for item 0 failed")
+		version1 = vItem0.version
+		require.IsType(t, versionItem{}, items[1], "Item 1 should be versionItem")
+		vItem1, ok = items[1].(versionItem)
+		require.True(t, ok, "Type assertion for item 1 failed")
+		version2 = vItem1.version
+		m.versions = []models.VaultVersion{version1, version2}
+		m.versionList = list.New(items, list.NewDefaultDelegate(), 80, 20) // Увеличиваем высоту до 20
+
+		// Получаем View от списка, так как viewVersionListScreen его возвращает
+		expectedListView := m.versionList.View()
+		view := m.viewVersionListScreen()
+
+		// Проверяем, что view совпадает с View() списка
+		assert.Equal(t, expectedListView, view, "View should be the list view")
+		// Дополнительно проверяем наличие элементов в строке
+		assert.Contains(t, view, vItem0.Title(), "View should contain title of version 1")
+		assert.Contains(t, view, vItem0.Description(), "View should contain description of version 1")
+		assert.Contains(t, view, vItem1.Title(), "View should contain title of version 2")
+		assert.Contains(t, view, vItem1.Description(), "View should contain description of version 2")
 	})
 }
