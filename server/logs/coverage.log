@@ -4,9 +4,9 @@ github.com/maynagashev/gophkeeper/server/cmd/server/main.go:81:					run					0.0%
 github.com/maynagashev/gophkeeper/server/cmd/server/main.go:120:				setupDependencies			100.0%
 github.com/maynagashev/gophkeeper/server/cmd/server/main.go:168:				setupRouter				94.7%
 github.com/maynagashev/gophkeeper/server/cmd/server/main.go:207:				getEnv					100.0%
-github.com/maynagashev/gophkeeper/server/internal/handlers/auth.go:26:				NewAuthHandler				0.0%
-github.com/maynagashev/gophkeeper/server/internal/handlers/auth.go:31:				Register				0.0%
-github.com/maynagashev/gophkeeper/server/internal/handlers/auth.go:71:				Login					0.0%
+github.com/maynagashev/gophkeeper/server/internal/handlers/auth.go:26:				NewAuthHandler				100.0%
+github.com/maynagashev/gophkeeper/server/internal/handlers/auth.go:31:				Register				100.0%
+github.com/maynagashev/gophkeeper/server/internal/handlers/auth.go:71:				Login					92.0%
 github.com/maynagashev/gophkeeper/server/internal/handlers/vault_handler.go:23:			NewVaultHandler				100.0%
 github.com/maynagashev/gophkeeper/server/internal/handlers/vault_handler.go:28:			GetMetadata				94.4%
 github.com/maynagashev/gophkeeper/server/internal/handlers/vault_handler.go:61:			Upload					89.2%
@@ -44,4 +44,4 @@ github.com/maynagashev/gophkeeper/server/internal/services/vault_service.go:338:
 github.com/maynagashev/gophkeeper/server/internal/storage/minio_client.go:38:			NewMinioClient				0.0%
 github.com/maynagashev/gophkeeper/server/internal/storage/minio_client.go:83:			UploadFile				0.0%
 github.com/maynagashev/gophkeeper/server/internal/storage/minio_client.go:112:			DownloadFile				0.0%
-total:												(statements)				42.2%
+total:												(statements)				49.0%

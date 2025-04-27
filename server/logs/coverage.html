@@ -59,7 +59,7 @@
 				
 				<option value="file1">github.com/maynagashev/gophkeeper/server/cmd/server/main.go (61.8%)</option>
 				
-				<option value="file2">github.com/maynagashev/gophkeeper/server/internal/handlers/auth.go (0.0%)</option>
+				<option value="file2">github.com/maynagashev/gophkeeper/server/internal/handlers/auth.go (95.7%)</option>
 				
 				<option value="file3">github.com/maynagashev/gophkeeper/server/internal/handlers/vault_handler.go (92.2%)</option>
 				
@@ -415,86 +415,86 @@ type AuthHandler struct {
 }
 
 // NewAuthHandler создает новый экземпляр AuthHandler.
-func NewAuthHandler(s services.AuthService) *AuthHandler <span class="cov0" title="0">{ // Принимаем интерфейс из пакета services
+func NewAuthHandler(s services.AuthService) *AuthHandler <span class="cov8" title="1">{ // Принимаем интерфейс из пакета services
         return &amp;AuthHandler{service: s}
 }</span>
 
 // Register обрабатывает запрос на регистрацию нового пользователя.
-func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
         var req models.RegisterRequest
         // Декодируем JSON из тела запроса
-        if err := json.NewDecoder(r.Body).Decode(&amp;req); err != nil </span><span class="cov0" title="0">{
+        if err := json.NewDecoder(r.Body).Decode(&amp;req); err != nil </span><span class="cov8" title="1">{
                 log.Printf("[AuthHandler] Ошибка декодирования запроса регистрации: %v", err)
                 http.Error(w, "Неверный формат запроса", http.StatusBadRequest)
                 return
         }</span>
 
         // Валидация входных данных (простая)
-        <span class="cov0" title="0">if req.Username == "" || req.Password == "" </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if req.Username == "" || req.Password == "" </span><span class="cov8" title="1">{
                 log.Printf("[AuthHandler] Пустое имя пользователя или пароль при регистрации")
                 http.Error(w, "Имя пользователя и пароль не могут быть пустыми", http.StatusBadRequest)
                 return
         }</span>
 
-        <span class="cov0" title="0">log.Printf("[AuthHandler] Попытка регистрации пользователя: %s", req.Username)
+        <span class="cov8" title="1">log.Printf("[AuthHandler] Попытка регистрации пользователя: %s", req.Username)
 
         // Вызываем сервис
         err := h.service.Register(req.Username, req.Password)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 // Обрабатываем ошибки от сервиса
-                if errors.Is(err, services.ErrUsernameTaken) </span><span class="cov0" title="0">{
+                if errors.Is(err, services.ErrUsernameTaken) </span><span class="cov8" title="1">{
                         log.Printf("[AuthHandler] Ошибка регистрации (имя занято): %s", req.Username)
                         http.Error(w, err.Error(), http.StatusConflict) // 409 Conflict
-                }</span> else<span class="cov0" title="0"> {
+                }</span> else<span class="cov8" title="1"> {
                         // Другие ошибки считаем внутренними
                         log.Printf("[AuthHandler] Внутренняя ошибка при регистрации '%s': %v", req.Username, err)
                         http.Error(w, "Внутренняя ошибка сервера", http.StatusInternalServerError)
                 }</span>
-                <span class="cov0" title="0">return</span>
+                <span class="cov8" title="1">return</span>
         }
 
         // Возвращаем успешный статус
-        <span class="cov0" title="0">w.WriteHeader(http.StatusCreated)                                // 201 Created
+        <span class="cov8" title="1">w.WriteHeader(http.StatusCreated)                                // 201 Created
         _, _ = w.Write([]byte("Пользователь успешно зарегистрирован\n")) // Убираем "(заглушка)"
         log.Printf("[AuthHandler] Успешная регистрация для: %s", req.Username)</span>
 }
 
 // Login обрабатывает запрос на вход пользователя.
-func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
         var req models.LoginRequest
         // Декодируем JSON из тела запроса
-        if err := json.NewDecoder(r.Body).Decode(&amp;req); err != nil </span><span class="cov0" title="0">{
+        if err := json.NewDecoder(r.Body).Decode(&amp;req); err != nil </span><span class="cov8" title="1">{
                 log.Printf("[AuthHandler] Ошибка декодирования запроса входа: %v", err)
                 http.Error(w, "Неверный формат запроса", http.StatusBadRequest)
                 return
         }</span>
 
         // Валидация входных данных (простая)
-        <span class="cov0" title="0">if req.Username == "" || req.Password == "" </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if req.Username == "" || req.Password == "" </span><span class="cov8" title="1">{
                 log.Printf("[AuthHandler] Пустое имя пользователя или пароль при входе")
                 http.Error(w, "Имя пользователя и пароль не могут быть пустыми", http.StatusBadRequest)
                 return
         }</span>
 
-        <span class="cov0" title="0">log.Printf("[AuthHandler] Попытка входа пользователя: %s", req.Username)
+        <span class="cov8" title="1">log.Printf("[AuthHandler] Попытка входа пользователя: %s", req.Username)
 
         // Вызываем сервис
         token, err := h.service.Login(req.Username, req.Password)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 // Обрабатываем ошибки от сервиса
-                if errors.Is(err, services.ErrInvalidCredentials) </span><span class="cov0" title="0">{
+                if errors.Is(err, services.ErrInvalidCredentials) </span><span class="cov8" title="1">{
                         log.Printf("[AuthHandler] Ошибка входа (неверные данные): %s", req.Username)
                         http.Error(w, err.Error(), http.StatusUnauthorized) // 401 Unauthorized
-                }</span> else<span class="cov0" title="0"> {
+                }</span> else<span class="cov8" title="1"> {
                         // Другие ошибки считаем внутренними
                         log.Printf("[AuthHandler] Внутренняя ошибка при входе '%s': %v", req.Username, err)
                         http.Error(w, "Внутренняя ошибка сервера", http.StatusInternalServerError)
                 }</span>
-                <span class="cov0" title="0">return</span>
+                <span class="cov8" title="1">return</span>
         }
 
         // Возвращаем токен
-        <span class="cov0" title="0">resp := models.LoginResponse{
+        <span class="cov8" title="1">resp := models.LoginResponse{
                 Token: token, // Используем реальный токен от сервиса
         }
 
@@ -504,7 +504,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) <span class=
                 log.Printf("[AuthHandler] Ошибка кодирования ответа входа: %v", err)
                 return
         }</span>
-        <span class="cov0" title="0">log.Printf("[AuthHandler] Успешный вход для: %s", req.Username)</span>
+        <span class="cov8" title="1">log.Printf("[AuthHandler] Успешный вход для: %s", req.Username)</span>
 }
 </pre>
 		
