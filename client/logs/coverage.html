@@ -79,11 +79,11 @@
 				
 				<option value="file11">github.com/maynagashev/gophkeeper/client/internal/tui/screen_credentials.go (90.9%)</option>
 				
-				<option value="file12">github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go (61.8%)</option>
+				<option value="file12">github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go (76.3%)</option>
 				
 				<option value="file13">github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go (66.4%)</option>
 				
-				<option value="file14">github.com/maynagashev/gophkeeper/client/internal/tui/screen_list.go (72.4%)</option>
+				<option value="file14">github.com/maynagashev/gophkeeper/client/internal/tui/screen_list.go (86.8%)</option>
 				
 				<option value="file15">github.com/maynagashev/gophkeeper/client/internal/tui/screen_login.go (16.3%)</option>
 				
@@ -109,7 +109,7 @@
 				
 				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/tui.go (3.5%)</option>
 				
-				<option value="file27">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (46.2%)</option>
+				<option value="file27">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (46.6%)</option>
 				
 				<option value="file28">github.com/maynagashev/gophkeeper/client/internal/tui/utils.go (92.9%)</option>
 				
@@ -2461,17 +2461,17 @@ const (
 )
 
 // updateEntryDetailScreen обрабатывает сообщения для экрана деталей записи.
-func (m *model) updateEntryDetailScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
-        if keyMsg, ok := msg.(tea.KeyMsg); ok </span><span class="cov0" title="0">{
+func (m *model) updateEntryDetailScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov8" title="1">{
+        if keyMsg, ok := msg.(tea.KeyMsg); ok </span><span class="cov8" title="1">{
                 switch keyMsg.String() </span>{
-                case keyEsc, keyBack:<span class="cov0" title="0">
+                case keyEsc, keyBack:<span class="cov8" title="1">
                         m.state = entryListScreen
                         m.selectedEntry = nil // Сбрасываем выбранную запись
                         slog.Info("Возврат к списку записей")
                         return m, tea.ClearScreen</span>
-                case keyEdit:<span class="cov0" title="0">
+                case keyEdit:<span class="cov8" title="1">
                         // Переход к редактированию (только если не Read-Only)
-                        if !m.readOnlyMode &amp;&amp; m.selectedEntry != nil </span><span class="cov0" title="0">{
+                        if !m.readOnlyMode &amp;&amp; m.selectedEntry != nil </span><span class="cov8" title="1">{
                                 m.prepareEditScreen()
                                 m.state = entryEditScreen
                                 slog.Info("Переход к редактированию записи", "title", m.selectedEntry.Title())
@@ -2961,19 +2961,19 @@ func (m *model) updateEntryListScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span cl
 }
 
 // _handleAuthLoadError обрабатывает ошибку загрузки Auth данных.
-func (m *model) _handleAuthLoadError(errLoad error, urlFromFlag bool) <span class="cov0" title="0">{
+func (m *model) _handleAuthLoadError(errLoad error, urlFromFlag bool) <span class="cov8" title="1">{
         slog.Error("Ошибка загрузки Auth данных из KDBX", "error", errLoad)
-        if !urlFromFlag </span><span class="cov0" title="0">{
+        if !urlFromFlag </span><span class="cov8" title="1">{
                 m.serverURL = ""
                 m.apiClient = nil
         }</span>
-        <span class="cov0" title="0">m.authToken = ""
+        <span class="cov8" title="1">m.authToken = ""
         m.loginStatus = statusNotLoggedIn + " (ошибка загрузки)"</span>
 }
 
 // _handleAuthLoadSuccess обрабатывает успешную загрузку Auth данных.
 func (m *model) _handleAuthLoadSuccess(loadedURL, loadedToken string, urlFromFlag bool) <span class="cov8" title="1">{
-        if urlFromFlag </span><span class="cov0" title="0">{
+        if urlFromFlag </span><span class="cov8" title="1">{
                 // URL задан флагом, загружаем только токен
                 m.authToken = loadedToken
                 slog.Info("URL сервера задан флагом, загружен только токен из KDBX", "token_found", m.authToken != "")
@@ -2981,7 +2981,7 @@ func (m *model) _handleAuthLoadSuccess(loadedURL, loadedToken string, urlFromFla
                 // URL не задан флагом, используем загруженный URL
                 m.serverURL = loadedURL
                 m.authToken = loadedToken
-                if m.serverURL != "" </span><span class="cov0" title="0">{
+                if m.serverURL != "" </span><span class="cov8" title="1">{
                         m.apiClient = api.NewHTTPClient(m.serverURL)
                         slog.Info("URL сервера загружен из KDBX, создан API клиент", "url", m.serverURL, "token_found", m.authToken != "")
                 }</span> else<span class="cov8" title="1"> {
@@ -2991,7 +2991,7 @@ func (m *model) _handleAuthLoadSuccess(loadedURL, loadedToken string, urlFromFla
         }
 
         // Обновляем статус входа
-        <span class="cov8" title="1">if m.authToken != "" </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if m.authToken != "" </span><span class="cov8" title="1">{
                 m.loginStatus = "Вход выполнен (сессия загружена)"
         }</span> else<span class="cov8" title="1"> {
                 m.loginStatus = statusNotLoggedIn
@@ -5499,7 +5499,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov8" titl
                 updatedModel, stateCmd = m.updateNewKdbxPasswordScreen(msg)</span>
         case entryListScreen:<span class="cov8" title="1">
                 updatedModel, stateCmd = m.updateEntryListScreen(msg)</span>
-        case entryDetailScreen:<span class="cov0" title="0">
+        case entryDetailScreen:<span class="cov8" title="1">
                 updatedModel, stateCmd = m.updateEntryDetailScreen(msg)</span>
         case entryEditScreen:<span class="cov0" title="0">
                 updatedModel, stateCmd = m.updateEntryEditScreen(msg)</span>

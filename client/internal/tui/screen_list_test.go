@@ -1,12 +1,14 @@
 package tui
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/maynagashev/gophkeeper/client/internal/api"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tobischo/gokeepasslib/v3"
@@ -176,4 +178,115 @@ func TestUpdateEntryListScreen(t *testing.T) {
 
 	// TODO: Добавить тесты для _handleAuthLoadErrorMsg, _handleAuthLoadSuccessMsg,
 	// TODO: клавиш 'e' (редактирование), 's' (сохранение), 'b' (назад), 'q' (выход), '/' (фильтр)
+}
+
+// TestHandleAuthLoadError проверяет функцию _handleAuthLoadError.
+func TestHandleAuthLoadError(t *testing.T) {
+	t.Run("URL не из флага", func(t *testing.T) {
+		initialModel := &model{
+			serverURL: "http://existing.url",
+			apiClient: api.NewHTTPClient("http://existing.url"),
+			authToken: "existing_token",
+		}
+		errLoad := errors.New("test auth load error")
+
+		initialModel._handleAuthLoadError(errLoad, false)
+
+		assert.Equal(t, "", initialModel.serverURL, "URL сервера должен быть сброшен")
+		assert.Nil(t, initialModel.apiClient, "API клиент должен быть сброшен")
+		assert.Equal(t, "", initialModel.authToken, "Токен должен быть сброшен")
+		assert.Contains(t, initialModel.loginStatus, statusNotLoggedIn)
+		assert.Contains(t, initialModel.loginStatus, "(ошибка загрузки)")
+	})
+
+	t.Run("URL из флага", func(t *testing.T) {
+		initialModel := &model{
+			serverURL: "http://flag.url",
+			apiClient: api.NewHTTPClient("http://flag.url"),
+			authToken: "existing_token",
+		}
+		errLoad := errors.New("test auth load error")
+
+		initialModel._handleAuthLoadError(errLoad, true)
+
+		assert.Equal(t, "http://flag.url", initialModel.serverURL, "URL сервера не должен меняться")
+		assert.NotNil(t, initialModel.apiClient, "API клиент не должен меняться")
+		assert.Equal(t, "", initialModel.authToken, "Токен должен быть сброшен")
+		assert.Contains(t, initialModel.loginStatus, statusNotLoggedIn)
+		assert.Contains(t, initialModel.loginStatus, "(ошибка загрузки)")
+	})
+}
+
+// TestHandleAuthLoadSuccess проверяет функцию _handleAuthLoadSuccess.
+func TestHandleAuthLoadSuccess(t *testing.T) {
+	t.Run("URL не из флага, URL и токен загружены", func(t *testing.T) {
+		initialModel := &model{}
+		loadedURL := "http://loaded.url"
+		loadedToken := "loaded_token"
+
+		initialModel._handleAuthLoadSuccess(loadedURL, loadedToken, false)
+
+		assert.Equal(t, loadedURL, initialModel.serverURL, "URL сервера должен быть установлен")
+		assert.NotNil(t, initialModel.apiClient, "API клиент должен быть создан")
+		assert.Equal(t, loadedToken, initialModel.authToken, "Токен должен быть установлен")
+		assert.Contains(t, initialModel.loginStatus, "Вход выполнен")
+	})
+
+	t.Run("URL не из флага, URL пустой, токен загружен", func(t *testing.T) {
+		initialModel := &model{}
+		loadedURL := ""
+		loadedToken := "loaded_token"
+
+		initialModel._handleAuthLoadSuccess(loadedURL, loadedToken, false)
+
+		assert.Equal(t, "", initialModel.serverURL, "URL сервера должен быть пустым")
+		assert.Nil(t, initialModel.apiClient, "API клиент не должен быть создан")
+		assert.Equal(t, loadedToken, initialModel.authToken, "Токен должен быть установлен")
+		assert.Contains(t, initialModel.loginStatus, "Вход выполнен")
+	})
+
+	t.Run("URL не из флага, URL загружен, токен пустой", func(t *testing.T) {
+		initialModel := &model{}
+		loadedURL := "http://loaded.url"
+		loadedToken := ""
+
+		initialModel._handleAuthLoadSuccess(loadedURL, loadedToken, false)
+
+		assert.Equal(t, loadedURL, initialModel.serverURL, "URL сервера должен быть установлен")
+		assert.NotNil(t, initialModel.apiClient, "API клиент должен быть создан")
+		assert.Equal(t, "", initialModel.authToken, "Токен должен быть пустым")
+		assert.Equal(t, statusNotLoggedIn, initialModel.loginStatus)
+	})
+
+	t.Run("URL из флага, токен загружен", func(t *testing.T) {
+		initialModel := &model{
+			serverURL: "http://flag.url",
+			apiClient: api.NewHTTPClient("http://flag.url"), // Клиент уже есть
+		}
+		loadedURL := "http://ignored.url"
+		loadedToken := "loaded_token"
+
+		initialModel._handleAuthLoadSuccess(loadedURL, loadedToken, true)
+
+		assert.Equal(t, "http://flag.url", initialModel.serverURL, "URL сервера не должен меняться")
+		assert.NotNil(t, initialModel.apiClient, "API клиент не должен меняться")
+		assert.Equal(t, loadedToken, initialModel.authToken, "Токен должен быть установлен")
+		assert.Contains(t, initialModel.loginStatus, "Вход выполнен")
+	})
+
+	t.Run("URL из флага, токен пустой", func(t *testing.T) {
+		initialModel := &model{
+			serverURL: "http://flag.url",
+			apiClient: api.NewHTTPClient("http://flag.url"),
+		}
+		loadedURL := "http://ignored.url"
+		loadedToken := ""
+
+		initialModel._handleAuthLoadSuccess(loadedURL, loadedToken, true)
+
+		assert.Equal(t, "http://flag.url", initialModel.serverURL, "URL сервера не должен меняться")
+		assert.NotNil(t, initialModel.apiClient, "API клиент не должен меняться")
+		assert.Equal(t, "", initialModel.authToken, "Токен должен быть пустым")
+		assert.Equal(t, statusNotLoggedIn, initialModel.loginStatus)
+	})
 }

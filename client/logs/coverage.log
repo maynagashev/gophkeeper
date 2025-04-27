@@ -66,7 +66,7 @@ github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_input.go
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_input.go:44:		handleAttachmentPathConfirm			75.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_input.go:99:		viewAttachmentPathInputScreen			85.7%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_credentials.go:11:			viewCredentialsScreen				90.9%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go:17:			updateEntryDetailScreen				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go:17:			updateEntryDetailScreen				91.7%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go:40:			renderStandardFields				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go:69:			maskCardNumber					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go:78:			renderCustomFields				100.0%
@@ -83,8 +83,8 @@ github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:180:			hand
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:197:			saveEntryChanges				88.9%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go:232:			viewEntryEditScreen				0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_list.go:21:			updateEntryListScreen				76.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_list.go:75:			_handleAuthLoadError				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_list.go:86:			_handleAuthLoadSuccess				61.5%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_list.go:75:			_handleAuthLoadError				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_list.go:86:			_handleAuthLoadSuccess				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_list.go:113:			handleDBOpenedMsg				87.5%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_login.go:12:			updateLoginScreen				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_login.go:34:			viewLoginScreen					100.0%
@@ -193,10 +193,10 @@ github.com/maynagashev/gophkeeper/client/internal/tui/update.go:347:				updateDB
 github.com/maynagashev/gophkeeper/client/internal/tui/update.go:373:				updateRootModTime				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/update.go:393:				handleSaveKeyPress				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/update.go:413:				handleGlobalKeys				100.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/update.go:431:				Update						55.8%
+github.com/maynagashev/gophkeeper/client/internal/tui/update.go:431:				Update						58.1%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:8:				DeepCopyEntry					85.7%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:46:				deepCopyEntry					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:51:				FindEntryInDB					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:60:				findEntryInDB					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:65:				FindEntryInGroups				100.0%
-total:												(statements)					57.8%
+total:												(statements)					58.9%

@@ -186,3 +186,54 @@ func TestViewEntryDetailScreen(t *testing.T) {
 	testModel.selectedEntry = nil
 	assert.Equal(t, "Ошибка: запись не выбрана.", testModel.viewEntryDetailScreen())
 }
+
+// TestUpdateEntryDetailScreen проверяет функцию updateEntryDetailScreen.
+func TestUpdateEntryDetailScreen(t *testing.T) {
+	suite := NewScreenTestSuite()
+
+	// Подготавливаем модель для экрана деталей
+	entry := gokeepasslib.Entry{
+		Values: []gokeepasslib.ValueData{
+			{Key: fieldNameTitle, Value: gokeepasslib.V{Content: "Detail Test"}},
+		},
+	}
+	initialModel := suite.Model
+	initialModel.state = entryDetailScreen
+	initialModel.selectedEntry = &entryItem{entry: entry}
+	initialModel.readOnlyMode = false // Режим редактирования разрешен
+	suite.Model = initialModel
+
+	t.Run("Переход к редактированию по 'e'", func(t *testing.T) {
+		// Моделируем нажатие 'e'
+		newModel, _ := suite.SimulateKeyRune('e')
+		suite.Model = toModel(t, newModel)
+
+		// Проверки
+		suite.AssertState(t, entryEditScreen)
+		assert.NotNil(t, suite.Model.editingEntry, "Должна быть создана копия для редактирования")
+		assert.Equal(t, "Detail Test", suite.Model.editingEntry.GetTitle(), "Заголовок редактируемой записи")
+		assert.Len(t, suite.Model.editInputs, numEditableFields, "Должны быть созданы поля ввода")
+		assert.True(t, suite.Model.editInputs[editableFieldTitle].Focused(), "Фокус должен быть на поле Title")
+	})
+
+	// Сбрасываем состояние для следующего теста
+	initialModel = suite.Model
+	initialModel.state = entryDetailScreen
+	initialModel.selectedEntry = &entryItem{entry: entry}
+	initialModel.editingEntry = nil // Убираем состояние редактирования
+	initialModel.editInputs = nil
+	suite.Model = initialModel
+
+	t.Run("Возврат к списку по 'b'", func(t *testing.T) {
+		// Моделируем нажатие 'b'
+		newModel, _ := suite.SimulateKeyRune('b')
+		suite.Model = toModel(t, newModel)
+
+		// Проверка
+		suite.AssertState(t, entryListScreen)
+		assert.Nil(t, suite.Model.selectedEntry, "Выбранная запись должна быть сброшена")
+	})
+
+	// TODO: Добавить тесты для других клавиш, если они будут добавлены
+	// (например, копирование полей)
+}
