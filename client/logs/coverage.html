@@ -101,7 +101,7 @@
 				
 				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go (92.7%)</option>
 				
-				<option value="file23">github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go (71.7%)</option>
+				<option value="file23">github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go (87.0%)</option>
 				
 				<option value="file24">github.com/maynagashev/gophkeeper/client/internal/tui/screen_welcome.go (100.0%)</option>
 				
@@ -4305,7 +4305,7 @@ func (m *model) updateVersionListScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span 
 }
 
 // handleVersionsLoadedMsg обрабатывает сообщение о загруженных версиях.
-func handleVersionsLoadedMsg(m *model, msg versionsLoadedMsg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+func handleVersionsLoadedMsg(m *model, msg versionsLoadedMsg) (tea.Model, tea.Cmd) <span class="cov8" title="1">{
         m.loadingVersions = false
         m.versions = msg.versions
 
@@ -4314,12 +4314,12 @@ func handleVersionsLoadedMsg(m *model, msg versionsLoadedMsg) (tea.Model, tea.Cm
         currentVersionID := msg.currentVersionID // Используем ID из сообщения
 
         // Пытаемся определить текущую версию, если ID из сообщения 0 или его нет (для обратной совместимости?)
-        if currentVersionID == 0 &amp;&amp; m.serverMeta != nil </span><span class="cov0" title="0">{
+        if currentVersionID == 0 &amp;&amp; m.serverMeta != nil </span><span class="cov8" title="1">{
                 currentVersionID = m.serverMeta.ID
                 slog.Warn("currentVersionID из API = 0, используем ID из serverMeta", "serverMeta.ID", currentVersionID)
         }</span>
 
-        <span class="cov0" title="0">for _, v := range m.versions </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">for _, v := range m.versions </span><span class="cov8" title="1">{
                 items = append(items, versionItem{
                         version:   v,
                         isCurrent: v.ID == currentVersionID,
@@ -4327,17 +4327,22 @@ func handleVersionsLoadedMsg(m *model, msg versionsLoadedMsg) (tea.Model, tea.Cm
         }</span>
 
         // Обновляем список и получаем команду от него
-        <span class="cov0" title="0">cmd := m.versionList.SetItems(items) // Не игнорируем команду
+        <span class="cov8" title="1">listCmd := m.versionList.SetItems(items) // Не игнорируем команду
+
+        // Оборачиваем сообщение ClearScreen в команду
+        clearCmd := func() tea.Msg </span><span class="cov0" title="0">{
+                return tea.ClearScreen()
+        }</span>
 
         // Добавляем ClearScreen для очистки артефактов
-        return m, tea.Batch(cmd, tea.ClearScreen)</span>
+        <span class="cov8" title="1">return m, tea.Batch(listCmd, clearCmd)</span>
 }
 
 // handleVersionsLoadErrorMsg обрабатывает ошибку загрузки версий.
-func handleVersionsLoadErrorMsg(m *model, msg versionsLoadErrorMsg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+func handleVersionsLoadErrorMsg(m *model, msg versionsLoadErrorMsg) (tea.Model, tea.Cmd) <span class="cov8" title="1">{
         m.loadingVersions = false
         // Проверяем, является ли ошибка ошибкой авторизации
-        if errors.Is(msg.err, api.ErrAuthorization) </span><span class="cov0" title="0">{
+        if errors.Is(msg.err, api.ErrAuthorization) </span><span class="cov8" title="1">{
                 // Не меняем состояние здесь, т.к. мы уже на экране версий,
                 // но даем пользователю понять, что делать (нажать 'l')
                 newM, statusCmd := m.setStatusMessage("Ошибка авторизации. Токен истек? Попробуйте войти заново (L).")
@@ -4345,7 +4350,7 @@ func handleVersionsLoadErrorMsg(m *model, msg versionsLoadErrorMsg) (tea.Model, 
         }</span>
         // Иначе показываем общую ошибку
         // Возвращаем результат setStatusMessage, который включает команду
-        <span class="cov0" title="0">newM, statusCmd := m.setStatusMessage(fmt.Sprintf("Ошибка загрузки версий: %v", msg.err))
+        <span class="cov8" title="1">newM, statusCmd := m.setStatusMessage(fmt.Sprintf("Ошибка загрузки версий: %v", msg.err))
         // Добавляем ClearScreen и сюда
         return newM, tea.Batch(statusCmd, tea.ClearScreen)</span>
 }

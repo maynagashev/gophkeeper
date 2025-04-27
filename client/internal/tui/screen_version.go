@@ -248,10 +248,15 @@ func handleVersionsLoadedMsg(m *model, msg versionsLoadedMsg) (tea.Model, tea.Cm
 	}
 
 	// Обновляем список и получаем команду от него
-	cmd := m.versionList.SetItems(items) // Не игнорируем команду
+	listCmd := m.versionList.SetItems(items) // Не игнорируем команду
+
+	// Оборачиваем сообщение ClearScreen в команду
+	clearCmd := func() tea.Msg {
+		return tea.ClearScreen()
+	}
 
 	// Добавляем ClearScreen для очистки артефактов
-	return m, tea.Batch(cmd, tea.ClearScreen)
+	return m, tea.Batch(listCmd, clearCmd)
 }
 
 // handleVersionsLoadErrorMsg обрабатывает ошибку загрузки версий.
