@@ -99,7 +99,7 @@
 				
 				<option value="file21">github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go (92.8%)</option>
 				
-				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go (40.4%)</option>
+				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go (50.5%)</option>
 				
 				<option value="file23">github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go (25.2%)</option>
 				
@@ -3810,33 +3810,33 @@ func (m *ScreenTestMockAPIClient) ListVersions(
         ctx context.Context,
         limit,
         offset int,
-) ([]models.VaultVersion, int64, error) <span class="cov0" title="0">{
+) ([]models.VaultVersion, int64, error) <span class="cov8" title="1">{
         args := m.Called(ctx, limit, offset)
-        if args.Get(0) == nil </span><span class="cov0" title="0">{
+        if args.Get(0) == nil </span><span class="cov8" title="1">{
                 return nil, 0, args.Error(mockErrorIndex)
         }</span>
 
-        <span class="cov0" title="0">versions, ok1 := args.Get(0).([]models.VaultVersion)
+        <span class="cov8" title="1">versions, ok1 := args.Get(0).([]models.VaultVersion)
         if !ok1 </span><span class="cov0" title="0">{
                 return nil, 0, args.Error(mockErrorIndex)
         }</span>
 
-        <span class="cov0" title="0">count, ok2 := args.Get(1).(int64)
+        <span class="cov8" title="1">count, ok2 := args.Get(1).(int64)
         if !ok2 </span><span class="cov0" title="0">{
                 return versions, 0, args.Error(mockErrorIndex)
         }</span>
 
-        <span class="cov0" title="0">return versions, count, args.Error(mockErrorIndex)</span>
+        <span class="cov8" title="1">return versions, count, args.Error(mockErrorIndex)</span>
 }
 
 // RollbackToVersion мокирует метод RollbackToVersion.
-func (m *ScreenTestMockAPIClient) RollbackToVersion(ctx context.Context, versionID int64) error <span class="cov0" title="0">{
+func (m *ScreenTestMockAPIClient) RollbackToVersion(ctx context.Context, versionID int64) error <span class="cov8" title="1">{
         args := m.Called(ctx, versionID)
         return args.Error(0)
 }</span>
 
 // SetAuthToken мокирует метод SetAuthToken.
-func (m *ScreenTestMockAPIClient) SetAuthToken(token string) <span class="cov0" title="0">{
+func (m *ScreenTestMockAPIClient) SetAuthToken(token string) <span class="cov8" title="1">{
         m.Called(token)
 }</span>
 

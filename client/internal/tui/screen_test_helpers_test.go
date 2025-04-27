@@ -196,3 +196,74 @@ func TestScreenTestMockAPIClient_DownloadVault(t *testing.T) {
 		mockClient.AssertExpectations(t)
 	})
 }
+
+// TestScreenTestMockAPIClient_ListVersions проверяет мок метода ListVersions.
+func TestScreenTestMockAPIClient_ListVersions(t *testing.T) {
+	mockClient := new(ScreenTestMockAPIClient)
+	ctx := context.Background()
+	limit := 10
+	offset := 0
+	now := time.Now()
+	expectedVersions := []models.VaultVersion{
+		{ID: 1, VaultID: 1, ObjectKey: "key1", CreatedAt: now, ContentModifiedAt: &now},
+		{ID: 2, VaultID: 1, ObjectKey: "key2", CreatedAt: now.Add(-time.Hour), ContentModifiedAt: &now},
+	}
+	expectedCount := int64(2)
+	expectedErr := errors.New("mock list versions error")
+
+	// Тест успешного получения списка версий
+	t.Run("Success", func(t *testing.T) {
+		mockClient.On("ListVersions", ctx, limit, offset).Return(expectedVersions, expectedCount, nil).Once()
+		versions, count, err := mockClient.ListVersions(ctx, limit, offset)
+		require.NoError(t, err)
+		assert.Equal(t, expectedVersions, versions)
+		assert.Equal(t, expectedCount, count)
+		mockClient.AssertExpectations(t)
+	})
+
+	// Тест ошибки получения списка версий
+	t.Run("Error", func(t *testing.T) {
+		mockClient.On("ListVersions", ctx, limit, offset).Return(nil, int64(0), expectedErr).Once()
+		versions, count, err := mockClient.ListVersions(ctx, limit, offset)
+		require.Error(t, err)
+		assert.Equal(t, expectedErr, err)
+		assert.Nil(t, versions)
+		assert.Zero(t, count)
+		mockClient.AssertExpectations(t)
+	})
+}
+
+// TestScreenTestMockAPIClient_RollbackToVersion проверяет мок метода RollbackToVersion.
+func TestScreenTestMockAPIClient_RollbackToVersion(t *testing.T) {
+	mockClient := new(ScreenTestMockAPIClient)
+	ctx := context.Background()
+	versionID := int64(5)
+	expectedErr := errors.New("mock rollback error")
+
+	// Тест успешного отката
+	t.Run("Success", func(t *testing.T) {
+		mockClient.On("RollbackToVersion", ctx, versionID).Return(nil).Once()
+		err := mockClient.RollbackToVersion(ctx, versionID)
+		require.NoError(t, err)
+		mockClient.AssertExpectations(t)
+	})
+
+	// Тест ошибки отката
+	t.Run("Error", func(t *testing.T) {
+		mockClient.On("RollbackToVersion", ctx, versionID).Return(expectedErr).Once()
+		err := mockClient.RollbackToVersion(ctx, versionID)
+		require.Error(t, err)
+		assert.Equal(t, expectedErr, err)
+		mockClient.AssertExpectations(t)
+	})
+}
+
+// TestScreenTestMockAPIClient_SetAuthToken проверяет мок метода SetAuthToken.
+func TestScreenTestMockAPIClient_SetAuthToken(t *testing.T) {
+	mockClient := new(ScreenTestMockAPIClient)
+	token := "new-auth-token"
+
+	mockClient.On("SetAuthToken", token).Return().Once()
+	mockClient.SetAuthToken(token)
+	mockClient.AssertExpectations(t)
+}

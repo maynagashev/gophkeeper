@@ -115,9 +115,9 @@ github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:42:
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:53:		GetVaultMetadata			80.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:72:		UploadVault				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:83:		DownloadVault				80.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:110:		ListVersions				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:134:		RollbackToVersion			0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:140:		SetAuthToken				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:110:		ListVersions				80.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:134:		RollbackToVersion			100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:140:		SetAuthToken				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:145:		NewScreenTestSuite			100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:179:		WithServerURL				0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:185:		WithAuthToken				0.0%
@@ -193,4 +193,4 @@ github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:46:				deepCopyEn
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:51:				FindEntryInDB				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:60:				findEntryInDB				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:65:				FindEntryInGroups			100.0%
-total:												(statements)				70.5%
+total:												(statements)				71.0%
