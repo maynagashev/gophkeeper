@@ -19,11 +19,11 @@ github.com/maynagashev/gophkeeper/server/internal/repository/db.go:20:				NewPos
 github.com/maynagashev/gophkeeper/server/internal/repository/user_repository.go:32:		NewPostgresUserRepository		100.0%
 github.com/maynagashev/gophkeeper/server/internal/repository/user_repository.go:38:		CreateUser				100.0%
 github.com/maynagashev/gophkeeper/server/internal/repository/user_repository.go:60:		GetUserByUsername			100.0%
-github.com/maynagashev/gophkeeper/server/internal/repository/vault_repository.go:30:		NewPostgresVaultRepository		0.0%
-github.com/maynagashev/gophkeeper/server/internal/repository/vault_repository.go:35:		GetVaultByUserID			0.0%
-github.com/maynagashev/gophkeeper/server/internal/repository/vault_repository.go:55:		CreateVault				0.0%
-github.com/maynagashev/gophkeeper/server/internal/repository/vault_repository.go:72:		UpdateVaultCurrentVersion		0.0%
-github.com/maynagashev/gophkeeper/server/internal/repository/vault_repository.go:98:		GetVaultWithCurrentVersionByUserID	0.0%
+github.com/maynagashev/gophkeeper/server/internal/repository/vault_repository.go:30:		NewPostgresVaultRepository		100.0%
+github.com/maynagashev/gophkeeper/server/internal/repository/vault_repository.go:35:		GetVaultByUserID			100.0%
+github.com/maynagashev/gophkeeper/server/internal/repository/vault_repository.go:55:		CreateVault				100.0%
+github.com/maynagashev/gophkeeper/server/internal/repository/vault_repository.go:72:		UpdateVaultCurrentVersion		100.0%
+github.com/maynagashev/gophkeeper/server/internal/repository/vault_repository.go:98:		GetVaultWithCurrentVersionByUserID	100.0%
 github.com/maynagashev/gophkeeper/server/internal/repository/vault_version_repository.go:28:	NewPostgresVaultVersionRepository	0.0%
 github.com/maynagashev/gophkeeper/server/internal/repository/vault_version_repository.go:33:	CreateVersion				0.0%
 github.com/maynagashev/gophkeeper/server/internal/repository/vault_version_repository.go:61:	ListVersionsByVaultID			0.0%
@@ -44,4 +44,4 @@ github.com/maynagashev/gophkeeper/server/internal/services/vault_service.go:338:
 github.com/maynagashev/gophkeeper/server/internal/storage/minio_client.go:38:			NewMinioClient				0.0%
 github.com/maynagashev/gophkeeper/server/internal/storage/minio_client.go:83:			UploadFile				0.0%
 github.com/maynagashev/gophkeeper/server/internal/storage/minio_client.go:112:			DownloadFile				0.0%
-total:												(statements)				58.2%
+total:												(statements)				65.9%
