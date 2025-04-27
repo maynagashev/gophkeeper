@@ -107,7 +107,7 @@
 				
 				<option value="file25">github.com/maynagashev/gophkeeper/client/internal/tui/tui.go (18.3%)</option>
 				
-				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (68.5%)</option>
+				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (70.5%)</option>
 				
 				<option value="file27">github.com/maynagashev/gophkeeper/client/internal/tui/utils.go (92.9%)</option>
 				
@@ -4865,13 +4865,13 @@ func handleSyncUploadSuccessMsg(m *model) (tea.Model, tea.Cmd) <span class="cov8
         return newM, tea.Batch(statusCmd, tea.ClearScreen)
 }</span>
 
-func handleSyncDownloadSuccessMsg(m *model, msg syncDownloadSuccessMsg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+func handleSyncDownloadSuccessMsg(m *model, msg syncDownloadSuccessMsg) (tea.Model, tea.Cmd) <span class="cov8" title="1">{
         newM, statusCmd := m.setStatusMessage("Синхронизация завершена (скачано), перезагрузка...")
-        if msg.reloadNeeded </span><span class="cov0" title="0">{
+        if msg.reloadNeeded </span><span class="cov8" title="1">{
                 openCmd := openKdbxCmd(m.kdbxPath, m.password)
                 return newM, tea.Batch(statusCmd, openCmd)
         }</span>
-        <span class="cov0" title="0">return newM, statusCmd</span>
+        <span class="cov8" title="1">return newM, statusCmd</span>
 }
 
 // processMetadataResults обрабатывает ситуацию, когда получены и локальные, и серверные метаданные.

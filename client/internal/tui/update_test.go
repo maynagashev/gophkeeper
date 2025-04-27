@@ -361,6 +361,46 @@ func TestHandleVersionMsg(t *testing.T) {
 	})
 }
 
+// TestHandleSyncDownloadSuccessMsg проверяет обработку успешного скачивания.
+func TestHandleSyncDownloadSuccessMsg(t *testing.T) {
+	t.Run("Без перезагрузки", func(t *testing.T) {
+		m := createTestModelForUpdate()
+		msg := syncDownloadSuccessMsg{reloadNeeded: false}
+
+		newM, cmd := handleSyncDownloadSuccessMsg(m, msg)
+
+		updatedModel := newM.(*model)
+		require.Contains(t, updatedModel.savingStatus, "Синхронизация завершена (скачано)", "Статус должен обновиться")
+
+		// Проверяем, что команда - это просто команда статуса (без openKdbxCmd)
+		isBatch := false
+		if _, ok := cmd().(tea.BatchMsg); ok {
+			isBatch = true
+		}
+		require.False(t, isBatch, "Команда не должна быть BatchMsg, если перезагрузка не нужна")
+		// Мы не можем точно проверить тип команды статуса, т.к. setStatusMessage возвращает func() tea.Msg
+		require.NotNil(t, cmd, "Должна быть возвращена команда статуса")
+	})
+
+	t.Run("С перезагрузкой", func(t *testing.T) {
+		m := createTestModelForUpdate()
+		m.kdbxPath = "/path/to/test.kdbx" // Устанавливаем путь для команды
+		m.password = "testpass"           // Устанавливаем пароль для команды
+		msg := syncDownloadSuccessMsg{reloadNeeded: true}
+
+		newM, cmd := handleSyncDownloadSuccessMsg(m, msg)
+
+		updatedModel := newM.(*model)
+		require.Contains(t, updatedModel.savingStatus, "Синхронизация завершена (скачано)", "Статус должен обновиться")
+
+		// Проверяем, что команда - это BatchMsg
+		require.NotNil(t, cmd, "Должна быть возвращена команда BatchMsg")
+		batchCmd, ok := cmd().(tea.BatchMsg)
+		require.True(t, ok, "Команда должна быть BatchMsg")
+		require.Len(t, batchCmd, 2, "BatchMsg должен содержать 2 команды (статус и открытие)")
+	})
+}
+
 // TestCanSave проверяет логику разрешения сохранения.
 func TestCanSave(t *testing.T) {
 	t.Run("РазрешеноСохранение", func(t *testing.T) {
