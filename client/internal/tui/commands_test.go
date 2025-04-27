@@ -1502,7 +1502,8 @@ func TestRollbackToVersionCmd(t *testing.T) {
 			}
 
 			// Вызываем тестируемую функцию
-			cmd := rollbackToVersionCmd(m, tt.versionID)
+			ctx := context.Background()
+			cmd := rollbackToVersionCmd(ctx, m, tt.versionID)
 			msg := cmd()
 
 			// Проверяем результат

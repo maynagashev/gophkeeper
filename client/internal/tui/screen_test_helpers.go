@@ -230,11 +230,13 @@ func (s *ScreenTestSuite) SimulateKeyRune(r rune) (tea.Model, tea.Cmd) {
 	return s.Model.Update(msg)
 }
 
-// ExecuteCmd выполняет команду и возвращает результат.
-func (s *ScreenTestSuite) ExecuteCmd(cmd tea.Cmd) tea.Msg {
+// ExecuteCmd выполняет команду и возвращает сообщение.
+func (s *ScreenTestSuite) ExecuteCmd(_ context.Context, cmd tea.Cmd) tea.Msg {
 	if cmd == nil {
 		return nil
 	}
+	// Вызов команды. Контекст пока не используется здесь напрямую,
+	// но может понадобиться командам в будущем.
 	return cmd()
 }
 

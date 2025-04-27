@@ -101,7 +101,7 @@
 				
 				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go (92.7%)</option>
 				
-				<option value="file23">github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go (25.2%)</option>
+				<option value="file23">github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go (33.0%)</option>
 				
 				<option value="file24">github.com/maynagashev/gophkeeper/client/internal/tui/screen_welcome.go (100.0%)</option>
 				
@@ -3939,11 +3939,13 @@ func (s *ScreenTestSuite) SimulateKeyRune(r rune) (tea.Model, tea.Cmd) <span cla
         return s.Model.Update(msg)
 }</span>
 
-// ExecuteCmd выполняет команду и возвращает результат.
-func (s *ScreenTestSuite) ExecuteCmd(cmd tea.Cmd) tea.Msg <span class="cov8" title="1">{
+// ExecuteCmd выполняет команду и возвращает сообщение.
+func (s *ScreenTestSuite) ExecuteCmd(_ context.Context, cmd tea.Cmd) tea.Msg <span class="cov8" title="1">{
         if cmd == nil </span><span class="cov0" title="0">{
                 return nil
         }</span>
+        // Вызов команды. Контекст пока не используется здесь напрямую,
+        // но может понадобиться командам в будущем.
         <span class="cov8" title="1">return cmd()</span>
 }
 
@@ -4150,7 +4152,7 @@ func loadVersionsCmd(m *model) tea.Cmd <span class="cov8" title="1">{
 }
 
 // rollbackToVersionCmd выполняет откат к выбранной версии.
-func rollbackToVersionCmd(m *model, versionID int64) tea.Cmd <span class="cov8" title="1">{
+func rollbackToVersionCmd(ctx context.Context, m *model, versionID int64) tea.Cmd <span class="cov8" title="1">{
         return func() tea.Msg </span><span class="cov8" title="1">{
                 if m.apiClient == nil </span><span class="cov8" title="1">{
                         return rollbackErrorMsg{err: errors.New("API клиент не инициализирован")}
@@ -4160,8 +4162,8 @@ func rollbackToVersionCmd(m *model, versionID int64) tea.Cmd <span class="cov8" 
                         return rollbackErrorMsg{err: errors.New("требуется авторизация")}
                 }</span>
 
-                <span class="cov8" title="1">ctx := context.Background()
-                err := m.apiClient.RollbackToVersion(ctx, versionID)
+                // Используем переданный контекст
+                <span class="cov8" title="1">err := m.apiClient.RollbackToVersion(ctx, versionID)
                 if err != nil </span><span class="cov8" title="1">{
                         slog.Error("Ошибка отката к версии", "version_id", versionID, "error", err)
                         return rollbackErrorMsg{err: err}
@@ -4175,24 +4177,24 @@ func rollbackToVersionCmd(m *model, versionID int64) tea.Cmd <span class="cov8" 
 // --- Функции обработки экрана версий --- //
 
 // handleVersionRollbackConfirm обрабатывает ввод в режиме подтверждения отката.
-func (m *model) handleVersionRollbackConfirm(keyMsg tea.KeyMsg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+func (m *model) handleVersionRollbackConfirm(ctx context.Context, keyMsg tea.KeyMsg) (tea.Model, tea.Cmd) <span class="cov8" title="1">{
         switch keyMsg.String() </span>{
-        case keyEnter:<span class="cov0" title="0">
+        case keyEnter:<span class="cov8" title="1">
                 // Подтверждение отката
-                if m.selectedVersionForRollback != nil </span><span class="cov0" title="0">{
+                if m.selectedVersionForRollback != nil </span><span class="cov8" title="1">{
                         m.confirmRollback = false
                         m.rollbackError = nil
-                        // Добавляем ClearScreen
-                        return m, tea.Batch(tea.ClearScreen, rollbackToVersionCmd(m, m.selectedVersionForRollback.ID))
+                        // Передаем полученный контекст в команду
+                        return m, tea.Batch(tea.ClearScreen, rollbackToVersionCmd(ctx, m, m.selectedVersionForRollback.ID))
                 }</span>
-        case keyEsc, keyBack:<span class="cov0" title="0">
+        case keyEsc, keyBack:<span class="cov8" title="1">
                 // Отмена отката
                 m.confirmRollback = false
                 m.selectedVersionForRollback = nil
                 // Добавляем ClearScreen
                 return m, tea.ClearScreen</span>
         }
-        <span class="cov0" title="0">return m, nil</span>
+        <span class="cov8" title="1">return m, nil</span>
 }
 
 // handleVersionRollbackError обрабатывает ввод в режиме отображения ошибки отката.
@@ -4277,7 +4279,9 @@ func (m *model) updateVersionListScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span 
         if keyMsg, ok := msg.(tea.KeyMsg); ok </span><span class="cov0" title="0">{
                 // Если показывается экран подтверждения
                 if m.confirmRollback </span><span class="cov0" title="0">{
-                        return m.handleVersionRollbackConfirm(keyMsg)
+                        // Передаем контекст в обработчик подтверждения
+                        // Используем Background(), т.к. Update не имеет контекста
+                        return m.handleVersionRollbackConfirm(context.Background(), keyMsg)
                 }</span>
 
                 // Если показывается ошибка отката

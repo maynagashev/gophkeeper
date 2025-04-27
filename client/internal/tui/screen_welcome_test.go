@@ -2,6 +2,7 @@
 package tui
 
 import (
+	"context"
 	"testing"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -66,7 +67,8 @@ func TestWelcomeScreen(t *testing.T) {
 		require.NotNil(t, quitCmd, "Команда не должна быть nil при нажатии Ctrl+C")
 
 		// Выполняем команду и проверяем тип сообщения
-		msg := suite.ExecuteCmd(quitCmd)
+		ctx := context.Background()
+		msg := suite.ExecuteCmd(ctx, quitCmd)
 		_, ok := msg.(tea.QuitMsg)
 		assert.True(t, ok, "Должно быть возвращено сообщение tea.QuitMsg при нажатии Ctrl+C")
 	})

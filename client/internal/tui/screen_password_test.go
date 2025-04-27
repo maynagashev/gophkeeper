@@ -2,6 +2,7 @@
 package tui
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -85,7 +86,8 @@ func TestPasswordInputScreen(t *testing.T) {
 		// Выполняем команду и проверяем, что она пытается открыть файл
 		// Примечание: в реальном приложении это бы открыло файл KDBX,
 		// но в тесте это вернет ошибку, так как файл не существует
-		msg := suite.ExecuteCmd(cmd)
+		ctx := context.Background()
+		msg := suite.ExecuteCmd(ctx, cmd)
 		errorMsg, ok := msg.(errMsg)
 		require.True(t, ok, "Сообщение должно быть типа errMsg, т.к. файл не существует")
 		assert.Contains(t, errorMsg.err.Error(), "open "+testPath, "Ошибка должна указывать на попытку открыть файл")
