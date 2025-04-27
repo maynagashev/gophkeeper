@@ -10,6 +10,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/tobischo/gokeepasslib/v3"
+
+	// Правильный путь к нашему пакету kdbx.
+	kdbx "github.com/maynagashev/gophkeeper/client/internal/kdbx"
 )
 
 // TODO: Добавить тесты для syncMenuItem и viewSyncServerScreen
@@ -269,6 +272,190 @@ func TestHandleSyncMenuSyncNow(t *testing.T) {
 				assert.NotNil(t, cmd, "Ожидалась команда Tick, но получено nil")
 				// msg := cmd()
 				// assert.IsType(t, tea.TickMsg{}, msg, "...") // TODO: Fix type check
+			}
+		})
+	}
+}
+
+// TestHandleSyncMenuViewVersions проверяет функцию handleSyncMenuViewVersions.
+func TestHandleSyncMenuViewVersions(t *testing.T) {
+	tests := []struct {
+		name          string
+		authToken     string
+		expectedState screenState
+		expectCmd     bool
+		expectStatus  string
+	}{
+		{
+			name:          "Авторизован, переход к просмотру версий",
+			authToken:     "valid-token",
+			expectedState: versionListScreen,
+			expectCmd:     true,
+		},
+		{
+			name:          "Не авторизован, ошибка",
+			authToken:     "",
+			expectedState: syncServerScreen, // Состояние не меняется
+			expectCmd:     false,
+			expectStatus:  "Необходимо войти для просмотра версий",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockAPI := new(MockAPIClient)
+			m := initModel("", false, "", mockAPI)
+			m.authToken = tt.authToken
+			m.state = syncServerScreen
+
+			// Настройка мока для loadVersionsCmd, если ожидается его вызов
+			if tt.expectCmd {
+				mockAPI.On("ListVersions", mock.Anything, mock.AnythingOfType("int"), mock.AnythingOfType("int")).
+					Return([]models.VaultVersion{}, int64(0), nil).Once() // Убираем Maybe()
+			}
+
+			cmd := m.handleSyncMenuViewVersions()
+
+			assert.Equal(t, tt.expectedState, m.state, "Неправильное состояние после вызова")
+
+			if tt.expectCmd {
+				assert.True(t, m.loadingVersions, "Флаг loadingVersions должен быть true")
+				assert.NotNil(t, cmd, "Ожидалась команда BatchMsg, но получено nil")
+				// Ожидаем BatchMsg, содержащую ClearScreen и loadVersionsCmd
+				msg := cmd()
+				batchMsg, ok := msg.(tea.BatchMsg)
+				assert.True(t, ok, "Ожидалась tea.BatchMsg")
+				assert.Len(t, batchMsg, 2, "BatchMsg должна содержать 2 команды")
+				// Первая команда - ClearScreen (сложно проверить тип напрямую)
+				assert.NotNil(t, batchMsg[0], "Первая команда (ClearScreen) не должна быть nil")
+				// Вторая команда - loadVersionsCmd (проверяем результат)
+				assert.NotNil(t, batchMsg[1], "Вторая команда (loadVersionsCmd) не должна быть nil")
+				loadMsg := batchMsg[1]()
+				assert.IsType(t, versionsLoadedMsg{}, loadMsg, "Ожидалась versionsLoadedMsg от loadVersionsCmd")
+			} else {
+				assert.False(t, m.loadingVersions, "Флаг loadingVersions должен быть false")
+				// Ожидаем только TickMsg для статуса
+				assert.NotNil(t, cmd, "Ожидалась команда Tick, но получено nil")
+				// msg := cmd() // Удаляем объявление неиспользуемой переменной
+				// assert.IsType(t, tea.TickMsg{}, msg, "...") // TODO: Fix type check
+				assert.Equal(t, tt.expectStatus, m.savingStatus, "Неверное сообщение статуса в модели")
+			}
+		})
+	}
+}
+
+// TestHandleSyncMenuLogout проверяет функцию handleSyncMenuLogout.
+//
+//nolint:gocognit // Сложность вызвана проверкой нескольких сценариев
+func TestHandleSyncMenuLogout(t *testing.T) {
+	tests := []struct {
+		name               string
+		authToken          string
+		serverURL          string
+		dbIsSet            bool // Флаг, инициализирована ли база данных
+		expectStatus       string
+		expectCmd          bool
+		expectTokenCleared bool
+		expectAPICall      bool // Ожидается ли вызов mockAPI.SetAuthToken("")
+	}{
+		{
+			name:               "Авторизован, DB установлена, успешный выход",
+			authToken:          "valid-token",
+			serverURL:          "http://test.server",
+			dbIsSet:            true,
+			expectStatus:       "Успешно вышли",
+			expectCmd:          true, // Ожидаем команду статуса
+			expectTokenCleared: true,
+			expectAPICall:      true,
+		},
+		{
+			name:               "Авторизован, DB не установлена, выход локально",
+			authToken:          "valid-token",
+			serverURL:          "http://test.server",
+			dbIsSet:            false,
+			expectStatus:       "Успешно вышли (локально)",
+			expectCmd:          true, // Ожидаем команду статуса
+			expectTokenCleared: true,
+			expectAPICall:      true,
+		},
+		{
+			name:               "Не авторизован, сообщение об ошибке",
+			authToken:          "",
+			serverURL:          "http://test.server",
+			dbIsSet:            true,
+			expectStatus:       "Вы не авторизованы",
+			expectCmd:          true, // Ожидаем команду статуса
+			expectTokenCleared: false,
+			expectAPICall:      false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockAPI := new(MockAPIClient)
+			m := initModel("/tmp/test-logout.kdbx", false, tt.serverURL, mockAPI)
+			m.authToken = tt.authToken
+			m.state = syncServerScreen
+			// Используем строку, т.к. константа statusLoggedIn не экспортируется
+			initialLoginStatus := "Выполнен как..." // Предполагаемый статус при входе
+			if tt.authToken == "" {
+				initialLoginStatus = "Не выполнен" // Если токена нет, то статус "Не выполнен"
+			}
+			m.loginStatus = initialLoginStatus
+
+			if tt.dbIsSet {
+				// Инициализируем db для теста сохранения токена
+				m.db = gokeepasslib.NewDatabase()
+				m.db.Content = &gokeepasslib.DBContent{
+					Meta: gokeepasslib.NewMetaData(),
+					Root: &gokeepasslib.RootData{
+						Groups: []gokeepasslib.Group{gokeepasslib.NewGroup()},
+					},
+				}
+				// Устанавливаем URL в метаданные, чтобы SaveAuthData мог его использовать
+				_ = kdbx.SaveAuthData(m.db, tt.serverURL, tt.authToken) // Сохраняем начальные данные, игнорируем ошибку
+			} else {
+				m.db = nil // Убеждаемся, что db nil
+			}
+
+			// Настраиваем мок для SetAuthToken, если ожидается вызов
+			if tt.expectAPICall {
+				mockAPI.On("SetAuthToken", "").Return().Once()
+			}
+
+			cmd := m.handleSyncMenuLogout()
+
+			if tt.expectTokenCleared {
+				assert.Empty(t, m.authToken, "Токен должен быть очищен")
+				// Используем строковое значение "Не выполнен"
+				assert.Equal(t, "Не выполнен", m.loginStatus, "Статус входа должен быть 'Не выполнен'")
+			} else {
+				assert.Equal(t, tt.authToken, m.authToken, "Токен не должен был измениться")
+				// Проверяем, что статус остался исходным
+				assert.Equal(t, initialLoginStatus, m.loginStatus, "Статус входа не должен был измениться")
+			}
+
+			if tt.expectCmd {
+				assert.NotNil(t, cmd, "Ожидалась команда Tick, но получено nil")
+				// msg := cmd()
+				// assert.IsType(t, tea.TickMsg{}, msg, "...") // TODO: Fix type check
+				assert.Equal(t, tt.expectStatus, m.savingStatus, "Неверное сообщение статуса в модели")
+			} else {
+				assert.Nil(t, cmd, "Не ожидалась команда")
+			}
+
+			// Проверяем вызов мока
+			if tt.expectAPICall {
+				mockAPI.AssertExpectations(t)
+			} else {
+				mockAPI.AssertNotCalled(t, "SetAuthToken", "")
+			}
+
+			// Дополнительная проверка: если db был установлен, проверим, что токен удален из KDBX (косвенно)
+			if tt.dbIsSet && tt.expectTokenCleared {
+				// LoadAuthData возвращает url, token, err
+				_, loadedToken, _ := kdbx.LoadAuthData(m.db)
+				assert.Empty(t, loadedToken, "Токен должен быть удален из KDBX")
 			}
 		})
 	}

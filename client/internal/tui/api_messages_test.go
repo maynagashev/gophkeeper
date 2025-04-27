@@ -1,11 +1,13 @@
 package tui //nolint:testpackage // Тесты в том же пакете для доступа к непубличным функциям
 
 import (
+	"context"
 	"errors"
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/maynagashev/gophkeeper/client/internal/api"
+	"github.com/maynagashev/gophkeeper/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -28,6 +30,34 @@ type MockAPIClient struct {
 
 func (m *MockAPIClient) SetAuthToken(token string) {
 	m.Called(token)
+}
+
+// ListVersions mocks base method.
+func (m *MockAPIClient) ListVersions(ctx context.Context, limit, offset int) ([]models.VaultVersion, int64, error) {
+	args := m.Called(ctx, limit, offset)
+	var versions []models.VaultVersion
+	var currentID int64
+	var err error
+
+	if v := args.Get(0); v != nil {
+		var ok bool
+		versions, ok = v.([]models.VaultVersion)
+		if !ok {
+			panic("mock: ListVersions: argument 0 is not []models.VaultVersion")
+		}
+	}
+
+	if id := args.Get(1); id != nil {
+		var ok bool
+		currentID, ok = id.(int64)
+		if !ok {
+			panic("mock: ListVersions: argument 1 is not int64")
+		}
+	}
+
+	err = args.Error(2)
+
+	return versions, currentID, err
 }
 
 // TestHandleAPIMessages проверяет обработку различных сообщений API.

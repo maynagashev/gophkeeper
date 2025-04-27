@@ -97,7 +97,7 @@
 				
 				<option value="file20">github.com/maynagashev/gophkeeper/client/internal/tui/screen_server_url.go (100.0%)</option>
 				
-				<option value="file21">github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go (38.3%)</option>
+				<option value="file21">github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go (67.9%)</option>
 				
 				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go (17.0%)</option>
 				
@@ -3594,43 +3594,43 @@ func (m *model) handleSyncMenuSyncNow() tea.Cmd <span class="cov8" title="1">{
 }
 
 // handleSyncMenuViewVersions обрабатывает выбор пункта "Просмотреть версии".
-func (m *model) handleSyncMenuViewVersions() tea.Cmd <span class="cov0" title="0">{
-        if m.authToken == "" </span><span class="cov0" title="0">{
+func (m *model) handleSyncMenuViewVersions() tea.Cmd <span class="cov8" title="1">{
+        if m.authToken == "" </span><span class="cov8" title="1">{
                 _, cmd := m.setStatusMessage("Необходимо войти для просмотра версий")
                 return cmd
         }</span>
-        <span class="cov0" title="0">m.state = versionListScreen
+        <span class="cov8" title="1">m.state = versionListScreen
         m.loadingVersions = true
         return tea.Batch(tea.ClearScreen, loadVersionsCmd(m))</span>
 }
 
 // handleSyncMenuLogout обрабатывает выбор пункта "Выйти на сервере".
-func (m *model) handleSyncMenuLogout() tea.Cmd <span class="cov0" title="0">{
-        if m.authToken == "" </span><span class="cov0" title="0">{
+func (m *model) handleSyncMenuLogout() tea.Cmd <span class="cov8" title="1">{
+        if m.authToken == "" </span><span class="cov8" title="1">{
                 _, cmd := m.setStatusMessage("Вы не авторизованы")
                 return cmd
         }</span>
-        <span class="cov0" title="0">oldToken := m.authToken
+        <span class="cov8" title="1">oldToken := m.authToken
         m.authToken = ""
         m.loginStatus = statusNotLoggedIn
-        if m.apiClient != nil </span><span class="cov0" title="0">{
+        if m.apiClient != nil </span><span class="cov8" title="1">{
                 m.apiClient.SetAuthToken("")
         }</span>
-        <span class="cov0" title="0">var saveCmd tea.Cmd
-        if m.db != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">var saveCmd tea.Cmd
+        if m.db != nil </span><span class="cov8" title="1">{
                 errSave := kdbx.SaveAuthData(m.db, m.serverURL, "")
                 if errSave != nil </span><span class="cov0" title="0">{
                         slog.Error("Ошибка сохранения пустого токена в KDBX при выходе", "error", errSave)
                         _, saveCmd = m.setStatusMessage("Ошибка сохранения данных при выходе")
-                }</span> else<span class="cov0" title="0"> {
+                }</span> else<span class="cov8" title="1"> {
                         slog.Info("Локальный токен очищен и сохранен в KDBX.")
                         _, saveCmd = m.setStatusMessage("Успешно вышли")
                 }</span>
-        } else<span class="cov0" title="0"> {
+        } else<span class="cov8" title="1"> {
                 slog.Warn("Не удалось сохранить пустой токен в KDBX при выходе: база не загружена.")
                 _, saveCmd = m.setStatusMessage("Успешно вышли (локально)")
         }</span>
-        <span class="cov0" title="0">slog.Info("Выполнен выход", "token_existed", oldToken != "")
+        <span class="cov8" title="1">slog.Info("Выполнен выход", "token_existed", oldToken != "")
         return saveCmd</span>
 }
 
