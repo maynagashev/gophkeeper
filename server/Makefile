@@ -41,16 +41,35 @@ test:
 
 # Тест с генерацией отчёта о покрытии
 test-coverage:
-	@echo "Запуск тестов с генерацией покрытия..."
-	go test -coverprofile=logs/coverage.out ./...
+	@echo "Запуск тестов с генерацией покрытия (исключая моки)..."
+	# Используем -coverpkg для явного указания пакетов, исключая /mocks
+	go test -coverprofile=logs/coverage.out -coverpkg=$(shell go list ./... | grep -v /mocks) ./...
 	go tool cover -html=logs/coverage.out -o logs/coverage.html
-	go tool cover -func=logs/coverage.out | tee logs/coverage.log
+	# Выводим общий процент покрытия и покрытие по функциям (моки должны быть исключены)
+	@echo "\nПокрытие по функциям (без моков):"
+	go tool cover -func=logs/coverage.out | grep -v /mocks | tee logs/coverage.log
+	@echo "\nОбщее покрытие (без моков):"
+	@go tool cover -func=logs/coverage.out | grep -v /mocks | grep total
 
 
 # Линтер
 lint:
 	@echo "Запуск линтера для сервера..."
 	golangci-lint run ./... --fix
+
+# --- Генерация моков --- #
+# Установка mockery (если не установлен)
+install-mockery:
+	@echo "Установка mockery..."
+	@go install github.com/vektra/mockery/v2@latest
+
+# Генерация моков для всех интерфейсов в указанных директориях
+mocks:
+	@echo "Генерация моков..."
+	# Генерируем моки в директорию internal/mocks
+	@rm -rf internal/mocks # Удаляем старые моки перед генерацией
+	# Убрали --keeptree, моки будут плоским списком в internal/mocks
+	@mockery --all --output internal/mocks --case=underscore --with-expecter
 
 # --- Миграции БД --- #
 # Запуск контейнера с БД (для локальной работы)
