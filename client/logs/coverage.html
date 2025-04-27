@@ -89,7 +89,7 @@
 				
 				<option value="file16">github.com/maynagashev/gophkeeper/client/internal/tui/screen_login_register_choice.go (100.0%)</option>
 				
-				<option value="file17">github.com/maynagashev/gophkeeper/client/internal/tui/screen_new_kdbx.go (0.0%)</option>
+				<option value="file17">github.com/maynagashev/gophkeeper/client/internal/tui/screen_new_kdbx.go (90.2%)</option>
 				
 				<option value="file18">github.com/maynagashev/gophkeeper/client/internal/tui/screen_password.go (100.0%)</option>
 				
@@ -3175,41 +3175,41 @@ import (
 // updateNewKdbxPasswordScreen обрабатывает сообщения для экрана ввода пароля нового KDBX.
 //
 //nolint:gocognit,funlen // Сложность и длина будут снижены при рефакторинге
-func (m *model) updateNewKdbxPasswordScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+func (m *model) updateNewKdbxPasswordScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov8" title="1">{
         var cmds []tea.Cmd
         var cmd tea.Cmd
 
         //nolint:nestif // Сложность вложенности будет снижена при рефакторинге
-        if keyMsg, ok := msg.(tea.KeyMsg); ok </span><span class="cov0" title="0">{
+        if keyMsg, ok := msg.(tea.KeyMsg); ok </span><span class="cov8" title="1">{
                 switch keyMsg.String() </span>{
-                case "ctrl+c", keyEsc:<span class="cov0" title="0"> // Выход из приложения, если мы еще не создали файл
+                case "ctrl+c", keyEsc:<span class="cov8" title="1"> // Выход из приложения, если мы еще не создали файл
                         return m, tea.Quit</span>
 
-                case keyTab, keyShiftTab, keyUp, keyDown:<span class="cov0" title="0">
+                case keyTab, keyShiftTab, keyUp, keyDown:<span class="cov8" title="1">
                         m.newPasswordFocusedField = (m.newPasswordFocusedField + 1) % numNewPasswordFields // Переключаем фокус
                         m.confirmPasswordError = ""                                                        // Сбрасываем ошибку
 
-                        if m.newPasswordFocusedField == 0 </span><span class="cov0" title="0">{
+                        if m.newPasswordFocusedField == 0 </span><span class="cov8" title="1">{
                                 m.newPasswordInput1.Focus()
                                 m.newPasswordInput2.Blur()
                                 cmd = textinput.Blink
-                        }</span> else<span class="cov0" title="0"> {
+                        }</span> else<span class="cov8" title="1"> {
                                 m.newPasswordInput1.Blur()
                                 m.newPasswordInput2.Focus()
                                 cmd = textinput.Blink
                         }</span>
-                        <span class="cov0" title="0">cmds = append(cmds, cmd)
+                        <span class="cov8" title="1">cmds = append(cmds, cmd)
                         return m, tea.Batch(cmds...)</span>
 
-                case keyEnter:<span class="cov0" title="0">
+                case keyEnter:<span class="cov8" title="1">
                         // Если фокус на первом поле, переключаем на второе (если первый пароль не пуст)
-                        if m.newPasswordFocusedField == 0 </span><span class="cov0" title="0">{
-                                if m.newPasswordInput1.Value() == "" </span><span class="cov0" title="0">{
+                        if m.newPasswordFocusedField == 0 </span><span class="cov8" title="1">{
+                                if m.newPasswordInput1.Value() == "" </span><span class="cov8" title="1">{
                                         m.confirmPasswordError = "Пароль не может быть пустым!"
                                         return m, nil
                                 }</span>
                                 // Переключаем фокус на второе поле
-                                <span class="cov0" title="0">m.newPasswordFocusedField = 1
+                                <span class="cov8" title="1">m.newPasswordFocusedField = 1
                                 m.confirmPasswordError = "" // Сбрасываем ошибку
                                 m.newPasswordInput1.Blur()
                                 m.newPasswordInput2.Focus()
@@ -3219,14 +3219,14 @@ func (m *model) updateNewKdbxPasswordScreen(msg tea.Msg) (tea.Model, tea.Cmd) <s
                         }
 
                         // Если фокус на втором поле, проверяем и создаем базу
-                        <span class="cov0" title="0">pass1 := m.newPasswordInput1.Value()
+                        <span class="cov8" title="1">pass1 := m.newPasswordInput1.Value()
                         pass2 := m.newPasswordInput2.Value()
 
                         if pass1 == "" </span><span class="cov0" title="0">{
                                 m.confirmPasswordError = "Пароль не может быть пустым!"
                                 return m, nil
                         }</span>
-                        <span class="cov0" title="0">if pass1 != pass2 </span><span class="cov0" title="0">{
+                        <span class="cov8" title="1">if pass1 != pass2 </span><span class="cov8" title="1">{
                                 m.confirmPasswordError = "Пароли не совпадают!"
                                 m.newPasswordInput1.SetValue("") // Очищаем поля
                                 m.newPasswordInput2.SetValue("")
@@ -3237,7 +3237,7 @@ func (m *model) updateNewKdbxPasswordScreen(msg tea.Msg) (tea.Model, tea.Cmd) <s
                         }</span>
 
                         // Пароли совпадают, создаем новую базу
-                        <span class="cov0" title="0">m.confirmPasswordError = "" // Сбрасываем ошибку
+                        <span class="cov8" title="1">m.confirmPasswordError = "" // Сбрасываем ошибку
                         m.password = pass1          // Сохраняем пароль в модели
 
                         slog.Info("Пароли совпадают, создаем новую базу KDBX", "path", m.kdbxPath)
@@ -3268,7 +3268,7 @@ func (m *model) updateNewKdbxPasswordScreen(msg tea.Msg) (tea.Model, tea.Cmd) <s
                         }</span>
 
                         // Используем имя файла (без расширения) как имя базы данных
-                        <span class="cov0" title="0">baseName := filepath.Base(m.kdbxPath)
+                        <span class="cov8" title="1">baseName := filepath.Base(m.kdbxPath)
                         dbName := strings.TrimSuffix(baseName, filepath.Ext(baseName))
                         m.db.Content.Meta.DatabaseName = dbName
                         // Устанавливаем Generator (опционально, WithKDBX4 может уже это делать)
@@ -3284,7 +3284,7 @@ func (m *model) updateNewKdbxPasswordScreen(msg tea.Msg) (tea.Model, tea.Cmd) <s
                                 m.confirmPasswordError = fmt.Sprintf("Ошибка создания файла: %v", err)
                                 return m, nil
                         }</span>
-                        <span class="cov0" title="0">defer file.Close() // Используем defer для гарантированного закрытия
+                        <span class="cov8" title="1">defer file.Close() // Используем defer для гарантированного закрытия
 
                         encoder := gokeepasslib.NewEncoder(file)
                         // УДАЛЕНО: Применение заголовков к кодировщику - делается через NewDatabase
@@ -3294,7 +3294,7 @@ func (m *model) updateNewKdbxPasswordScreen(msg tea.Msg) (tea.Model, tea.Cmd) <s
                                 return m, nil
                         }</span>
 
-                        <span class="cov0" title="0">slog.Info("Новый файл KDBX успешно создан и сохранен", "path", m.kdbxPath)
+                        <span class="cov8" title="1">slog.Info("Новый файл KDBX успешно создан и сохранен", "path", m.kdbxPath)
                         // Переходим к списку
                         m.state = entryListScreen
 
@@ -3302,10 +3302,10 @@ func (m *model) updateNewKdbxPasswordScreen(msg tea.Msg) (tea.Model, tea.Cmd) <s
                         entries := kdbx.GetAllEntries(m.db)
                         slog.Debug("Записи, полученные из новой KDBX", "count", len(entries))
                         items := make([]list.Item, len(entries))
-                        for i, entry := range entries </span><span class="cov0" title="0">{
+                        for i, entry := range entries </span><span class="cov8" title="1">{
                                 items[i] = entryItem{entry: entry}
                         }</span>
-                        <span class="cov0" title="0">slog.Debug("Элементы, подготовленные для списка", "count", len(items))
+                        <span class="cov8" title="1">slog.Debug("Элементы, подготовленные для списка", "count", len(items))
                         m.entryList.SetItems(items) // Устанавливаем элементы в список
 
                         // Устанавливаем размер списка явно (как при открытии существующей базы)
@@ -3318,19 +3318,19 @@ func (m *model) updateNewKdbxPasswordScreen(msg tea.Msg) (tea.Model, tea.Cmd) <s
                 }
 
                 // Обновляем активное поле ввода, если это не спец. клавиша
-                <span class="cov0" title="0">if m.newPasswordFocusedField == 0 </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">if m.newPasswordFocusedField == 0 </span><span class="cov8" title="1">{
                         m.newPasswordInput1, cmd = m.newPasswordInput1.Update(msg)
-                }</span> else<span class="cov0" title="0"> {
+                }</span> else<span class="cov8" title="1"> {
                         m.newPasswordInput2, cmd = m.newPasswordInput2.Update(msg)
                 }</span>
-                <span class="cov0" title="0">cmds = append(cmds, cmd)</span>
+                <span class="cov8" title="1">cmds = append(cmds, cmd)</span>
         } // else if msg.(type) is not tea.KeyMsg, do nothing? Maybe return m, nil?
 
-        <span class="cov0" title="0">return m, tea.Batch(cmds...)</span>
+        <span class="cov8" title="1">return m, tea.Batch(cmds...)</span>
 }
 
 // viewNewKdbxPasswordScreen отрисовывает экран ввода пароля для нового KDBX.
-func (m *model) viewNewKdbxPasswordScreen() string <span class="cov0" title="0">{
+func (m *model) viewNewKdbxPasswordScreen() string <span class="cov8" title="1">{
         // Определяем стиль ошибки локально
         errorStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
 
@@ -3339,20 +3339,20 @@ func (m *model) viewNewKdbxPasswordScreen() string <span class="cov0" title="0">
         // Добавляем индикатор фокуса
         focusIndicator1 := "  "
         focusIndicator2 := "  "
-        if m.newPasswordFocusedField == 0 </span><span class="cov0" title="0">{
+        if m.newPasswordFocusedField == 0 </span><span class="cov8" title="1">{
                 focusIndicator1 = "&gt; "
-        }</span> else<span class="cov0" title="0"> {
+        }</span> else<span class="cov8" title="1"> {
                 focusIndicator2 = "&gt; "
         }</span>
 
-        <span class="cov0" title="0">s += focusIndicator1 + m.newPasswordInput1.View() + "\n"
+        <span class="cov8" title="1">s += focusIndicator1 + m.newPasswordInput1.View() + "\n"
         s += focusIndicator2 + m.newPasswordInput2.View() + "\n\n"
 
-        if m.confirmPasswordError != "" </span><span class="cov0" title="0">{
+        if m.confirmPasswordError != "" </span><span class="cov8" title="1">{
                 s += errorStyle.Render(m.confirmPasswordError) + "\n"
         }</span>
 
-        <span class="cov0" title="0">return s</span>
+        <span class="cov8" title="1">return s</span>
 }
 </pre>
 		

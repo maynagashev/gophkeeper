@@ -90,8 +90,8 @@ github.com/maynagashev/gophkeeper/client/internal/tui/screen_login.go:8:			updat
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_login.go:30:			viewLoginScreen				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_login_register_choice.go:12:	updateLoginRegisterChoiceScreen		100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_login_register_choice.go:35:	viewLoginRegisterChoiceScreen		100.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_new_kdbx.go:25:			updateNewKdbxPasswordScreen		0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_new_kdbx.go:180:			viewNewKdbxPasswordScreen		0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_new_kdbx.go:25:			updateNewKdbxPasswordScreen		88.8%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_new_kdbx.go:180:			viewNewKdbxPasswordScreen		100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_password.go:12:			updatePasswordInputScreen		100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_password.go:41:			viewPasswordInputScreen			100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_password.go:53:			handleErrorMsg				100.0%
@@ -193,4 +193,4 @@ github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:46:				deepCopyEn
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:51:				FindEntryInDB				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:60:				findEntryInDB				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:65:				FindEntryInGroups			100.0%
-total:												(statements)				61.5%
+total:												(statements)				65.6%
