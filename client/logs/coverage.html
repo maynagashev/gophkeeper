@@ -85,9 +85,9 @@
 				
 				<option value="file14">github.com/maynagashev/gophkeeper/client/internal/tui/screen_list.go (86.8%)</option>
 				
-				<option value="file15">github.com/maynagashev/gophkeeper/client/internal/tui/screen_login.go (16.3%)</option>
+				<option value="file15">github.com/maynagashev/gophkeeper/client/internal/tui/screen_login.go (100.0%)</option>
 				
-				<option value="file16">github.com/maynagashev/gophkeeper/client/internal/tui/screen_login_register_choice.go (34.8%)</option>
+				<option value="file16">github.com/maynagashev/gophkeeper/client/internal/tui/screen_login_register_choice.go (100.0%)</option>
 				
 				<option value="file17">github.com/maynagashev/gophkeeper/client/internal/tui/screen_new_kdbx.go (0.0%)</option>
 				
@@ -3062,11 +3062,7 @@ func (m *model) handleDBOpenedMsg(msg dbOpenedMsg) (tea.Model, tea.Cmd) <span cl
 		<pre class="file" id="file15" style="display: none">package tui
 
 import (
-        "testing"
-
-        "github.com/charmbracelet/bubbles/textinput"
         tea "github.com/charmbracelet/bubbletea"
-        "github.com/stretchr/testify/assert"
 )
 
 // updateLoginScreen обрабатывает ввод данных для входа.
@@ -3101,145 +3097,16 @@ func (m *model) viewLoginScreen() string <span class="cov8" title="1">{
                 m.loginPasswordInput,
         )
 }</span>
-
-// TestLoginScreenTabNavigation проверяет навигацию по полям с помощью клавиши Tab.
-func TestLoginScreenTabNavigation(t *testing.T) <span class="cov0" title="0">{
-        t.Run("ПереключениеФокусаПоTab", func(t *testing.T) </span><span class="cov0" title="0">{
-                // Создаем модель
-                m := &amp;model{
-                        state:                     loginScreen,
-                        loginRegisterFocusedField: 0,
-                        loginUsernameInput:        textinput.New(),
-                        loginPasswordInput:        textinput.New(),
-                }
-
-                // Устанавливаем фокус на первое поле
-                m.loginUsernameInput.Focus()
-                m.loginPasswordInput.Blur()
-
-                // Создаем сообщение о нажатии Tab
-                msg := tea.KeyMsg{Type: tea.KeyTab}
-
-                // Вызываем функцию обновления
-                newModel, _ := m.updateLoginScreen(msg)
-                model, ok := newModel.(*model)
-
-                // Проверяем результаты
-                assert.True(t, ok, "Должен быть возвращен указатель на model")
-                assert.Equal(t, 1, model.loginRegisterFocusedField, "Фокус должен переключиться на поле пароля")
-                assert.False(t, model.loginUsernameInput.Focused(), "Поле логина должно потерять фокус")
-                assert.True(t, model.loginPasswordInput.Focused(), "Поле пароля должно получить фокус")
-        }</span>)
-
-        <span class="cov0" title="0">t.Run("ПереключениеФокусаПоShiftTab", func(t *testing.T) </span><span class="cov0" title="0">{
-                // Создаем модель
-                m := &amp;model{
-                        state:                     loginScreen,
-                        loginRegisterFocusedField: 1,
-                        loginUsernameInput:        textinput.New(),
-                        loginPasswordInput:        textinput.New(),
-                }
-
-                // Устанавливаем фокус на второе поле
-                m.loginUsernameInput.Blur()
-                m.loginPasswordInput.Focus()
-
-                // Создаем сообщение о нажатии Shift+Tab
-                msg := tea.KeyMsg{Type: tea.KeyShiftTab}
-
-                // Вызываем функцию обновления
-                newModel, _ := m.updateLoginScreen(msg)
-                model, ok := newModel.(*model)
-
-                // Проверяем результаты
-                assert.True(t, ok, "Должен быть возвращен указатель на model")
-                assert.Equal(t, 0, model.loginRegisterFocusedField, "Фокус должен переключиться на поле логина")
-                assert.True(t, model.loginUsernameInput.Focused(), "Поле логина должно получить фокус")
-                assert.False(t, model.loginPasswordInput.Focused(), "Поле пароля должно потерять фокус")
-        }</span>)
-}
-
-// TestLoginScreenEscapeKey проверяет поведение при нажатии Escape.
-func TestLoginScreenEscapeKey(t *testing.T) <span class="cov0" title="0">{
-        // Создаем модель
-        m := &amp;model{
-                state:                     loginScreen,
-                loginRegisterFocusedField: 0,
-                loginUsernameInput:        textinput.New(),
-                loginPasswordInput:        textinput.New(),
-        }
-
-        // Создаем сообщение о нажатии Esc
-        msg := tea.KeyMsg{Type: tea.KeyEsc}
-
-        // Вызываем функцию обновления
-        newModel, _ := m.updateLoginScreen(msg)
-        model, ok := newModel.(*model)
-
-        // Проверяем результаты
-        assert.True(t, ok, "Должен быть возвращен указатель на model")
-        assert.Equal(t, loginRegisterChoiceScreen, model.state, "Должен произойти переход на экран выбора")
-}</span>
-
-// TestLoginScreenEnterSubmit проверяет отправку формы при нажатии Enter.
-func TestLoginScreenEnterSubmit(t *testing.T) <span class="cov0" title="0">{
-        // Создаем модель
-        m := &amp;model{
-                state:                     loginScreen,
-                loginRegisterFocusedField: 1, // Фокус на поле пароля
-                loginUsernameInput:        textinput.New(),
-                loginPasswordInput:        textinput.New(),
-                serverURL:                 "http://test.server",
-        }
-
-        // Устанавливаем значения полей
-        m.loginUsernameInput.SetValue("testuser")
-        m.loginPasswordInput.SetValue("testpass")
-
-        // Создаем сообщение о нажатии Enter
-        msg := tea.KeyMsg{Type: tea.KeyEnter}
-
-        // Вызываем функцию обновления
-        newModel, cmd := m.updateLoginScreen(msg)
-
-        // Проверяем результаты
-        assert.NotNil(t, newModel, "Должна быть возвращена модель")
-        assert.NotNil(t, cmd, "Должна быть возвращена команда")
-}</span>
-
-// TestLoginScreenView проверяет отображение экрана входа.
-func TestLoginScreenView(t *testing.T) <span class="cov0" title="0">{
-        // Создаем модель
-        m := &amp;model{
-                state:              loginScreen,
-                loginUsernameInput: textinput.New(),
-                loginPasswordInput: textinput.New(),
-                serverURL:          "http://test.server",
-        }
-
-        // Устанавливаем значения полей
-        m.loginUsernameInput.SetValue("testuser")
-        m.loginPasswordInput.SetValue("testpass")
-
-        // Вызываем функцию отображения
-        view := m.viewLoginScreen()
-
-        // Проверяем результаты
-        assert.Contains(t, view, "Вход в учетную запись", "View должен содержать заголовок")
-        assert.Contains(t, view, "http://test.server", "View должен содержать URL сервера")
-}</span>
 </pre>
 		
 		<pre class="file" id="file16" style="display: none">package tui
 
 import (
         "strings"
-        "testing"
 
         "github.com/charmbracelet/bubbles/textinput"
         tea "github.com/charmbracelet/bubbletea"
         "github.com/charmbracelet/lipgloss"
-        "github.com/stretchr/testify/assert"
 )
 
 // updateLoginRegisterChoiceScreen обрабатывает выбор между входом и регистрацией.
@@ -3281,114 +3148,6 @@ func (m *model) viewLoginRegisterChoiceScreen() string <span class="cov8" title=
         b.WriteString(subtleStyle.Render("Нажмите Esc для возврата"))
 
         return b.String()
-}</span>
-
-// TestLoginRegisterChoiceScreenSimulateKeyPress тесты для симуляции нажатий клавиш на экране выбора входа/регистрации.
-func TestLoginRegisterChoiceScreenSimulateKeyPress(t *testing.T) <span class="cov0" title="0">{
-        t.Run("ПереходНаЭкранРегистрации", func(t *testing.T) </span><span class="cov0" title="0">{
-                // Создаем модель
-                m := &amp;model{
-                        state:                 loginRegisterChoiceScreen,
-                        registerUsernameInput: textinput.New(),
-                }
-
-                // Создаем сообщение о нажатии клавиши 'r'
-                msg := tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'r'}}
-
-                // Вызываем функцию обновления
-                newModel, cmd := m.updateLoginRegisterChoiceScreen(msg)
-
-                // Проверяем результаты
-                model, ok := newModel.(*model)
-                assert.True(t, ok, "Должен быть возвращен указатель на model")
-                assert.Equal(t, registerScreen, model.state, "Должно произойти переключение на экран регистрации")
-                assert.Equal(t, 0, model.loginRegisterFocusedField, "Должно быть выбрано первое поле")
-                assert.True(t, model.registerUsernameInput.Focused(), "Поле имени пользователя должно получить фокус")
-                assert.NotNil(t, cmd, "Должна быть возвращена команда")
-        }</span>)
-
-        <span class="cov0" title="0">t.Run("ПереходНаЭкранВхода", func(t *testing.T) </span><span class="cov0" title="0">{
-                // Создаем модель
-                m := &amp;model{
-                        state:              loginRegisterChoiceScreen,
-                        loginUsernameInput: textinput.New(),
-                }
-
-                // Создаем сообщение о нажатии клавиши 'l'
-                msg := tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'l'}}
-
-                // Вызываем функцию обновления
-                newModel, cmd := m.updateLoginRegisterChoiceScreen(msg)
-
-                // Проверяем результаты
-                model, ok := newModel.(*model)
-                assert.True(t, ok, "Должен быть возвращен указатель на model")
-                assert.Equal(t, loginScreen, model.state, "Должно произойти переключение на экран входа")
-                assert.Equal(t, 0, model.loginRegisterFocusedField, "Должно быть выбрано первое поле")
-                assert.True(t, model.loginUsernameInput.Focused(), "Поле имени пользователя должно получить фокус")
-                assert.NotNil(t, cmd, "Должна быть возвращена команда")
-        }</span>)
-
-        <span class="cov0" title="0">t.Run("ВозвратНаСписокЗаписей", func(t *testing.T) </span><span class="cov0" title="0">{
-                // Создаем модель
-                m := &amp;model{
-                        state: loginRegisterChoiceScreen,
-                }
-
-                // Создаем сообщение о нажатии Esc
-                msg := tea.KeyMsg{Type: tea.KeyEsc}
-
-                // Вызываем функцию обновления
-                newModel, cmd := m.updateLoginRegisterChoiceScreen(msg)
-
-                // Проверяем результаты
-                model, ok := newModel.(*model)
-                assert.True(t, ok, "Должен быть возвращен указатель на model")
-                assert.Equal(t, syncServerScreen, model.state, "Должно произойти переключение на экран синхронизации и сервера")
-                assert.Nil(t, cmd, "Не должно быть возвращено команды")
-        }</span>)
-
-        <span class="cov0" title="0">t.Run("ИгнорированиеДругихКлавиш", func(t *testing.T) </span><span class="cov0" title="0">{
-                // Создаем модель
-                m := &amp;model{
-                        state: loginRegisterChoiceScreen,
-                }
-
-                // Сохраняем начальное состояние
-                initialState := m.state
-
-                // Создаем сообщение о нажатии другой клавиши
-                msg := tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'x'}}
-
-                // Вызываем функцию обновления
-                newModel, cmd := m.updateLoginRegisterChoiceScreen(msg)
-
-                // Проверяем результаты
-                model, ok := newModel.(*model)
-                assert.True(t, ok, "Должен быть возвращен указатель на model")
-                assert.Equal(t, initialState, model.state, "Состояние не должно измениться")
-                assert.Nil(t, cmd, "Не должно быть возвращено команды")
-        }</span>)
-}
-
-// TestLoginRegisterChoiceScreenView тест отображения экрана выбора входа/регистрации.
-func TestLoginRegisterChoiceScreenView(t *testing.T) <span class="cov0" title="0">{
-        // Создаем модель
-        m := &amp;model{
-                state:     loginRegisterChoiceScreen,
-                serverURL: "https://test.server",
-        }
-
-        // Вызываем функцию отображения
-        view := m.viewLoginRegisterChoiceScreen()
-
-        // Проверяем результаты
-        assert.Contains(t, view, "Настройка сервера", "View должен содержать заголовок")
-        assert.Contains(t, view, "https://test.server", "View должен содержать URL сервера")
-        assert.Contains(t, view, "Регистрация нового пользователя", "View должен содержать опцию регистрации")
-        assert.Contains(t, view, "Вход с существующими данными", "View должен содержать опцию входа")
-        assert.Contains(t, view, "(R)", "View должен содержать горячую клавишу для регистрации")
-        assert.Contains(t, view, "(L)", "View должен содержать горячую клавишу для входа")
 }</span>
 </pre>
 		
