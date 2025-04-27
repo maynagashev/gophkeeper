@@ -215,9 +215,9 @@ type model struct {
 	previousScreenState screenState         // Предыдущее состояние (для возврата)
 	savingStatus        string              // Статус сохранения (отображается внизу)
 	statusTimer         *time.Timer         // Таймер для очистки статуса сохранения
-	width               int                 //nolint:unused // Потенциально для адаптивной верстки
-	height              int                 //nolint:unused // Потенциально для адаптивной верстки
-	listMutex           sync.Mutex          //nolint:unused // Задел на будущее для синхронизации
+	width               int
+	height              int
+	listMutex           sync.Mutex //nolint:unused // Задел на будущее для синхронизации
 
 	// Поля для создания нового KDBX
 	newPasswordInput1       textinput.Model // Первое поле ввода нового пароля

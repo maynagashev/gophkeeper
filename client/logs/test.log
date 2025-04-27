@@ -82,7 +82,7 @@
     --- PASS: TestHTTPClient_RollbackToVersion/Ошибка_сервера_(500) (0.00s)
     --- PASS: TestHTTPClient_RollbackToVersion/Без_токена_авторизации (0.00s)
 PASS
-ok  	github.com/maynagashev/gophkeeper/client/internal/api	0.063s
+ok  	github.com/maynagashev/gophkeeper/client/internal/api	(cached)
 === RUN   TestSaveAuthData
 === RUN   TestSaveAuthData/Success_Save_Auth_Data
 === RUN   TestSaveAuthData/Success_Update_Auth_Data
@@ -150,10 +150,10 @@ ok  	github.com/maynagashev/gophkeeper/client/internal/api	0.063s
     --- PASS: TestSaveFileFunction/Ошибка_при_пустом_пароле (0.00s)
     --- PASS: TestSaveFileFunction/Ошибка_записи_в_недоступный_каталог (0.00s)
 PASS
-ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	1.740s
+ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	(cached)
 === RUN   TestHandleAPIMessages
 === RUN   TestHandleAPIMessages/УспешныйВход
-2025/04/27 11:03:22 INFO Auth данные успешно обновлены в KDBX (в памяти)
+2025/04/27 11:33:49 INFO Auth данные успешно обновлены в KDBX (в памяти)
 === RUN   TestHandleAPIMessages/ОшибкаВхода
 === RUN   TestHandleAPIMessages/УспешнаяРегистрация
 === RUN   TestHandleAPIMessages/ОшибкаРегистрации
@@ -168,7 +168,7 @@ ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	1.740s
 === RUN   TestOpenKdbxCmd/SuccessfulOpen
 === RUN   TestOpenKdbxCmd/FileNotFound
 === RUN   TestOpenKdbxCmd/WrongPassword
---- PASS: TestOpenKdbxCmd (0.01s)
+--- PASS: TestOpenKdbxCmd (0.00s)
     --- PASS: TestOpenKdbxCmd/SuccessfulOpen (0.00s)
     --- PASS: TestOpenKdbxCmd/FileNotFound (0.00s)
     --- PASS: TestOpenKdbxCmd/WrongPassword (0.00s)
@@ -198,20 +198,20 @@ ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	1.740s
     --- PASS: TestMakeRegisterCmd/RegistrationError (0.00s)
 === RUN   TestStartSyncCmd
 === RUN   TestStartSyncCmd/AllPreconditionsOK
-2025/04/27 11:03:22 INFO Запуск проверки предусловий для синхронизации...
-2025/04/27 11:03:22 INFO Предусловия синхронизации выполнены.
+2025/04/27 11:33:49 INFO Запуск проверки предусловий для синхронизации...
+2025/04/27 11:33:49 INFO Предусловия синхронизации выполнены.
 === RUN   TestStartSyncCmd/NoServerURL
-2025/04/27 11:03:22 INFO Запуск проверки предусловий для синхронизации...
-2025/04/27 11:03:22 WARN Предусловие синхронизации не выполнено error="URL сервера не настроен"
+2025/04/27 11:33:49 INFO Запуск проверки предусловий для синхронизации...
+2025/04/27 11:33:49 WARN Предусловие синхронизации не выполнено error="URL сервера не настроен"
 === RUN   TestStartSyncCmd/NoAuthToken
-2025/04/27 11:03:22 INFO Запуск проверки предусловий для синхронизации...
-2025/04/27 11:03:22 WARN Предусловие синхронизации не выполнено error="необходимо войти на сервер"
+2025/04/27 11:33:49 INFO Запуск проверки предусловий для синхронизации...
+2025/04/27 11:33:49 WARN Предусловие синхронизации не выполнено error="необходимо войти на сервер"
 === RUN   TestStartSyncCmd/NoAPIClient
-2025/04/27 11:03:22 INFO Запуск проверки предусловий для синхронизации...
-2025/04/27 11:03:22 ERROR Критическая ошибка: API клиент nil перед синхронизацией
+2025/04/27 11:33:49 INFO Запуск проверки предусловий для синхронизации...
+2025/04/27 11:33:49 ERROR Критическая ошибка: API клиент nil перед синхронизацией
 === RUN   TestStartSyncCmd/NoDatabase
-2025/04/27 11:03:22 INFO Запуск проверки предусловий для синхронизации...
-2025/04/27 11:03:22 ERROR Критическая ошибка: База данных nil перед синхронизацией
+2025/04/27 11:33:49 INFO Запуск проверки предусловий для синхронизации...
+2025/04/27 11:33:49 ERROR Критическая ошибка: База данных nil перед синхронизацией
 --- PASS: TestStartSyncCmd (0.00s)
     --- PASS: TestStartSyncCmd/AllPreconditionsOK (0.00s)
     --- PASS: TestStartSyncCmd/NoServerURL (0.00s)
@@ -221,39 +221,39 @@ ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	1.740s
 === RUN   TestFetchServerMetadataCmd
 === RUN   TestFetchServerMetadataCmd/SuccessfulMetadataFetch
 === RUN   TestFetchServerMetadataCmd/ErrorFetchingMetadata
-2025/04/27 11:03:22 ERROR Ошибка получения метаданных с сервера error="ошибка получения метаданных"
+2025/04/27 11:33:49 ERROR Ошибка получения метаданных с сервера error="ошибка получения метаданных"
 --- PASS: TestFetchServerMetadataCmd (0.00s)
     --- PASS: TestFetchServerMetadataCmd/SuccessfulMetadataFetch (0.00s)
     --- PASS: TestFetchServerMetadataCmd/ErrorFetchingMetadata (0.00s)
 === RUN   TestFetchLocalMetadataCmd
 === RUN   TestFetchLocalMetadataCmd/SuccessfulLocalMetadataFetch
 === RUN   TestFetchLocalMetadataCmd/FileNotFound
-2025/04/27 11:03:22 INFO Локальный файл KDBX не найден.
+2025/04/27 11:33:49 INFO Локальный файл KDBX не найден.
 === RUN   TestFetchLocalMetadataCmd/NoPathInModel
-2025/04/27 11:03:22 INFO Локальный файл KDBX не найден.
+2025/04/27 11:33:49 INFO Локальный файл KDBX не найден.
 --- PASS: TestFetchLocalMetadataCmd (0.00s)
     --- PASS: TestFetchLocalMetadataCmd/SuccessfulLocalMetadataFetch (0.00s)
     --- PASS: TestFetchLocalMetadataCmd/FileNotFound (0.00s)
     --- PASS: TestFetchLocalMetadataCmd/NoPathInModel (0.00s)
 === RUN   TestUploadVaultCmd
 === RUN   TestUploadVaultCmd/SuccessfulUpload
-2025/04/27 11:03:22 INFO Подготовка к загрузке: обновление m.db из TUI...
-2025/04/27 11:03:22 INFO Обновление m.db завершено.
-2025/04/27 11:03:22 INFO Запуск загрузки KDBX на сервер... fileModTime=2025-04-27T11:03:22.690+07:00
-2025/04/27 11:03:22 INFO Загрузка KDBX на сервер успешно завершена.
+2025/04/27 11:33:49 INFO Подготовка к загрузке: обновление m.db из TUI...
+2025/04/27 11:33:49 INFO Обновление m.db завершено.
+2025/04/27 11:33:49 INFO Запуск загрузки KDBX на сервер... fileModTime=2025-04-27T11:33:49.494+07:00
+2025/04/27 11:33:49 INFO Загрузка KDBX на сервер успешно завершена.
 === RUN   TestUploadVaultCmd/APIError
-2025/04/27 11:03:22 INFO Подготовка к загрузке: обновление m.db из TUI...
-2025/04/27 11:03:22 INFO Обновление m.db завершено.
-2025/04/27 11:03:22 INFO Запуск загрузки KDBX на сервер... fileModTime=2025-04-27T11:03:22.690+07:00
-2025/04/27 11:03:22 ERROR Ошибка загрузки KDBX на сервер error="ошибка загрузки"
+2025/04/27 11:33:49 INFO Подготовка к загрузке: обновление m.db из TUI...
+2025/04/27 11:33:49 INFO Обновление m.db завершено.
+2025/04/27 11:33:49 INFO Запуск загрузки KDBX на сервер... fileModTime=2025-04-27T11:33:49.494+07:00
+2025/04/27 11:33:49 ERROR Ошибка загрузки KDBX на сервер error="ошибка загрузки"
 === RUN   TestUploadVaultCmd/NoDatabaseLoaded
-2025/04/27 11:03:22 INFO Подготовка к загрузке: обновление m.db из TUI...
-2025/04/27 11:03:22 INFO Обновление m.db завершено.
-2025/04/27 11:03:22 ERROR Попытка загрузки хранилища, но m.db is nil
+2025/04/27 11:33:49 INFO Подготовка к загрузке: обновление m.db из TUI...
+2025/04/27 11:33:49 INFO Обновление m.db завершено.
+2025/04/27 11:33:49 ERROR Попытка загрузки хранилища, но m.db is nil
 === RUN   TestUploadVaultCmd/FileNotFoundForMetadata
-2025/04/27 11:03:22 INFO Подготовка к загрузке: обновление m.db из TUI...
-2025/04/27 11:03:22 INFO Обновление m.db завершено.
-2025/04/27 11:03:22 ERROR Ошибка получения метаданных локального файла перед загрузкой path=/tmp/gophkeeper_test_3191274523/non_existent.kdbx error="stat /tmp/gophkeeper_test_3191274523/non_existent.kdbx: no such file or directory"
+2025/04/27 11:33:49 INFO Подготовка к загрузке: обновление m.db из TUI...
+2025/04/27 11:33:49 INFO Обновление m.db завершено.
+2025/04/27 11:33:49 ERROR Ошибка получения метаданных локального файла перед загрузкой path=/tmp/gophkeeper_test_1615147421/non_existent.kdbx error="stat /tmp/gophkeeper_test_1615147421/non_existent.kdbx: no such file or directory"
 --- PASS: TestUploadVaultCmd (0.01s)
     --- PASS: TestUploadVaultCmd/SuccessfulUpload (0.00s)
     --- PASS: TestUploadVaultCmd/APIError (0.00s)
@@ -261,27 +261,27 @@ ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	1.740s
     --- PASS: TestUploadVaultCmd/FileNotFoundForMetadata (0.00s)
 === RUN   TestDownloadVaultCmd
 === RUN   TestDownloadVaultCmd/SuccessfulDownload
-2025/04/27 11:03:22 INFO Запуск скачивания KDBX с сервера...
-2025/04/27 11:03:22 INFO Скачивание KDBX с сервера и сохранение локально завершено.
+2025/04/27 11:33:49 INFO Запуск скачивания KDBX с сервера...
+2025/04/27 11:33:49 INFO Скачивание KDBX с сервера и сохранение локально завершено.
 === RUN   TestDownloadVaultCmd/APIError
-2025/04/27 11:03:22 INFO Запуск скачивания KDBX с сервера...
-2025/04/27 11:03:22 ERROR Ошибка скачивания KDBX с сервера error="ошибка скачивания"
+2025/04/27 11:33:49 INFO Запуск скачивания KDBX с сервера...
+2025/04/27 11:33:49 ERROR Ошибка скачивания KDBX с сервера error="ошибка скачивания"
 === RUN   TestDownloadVaultCmd/WriteError
-2025/04/27 11:03:22 INFO Запуск скачивания KDBX с сервера...
-2025/04/27 11:03:22 ERROR Ошибка открытия локального файла для записи path=/tmp/gophkeeper_test_4002407807/readonly/test.kdbx error="open /tmp/gophkeeper_test_4002407807/readonly/test.kdbx: permission denied"
+2025/04/27 11:33:49 INFO Запуск скачивания KDBX с сервера...
+2025/04/27 11:33:49 ERROR Ошибка открытия локального файла для записи path=/tmp/gophkeeper_test_2001535017/readonly/test.kdbx error="open /tmp/gophkeeper_test_2001535017/readonly/test.kdbx: permission denied"
 --- PASS: TestDownloadVaultCmd (0.00s)
     --- PASS: TestDownloadVaultCmd/SuccessfulDownload (0.00s)
     --- PASS: TestDownloadVaultCmd/APIError (0.00s)
     --- PASS: TestDownloadVaultCmd/WriteError (0.00s)
 === RUN   TestListVersionsCmd
 === RUN   TestListVersionsCmd/УспешнаяЗагрузкаВерсий
-2025/04/27 11:03:22 INFO Список версий успешно загружен count=2 current_id=2
+2025/04/27 11:33:49 INFO Список версий успешно загружен count=2 current_id=2
 === RUN   TestListVersionsCmd/APIКлиентНеИнициализирован
 === RUN   TestListVersionsCmd/ОтсутствуетТокенАвторизации
 === RUN   TestListVersionsCmd/ОшибкаAPI
-2025/04/27 11:03:22 ERROR Ошибка загрузки списка версий error="ошибка сети"
+2025/04/27 11:33:49 ERROR Ошибка загрузки списка версий error="ошибка сети"
 === RUN   TestListVersionsCmd/ОшибкаАвторизации
-2025/04/27 11:03:22 ERROR Ошибка загрузки списка версий: ошибка авторизации
+2025/04/27 11:33:49 ERROR Ошибка загрузки списка версий: ошибка авторизации
 --- PASS: TestListVersionsCmd (0.00s)
     --- PASS: TestListVersionsCmd/УспешнаяЗагрузкаВерсий (0.00s)
     --- PASS: TestListVersionsCmd/APIКлиентНеИнициализирован (0.00s)
@@ -290,11 +290,11 @@ ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	1.740s
     --- PASS: TestListVersionsCmd/ОшибкаАвторизации (0.00s)
 === RUN   TestRollbackToVersionCmd
 === RUN   TestRollbackToVersionCmd/УспешныйОткат
-2025/04/27 11:03:22 INFO Успешный откат к версии version_id=10
+2025/04/27 11:33:49 INFO Успешный откат к версии version_id=10
 === RUN   TestRollbackToVersionCmd/APIКлиентНеИнициализирован
 === RUN   TestRollbackToVersionCmd/ОтсутствуетТокенАвторизации
 === RUN   TestRollbackToVersionCmd/ОшибкаОтката
-2025/04/27 11:03:22 ERROR Ошибка отката к версии version_id=10 error="версия не найдена"
+2025/04/27 11:33:49 ERROR Ошибка отката к версии version_id=10 error="версия не найдена"
 --- PASS: TestRollbackToVersionCmd (0.00s)
     --- PASS: TestRollbackToVersionCmd/УспешныйОткат (0.00s)
     --- PASS: TestRollbackToVersionCmd/APIКлиентНеИнициализирован (0.00s)
@@ -303,7 +303,7 @@ ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	1.740s
 === RUN   TestApplyUIChangesToDB
 === RUN   TestApplyUIChangesToDB/УспешноеОбновлениеЗаписей
 === RUN   TestApplyUIChangesToDB/НесуществующийUUID
-2025/04/27 11:03:22 WARN Запись из списка не найдена в m.db при подготовке к загрузке uuid="aRWPruWLVcrgjQnDr9l/7A=="
+2025/04/27 11:33:49 WARN Запись из списка не найдена в m.db при подготовке к загрузке uuid="9stspsyHgiFj4GmD+5uF2g=="
 === RUN   TestApplyUIChangesToDB/ПустойСписок
 --- PASS: TestApplyUIChangesToDB (0.00s)
     --- PASS: TestApplyUIChangesToDB/УспешноеОбновлениеЗаписей (0.00s)
@@ -448,14 +448,14 @@ ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	1.740s
 === RUN   TestPrepareAddScreen
 --- PASS: TestPrepareAddScreen (0.00s)
 === RUN   TestCreateEntryFromInputs
-2025/04/27 11:03:22 INFO Добавлено вложение к новой записи name=file1.txt binary_id=0
-2025/04/27 11:03:22 INFO Добавлено вложение к новой записи name=image.png binary_id=1
+2025/04/27 11:33:49 INFO Добавлено вложение к новой записи name=file1.txt binary_id=0
+2025/04/27 11:33:49 INFO Добавлено вложение к новой записи name=image.png binary_id=1
 --- PASS: TestCreateEntryFromInputs (0.00s)
 === RUN   TestUpdateEntryAddScreen
-2025/04/27 11:03:22 INFO Отмена добавления, возврат к списку
-2025/04/27 11:03:22 ERROR Не удалось добавить запись в m.db: база данных или Root не инициализированы
-2025/04/27 11:03:22 INFO Новая запись добавлена title="New Entry Title"
-2025/04/27 11:03:22 INFO Переход к экрану ввода пути для добавления вложения
+2025/04/27 11:33:49 INFO Отмена добавления, возврат к списку
+2025/04/27 11:33:49 ERROR Не удалось добавить запись в m.db: база данных или Root не инициализированы
+2025/04/27 11:33:49 INFO Новая запись добавлена title="New Entry Title"
+2025/04/27 11:33:49 INFO Переход к экрану ввода пути для добавления вложения
 --- PASS: TestUpdateEntryAddScreen (0.00s)
 === RUN   TestViewEntryAddScreen
 === RUN   TestViewEntryAddScreen/Без_вложений
@@ -465,13 +465,13 @@ ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	1.740s
     --- PASS: TestViewEntryAddScreen/С_вложениями (0.00s)
 === RUN   TestUpdateAttachmentListDeleteScreen
 === RUN   TestUpdateAttachmentListDeleteScreen/Возврат_к_редактированию_в_режиме_ReadOnly
-2025/04/27 11:03:22 WARN Попытка доступа к экрану удаления вложения в режиме Read-Only.
+2025/04/27 11:33:49 WARN Попытка доступа к экрану удаления вложения в режиме Read-Only.
 === RUN   TestUpdateAttachmentListDeleteScreen/Обработка_подтверждения_удаления
-2025/04/27 11:03:22 INFO Подтверждено удаление ссылки на вложение name=test.txt id=123
-2025/04/27 11:03:22 INFO Ссылка на вложение успешно удалена из редактируемой записи
+2025/04/27 11:33:49 INFO Подтверждено удаление ссылки на вложение name=test.txt id=123
+2025/04/27 11:33:49 INFO Ссылка на вложение успешно удалена из редактируемой записи
 === RUN   TestUpdateAttachmentListDeleteScreen/Отмена_подтверждения_удаления
 === RUN   TestUpdateAttachmentListDeleteScreen/Возврат_к_редактированию_по_ESC
-2025/04/27 11:03:22 INFO Отмена удаления вложения, возврат к редактированию
+2025/04/27 11:33:49 INFO Отмена удаления вложения, возврат к редактированию
 === RUN   TestUpdateAttachmentListDeleteScreen/Выбор_вложения_для_удаления
 === RUN   TestUpdateAttachmentListDeleteScreen/Выбор_несуществующего_вложения
 === RUN   TestUpdateAttachmentListDeleteScreen/Обработка_неизвестной_клавиши
@@ -485,13 +485,13 @@ ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	1.740s
     --- PASS: TestUpdateAttachmentListDeleteScreen/Обработка_неизвестной_клавиши (0.00s)
 === RUN   TestPerformAttachmentDelete
 === RUN   TestPerformAttachmentDelete/Успешное_удаление_вложения
-2025/04/27 11:03:22 INFO Подтверждено удаление ссылки на вложение name=test.txt id=123
-2025/04/27 11:03:22 INFO Ссылка на вложение успешно удалена из редактируемой записи
+2025/04/27 11:33:49 INFO Подтверждено удаление ссылки на вложение name=test.txt id=123
+2025/04/27 11:33:49 INFO Ссылка на вложение успешно удалена из редактируемой записи
 === RUN   TestPerformAttachmentDelete/Попытка_удаления_без_выбранного_элемента
-2025/04/27 11:03:22 ERROR Попытка удаления без выбранного itemToDelete
+2025/04/27 11:33:49 ERROR Попытка удаления без выбранного itemToDelete
 === RUN   TestPerformAttachmentDelete/Вложение_не_найдено_в_записи
-2025/04/27 11:03:22 INFO Подтверждено удаление ссылки на вложение name=test.txt id=123
-2025/04/27 11:03:22 WARN Не удалось найти BinaryReference для удаления в editingEntry
+2025/04/27 11:33:49 INFO Подтверждено удаление ссылки на вложение name=test.txt id=123
+2025/04/27 11:33:49 WARN Не удалось найти BinaryReference для удаления в editingEntry
 --- PASS: TestPerformAttachmentDelete (0.00s)
     --- PASS: TestPerformAttachmentDelete/Успешное_удаление_вложения (0.00s)
     --- PASS: TestPerformAttachmentDelete/Попытка_удаления_без_выбранного_элемента (0.00s)
@@ -503,17 +503,17 @@ ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	1.740s
     --- PASS: TestViewAttachmentListDeleteScreen/Отображение_промпта_подтверждения (0.00s)
     --- PASS: TestViewAttachmentListDeleteScreen/Отображение_списка_вложений (0.00s)
 === RUN   TestUpdateAttachmentPathInputScreen
-2025/04/27 11:03:22 INFO Отмена ввода пути вложения
+2025/04/27 11:33:49 INFO Отмена ввода пути вложения
 --- PASS: TestUpdateAttachmentPathInputScreen (0.53s)
 === RUN   TestHandleAttachmentPathConfirm
-2025/04/27 11:03:23 INFO Попытка добавить вложение из файла path=nonexistent.txt
-2025/04/27 11:03:23 ERROR Ошибка чтения файла для вложения path=nonexistent.txt error="open nonexistent.txt: no such file or directory"
-2025/04/27 11:03:23 INFO Попытка добавить вложение из файла path=/tmp/test_attachment_1953446486.txt
-2025/04/27 11:03:23 INFO Файл успешно прочитан name=test_attachment_1953446486.txt size=20
-2025/04/27 11:03:23 INFO Вложение добавлено к редактируемой записи name=test_attachment_1953446486.txt binary_id=0
-2025/04/27 11:03:23 INFO Попытка добавить вложение из файла path=/tmp/test_attachment_1953446486.txt
-2025/04/27 11:03:23 INFO Файл успешно прочитан name=test_attachment_1953446486.txt size=20
-2025/04/27 11:03:23 ERROR Неожиданный предыдущий экран при добавлении вложения state=syncServerScreen
+2025/04/27 11:33:50 INFO Попытка добавить вложение из файла path=nonexistent.txt
+2025/04/27 11:33:50 ERROR Ошибка чтения файла для вложения path=nonexistent.txt error="open nonexistent.txt: no such file or directory"
+2025/04/27 11:33:50 INFO Попытка добавить вложение из файла path=/tmp/test_attachment_561186663.txt
+2025/04/27 11:33:50 INFO Файл успешно прочитан name=test_attachment_561186663.txt size=20
+2025/04/27 11:33:50 INFO Вложение добавлено к редактируемой записи name=test_attachment_561186663.txt binary_id=0
+2025/04/27 11:33:50 INFO Попытка добавить вложение из файла path=/tmp/test_attachment_561186663.txt
+2025/04/27 11:33:50 INFO Файл успешно прочитан name=test_attachment_561186663.txt size=20
+2025/04/27 11:33:50 ERROR Неожиданный предыдущий экран при добавлении вложения state=syncServerScreen
 --- PASS: TestHandleAttachmentPathConfirm (0.00s)
 === RUN   TestViewAttachmentPathInputScreen
 --- PASS: TestViewAttachmentPathInputScreen (0.00s)
@@ -537,9 +537,9 @@ ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	1.740s
 --- PASS: TestViewEntryDetailScreen (0.00s)
 === RUN   TestUpdateEntryDetailScreen
 === RUN   TestUpdateEntryDetailScreen/Переход_к_редактированию_по_'e'
-2025/04/27 11:03:23 INFO Переход к редактированию записи title="Detail Test"
+2025/04/27 11:33:50 INFO Переход к редактированию записи title="Detail Test"
 === RUN   TestUpdateEntryDetailScreen/Возврат_к_списку_по_'b'
-2025/04/27 11:03:23 INFO Возврат к списку записей
+2025/04/27 11:33:50 INFO Возврат к списку записей
 --- PASS: TestUpdateEntryDetailScreen (0.00s)
     --- PASS: TestUpdateEntryDetailScreen/Переход_к_редактированию_по_'e' (0.00s)
     --- PASS: TestUpdateEntryDetailScreen/Возврат_к_списку_по_'b' (0.00s)
@@ -577,10 +577,10 @@ ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	1.740s
     --- PASS: TestPrepareEditScreen/Без_выбранной_записи (0.00s)
 === RUN   TestUpdateEntryEditScreen
 === RUN   TestUpdateEntryEditScreen/Обработка_клавиши_Escape
-2025/04/27 11:03:23 INFO Отмена редактирования, возврат к деталям записи
+2025/04/27 11:33:50 INFO Отмена редактирования, возврат к деталям записи
 === RUN   TestUpdateEntryEditScreen/Навигация_с_помощью_Tab
 === RUN   TestUpdateEntryEditScreen/Сохранение_изменений_по_Enter
-2025/04/27 11:03:23 INFO Изменения сохранены, возврат к деталям записи
+2025/04/27 11:33:50 INFO Изменения сохранены, возврат к деталям записи
 === RUN   TestUpdateEntryEditScreen/Редактирование_значения_поля
 --- PASS: TestUpdateEntryEditScreen (0.00s)
     --- PASS: TestUpdateEntryEditScreen/Обработка_клавиши_Escape (0.00s)
@@ -589,11 +589,11 @@ ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	1.740s
     --- PASS: TestUpdateEntryEditScreen/Редактирование_значения_поля (0.00s)
 === RUN   TestHandleAttachmentDeleteAction
 === RUN   TestHandleAttachmentDeleteAction/С_вложениями_для_удаления
-2025/04/27 11:03:23 INFO Переход к экрану удаления вложения
+2025/04/27 11:33:50 INFO Переход к экрану удаления вложения
 === RUN   TestHandleAttachmentDeleteAction/Без_вложений
-2025/04/27 11:03:23 INFO Нет вложений для удаления
+2025/04/27 11:33:50 INFO Нет вложений для удаления
 === RUN   TestHandleAttachmentDeleteAction/editingEntry_is_nil
-2025/04/27 11:03:23 INFO Нет вложений для удаления
+2025/04/27 11:33:50 INFO Нет вложений для удаления
 --- PASS: TestHandleAttachmentDeleteAction (0.00s)
     --- PASS: TestHandleAttachmentDeleteAction/С_вложениями_для_удаления (0.00s)
     --- PASS: TestHandleAttachmentDeleteAction/Без_вложений (0.00s)
@@ -603,27 +603,27 @@ ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	1.740s
 --- SKIP: TestViewEntryEditScreen (0.00s)
 === RUN   TestUpdateEntryListScreen
 === RUN   TestUpdateEntryListScreen/Обработка_dbOpenedMsg
-2025/04/27 11:03:23 INFO База KDBX успешно открыта path=""
-2025/04/27 11:03:23 INFO URL сервера не задан и не найден в KDBX.
-2025/04/27 11:03:23 WARN API клиент не инициализирован (URL не задан), токен не установлен.
+2025/04/27 11:33:50 INFO База KDBX успешно открыта path=""
+2025/04/27 11:33:50 INFO URL сервера не задан и не найден в KDBX.
+2025/04/27 11:33:50 WARN API клиент не инициализирован (URL не задан), токен не установлен.
 === RUN   TestUpdateEntryListScreen/Навигация_по_списку_(вниз)
-2025/04/27 11:03:23 INFO База KDBX успешно открыта path=""
-2025/04/27 11:03:23 INFO URL сервера не задан и не найден в KDBX.
-2025/04/27 11:03:23 WARN API клиент не инициализирован (URL не задан), токен не установлен.
+2025/04/27 11:33:50 INFO База KDBX успешно открыта path=""
+2025/04/27 11:33:50 INFO URL сервера не задан и не найден в KDBX.
+2025/04/27 11:33:50 WARN API клиент не инициализирован (URL не задан), токен не установлен.
 === RUN   TestUpdateEntryListScreen/Навигация_по_списку_(вверх)
-2025/04/27 11:03:23 INFO База KDBX успешно открыта path=""
-2025/04/27 11:03:23 INFO URL сервера не задан и не найден в KDBX.
-2025/04/27 11:03:23 WARN API клиент не инициализирован (URL не задан), токен не установлен.
+2025/04/27 11:33:50 INFO База KDBX успешно открыта path=""
+2025/04/27 11:33:50 INFO URL сервера не задан и не найден в KDBX.
+2025/04/27 11:33:50 WARN API клиент не инициализирован (URL не задан), токен не установлен.
 === RUN   TestUpdateEntryListScreen/Переход_к_деталям_по_Enter
-2025/04/27 11:03:23 INFO База KDBX успешно открыта path=""
-2025/04/27 11:03:23 INFO URL сервера не задан и не найден в KDBX.
-2025/04/27 11:03:23 WARN API клиент не инициализирован (URL не задан), токен не установлен.
-2025/04/27 11:03:23 INFO Переход к деталям записи title="Entry 1"
+2025/04/27 11:33:50 INFO База KDBX успешно открыта path=""
+2025/04/27 11:33:50 INFO URL сервера не задан и не найден в KDBX.
+2025/04/27 11:33:50 WARN API клиент не инициализирован (URL не задан), токен не установлен.
+2025/04/27 11:33:50 INFO Переход к деталям записи title="Entry 1"
 === RUN   TestUpdateEntryListScreen/Переход_к_добавлению_по_'a'
-2025/04/27 11:03:23 INFO База KDBX успешно открыта path=""
-2025/04/27 11:03:23 INFO URL сервера не задан и не найден в KDBX.
-2025/04/27 11:03:23 WARN API клиент не инициализирован (URL не задан), токен не установлен.
-2025/04/27 11:03:23 INFO Переход к добавлению новой записи
+2025/04/27 11:33:50 INFO База KDBX успешно открыта path=""
+2025/04/27 11:33:50 INFO URL сервера не задан и не найден в KDBX.
+2025/04/27 11:33:50 WARN API клиент не инициализирован (URL не задан), токен не установлен.
+2025/04/27 11:33:50 INFO Переход к добавлению новой записи
 --- PASS: TestUpdateEntryListScreen (0.01s)
     --- PASS: TestUpdateEntryListScreen/Обработка_dbOpenedMsg (0.00s)
     --- PASS: TestUpdateEntryListScreen/Навигация_по_списку_(вниз) (0.00s)
@@ -632,23 +632,23 @@ ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	1.740s
     --- PASS: TestUpdateEntryListScreen/Переход_к_добавлению_по_'a' (0.00s)
 === RUN   TestHandleAuthLoadError
 === RUN   TestHandleAuthLoadError/URL_не_из_флага
-2025/04/27 11:03:23 ERROR Ошибка загрузки Auth данных из KDBX error="test auth load error"
+2025/04/27 11:33:50 ERROR Ошибка загрузки Auth данных из KDBX error="test auth load error"
 === RUN   TestHandleAuthLoadError/URL_из_флага
-2025/04/27 11:03:23 ERROR Ошибка загрузки Auth данных из KDBX error="test auth load error"
+2025/04/27 11:33:50 ERROR Ошибка загрузки Auth данных из KDBX error="test auth load error"
 --- PASS: TestHandleAuthLoadError (0.00s)
     --- PASS: TestHandleAuthLoadError/URL_не_из_флага (0.00s)
     --- PASS: TestHandleAuthLoadError/URL_из_флага (0.00s)
 === RUN   TestHandleAuthLoadSuccess
 === RUN   TestHandleAuthLoadSuccess/URL_не_из_флага,_URL_и_токен_загружены
-2025/04/27 11:03:23 INFO URL сервера загружен из KDBX, создан API клиент url=http://loaded.url token_found=true
+2025/04/27 11:33:50 INFO URL сервера загружен из KDBX, создан API клиент url=http://loaded.url token_found=true
 === RUN   TestHandleAuthLoadSuccess/URL_не_из_флага,_URL_пустой,_токен_загружен
-2025/04/27 11:03:23 INFO URL сервера не задан и не найден в KDBX.
+2025/04/27 11:33:50 INFO URL сервера не задан и не найден в KDBX.
 === RUN   TestHandleAuthLoadSuccess/URL_не_из_флага,_URL_загружен,_токен_пустой
-2025/04/27 11:03:23 INFO URL сервера загружен из KDBX, создан API клиент url=http://loaded.url token_found=false
+2025/04/27 11:33:50 INFO URL сервера загружен из KDBX, создан API клиент url=http://loaded.url token_found=false
 === RUN   TestHandleAuthLoadSuccess/URL_из_флага,_токен_загружен
-2025/04/27 11:03:23 INFO URL сервера задан флагом, загружен только токен из KDBX token_found=true
+2025/04/27 11:33:50 INFO URL сервера задан флагом, загружен только токен из KDBX token_found=true
 === RUN   TestHandleAuthLoadSuccess/URL_из_флага,_токен_пустой
-2025/04/27 11:03:23 INFO URL сервера задан флагом, загружен только токен из KDBX token_found=false
+2025/04/27 11:33:50 INFO URL сервера задан флагом, загружен только токен из KDBX token_found=false
 --- PASS: TestHandleAuthLoadSuccess (0.00s)
     --- PASS: TestHandleAuthLoadSuccess/URL_не_из_флага,_URL_и_токен_загружены (0.00s)
     --- PASS: TestHandleAuthLoadSuccess/URL_не_из_флага,_URL_пустой,_токен_загружен (0.00s)
@@ -691,6 +691,36 @@ ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	1.740s
 === RUN   TestLoginWithScreenTestSuite
     screen_login_test.go:144: Требуется полностью переработать тесты для модели входа/авторизации
 --- SKIP: TestLoginWithScreenTestSuite (0.00s)
+=== RUN   TestViewNewKdbxPasswordScreen
+=== RUN   TestViewNewKdbxPasswordScreen/Базовое_отображение_(фокус_на_первом_поле)
+=== RUN   TestViewNewKdbxPasswordScreen/Отображение_с_фокусом_на_втором_поле
+=== RUN   TestViewNewKdbxPasswordScreen/Отображение_с_ошибкой_совпадения_паролей
+--- PASS: TestViewNewKdbxPasswordScreen (0.00s)
+    --- PASS: TestViewNewKdbxPasswordScreen/Базовое_отображение_(фокус_на_первом_поле) (0.00s)
+    --- PASS: TestViewNewKdbxPasswordScreen/Отображение_с_фокусом_на_втором_поле (0.00s)
+    --- PASS: TestViewNewKdbxPasswordScreen/Отображение_с_ошибкой_совпадения_паролей (0.00s)
+=== RUN   TestUpdateNewKdbxPasswordScreen
+=== RUN   TestUpdateNewKdbxPasswordScreen/Выход_по_Esc
+=== RUN   TestUpdateNewKdbxPasswordScreen/Выход_по_Ctrl+C
+=== RUN   TestUpdateNewKdbxPasswordScreen/Переключение_фокуса_Tab/Down
+=== RUN   TestUpdateNewKdbxPasswordScreen/Переключение_фокуса_Shift+Tab/Up
+=== RUN   TestUpdateNewKdbxPasswordScreen/Enter_на_первом_поле_(пустой_пароль)
+=== RUN   TestUpdateNewKdbxPasswordScreen/Enter_на_первом_поле_(непустой_пароль)
+=== RUN   TestUpdateNewKdbxPasswordScreen/Enter_на_втором_поле_(пароли_не_совпадают)
+=== RUN   TestUpdateNewKdbxPasswordScreen/Enter_на_втором_поле_(успешное_создание)
+2025/04/27 11:33:50 INFO Пароли совпадают, создаем новую базу KDBX path=/tmp/TestUpdateNewKdbxPasswordScreenEnter_на_втором_поле_(успешное_создание)3906930466/001/test_new.kdbx
+2025/04/27 11:33:50 INFO Новый файл KDBX успешно создан и сохранен path=/tmp/TestUpdateNewKdbxPasswordScreenEnter_на_втором_поле_(успешное_создание)3906930466/001/test_new.kdbx
+=== RUN   TestUpdateNewKdbxPasswordScreen/Ввод_символов_в_активное_поле
+--- PASS: TestUpdateNewKdbxPasswordScreen (0.02s)
+    --- PASS: TestUpdateNewKdbxPasswordScreen/Выход_по_Esc (0.00s)
+    --- PASS: TestUpdateNewKdbxPasswordScreen/Выход_по_Ctrl+C (0.00s)
+    --- PASS: TestUpdateNewKdbxPasswordScreen/Переключение_фокуса_Tab/Down (0.00s)
+    --- PASS: TestUpdateNewKdbxPasswordScreen/Переключение_фокуса_Shift+Tab/Up (0.00s)
+    --- PASS: TestUpdateNewKdbxPasswordScreen/Enter_на_первом_поле_(пустой_пароль) (0.00s)
+    --- PASS: TestUpdateNewKdbxPasswordScreen/Enter_на_первом_поле_(непустой_пароль) (0.00s)
+    --- PASS: TestUpdateNewKdbxPasswordScreen/Enter_на_втором_поле_(пароли_не_совпадают) (0.00s)
+    --- PASS: TestUpdateNewKdbxPasswordScreen/Enter_на_втором_поле_(успешное_создание) (0.01s)
+    --- PASS: TestUpdateNewKdbxPasswordScreen/Ввод_символов_в_активное_поле (0.00s)
 === RUN   TestPasswordInputScreen
 === RUN   TestPasswordInputScreen/ОтрисовкаЭкрана
 === RUN   TestPasswordInputScreen/ОтображениеОшибки
@@ -720,9 +750,9 @@ ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	1.740s
 === RUN   TestUpdateServerURLInputScreen
 === RUN   TestUpdateServerURLInputScreen/ОтменаВводаURL
 === RUN   TestUpdateServerURLInputScreen/ПодтверждениеВводаURL
-2025/04/27 11:03:23 INFO URL сервера обновлен url=https://new.server
+2025/04/27 11:33:50 INFO URL сервера обновлен url=https://new.server
 === RUN   TestUpdateServerURLInputScreen/ИспользованиеПлейсхолдера
-2025/04/27 11:03:23 INFO URL сервера обновлен url=https://default.server
+2025/04/27 11:33:50 INFO URL сервера обновлен url=https://default.server
 === RUN   TestUpdateServerURLInputScreen/ОбновлениеПоляВвода
 --- PASS: TestUpdateServerURLInputScreen (0.00s)
     --- PASS: TestUpdateServerURLInputScreen/ОтменаВводаURL (0.00s)
@@ -734,10 +764,34 @@ ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	1.740s
 === RUN   TestDirectServerURLInputScreen
 === RUN   TestDirectServerURLInputScreen/ОтменаВвода
 === RUN   TestDirectServerURLInputScreen/ПодтверждениеПустогоВвода
-2025/04/27 11:03:23 INFO URL сервера обновлен url=https://default.server
+2025/04/27 11:33:50 INFO URL сервера обновлен url=https://default.server
 --- PASS: TestDirectServerURLInputScreen (0.00s)
     --- PASS: TestDirectServerURLInputScreen/ОтменаВвода (0.00s)
     --- PASS: TestDirectServerURLInputScreen/ПодтверждениеПустогоВвода (0.00s)
+=== RUN   TestSyncMenuItem_Title
+=== RUN   TestSyncMenuItem_Title/Настройка_URL
+=== RUN   TestSyncMenuItem_Title/Вход/Регистрация
+=== RUN   TestSyncMenuItem_Title/Синхронизировать
+=== RUN   TestSyncMenuItem_Title/Просмотр_версий
+=== RUN   TestSyncMenuItem_Title/Выход
+=== RUN   TestSyncMenuItem_Title/Пустой_заголовок
+--- PASS: TestSyncMenuItem_Title (0.00s)
+    --- PASS: TestSyncMenuItem_Title/Настройка_URL (0.00s)
+    --- PASS: TestSyncMenuItem_Title/Вход/Регистрация (0.00s)
+    --- PASS: TestSyncMenuItem_Title/Синхронизировать (0.00s)
+    --- PASS: TestSyncMenuItem_Title/Просмотр_версий (0.00s)
+    --- PASS: TestSyncMenuItem_Title/Выход (0.00s)
+    --- PASS: TestSyncMenuItem_Title/Пустой_заголовок (0.00s)
+=== RUN   TestSyncMenuItem_Description
+--- PASS: TestSyncMenuItem_Description (0.00s)
+=== RUN   TestSyncMenuItem_FilterValue
+=== RUN   TestSyncMenuItem_FilterValue/Настройка_URL
+=== RUN   TestSyncMenuItem_FilterValue/Пустой_заголовок
+--- PASS: TestSyncMenuItem_FilterValue (0.00s)
+    --- PASS: TestSyncMenuItem_FilterValue/Настройка_URL (0.00s)
+    --- PASS: TestSyncMenuItem_FilterValue/Пустой_заголовок (0.00s)
+=== RUN   TestViewSyncServerScreen
+--- PASS: TestViewSyncServerScreen (0.00s)
 === RUN   TestWelcomeScreen
 === RUN   TestWelcomeScreen/ОтрисовкаЭкрана
 === RUN   TestWelcomeScreen/ПереходПриНажатииEnter
@@ -773,9 +827,9 @@ ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	1.740s
 === RUN   TestUpdateRootModTime
 === RUN   TestUpdateRootModTime/УспешноеОбновление
 === RUN   TestUpdateRootModTime/ПустаяБазаДанных
-2025/04/27 11:03:23 WARN Не удалось обновить LastModificationTime: db, Content или Root is nil
+2025/04/27 11:33:50 WARN Не удалось обновить LastModificationTime: db, Content или Root is nil
 === RUN   TestUpdateRootModTime/НетКорневойГруппы
-2025/04/27 11:03:23 WARN Не удалось обновить LastModificationTime: нет корневой группы
+2025/04/27 11:33:50 WARN Не удалось обновить LastModificationTime: нет корневой группы
 --- PASS: TestUpdateRootModTime (0.00s)
     --- PASS: TestUpdateRootModTime/УспешноеОбновление (0.00s)
     --- PASS: TestUpdateRootModTime/ПустаяБазаДанных (0.00s)
@@ -783,10 +837,10 @@ ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	1.740s
 === RUN   TestHandleGlobalKeys
 === RUN   TestHandleGlobalKeys/CtrlC
 === RUN   TestHandleGlobalKeys/CtrlS_РазрешеноСохранение
-2025/04/27 11:03:23 INFO Начало обновления m.db перед сохранением
-2025/04/27 11:03:23 INFO Обновление m.db завершено updated_count=0
-2025/04/27 11:03:23 WARN Не удалось обновить LastModificationTime: db, Content или Root is nil
-2025/04/27 11:03:23 INFO Запуск сохранения KDBX path=/tmp/test.kdbx
+2025/04/27 11:33:50 INFO Начало обновления m.db перед сохранением
+2025/04/27 11:33:50 INFO Обновление m.db завершено updated_count=0
+2025/04/27 11:33:50 WARN Не удалось обновить LastModificationTime: db, Content или Root is nil
+2025/04/27 11:33:50 INFO Запуск сохранения KDBX path=/tmp/test.kdbx
 === RUN   TestHandleGlobalKeys/CtrlS_ЗапрещеноСохранение
 === RUN   TestHandleGlobalKeys/ДругаяКлавиша
 --- PASS: TestHandleGlobalKeys (0.00s)
@@ -796,15 +850,15 @@ ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	1.740s
     --- PASS: TestHandleGlobalKeys/ДругаяКлавиша (0.00s)
 === RUN   TestUpdateDBFromList
 === RUN   TestUpdateDBFromList/ОбновлениеСуществующейЗаписи
-2025/04/27 11:03:23 INFO Начало обновления m.db перед сохранением
-2025/04/27 11:03:23 INFO Обновление m.db завершено updated_count=1
+2025/04/27 11:33:50 INFO Начало обновления m.db перед сохранением
+2025/04/27 11:33:50 INFO Обновление m.db завершено updated_count=1
 === RUN   TestUpdateDBFromList/ЗаписьНеНайденаВБазе
-2025/04/27 11:03:23 INFO Начало обновления m.db перед сохранением
-2025/04/27 11:03:23 WARN Запись из списка не найдена в m.db uuid="i7cJ5ZY82Jm8UHzIH9mG+A=="
-2025/04/27 11:03:23 INFO Обновление m.db завершено updated_count=0
+2025/04/27 11:33:50 INFO Начало обновления m.db перед сохранением
+2025/04/27 11:33:50 WARN Запись из списка не найдена в m.db uuid="RThRsb9iTPI+3IceJ0dibw=="
+2025/04/27 11:33:50 INFO Обновление m.db завершено updated_count=0
 === RUN   TestUpdateDBFromList/ПустойСписок
-2025/04/27 11:03:23 INFO Начало обновления m.db перед сохранением
-2025/04/27 11:03:23 INFO Обновление m.db завершено updated_count=0
+2025/04/27 11:33:50 INFO Начало обновления m.db перед сохранением
+2025/04/27 11:33:50 INFO Обновление m.db завершено updated_count=0
 --- PASS: TestUpdateDBFromList (0.00s)
     --- PASS: TestUpdateDBFromList/ОбновлениеСуществующейЗаписи (0.00s)
     --- PASS: TestUpdateDBFromList/ЗаписьНеНайденаВБазе (0.00s)
@@ -840,4 +894,4 @@ ok  	github.com/maynagashev/gophkeeper/client/internal/kdbx	1.740s
 === RUN   TestFindEntryInDBAlias
 --- PASS: TestFindEntryInDBAlias (0.00s)
 PASS
-ok  	github.com/maynagashev/gophkeeper/client/internal/tui	0.672s
+ok  	github.com/maynagashev/gophkeeper/client/internal/tui	0.693s

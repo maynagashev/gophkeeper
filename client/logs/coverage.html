@@ -97,7 +97,7 @@
 				
 				<option value="file20">github.com/maynagashev/gophkeeper/client/internal/tui/screen_server_url.go (100.0%)</option>
 				
-				<option value="file21">github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go (0.0%)</option>
+				<option value="file21">github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go (9.9%)</option>
 				
 				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go (17.0%)</option>
 				
@@ -1885,9 +1885,9 @@ type model struct {
         previousScreenState screenState         // Предыдущее состояние (для возврата)
         savingStatus        string              // Статус сохранения (отображается внизу)
         statusTimer         *time.Timer         // Таймер для очистки статуса сохранения
-        width               int                 //nolint:unused // Потенциально для адаптивной верстки
-        height              int                 //nolint:unused // Потенциально для адаптивной верстки
-        listMutex           sync.Mutex          //nolint:unused // Задел на будущее для синхронизации
+        width               int
+        height              int
+        listMutex           sync.Mutex //nolint:unused // Задел на будущее для синхронизации
 
         // Поля для создания нового KDBX
         newPasswordInput1       textinput.Model // Первое поле ввода нового пароля
@@ -3525,20 +3525,20 @@ type syncMenuItem struct {
         id    string // Идентификатор для обработки выбора
 }
 
-func (i syncMenuItem) Title() string       <span class="cov0" title="0">{ return i.title }</span>
-func (i syncMenuItem) Description() string <span class="cov0" title="0">{ return "" }</span> // Описание не нужно
-func (i syncMenuItem) FilterValue() string <span class="cov0" title="0">{ return i.title }</span>
+func (i syncMenuItem) Title() string       <span class="cov8" title="1">{ return i.title }</span>
+func (i syncMenuItem) Description() string <span class="cov8" title="1">{ return "" }</span> // Описание не нужно
+func (i syncMenuItem) FilterValue() string <span class="cov8" title="1">{ return i.title }</span>
 
 // --- Функции экрана --- //
 
 // viewSyncServerScreen отображает экран "Синхронизация и Сервер".
-func (m *model) viewSyncServerScreen() string <span class="cov0" title="0">{
+func (m *model) viewSyncServerScreen() string <span class="cov8" title="1">{
         serverURLText := m.serverURL
-        if serverURLText == "" </span><span class="cov0" title="0">{
+        if serverURLText == "" </span><span class="cov8" title="1">{
                 serverURLText = "Не настроен"
         }</span>
 
-        <span class="cov0" title="0">statusInfo := fmt.Sprintf(
+        <span class="cov8" title="1">statusInfo := fmt.Sprintf(
                 "URL Сервера: %s\nСтатус входа: %s\nПоследняя синх.: %s\n",
                 serverURLText,
                 m.loginStatus,
