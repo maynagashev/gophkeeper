@@ -65,7 +65,7 @@
 				
 				<option value="file4">github.com/maynagashev/gophkeeper/server/internal/middleware/auth.go (86.7%)</option>
 				
-				<option value="file5">github.com/maynagashev/gophkeeper/server/internal/repository/db.go (0.0%)</option>
+				<option value="file5">github.com/maynagashev/gophkeeper/server/internal/repository/db.go (73.3%)</option>
 				
 				<option value="file6">github.com/maynagashev/gophkeeper/server/internal/repository/user_repository.go (0.0%)</option>
 				
@@ -909,16 +909,16 @@ const (
 )
 
 // NewPostgresDB создает и возвращает новое подключение к PostgreSQL.
-func NewPostgresDB(dsn string) (*sqlx.DB, error) <span class="cov0" title="0">{
+func NewPostgresDB(dsn string) (*sqlx.DB, error) <span class="cov8" title="1">{
         log.Printf("Подключение к PostgreSQL...")
 
         db, err := sqlx.Connect("postgres", dsn)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return nil, fmt.Errorf("ошибка подключения к БД: %w", err)
         }</span>
 
         // Проверка соединения
-        <span class="cov0" title="0">if err = db.Ping(); err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if err = db.Ping(); err != nil </span><span class="cov0" title="0">{
                 // Закрываем соединение в случае ошибки пинга
                 closeErr := db.Close()
                 if closeErr != nil </span><span class="cov0" title="0">{
@@ -928,7 +928,7 @@ func NewPostgresDB(dsn string) (*sqlx.DB, error) <span class="cov0" title="0">{
         }
 
         // Настройка пула соединений
-        <span class="cov0" title="0">db.SetMaxOpenConns(maxOpenConns)
+        <span class="cov8" title="1">db.SetMaxOpenConns(maxOpenConns)
         db.SetMaxIdleConns(maxIdleConns)
         db.SetConnMaxLifetime(connMaxLifetime)
         db.SetConnMaxIdleTime(connMaxIdleTime)

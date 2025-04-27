@@ -15,7 +15,7 @@ github.com/maynagashev/gophkeeper/server/internal/handlers/vault_handler.go:178:
 github.com/maynagashev/gophkeeper/server/internal/handlers/vault_handler.go:247:		Rollback				100.0%
 github.com/maynagashev/gophkeeper/server/internal/middleware/auth.go:29:			Authenticator				85.7%
 github.com/maynagashev/gophkeeper/server/internal/middleware/auth.go:86:			GetUserIDFromContext			100.0%
-github.com/maynagashev/gophkeeper/server/internal/repository/db.go:20:				NewPostgresDB				0.0%
+github.com/maynagashev/gophkeeper/server/internal/repository/db.go:20:				NewPostgresDB				73.3%
 github.com/maynagashev/gophkeeper/server/internal/repository/user_repository.go:32:		NewPostgresUserRepository		0.0%
 github.com/maynagashev/gophkeeper/server/internal/repository/user_repository.go:38:		CreateUser				0.0%
 github.com/maynagashev/gophkeeper/server/internal/repository/user_repository.go:60:		GetUserByUsername			0.0%
@@ -44,4 +44,4 @@ github.com/maynagashev/gophkeeper/server/internal/services/vault_service.go:338:
 github.com/maynagashev/gophkeeper/server/internal/storage/minio_client.go:38:			NewMinioClient				0.0%
 github.com/maynagashev/gophkeeper/server/internal/storage/minio_client.go:83:			UploadFile				0.0%
 github.com/maynagashev/gophkeeper/server/internal/storage/minio_client.go:112:			DownloadFile				0.0%
-total:												(statements)				52.9%
+total:												(statements)				54.6%
