@@ -24,10 +24,10 @@ github.com/maynagashev/gophkeeper/server/internal/repository/vault_repository.go
 github.com/maynagashev/gophkeeper/server/internal/repository/vault_repository.go:55:		CreateVault				100.0%
 github.com/maynagashev/gophkeeper/server/internal/repository/vault_repository.go:72:		UpdateVaultCurrentVersion		100.0%
 github.com/maynagashev/gophkeeper/server/internal/repository/vault_repository.go:98:		GetVaultWithCurrentVersionByUserID	100.0%
-github.com/maynagashev/gophkeeper/server/internal/repository/vault_version_repository.go:28:	NewPostgresVaultVersionRepository	0.0%
-github.com/maynagashev/gophkeeper/server/internal/repository/vault_version_repository.go:33:	CreateVersion				0.0%
-github.com/maynagashev/gophkeeper/server/internal/repository/vault_version_repository.go:61:	ListVersionsByVaultID			0.0%
-github.com/maynagashev/gophkeeper/server/internal/repository/vault_version_repository.go:87:	GetVersionByID				0.0%
+github.com/maynagashev/gophkeeper/server/internal/repository/vault_version_repository.go:28:	NewPostgresVaultVersionRepository	100.0%
+github.com/maynagashev/gophkeeper/server/internal/repository/vault_version_repository.go:33:	CreateVersion				100.0%
+github.com/maynagashev/gophkeeper/server/internal/repository/vault_version_repository.go:61:	ListVersionsByVaultID			100.0%
+github.com/maynagashev/gophkeeper/server/internal/repository/vault_version_repository.go:87:	GetVersionByID				100.0%
 github.com/maynagashev/gophkeeper/server/internal/services/auth_service.go:43:			NewAuthService				0.0%
 github.com/maynagashev/gophkeeper/server/internal/services/auth_service.go:48:			Register				0.0%
 github.com/maynagashev/gophkeeper/server/internal/services/auth_service.go:79:			Login					0.0%
@@ -44,4 +44,4 @@ github.com/maynagashev/gophkeeper/server/internal/services/vault_service.go:338:
 github.com/maynagashev/gophkeeper/server/internal/storage/minio_client.go:38:			NewMinioClient				0.0%
 github.com/maynagashev/gophkeeper/server/internal/storage/minio_client.go:83:			UploadFile				0.0%
 github.com/maynagashev/gophkeeper/server/internal/storage/minio_client.go:112:			DownloadFile				0.0%
-total:												(statements)				65.9%
+total:												(statements)				70.7%

@@ -71,7 +71,7 @@
 				
 				<option value="file7">github.com/maynagashev/gophkeeper/server/internal/repository/vault_repository.go (100.0%)</option>
 				
-				<option value="file8">github.com/maynagashev/gophkeeper/server/internal/repository/vault_version_repository.go (0.0%)</option>
+				<option value="file8">github.com/maynagashev/gophkeeper/server/internal/repository/vault_version_repository.go (100.0%)</option>
 				
 				<option value="file9">github.com/maynagashev/gophkeeper/server/internal/services/auth_service.go (0.0%)</option>
 				
@@ -1223,7 +1223,7 @@ type postgresVaultVersionRepository struct {
 }
 
 // NewPostgresVaultVersionRepository создает новый экземпляр репозитория версий.
-func NewPostgresVaultVersionRepository(db *sqlx.DB) VaultVersionRepository <span class="cov0" title="0">{
+func NewPostgresVaultVersionRepository(db *sqlx.DB) VaultVersionRepository <span class="cov8" title="1">{
         return &amp;postgresVaultVersionRepository{db: db}
 }</span>
 
@@ -1231,7 +1231,7 @@ func NewPostgresVaultVersionRepository(db *sqlx.DB) VaultVersionRepository <span
 func (r *postgresVaultVersionRepository) CreateVersion(
         ctx context.Context,
         version *models.VaultVersion,
-) (int64, error) <span class="cov0" title="0">{
+) (int64, error) <span class="cov8" title="1">{
         query := `INSERT INTO vault_versions (vault_id, object_key, checksum, size_bytes, content_modified_at)
                   VALUES ($1, $2, $3, $4, $5) RETURNING id`
         var versionID int64
@@ -1240,18 +1240,18 @@ func (r *postgresVaultVersionRepository) CreateVersion(
                 version.VaultID, version.ObjectKey, version.Checksum, version.SizeBytes, version.ContentModifiedAt,
         ).Scan(&amp;versionID)
 
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 // Проверяем на ошибку уникальности object_key
                 var pgErr *pq.Error
-                if errors.As(err, &amp;pgErr) &amp;&amp; pgErr.Code == pgUniqueViolationCode </span><span class="cov0" title="0">{
+                if errors.As(err, &amp;pgErr) &amp;&amp; pgErr.Code == pgUniqueViolationCode </span><span class="cov8" title="1">{
                         log.Printf("[VaultVerRepo] Ошибка создания версии: ключ объекта '%s' уже существует", version.ObjectKey)
                         return 0, fmt.Errorf("версия с ключом объекта '%s' уже существует: %w", version.ObjectKey, err)
                 }</span>
-                <span class="cov0" title="0">log.Printf("[VaultVerRepo] Непредвиденная ошибка при создании версии для '%s': %v", version.ObjectKey, err)
+                <span class="cov8" title="1">log.Printf("[VaultVerRepo] Непредвиденная ошибка при создании версии для '%s': %v", version.ObjectKey, err)
                 return 0, fmt.Errorf("ошибка выполнения запроса на создание версии: %w", err)</span>
         }
 
-        <span class="cov0" title="0">log.Printf("[VaultVerRepo] Версия (ID: %d) успешно создана для хранилища ID %d", versionID, version.VaultID)
+        <span class="cov8" title="1">log.Printf("[VaultVerRepo] Версия (ID: %d) успешно создана для хранилища ID %d", versionID, version.VaultID)
         return versionID, nil</span>
 }
 
@@ -1261,7 +1261,7 @@ func (r *postgresVaultVersionRepository) ListVersionsByVaultID(
         vaultID int64,
         limit,
         offset int,
-) ([]models.VaultVersion, error) <span class="cov0" title="0">{
+) ([]models.VaultVersion, error) <span class="cov8" title="1">{
         // Запрос с сортировкой по убыванию времени создания (сначала новые)
         query := `SELECT id, vault_id, object_key, checksum, size_bytes, created_at, content_modified_at
                   FROM vault_versions
@@ -1271,12 +1271,12 @@ func (r *postgresVaultVersionRepository) ListVersionsByVaultID(
 
         versions := make([]models.VaultVersion, 0, limit)
         err := r.db.SelectContext(ctx, &amp;versions, query, vaultID, limit, offset)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 log.Printf("[VaultVerRepo] Ошибка при получении списка версий для хранилища ID %d: %v", vaultID, err)
                 return nil, fmt.Errorf("ошибка выполнения запроса на получение списка версий: %w", err)
         }</span>
 
-        <span class="cov0" title="0">log.Printf("[VaultVerRepo] Получено %d версий для хранилища ID %d (limit=%d, offset=%d)",
+        <span class="cov8" title="1">log.Printf("[VaultVerRepo] Получено %d версий для хранилища ID %d (limit=%d, offset=%d)",
                 len(versions), vaultID, limit, offset)
         return versions, nil</span>
 }
@@ -1285,22 +1285,22 @@ func (r *postgresVaultVersionRepository) ListVersionsByVaultID(
 func (r *postgresVaultVersionRepository) GetVersionByID(
         ctx context.Context,
         versionID int64,
-) (*models.VaultVersion, error) <span class="cov0" title="0">{
+) (*models.VaultVersion, error) <span class="cov8" title="1">{
         query := `SELECT id, vault_id, object_key, checksum, size_bytes, created_at, content_modified_at` +
                 ` FROM vault_versions WHERE id=$1`
         var version models.VaultVersion
 
         err := r.db.GetContext(ctx, &amp;version, query, versionID)
-        if err != nil </span><span class="cov0" title="0">{
-                if errors.Is(err, sql.ErrNoRows) </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, sql.ErrNoRows) </span><span class="cov8" title="1">{
                         log.Printf("[VaultVerRepo] Версия с ID %d не найдена", versionID)
                         return nil, ErrVersionNotFound // Кастомная ошибка
                 }</span>
-                <span class="cov0" title="0">log.Printf("[VaultVerRepo] Ошибка при поиске версии ID %d: %v", versionID, err)
+                <span class="cov8" title="1">log.Printf("[VaultVerRepo] Ошибка при поиске версии ID %d: %v", versionID, err)
                 return nil, fmt.Errorf("ошибка выполнения запроса на получение версии: %w", err)</span>
         }
 
-        <span class="cov0" title="0">log.Printf("[VaultVerRepo] Найдена версия ID %d (Хранилище ID: %d)", versionID, version.VaultID)
+        <span class="cov8" title="1">log.Printf("[VaultVerRepo] Найдена версия ID %d (Хранилище ID: %d)", versionID, version.VaultID)
         return &amp;version, nil</span>
 }
 
