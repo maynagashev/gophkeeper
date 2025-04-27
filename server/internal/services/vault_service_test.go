@@ -13,6 +13,7 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/maynagashev/gophkeeper/models"
+	"github.com/maynagashev/gophkeeper/server/internal/mocks"
 	"github.com/maynagashev/gophkeeper/server/internal/repository"
 	"github.com/maynagashev/gophkeeper/server/internal/services"
 	"github.com/stretchr/testify/assert"
@@ -139,28 +140,24 @@ func (m *MockFileStorage) DownloadFile(ctx context.Context, objectKey string) (i
 
 // --- Helper to setup service with mocks ---.
 func setupVaultServiceWithMocks() (
-	services.VaultService, // Возвращаем интерфейс напрямую
-	*MockVaultRepository,
-	*MockVaultVersionRepository,
-	*MockFileStorage,
+	services.VaultService,
+	*mocks.VaultRepository,
+	*mocks.VaultVersionRepository,
+	*mocks.FileStorage,
 	sqlmock.Sqlmock,
 ) {
-	mockVaultRepo := new(MockVaultRepository)
-	mockVersionRepo := new(MockVaultVersionRepository)
-	mockFileStorage := new(MockFileStorage)
+	mockVaultRepo := new(mocks.VaultRepository)
+	mockVersionRepo := new(mocks.VaultVersionRepository)
+	mockFileStorage := new(mocks.FileStorage)
 
-	// Создаем мок DB с помощью sqlmock
 	mockDB, mockSQL, err := sqlmock.New()
 	if err != nil {
-		// В тестах обычно паникуем при ошибке настройки мока
 		panic(fmt.Sprintf("Не удалось создать sqlmock: %s", err))
 	}
-	// Не закрываем mockDB здесь, тесты должны это делать через mockSQL.ExpectationsWereMet()
 
 	vaultService := services.NewVaultService(mockDB, mockVaultRepo, mockVersionRepo, mockFileStorage)
-	// Убрано лишнее утверждение типа
 
-	return vaultService, mockVaultRepo, mockVersionRepo, mockFileStorage, mockSQL // Возвращаем интерфейс
+	return vaultService, mockVaultRepo, mockVersionRepo, mockFileStorage, mockSQL
 }
 
 // --- Tests ---
@@ -172,53 +169,47 @@ func TestVaultService_GetVaultMetadata(t *testing.T) {
 	testUserID := int64(1)
 	testVaultID := int64(101)
 	testVersionID := int64(201)
-	// Используем UTC и Truncate для консистентности времени
 	testModTime := time.Now().UTC().Truncate(time.Second)
 	testS3Key := "vaults/1/version_201"
 
 	tests := []struct {
 		name             string
-		mockSetup        func(*MockVaultRepository, *MockVaultVersionRepository)
+		mockSetup        func(*mocks.VaultRepository, *mocks.VaultVersionRepository)
 		expectedMetadata *models.VaultVersion
 		expectedErr      error
-		checkErrorIs     bool // Флаг для использования ErrorIs
+		checkErrorIs     bool
 	}{
 		{
 			name: "Успех",
-			mockSetup: func(mockVaultRepo *MockVaultRepository, _ *MockVaultVersionRepository) {
-				// Создаем копию testModTime для мока, чтобы избежать случайного изменения
+			mockSetup: func(mockVaultRepo *mocks.VaultRepository, _ *mocks.VaultVersionRepository) {
 				modTimeCopy := testModTime
-				mockVaultRepo.On(
-					"GetVaultWithCurrentVersionByUserID",
-					mock.Anything,
-					testUserID,
-				).Return(
-					&models.Vault{ID: testVaultID, UserID: testUserID, CurrentVersionID: &testVersionID},
-					&models.VaultVersion{
-						ID:                testVersionID,
-						VaultID:           testVaultID,
-						ContentModifiedAt: &modTimeCopy, // Используем копию UTC Truncated времени
-						ObjectKey:         testS3Key,
-					},
-					nil,
-				).Once()
+				mockVaultRepo.EXPECT().
+					GetVaultWithCurrentVersionByUserID(mock.Anything, testUserID).
+					Return(
+						&models.Vault{ID: testVaultID, UserID: testUserID, CurrentVersionID: &testVersionID},
+						&models.VaultVersion{
+							ID:                testVersionID,
+							VaultID:           testVaultID,
+							ContentModifiedAt: &modTimeCopy,
+							ObjectKey:         testS3Key,
+						},
+						nil,
+					).Once()
 			},
 			expectedMetadata: &models.VaultVersion{
 				ID:                testVersionID,
 				VaultID:           testVaultID,
-				ContentModifiedAt: &testModTime, // Сравниваем с оригиналом UTC Truncated времени
+				ContentModifiedAt: &testModTime,
 				ObjectKey:         testS3Key,
 			},
 			expectedErr: nil,
 		},
 		{
 			name: "Хранилище не найдено",
-			mockSetup: func(mockVaultRepo *MockVaultRepository, _ *MockVaultVersionRepository) {
-				mockVaultRepo.On(
-					"GetVaultWithCurrentVersionByUserID",
-					mock.Anything,
-					testUserID,
-				).Return(nil, nil, repository.ErrVaultNotFound).Once()
+			mockSetup: func(mockVaultRepo *mocks.VaultRepository, _ *mocks.VaultVersionRepository) {
+				mockVaultRepo.EXPECT().
+					GetVaultWithCurrentVersionByUserID(mock.Anything, testUserID).
+					Return(nil, nil, repository.ErrVaultNotFound).Once()
 			},
 			expectedMetadata: nil,
 			expectedErr:      services.ErrVaultNotFound,
@@ -226,66 +217,71 @@ func TestVaultService_GetVaultMetadata(t *testing.T) {
 		},
 		{
 			name: "Хранилище есть, версии нет",
-			mockSetup: func(mockVaultRepo *MockVaultRepository, _ *MockVaultVersionRepository) {
-				mockVaultRepo.On(
-					"GetVaultWithCurrentVersionByUserID",
-					mock.Anything,
-					testUserID,
-				).Return(&models.Vault{ID: testVaultID, UserID: testUserID, CurrentVersionID: nil}, nil, nil).Once()
+			mockSetup: func(mockVaultRepo *mocks.VaultRepository, _ *mocks.VaultVersionRepository) {
+				mockVaultRepo.EXPECT().
+					GetVaultWithCurrentVersionByUserID(mock.Anything, testUserID).
+					Return(&models.Vault{ID: testVaultID, UserID: testUserID, CurrentVersionID: nil}, nil, nil).Once()
 			},
 			expectedMetadata: nil,
-			expectedErr:      services.ErrVaultNotFound, // Сервис должен вернуть эту ошибку
+			expectedErr:      services.ErrVaultNotFound,
 			checkErrorIs:     true,
 		},
 		{
 			name: "Ошибка репозитория",
-			mockSetup: func(mockVaultRepo *MockVaultRepository, _ *MockVaultVersionRepository) {
-				mockVaultRepo.On(
-					"GetVaultWithCurrentVersionByUserID",
-					mock.Anything,
-					testUserID,
-				).Return(nil, nil, errors.New("db error")).Once()
+			mockSetup: func(mockVaultRepo *mocks.VaultRepository, _ *mocks.VaultVersionRepository) {
+				mockVaultRepo.EXPECT().
+					GetVaultWithCurrentVersionByUserID(mock.Anything, testUserID).
+					Return(nil, nil, errors.New("db error")).Once()
 			},
 			expectedMetadata: nil,
 			expectedErr:      errors.New("внутренняя ошибка сервера при получении метаданных"),
-			checkErrorIs:     false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Получаем моки, игнорируем mockSQL и mockFileStorage
-			service, mockVaultRepo, mockVersionRepo, _, _ := setupVaultServiceWithMocks()
-
+			vaultService, mockVaultRepo, mockVersionRepo, _, mockSQL := setupVaultServiceWithMocks()
 			tt.mockSetup(mockVaultRepo, mockVersionRepo)
 
-			metadata, err := service.GetVaultMetadata(testUserID)
+			metadata, err := vaultService.GetVaultMetadata(testUserID)
 
+			// Проверяем ошибку, если она ожидается
 			if tt.expectedErr != nil {
-				require.Error(err, t) // ПОРЯДОК АРГУМЕНТОВ: err, t
+				require.Error(err)
 				if tt.checkErrorIs {
-					// Теперь используем ErrorIs, так как ожидаем конкретную ошибку
-					require.ErrorIs(err, tt.expectedErr, t) // ПОРЯДОК АРГУМЕНТОВ: err, tt.expectedErr, t
+					require.ErrorIs(err, tt.expectedErr)
 				} else {
-					// Проверяем текст ошибки для общих случаев
-					assert.Contains(err.Error(), tt.expectedErr.Error(), t)
+					require.EqualError(err, tt.expectedErr.Error())
 				}
-			} else {
-				require.NoError(err, t) // ПОРЯДОК АРГУМЕНТОВ: err, t
-				require.NotNil(metadata, t, "Метаданные не должны быть nil при успехе")
-				// Сравниваем указатели на время, предварительно убедившись, что они не nil
-				require.NotNil(metadata.ContentModifiedAt, t, "metadata.ContentModifiedAt is nil")
-				require.NotNil(tt.expectedMetadata.ContentModifiedAt, t, "expectedMetadata.ContentModifiedAt is nil")
-				// assert.True уже был исправлен ранее
-				assert.True(tt.expectedMetadata.ContentModifiedAt.Equal(*metadata.ContentModifiedAt), t, "Times are not equal")
-				// Сравниваем остальные поля структуры, игнорируя время
-				expectedCopy := *tt.expectedMetadata
-				metadataCopy := *metadata
-				expectedCopy.ContentModifiedAt = nil
-				metadataCopy.ContentModifiedAt = nil
-				assert.Equal(expectedCopy, metadataCopy, t, "Metadata structs (excluding time) are not equal")
+				assert.Nil(metadata)
+				require.NoError(mockSQL.ExpectationsWereMet(), "Ожидания sqlmock не выполнены")
+				return
 			}
 
+			// Если ошибки нет
+			require.NoError(err)
+			require.NotNil(metadata)
+
+			// Сравниваем указатели на время
+			if tt.expectedMetadata.ContentModifiedAt != nil && metadata.ContentModifiedAt != nil {
+				assert.True(
+					tt.expectedMetadata.ContentModifiedAt.Equal(*metadata.ContentModifiedAt),
+					"Время модификации не совпадает",
+				)
+				// Обнуляем время перед сравнением остальной структуры
+				tt.expectedMetadata.ContentModifiedAt = nil
+				metadata.ContentModifiedAt = nil
+			} else {
+				assert.Equal(
+					tt.expectedMetadata.ContentModifiedAt,
+					metadata.ContentModifiedAt,
+					"Одно из времен модификации nil",
+				)
+			}
+			assert.Equal(tt.expectedMetadata, metadata)
+
+			// Проверяем, что все ожидания моков были выполнены
+			require.NoError(mockSQL.ExpectationsWereMet(), "Ожидания sqlmock не выполнены")
 			mockVaultRepo.AssertExpectations(t)
 			mockVersionRepo.AssertExpectations(t)
 		})
@@ -303,6 +299,12 @@ func TestVaultService_UploadVault(t *testing.T) {
 	testModTimeOlder := testModTime.Add(-time.Hour) // Время старой версии на сервере
 	testSize := int64(1234)
 	testContentType := "application/octet-stream"
+	testData := "test data"
+
+	// Вычисляем чексумму для тестовых данных
+	h := sha256.New()
+	_, _ = io.WriteString(h, testData)
+	testDataChecksum := hex.EncodeToString(h.Sum(nil))
 
 	// Ожидаемый аргумент для CreateVersion
 	expectedVersionMatcher := mock.MatchedBy(func(v *models.VaultVersion) bool {
@@ -317,9 +319,9 @@ func TestVaultService_UploadVault(t *testing.T) {
 		name          string
 		clientModTime time.Time // Время модификации, передаваемое клиентом
 		mockSetup     func(
-			mockVaultRepo *MockVaultRepository,
-			mockVersionRepo *MockVaultVersionRepository,
-			mockFileStorage *MockFileStorage,
+			mockVaultRepo *mocks.VaultRepository,
+			mockVersionRepo *mocks.VaultVersionRepository,
+			mockFileStorage *mocks.FileStorage,
 			mockSQL sqlmock.Sqlmock,
 		)
 		expectedErr      error
@@ -330,39 +332,38 @@ func TestVaultService_UploadVault(t *testing.T) {
 			name:          "Успех - Новое хранилище",
 			clientModTime: testModTime,
 			mockSetup: func(
-				mockVaultRepo *MockVaultRepository,
-				mockVersionRepo *MockVaultVersionRepository,
-				mockFileStorage *MockFileStorage,
+				mockVaultRepo *mocks.VaultRepository,
+				mockVersionRepo *mocks.VaultVersionRepository,
+				mockFileStorage *mocks.FileStorage,
 				mockSQL sqlmock.Sqlmock,
 			) {
 				// 1. Загрузка файла
-				mockFileStorage.On(
-					"UploadFile",
-					mock.Anything,
-					mock.AnythingOfType("string"),
-					mock.Anything,
-					testSize,
-					testContentType,
-				).Return(nil).Once()
+				mockFileStorage.EXPECT().
+					UploadFile(mock.Anything, mock.AnythingOfType("string"), mock.Anything, testSize, testContentType).
+					Return(nil).Once()
 
 				// 2. Начало транзакции
 				mockSQL.ExpectBegin()
 
 				// 3. Проверка существования хранилища (для проверки конфликта)
-				mockVaultRepo.On(
-					"GetVaultWithCurrentVersionByUserID",
-					mock.Anything,
-					testUserID,
-				).Return(nil, nil, repository.ErrVaultNotFound).Once()
+				mockVaultRepo.EXPECT().
+					GetVaultWithCurrentVersionByUserID(mock.Anything, testUserID).
+					Return(nil, nil, repository.ErrVaultNotFound).Once()
 
 				// 4. Создание нового хранилища
-				mockVaultRepo.On("CreateVault", mock.Anything, mock.AnythingOfType("*models.Vault")).Return(testVaultID, nil).Once()
+				mockVaultRepo.EXPECT().
+					CreateVault(mock.Anything, mock.AnythingOfType("*models.Vault")).
+					Return(testVaultID, nil).Once()
 
 				// 5. Создание новой версии
-				mockVersionRepo.On("CreateVersion", mock.Anything, expectedVersionMatcher).Return(testVersionID, nil).Once()
+				mockVersionRepo.EXPECT().
+					CreateVersion(mock.Anything, expectedVersionMatcher).
+					Return(testVersionID, nil).Once()
 
 				// 6. Обновление текущей версии хранилища
-				mockVaultRepo.On("UpdateVaultCurrentVersion", mock.Anything, testVaultID, testVersionID).Return(nil).Once()
+				mockVaultRepo.EXPECT().
+					UpdateVaultCurrentVersion(mock.Anything, testVaultID, testVersionID).
+					Return(nil).Once()
 
 				// 7. Завершение транзакции
 				mockSQL.ExpectCommit()
@@ -373,20 +374,15 @@ func TestVaultService_UploadVault(t *testing.T) {
 			name:          "Успех - Существующее хранилище (новее клиента)",
 			clientModTime: testModTime, // Время клиента новее, чем mockExistingVersion
 			mockSetup: func(
-				mockVaultRepo *MockVaultRepository,
-				mockVersionRepo *MockVaultVersionRepository,
-				mockFileStorage *MockFileStorage,
+				mockVaultRepo *mocks.VaultRepository,
+				mockVersionRepo *mocks.VaultVersionRepository,
+				mockFileStorage *mocks.FileStorage,
 				mockSQL sqlmock.Sqlmock,
 			) {
 				// 1. Загрузка файла
-				mockFileStorage.On(
-					"UploadFile",
-					mock.Anything,
-					mock.AnythingOfType("string"),
-					mock.Anything,
-					testSize,
-					testContentType,
-				).Return(nil).Once()
+				mockFileStorage.EXPECT().
+					UploadFile(mock.Anything, mock.AnythingOfType("string"), mock.Anything, testSize, testContentType).
+					Return(nil).Once()
 
 				// 2. Начало транзакции
 				mockSQL.ExpectBegin()
@@ -400,17 +396,19 @@ func TestVaultService_UploadVault(t *testing.T) {
 					Checksum:          &serverChecksum,
 				}
 
-				mockVaultRepo.On(
-					"GetVaultWithCurrentVersionByUserID",
-					mock.Anything,
-					testUserID,
-				).Return(mockExistingVault, mockExistingVersion, nil).Once()
+				mockVaultRepo.EXPECT().
+					GetVaultWithCurrentVersionByUserID(mock.Anything, testUserID).
+					Return(mockExistingVault, mockExistingVersion, nil).Once()
 
 				// 4. Создание новой версии
-				mockVersionRepo.On("CreateVersion", mock.Anything, expectedVersionMatcher).Return(testVersionID, nil).Once()
+				mockVersionRepo.EXPECT().
+					CreateVersion(mock.Anything, expectedVersionMatcher).
+					Return(testVersionID, nil).Once()
 
 				// 5. Обновление текущей версии
-				mockVaultRepo.On("UpdateVaultCurrentVersion", mock.Anything, testVaultID, testVersionID).Return(nil).Once()
+				mockVaultRepo.EXPECT().
+					UpdateVaultCurrentVersion(mock.Anything, testVaultID, testVersionID).
+					Return(nil).Once()
 
 				// 6. Завершение транзакции
 				mockSQL.ExpectCommit()
@@ -421,20 +419,15 @@ func TestVaultService_UploadVault(t *testing.T) {
 			name:          "Конфликт - Существующее хранилище (старее клиента по времени)",
 			clientModTime: testModTimeOlder, // Время клиента СТАРШЕ версии на сервере
 			mockSetup: func(
-				mockVaultRepo *MockVaultRepository,
-				_ *MockVaultVersionRepository,
-				mockFileStorage *MockFileStorage,
+				mockVaultRepo *mocks.VaultRepository,
+				_ *mocks.VaultVersionRepository,
+				mockFileStorage *mocks.FileStorage,
 				mockSQL sqlmock.Sqlmock,
 			) {
 				// 1. Загрузка файла (всегда происходит сначала)
-				mockFileStorage.On(
-					"UploadFile",
-					mock.Anything,
-					mock.AnythingOfType("string"),
-					mock.Anything,
-					testSize,
-					testContentType,
-				).Return(nil).Once()
+				mockFileStorage.EXPECT().
+					UploadFile(mock.Anything, mock.AnythingOfType("string"), mock.Anything, testSize, testContentType).
+					Return(nil).Once()
 
 				// 2. Начало транзакции
 				mockSQL.ExpectBegin()
@@ -447,11 +440,9 @@ func TestVaultService_UploadVault(t *testing.T) {
 					ContentModifiedAt: &modTimeServer,
 					Checksum:          &serverChecksum,
 				}
-				mockVaultRepo.On(
-					"GetVaultWithCurrentVersionByUserID",
-					mock.Anything,
-					testUserID,
-				).Return(mockExistingVault, mockExistingVersion, nil).Once()
+				mockVaultRepo.EXPECT().
+					GetVaultWithCurrentVersionByUserID(mock.Anything, testUserID).
+					Return(mockExistingVault, mockExistingVersion, nil).Once()
 
 				// 4. Откат транзакции из-за ошибки
 				mockSQL.ExpectRollback()
@@ -464,20 +455,15 @@ func TestVaultService_UploadVault(t *testing.T) {
 			name:          "Конфликт - Существующее хранилище (время совпадает, checksum разный)",
 			clientModTime: testModTime, // Время клиента совпадает
 			mockSetup: func(
-				mockVaultRepo *MockVaultRepository,
-				_ *MockVaultVersionRepository,
-				mockFileStorage *MockFileStorage,
+				mockVaultRepo *mocks.VaultRepository,
+				_ *mocks.VaultVersionRepository,
+				mockFileStorage *mocks.FileStorage,
 				mockSQL sqlmock.Sqlmock,
 			) {
 				// 1. Загрузка файла
-				mockFileStorage.On(
-					"UploadFile",
-					mock.Anything,
-					mock.AnythingOfType("string"),
-					mock.Anything,
-					testSize,
-					testContentType,
-				).Return(nil).Once()
+				mockFileStorage.EXPECT().
+					UploadFile(mock.Anything, mock.AnythingOfType("string"), mock.Anything, testSize, testContentType).
+					Return(nil).Once()
 
 				// 2. Начало транзакции
 				mockSQL.ExpectBegin()
@@ -490,11 +476,9 @@ func TestVaultService_UploadVault(t *testing.T) {
 					ContentModifiedAt: &modTimeServer,
 					Checksum:          &serverChecksum,
 				}
-				mockVaultRepo.On(
-					"GetVaultWithCurrentVersionByUserID",
-					mock.Anything,
-					testUserID,
-				).Return(mockExistingVault, mockExistingVersion, nil).Once()
+				mockVaultRepo.EXPECT().
+					GetVaultWithCurrentVersionByUserID(mock.Anything, testUserID).
+					Return(mockExistingVault, mockExistingVersion, nil).Once()
 
 				// 4. Транзакция откатывается из-за ошибки конфликта
 				mockSQL.ExpectRollback()
@@ -507,45 +491,45 @@ func TestVaultService_UploadVault(t *testing.T) {
 			name:          "Успех - Идентичная версия (пропуск)",
 			clientModTime: testModTime, // Время клиента совпадает
 			mockSetup: func(
-				mockVaultRepo *MockVaultRepository,
-				_ *MockVaultVersionRepository,
-				mockFileStorage *MockFileStorage,
+				mockVaultRepo *mocks.VaultRepository,
+				_ *mocks.VaultVersionRepository,
+				mockFileStorage *mocks.FileStorage,
 				mockSQL sqlmock.Sqlmock,
 			) {
-				// 1. Загрузка файла
-				mockFileStorage.On(
-					"UploadFile",
-					mock.Anything,
-					mock.AnythingOfType("string"),
-					mock.Anything,
-					testSize,
-					testContentType,
-				).Return(nil).Once()
+				// Мы должны эмулировать поведение uploadFileToStorage, где сначала загружается файл,
+				// а потом используется полученная чексумма.
+
+				// 1. Эмулируем загрузку файла в хранилище
+				mockFileStorage.EXPECT().
+					UploadFile(mock.Anything, mock.AnythingOfType("string"), mock.Anything, testSize, testContentType).
+					Return(nil).
+					Run(func(_ context.Context, _ string, reader io.Reader, _ int64, _ string) {
+						// Эмулируем чтение из TeeReader, который вычисляет хеш
+						_, _ = io.ReadAll(reader) // Это важно! Мы должны прочитать, чтобы хеш вычислился
+					}).Once()
 
 				// 2. Начало транзакции
 				mockSQL.ExpectBegin()
 
-				// 3. Проверка метаданных - версии идентичны
+				// 3. Проверка метаданных - версии идентичны, поэтому мы должны
+				// вернуть существующую версию с такой же контрольной суммой
 				mockExistingVault := &models.Vault{ID: testVaultID, UserID: testUserID}
-				modTimeServer := testModTime // Время совпадает
+				modTimeServer := testModTime
 
-				// Вычисляем чексумму из тестовых данных
-				h := sha256.New()
-				_, _ = io.WriteString(h, "test data")
-				expectedChecksum := hex.EncodeToString(h.Sum(nil))
-				serverChecksum := expectedChecksum // Чексумма идентична!
-
+				// Задаем ту же контрольную сумму, что будет вычислена при пустых данных
+				// В нашем случае в тесте строка будет "test data"
 				mockExistingVersion := &models.VaultVersion{
+					ID:                testVersionID,
+					VaultID:           testVaultID,
 					ContentModifiedAt: &modTimeServer,
-					Checksum:          &serverChecksum,
+					Checksum:          &testDataChecksum, // Этот хеш будет сравниваться с вычисленным
 				}
-				mockVaultRepo.On(
-					"GetVaultWithCurrentVersionByUserID",
-					mock.Anything,
-					testUserID,
-				).Return(mockExistingVault, mockExistingVersion, nil).Once()
 
-				// 4. Транзакция фиксируется (коммитится), даже если мы ничего не делаем
+				mockVaultRepo.EXPECT().
+					GetVaultWithCurrentVersionByUserID(mock.Anything, testUserID).
+					Return(mockExistingVault, mockExistingVersion, nil).Once()
+
+				// 4. Транзакция должна закоммититься
 				mockSQL.ExpectCommit()
 			},
 			expectedErr: nil, // Ошибки нет, просто пропускаем
@@ -554,20 +538,15 @@ func TestVaultService_UploadVault(t *testing.T) {
 			name:          "Ошибка - Загрузка в FileStorage",
 			clientModTime: testModTime,
 			mockSetup: func(
-				_ *MockVaultRepository,
-				_ *MockVaultVersionRepository,
-				mockFileStorage *MockFileStorage,
+				_ *mocks.VaultRepository,
+				_ *mocks.VaultVersionRepository,
+				mockFileStorage *mocks.FileStorage,
 				_ sqlmock.Sqlmock,
 			) {
 				// 1. Ошибка при загрузке файла - файл не загружается, транзакция не начинается
-				mockFileStorage.On(
-					"UploadFile",
-					mock.Anything,
-					mock.AnythingOfType("string"),
-					mock.Anything,
-					testSize,
-					testContentType,
-				).Return(errors.New("storage error")).Once()
+				mockFileStorage.EXPECT().
+					UploadFile(mock.Anything, mock.AnythingOfType("string"), mock.Anything, testSize, testContentType).
+					Return(errors.New("storage error")).Once()
 
 				// Все остальные вызовы не должны произойти
 			},
@@ -584,32 +563,31 @@ func TestVaultService_UploadVault(t *testing.T) {
 			tt.mockSetup(mockVaultRepo, mockVersionRepo, mockFileStorage, mockSQL)
 
 			// Строка данных для тестирования
-			currentReader := strings.NewReader("test data")
+			currentReader := strings.NewReader(testData)
 
 			// Вызываем метод сервиса
 			err := service.UploadVault(testUserID, currentReader, testSize, testContentType, tt.clientModTime)
 
 			// Проверяем результат
 			if tt.expectedErr != nil {
-				require.Error(err, t)
+				require.Error(err)
 				if tt.checkErrorIs {
-					require.ErrorIs(err, tt.expectedErr, t)
+					require.ErrorIs(err, tt.expectedErr)
 				} else {
-					assert.Contains(err.Error(), tt.expectedErr.Error(), t)
+					assert.Contains(err.Error(), tt.expectedErr.Error())
 				}
 			} else {
-				require.NoError(err, t)
+				require.NoError(err)
 			}
 
-			// Проверяем вызовы репозиториев и хранилища
+			// Проверяем, что все ожидания моков были выполнены
 			mockVaultRepo.AssertExpectations(t)
 			mockVersionRepo.AssertExpectations(t)
 			mockFileStorage.AssertExpectations(t)
-
-			// Проверяем ожидания SQL только если не ожидалось ошибки конфликта или ошибки загрузки файла
+			// Проверяем ожидания sqlmock только если не было ошибки загрузки файла
 			// или если ошибка nil (успешный случай или пропуск)
 			if !tt.expectedConflict && (tt.expectedErr == nil || !strings.Contains(tt.expectedErr.Error(), "загрузке файла")) {
-				require.NoError(mockSQL.ExpectationsWereMet(), t, "Ожидания sqlmock не выполнены")
+				require.NoError(mockSQL.ExpectationsWereMet(), "Ожидания sqlmock не выполнены")
 			}
 		})
 	}
