@@ -11,6 +11,8 @@ require (
 	github.com/tobischo/gokeepasslib/v3 v3.6.1
 )
 
+replace github.com/maynagashev/gophkeeper/models => ../models
+
 require (
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect

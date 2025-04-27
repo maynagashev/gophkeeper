@@ -99,7 +99,7 @@
 				
 				<option value="file21">github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go (92.8%)</option>
 				
-				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go (20.8%)</option>
+				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go (40.4%)</option>
 				
 				<option value="file23">github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go (25.2%)</option>
 				
@@ -3702,6 +3702,7 @@ func (m *model) handleSyncMenuAction() tea.Cmd <span class="cov8" title="1">{
 import (
         "bytes"
         "context"
+        "errors"
         "io"
         "strings"
         "testing"
@@ -3748,16 +3749,22 @@ const (
 )
 
 // GetVaultMetadata мокирует метод GetVaultMetadata.
-func (m *ScreenTestMockAPIClient) GetVaultMetadata(ctx context.Context) (*models.VaultVersion, error) <span class="cov0" title="0">{
+func (m *ScreenTestMockAPIClient) GetVaultMetadata(ctx context.Context) (*models.VaultVersion, error) <span class="cov8" title="1">{
         args := m.Called(ctx)
-        if args.Get(0) == nil </span><span class="cov0" title="0">{
-                return nil, args.Error(1)
+        err := args.Error(1)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
         }</span>
-        <span class="cov0" title="0">v, ok := args.Get(0).(*models.VaultVersion)
+        <span class="cov8" title="1">if args.Get(0) == nil </span><span class="cov0" title="0">{
+                // Если ошибки нет, но и объекта нет, возвращаем nil, nil (или можно паниковать, если это не ожидаемый сценарий)
+                return nil, nil //nolint:nilnil // Мок может быть настроен вернуть nil, nil
+        }</span>
+        // Проверяем ошибку перед приведением типа
+        <span class="cov8" title="1">v, ok := args.Get(0).(*models.VaultVersion) // Используем проверку типа
         if !ok </span><span class="cov0" title="0">{
-                return nil, args.Error(1)
+                return nil, errors.New("mock GetVaultMetadata: unexpected type returned")
         }</span>
-        <span class="cov0" title="0">return v, args.Error(1)</span>
+        <span class="cov8" title="1">return v, nil</span>
 }
 
 // UploadVault мокирует метод UploadVault.
@@ -3766,36 +3773,36 @@ func (m *ScreenTestMockAPIClient) UploadVault(
         data io.Reader,
         size int64,
         contentModifiedAt time.Time,
-) error <span class="cov0" title="0">{
+) error <span class="cov8" title="1">{
         args := m.Called(ctx, data, size, contentModifiedAt)
         return args.Error(0)
 }</span>
 
 // DownloadVault мокирует метод DownloadVault.
-func (m *ScreenTestMockAPIClient) DownloadVault(ctx context.Context) (io.ReadCloser, *models.VaultVersion, error) <span class="cov0" title="0">{
+func (m *ScreenTestMockAPIClient) DownloadVault(ctx context.Context) (io.ReadCloser, *models.VaultVersion, error) <span class="cov8" title="1">{
         args := m.Called(ctx)
-        if args.Get(0) == nil </span><span class="cov0" title="0">{
+        if args.Get(0) == nil </span><span class="cov8" title="1">{
                 return nil, nil, args.Error(mockErrorIndex)
         }</span>
-        <span class="cov0" title="0">if args.Get(1) == nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if args.Get(1) == nil </span><span class="cov8" title="1">{
                 readCloser, ok := args.Get(0).(io.ReadCloser)
                 if !ok </span><span class="cov0" title="0">{
                         return nil, nil, args.Error(mockErrorIndex)
                 }</span>
-                <span class="cov0" title="0">return readCloser, nil, args.Error(mockErrorIndex)</span>
+                <span class="cov8" title="1">return readCloser, nil, args.Error(mockErrorIndex)</span>
         }
 
-        <span class="cov0" title="0">readCloser, ok1 := args.Get(0).(io.ReadCloser)
+        <span class="cov8" title="1">readCloser, ok1 := args.Get(0).(io.ReadCloser)
         if !ok1 </span><span class="cov0" title="0">{
                 return nil, nil, args.Error(mockErrorIndex)
         }</span>
 
-        <span class="cov0" title="0">version, ok2 := args.Get(1).(*models.VaultVersion)
+        <span class="cov8" title="1">version, ok2 := args.Get(1).(*models.VaultVersion)
         if !ok2 </span><span class="cov0" title="0">{
                 return readCloser, nil, args.Error(mockErrorIndex)
         }</span>
 
-        <span class="cov0" title="0">return readCloser, version, args.Error(mockErrorIndex)</span>
+        <span class="cov8" title="1">return readCloser, version, args.Error(mockErrorIndex)</span>
 }
 
 // ListVersions мокирует метод ListVersions.

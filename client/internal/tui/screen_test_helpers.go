@@ -3,6 +3,7 @@ package tui
 import (
 	"bytes"
 	"context"
+	"errors"
 	"io"
 	"strings"
 	"testing"
@@ -51,14 +52,20 @@ const (
 // GetVaultMetadata мокирует метод GetVaultMetadata.
 func (m *ScreenTestMockAPIClient) GetVaultMetadata(ctx context.Context) (*models.VaultVersion, error) {
 	args := m.Called(ctx)
+	err := args.Error(1)
+	if err != nil {
+		return nil, err
+	}
 	if args.Get(0) == nil {
-		return nil, args.Error(1)
+		// Если ошибки нет, но и объекта нет, возвращаем nil, nil (или можно паниковать, если это не ожидаемый сценарий)
+		return nil, nil //nolint:nilnil // Мок может быть настроен вернуть nil, nil
 	}
-	v, ok := args.Get(0).(*models.VaultVersion)
+	// Проверяем ошибку перед приведением типа
+	v, ok := args.Get(0).(*models.VaultVersion) // Используем проверку типа
 	if !ok {
-		return nil, args.Error(1)
+		return nil, errors.New("mock GetVaultMetadata: unexpected type returned")
 	}
-	return v, args.Error(1)
+	return v, nil
 }
 
 // UploadVault мокирует метод UploadVault.
