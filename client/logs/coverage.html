@@ -99,7 +99,7 @@
 				
 				<option value="file21">github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go (92.8%)</option>
 				
-				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go (79.8%)</option>
+				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go (92.7%)</option>
 				
 				<option value="file23">github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go (25.2%)</option>
 				
@@ -107,7 +107,7 @@
 				
 				<option value="file25">github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go (0.0%)</option>
 				
-				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/tui.go (20.0%)</option>
+				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/tui.go (18.3%)</option>
 				
 				<option value="file27">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (46.6%)</option>
 				
@@ -3881,6 +3881,25 @@ func NewScreenTestSuite() *ScreenTestSuite <span class="cov8" title="1">{
         s.Mocks.APIClient = new(ScreenTestMockAPIClient)
         s.Model.apiClient = s.Mocks.APIClient
 
+        // Инициализируем карту помощи (копируем из Start() в tui.go)
+        s.Model.helpTextMap = map[screenState]string{
+                welcomeScreen:              "(Enter - продолжить, Ctrl+C/q - выход)",
+                passwordInputScreen:        "(Enter - подтвердить, " + keyCtrlC + " - выход)", // Используем константу
+                newKdbxPasswordScreen:      "(Tab - сменить поле, Enter - создать, Esc/" + keyCtrlC + " - выход)",
+                entryListScreen:            "(↑/↓, Enter - детали, / - поиск, a - доб, s - синхр, l - логин, Ctrl+S - сохр, q - вых)",
+                entryDetailScreen:          "(e - ред., Ctrl+S - сохр., Esc/b - назад)",
+                entryEditScreen:            "(Tab/↑/↓, Enter - сохр., Esc - отмена, ^O - влож+, ^D - влож-)",
+                entryAddScreen:             "(Tab/↑/↓, Enter - доб., ^O - влож+, Esc - отмена)",
+                attachmentListDeleteScreen: "(↑/↓ - навигация, Enter/d - удалить, Esc/b - отмена)",
+                attachmentPathInputScreen:  "(Enter - подтвердить, Esc - отмена)",
+                syncServerScreen:           "(↑/↓ - навигация, Enter - выбрать, Esc/b - назад)",
+                serverURLInputScreen:       "(Enter - подтвердить, Esc - назад)",
+                loginRegisterChoiceScreen:  "(R - регистрация, L - вход, Esc/b - назад)",
+                loginScreen:                "(Tab - след. поле, Enter - войти, Esc - назад)",
+                registerScreen:             "(Tab - след. поле, Enter - зарегистрироваться, Esc - назад)",
+                versionListScreen:          "(↑/↓ - навигация, Enter - откатить, Esc/b - назад, r - обновить)",
+        }
+
         return s
 }</span>
 
@@ -4016,31 +4035,31 @@ type MockResponse struct {
 }
 
 // SetupMockAPILogin настраивает мок API клиента для метода Login.
-func (s *ScreenTestSuite) SetupMockAPILogin(username, password string, response MockResponse) *ScreenTestSuite <span class="cov0" title="0">{
-        if response.Success </span><span class="cov0" title="0">{
+func (s *ScreenTestSuite) SetupMockAPILogin(username, password string, response MockResponse) *ScreenTestSuite <span class="cov8" title="1">{
+        if response.Success </span><span class="cov8" title="1">{
                 s.Mocks.APIClient.On("Login", mock.Anything, username, password).
                         Return(response.Token, nil).Once()
-        }</span> else<span class="cov0" title="0"> {
+        }</span> else<span class="cov8" title="1"> {
                 s.Mocks.APIClient.On("Login", mock.Anything, username, password).
                         Return("", response.Error).Once()
         }</span>
-        <span class="cov0" title="0">return s</span>
+        <span class="cov8" title="1">return s</span>
 }
 
 // SetupMockAPIRegister настраивает мок API клиента для метода Register.
-func (s *ScreenTestSuite) SetupMockAPIRegister(username, password string, response MockResponse) *ScreenTestSuite <span class="cov0" title="0">{
-        if response.Success </span><span class="cov0" title="0">{
+func (s *ScreenTestSuite) SetupMockAPIRegister(username, password string, response MockResponse) *ScreenTestSuite <span class="cov8" title="1">{
+        if response.Success </span><span class="cov8" title="1">{
                 s.Mocks.APIClient.On("Register", mock.Anything, username, password).
                         Return(nil).Once()
-        }</span> else<span class="cov0" title="0"> {
+        }</span> else<span class="cov8" title="1"> {
                 s.Mocks.APIClient.On("Register", mock.Anything, username, password).
                         Return(response.Error).Once()
         }</span>
-        <span class="cov0" title="0">return s</span>
+        <span class="cov8" title="1">return s</span>
 }
 
 // RenderScreen выполняет рендеринг View() для тестирования отображения.
-func (s *ScreenTestSuite) RenderScreen() string <span class="cov0" title="0">{
+func (s *ScreenTestSuite) RenderScreen() string <span class="cov8" title="1">{
         var buf bytes.Buffer
 
         // Получаем View текущей модели
@@ -4613,7 +4632,7 @@ func (m *model) getContentAndHelp() (string, string) <span class="cov8" title="1
         mainContent := m.getMainContentView()
         // Используем карту из модели
         help, ok := m.helpTextMap[m.state]
-        if !ok </span><span class="cov8" title="1">{
+        if !ok </span><span class="cov0" title="0">{
                 help = "Unknown state" // Default help for unknown state
                 if m.debugMode </span><span class="cov0" title="0">{
                         help = fmt.Sprintf("State: %s", m.state.String()) // More informative for debug

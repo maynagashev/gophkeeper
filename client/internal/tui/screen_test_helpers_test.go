@@ -392,3 +392,90 @@ func TestScreenTestSuite_CaptureOutput(t *testing.T) {
 		s.AssertState(t, entryListScreen)
 	})
 }
+
+// TestScreenTestSuite_SetupMockAPILogin проверяет хелпер SetupMockAPILogin.
+func TestScreenTestSuite_SetupMockAPILogin(t *testing.T) {
+	s := NewScreenTestSuite()
+	username := "test-user"
+	password := "test-pass"
+	ctx := context.Background()
+
+	t.Run("Success Case", func(t *testing.T) {
+		expectedToken := "success-token"
+		response := MockResponse{Success: true, Token: expectedToken}
+		s.SetupMockAPILogin(username, password, response)
+
+		// Проверяем, что мок настроен правильно, вызвав метод
+		token, err := s.Mocks.APIClient.Login(ctx, username, password)
+		require.NoError(t, err)
+		assert.Equal(t, expectedToken, token)
+		s.Mocks.APIClient.AssertExpectations(t) // Убедимся, что вызов был
+	})
+
+	t.Run("Error Case", func(t *testing.T) {
+		expectedErr := errors.New("login setup error")
+		response := MockResponse{Success: false, Error: expectedErr}
+		s.SetupMockAPILogin(username, password, response)
+
+		// Проверяем, что мок настроен правильно
+		token, err := s.Mocks.APIClient.Login(ctx, username, password)
+		require.Error(t, err)
+		assert.Equal(t, expectedErr, err)
+		assert.Empty(t, token)
+		s.Mocks.APIClient.AssertExpectations(t)
+	})
+}
+
+// TestScreenTestSuite_SetupMockAPIRegister проверяет хелпер SetupMockAPIRegister.
+func TestScreenTestSuite_SetupMockAPIRegister(t *testing.T) {
+	s := NewScreenTestSuite()
+	username := "reg-user"
+	password := "reg-pass"
+	ctx := context.Background()
+
+	t.Run("Success Case", func(t *testing.T) {
+		response := MockResponse{Success: true}
+		s.SetupMockAPIRegister(username, password, response)
+
+		// Проверяем, что мок настроен правильно
+		err := s.Mocks.APIClient.Register(ctx, username, password)
+		require.NoError(t, err)
+		s.Mocks.APIClient.AssertExpectations(t)
+	})
+
+	t.Run("Error Case", func(t *testing.T) {
+		expectedErr := errors.New("register setup error")
+		response := MockResponse{Success: false, Error: expectedErr}
+		s.SetupMockAPIRegister(username, password, response)
+
+		// Проверяем, что мок настроен правильно
+		err := s.Mocks.APIClient.Register(ctx, username, password)
+		require.Error(t, err)
+		assert.Equal(t, expectedErr, err)
+		s.Mocks.APIClient.AssertExpectations(t)
+	})
+}
+
+// TestScreenTestSuite_RenderScreen проверяет хелпер RenderScreen.
+func TestScreenTestSuite_RenderScreen(t *testing.T) {
+	s := NewScreenTestSuite()
+	// Используем состояние welcomeScreen для предсказуемого View
+	s.WithState(welcomeScreen)
+
+	// Ожидаемый результат ПОСЛЕ очистки ANSI и \r функцией RenderScreen
+	part1 := "Добро пожаловать в GophKeeper!\n\nНажмите Enter для продолжения..."
+	part2 := "\n(Enter - продолжить, Ctrl+C/q - выход)"
+	expectedCleanView := part1 + part2
+
+	actualCleanView := s.RenderScreen()
+
+	// Убираем лишние пробелы в конце строк, которые могут появиться из-за рендеринга
+	lines := strings.Split(actualCleanView, "\n")
+	for i, line := range lines {
+		lines[i] = strings.TrimRight(line, " ")
+	}
+	actualCleanViewTrimmed := strings.Join(lines, "\n")
+
+	// Сравниваем очищенные строки
+	assert.Equal(t, expectedCleanView, actualCleanViewTrimmed, "RenderScreen должен возвращать очищенный View")
+}
