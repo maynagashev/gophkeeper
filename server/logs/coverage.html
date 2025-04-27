@@ -55,7 +55,7 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/maynagashev/gophkeeper/server/cmd/server/flags.go (0.0%)</option>
+				<option value="file0">github.com/maynagashev/gophkeeper/server/cmd/server/flags.go (100.0%)</option>
 				
 				<option value="file1">github.com/maynagashev/gophkeeper/server/cmd/server/main.go (0.0%)</option>
 				
@@ -120,7 +120,7 @@ type config struct {
 }
 
 // parseFlags разбирает флаги и переменные окружения, возвращает config или ошибку.
-func parseFlags() (*config, error) <span class="cov0" title="0">{
+func parseFlags() (*config, error) <span class="cov8" title="1">{
         cfg := &amp;config{}
 
         // Определяем флаги
@@ -137,41 +137,41 @@ func parseFlags() (*config, error) <span class="cov0" title="0">{
         flag.Parse()
 
         // Применяем переменные окружения, если флаги не заданы
-        if cfg.Port == "" </span><span class="cov0" title="0">{
-                if value, ok := os.LookupEnv(envServerPort); ok </span><span class="cov0" title="0">{
+        if cfg.Port == "" </span><span class="cov8" title="1">{
+                if value, ok := os.LookupEnv(envServerPort); ok </span><span class="cov8" title="1">{
                         cfg.Port = value
-                }</span> else<span class="cov0" title="0"> {
+                }</span> else<span class="cov8" title="1"> {
                         cfg.Port = defaultServerPort
                 }</span>
         }
-        <span class="cov0" title="0">if cfg.CertFile == "" </span><span class="cov0" title="0">{
-                if value, ok := os.LookupEnv(envTLSCertFile); ok </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if cfg.CertFile == "" </span><span class="cov8" title="1">{
+                if value, ok := os.LookupEnv(envTLSCertFile); ok </span><span class="cov8" title="1">{
                         cfg.CertFile = value
                 }</span>
         }
-        <span class="cov0" title="0">if cfg.KeyFile == "" </span><span class="cov0" title="0">{
-                if value, ok := os.LookupEnv(envTLSKeyFile); ok </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if cfg.KeyFile == "" </span><span class="cov8" title="1">{
+                if value, ok := os.LookupEnv(envTLSKeyFile); ok </span><span class="cov8" title="1">{
                         cfg.KeyFile = value
                 }</span>
         }
-        <span class="cov0" title="0">if cfg.DatabaseDSN == "" </span><span class="cov0" title="0">{
-                if value, ok := os.LookupEnv(envDatabaseDSN); ok </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if cfg.DatabaseDSN == "" </span><span class="cov8" title="1">{
+                if value, ok := os.LookupEnv(envDatabaseDSN); ok </span><span class="cov8" title="1">{
                         cfg.DatabaseDSN = value
                 }</span>
         }
 
         // Проверяем обязательные параметры
-        <span class="cov0" title="0">if cfg.CertFile == "" </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if cfg.CertFile == "" </span><span class="cov8" title="1">{
                 return nil, errors.New("не указан путь к файлу сертификата (--cert-file или " + envTLSCertFile + ")")
         }</span>
-        <span class="cov0" title="0">if cfg.KeyFile == "" </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if cfg.KeyFile == "" </span><span class="cov8" title="1">{
                 return nil, errors.New("не указан путь к файлу ключа (--key-file или " + envTLSKeyFile + ")")
         }</span>
-        <span class="cov0" title="0">if cfg.DatabaseDSN == "" </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if cfg.DatabaseDSN == "" </span><span class="cov8" title="1">{
                 return nil, errors.New("не указана строка подключения к БД (--database-dsn или " + envDatabaseDSN + ")")
         }</span>
 
-        <span class="cov0" title="0">return cfg, nil</span>
+        <span class="cov8" title="1">return cfg, nil</span>
 }
 </pre>
 		
