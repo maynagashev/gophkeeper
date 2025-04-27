@@ -138,8 +138,8 @@ github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:355
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:47:			loadVersionsCmd				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:76:			rollbackToVersionCmd			100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:101:			handleVersionRollbackConfirm		100.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:122:			handleVersionRollbackError		0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:132:			handleVersionListKeys			0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:122:			handleVersionRollbackError		100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:132:			handleVersionListKeys			100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:164:			viewVersionListScreen			0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:195:			updateVersionListScreen			0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:229:			handleVersionsLoadedMsg			0.0%
@@ -193,4 +193,4 @@ github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:46:				deepCopyEn
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:51:				FindEntryInDB				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:60:				findEntryInDB				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:65:				FindEntryInGroups			100.0%
-total:												(statements)				74.6%
+total:												(statements)				75.6%

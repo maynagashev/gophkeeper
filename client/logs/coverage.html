@@ -101,7 +101,7 @@
 				
 				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go (92.7%)</option>
 				
-				<option value="file23">github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go (33.0%)</option>
+				<option value="file23">github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go (50.9%)</option>
 				
 				<option value="file24">github.com/maynagashev/gophkeeper/client/internal/tui/screen_welcome.go (100.0%)</option>
 				
@@ -4198,45 +4198,45 @@ func (m *model) handleVersionRollbackConfirm(ctx context.Context, keyMsg tea.Key
 }
 
 // handleVersionRollbackError обрабатывает ввод в режиме отображения ошибки отката.
-func (m *model) handleVersionRollbackError(keyMsg tea.KeyMsg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
-        if keyMsg.String() == keyEsc || keyMsg.String() == keyBack || keyMsg.String() == keyEnter </span><span class="cov0" title="0">{
+func (m *model) handleVersionRollbackError(keyMsg tea.KeyMsg) (tea.Model, tea.Cmd) <span class="cov8" title="1">{
+        if keyMsg.String() == keyEsc || keyMsg.String() == keyBack || keyMsg.String() == keyEnter </span><span class="cov8" title="1">{
                 m.rollbackError = nil
                 // Добавляем ClearScreen
                 return m, tea.ClearScreen
         }</span>
-        <span class="cov0" title="0">return m, nil</span>
+        <span class="cov8" title="1">return m, nil</span>
 }
 
 // handleVersionListKeys обрабатывает основные клавиши на экране списка версий.
-func (m *model) handleVersionListKeys(keyMsg tea.KeyMsg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+func (m *model) handleVersionListKeys(keyMsg tea.KeyMsg) (tea.Model, tea.Cmd) <span class="cov8" title="1">{
         switch keyMsg.String() </span>{
-        case keyEnter:<span class="cov0" title="0">
+        case keyEnter:<span class="cov8" title="1">
                 // Выбор версии для отката
                 selectedItem := m.versionList.SelectedItem()
-                if item, itemOk := selectedItem.(versionItem); itemOk </span><span class="cov0" title="0">{ // Используем itemOk
-                        if item.isCurrent </span><span class="cov0" title="0">{
+                if item, itemOk := selectedItem.(versionItem); itemOk </span><span class="cov8" title="1">{ // Используем itemOk
+                        if item.isCurrent </span><span class="cov8" title="1">{
                                 // Нельзя откатиться к текущей версии
                                 return m.setStatusMessage("Это уже текущая версия")
                         }</span>
-                        <span class="cov0" title="0">m.selectedVersionForRollback = &amp;item.version
+                        <span class="cov8" title="1">m.selectedVersionForRollback = &amp;item.version
                         m.confirmRollback = true
                         // Добавляем ClearScreen при переходе к подтверждению
                         return m, tea.ClearScreen</span>
                 }
-        case keyEsc, keyBack:<span class="cov0" title="0">
+        case keyEsc, keyBack:<span class="cov8" title="1">
                 // Возврат к экрану синхронизации
                 m.state = syncServerScreen
                 return m, tea.ClearScreen</span>
-        case "r":<span class="cov0" title="0">
+        case "r":<span class="cov8" title="1">
                 // Обновление списка версий
                 m.loadingVersions = true
                 return m, loadVersionsCmd(m)</span>
-        case "l":<span class="cov0" title="0">
+        case "l":<span class="cov8" title="1">
                 // Переход к экрану логина/регистрации
                 m.state = loginRegisterChoiceScreen
                 return m, tea.ClearScreen</span>
         }
-        <span class="cov0" title="0">return m, nil</span> // Клавиша не обработана здесь
+        <span class="cov8" title="1">return m, nil</span> // Клавиша не обработана здесь
 }
 
 // viewVersionListScreen отображает экран со списком версий.
