@@ -123,6 +123,7 @@ const (
 	keyShiftTab = "shift+tab"
 	keyUp       = "up"
 	keyDown     = "down"
+	keyCtrlC    = "ctrl+c" // Добавляем константу
 )
 
 const numNewPasswordFields = 2 // Количество полей на экране создания пароля

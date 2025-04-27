@@ -99,7 +99,7 @@
 				
 				<option value="file21">github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go (92.8%)</option>
 				
-				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go (68.8%)</option>
+				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go (79.8%)</option>
 				
 				<option value="file23">github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go (25.2%)</option>
 				
@@ -107,7 +107,7 @@
 				
 				<option value="file25">github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go (0.0%)</option>
 				
-				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/tui.go (18.3%)</option>
+				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/tui.go (20.0%)</option>
 				
 				<option value="file27">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (46.6%)</option>
 				
@@ -1793,6 +1793,7 @@ const (
         keyShiftTab = "shift+tab"
         keyUp       = "up"
         keyDown     = "down"
+        keyCtrlC    = "ctrl+c" // Добавляем константу
 )
 
 const numNewPasswordFields = 2 // Количество полей на экране создания пароля
@@ -3383,14 +3384,23 @@ func (m *model) updatePasswordInputScreen(msg tea.Msg) (tea.Model, tea.Cmd) <spa
                         m.passwordInput.Focus() // Возвращаем фокус
                         cmds = append(cmds, textinput.Blink)
                         // Не обрабатываем другие клавиши в этом цикле
-                }</span> else<span class="cov8" title="1"> if keyMsg.String() == keyEnter </span><span class="cov8" title="1">{
-                        password := m.passwordInput.Value()
-                        m.passwordInput.Blur()
-                        m.passwordInput.Reset()
-                        // Сохраняем пароль в модели перед отправкой команды
-                        m.password = password
-                        cmds = append(cmds, openKdbxCmd(m.kdbxPath, password))
-                }</span>
+                }</span> else<span class="cov8" title="1"> {
+                        switch keyMsg.String() </span>{
+                        case keyEnter:<span class="cov8" title="1">
+                                password := m.passwordInput.Value()
+                                m.passwordInput.Blur()
+                                m.passwordInput.Reset()
+                                // Сохраняем пароль в модели перед отправкой команды
+                                m.password = password
+                                cmds = append(cmds, openKdbxCmd(m.kdbxPath, password))</span>
+                        case keyEsc, keyCtrlC:<span class="cov8" title="1"> // Используем константу
+                                m.state = welcomeScreen
+                                m.passwordInput.Blur()
+                                m.passwordInput.Reset()
+                                m.password = "" // Сбрасываем пароль
+                                cmds = append(cmds, tea.ClearScreen)</span>
+                        }
+                }
         }
         <span class="cov8" title="1">return m, tea.Batch(cmds...)</span>
 }
@@ -3938,26 +3948,26 @@ func toModel(t *testing.T, m tea.Model) *model <span class="cov8" title="1">{
 }</span>
 
 // CaptureView выполняет команду и возвращает результат View().
-func (s *ScreenTestSuite) CaptureView(t *testing.T, cmd tea.Cmd) string <span class="cov0" title="0">{
-        if cmd != nil </span><span class="cov0" title="0">{
+func (s *ScreenTestSuite) CaptureView(t *testing.T, cmd tea.Cmd) string <span class="cov8" title="1">{
+        if cmd != nil </span><span class="cov8" title="1">{
                 msg := cmd()
                 newModel, _ := s.Model.Update(msg)
                 s.Model = toModel(t, newModel)
         }</span>
-        <span class="cov0" title="0">return s.Model.View()</span>
+        <span class="cov8" title="1">return s.Model.View()</span>
 }
 
 // CaptureOutput выполняет последовательность команд и возвращает финальный View.
-func (s *ScreenTestSuite) CaptureOutput(t *testing.T, cmds ...tea.Cmd) string <span class="cov0" title="0">{
-        for _, cmd := range cmds </span><span class="cov0" title="0">{
-                if cmd == nil </span><span class="cov0" title="0">{
+func (s *ScreenTestSuite) CaptureOutput(t *testing.T, cmds ...tea.Cmd) string <span class="cov8" title="1">{
+        for _, cmd := range cmds </span><span class="cov8" title="1">{
+                if cmd == nil </span><span class="cov8" title="1">{
                         continue</span>
                 }
-                <span class="cov0" title="0">msg := cmd()
+                <span class="cov8" title="1">msg := cmd()
                 newModel, _ := s.Model.Update(msg)
                 s.Model = toModel(t, newModel)</span>
         }
-        <span class="cov0" title="0">return s.Model.View()</span>
+        <span class="cov8" title="1">return s.Model.View()</span>
 }
 
 // CreateBasicTestDB создает простую тестовую базу данных.
@@ -4565,11 +4575,11 @@ func (m *model) getMainContentView() string <span class="cov8" title="1">{
         switch m.state </span>{
         case welcomeScreen:<span class="cov8" title="1">
                 return m.viewWelcomeScreen()</span>
-        case passwordInputScreen:<span class="cov0" title="0">
+        case passwordInputScreen:<span class="cov8" title="1">
                 return m.viewPasswordInputScreen()</span>
         case newKdbxPasswordScreen:<span class="cov0" title="0">
                 return m.viewNewKdbxPasswordScreen()</span>
-        case entryListScreen:<span class="cov0" title="0">
+        case entryListScreen:<span class="cov8" title="1">
                 return m.entryList.View()</span>
         case entryDetailScreen:<span class="cov0" title="0">
                 return m.viewEntryDetailScreen()</span>

@@ -51,9 +51,9 @@ github.com/maynagashev/gophkeeper/client/internal/tui/initialization.go:246:			i
 github.com/maynagashev/gophkeeper/client/internal/tui/input_helpers.go:15:			handleCredentialsKeys			82.6%
 github.com/maynagashev/gophkeeper/client/internal/tui/input_helpers.go:60:			handleCredentialsInput			94.4%
 github.com/maynagashev/gophkeeper/client/internal/tui/model.go:41:				String					100.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/model.go:136:				Title					100.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/model.go:150:				Description				100.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/model.go:177:				FilterValue				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/model.go:137:				Title					100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/model.go:151:				Description				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/model.go:178:				FilterValue				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:15:				prepareAddScreen			100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:60:				createEntryFromInputs			92.3%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:109:			updateEntryAddScreen			78.7%
@@ -93,8 +93,8 @@ github.com/maynagashev/gophkeeper/client/internal/tui/screen_login_register_choi
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_new_kdbx.go:25:			updateNewKdbxPasswordScreen		88.8%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_new_kdbx.go:180:			viewNewKdbxPasswordScreen		100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_password.go:12:			updatePasswordInputScreen		100.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_password.go:41:			viewPasswordInputScreen			100.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_password.go:53:			handleErrorMsg				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_password.go:50:			viewPasswordInputScreen			100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_password.go:62:			handleErrorMsg				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_register.go:8:			updateRegisterScreen			100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_register.go:29:			viewRegisterScreen			100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_server_url.go:12:			updateServerURLInputScreen		100.0%
@@ -129,8 +129,8 @@ github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:215
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:223:		AssertViewContains			100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:229:		AssertState				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:234:		toModel					100.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:242:		CaptureView				0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:252:		CaptureOutput				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:242:		CaptureView				100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:252:		CaptureOutput				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:265:		CreateBasicTestDB			100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:310:		SetupMockAPILogin			0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go:322:		SetupMockAPIRegister			0.0%
@@ -159,7 +159,7 @@ github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go:126:			Mak
 github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go:131:			MakeRegisterCmd				0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:27:				Init					0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:32:				setStatusMessage			66.7%
-github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:48:				getMainContentView			11.8%
+github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:48:				getMainContentView			23.5%
 github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:86:				getContentAndHelp			85.7%
 github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:100:				getDBModTimeString			0.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/tui.go:116:				getDBDebugInfo				0.0%
@@ -193,4 +193,4 @@ github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:46:				deepCopyEn
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:51:				FindEntryInDB				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:60:				findEntryInDB				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:65:				FindEntryInGroups			100.0%
-total:												(statements)				72.9%
+total:												(statements)				73.6%

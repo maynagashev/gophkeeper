@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/maynagashev/gophkeeper/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -312,4 +313,82 @@ func TestScreenTestSuite_AssertViewContains(t *testing.T) {
 	// Негативный случай (когда подстрока отсутствует) не проверяем явно,
 	// так как он полагается на корректную работу assert.Contains из testify,
 	// которая вызовет t.FailNow(), прервав тест, что сложно перехватить.
+}
+
+// TestScreenTestSuite_CaptureView проверяет хелпер CaptureView.
+func TestScreenTestSuite_CaptureView(t *testing.T) {
+	t.Run("With Command", func(t *testing.T) {
+		s := NewScreenTestSuite()
+		s.WithState(welcomeScreen)
+
+		// Команда, которая меняет состояние с welcome на passwordInput
+		changeStateCmd := func() tea.Msg {
+			return tea.KeyMsg{Type: tea.KeyEnter}
+		}
+
+		// Ожидаем View от passwordInputScreen
+		view := s.CaptureView(t, changeStateCmd)
+
+		// Проверяем, что View соответствует новому состоянию
+		assert.Contains(t, view, "Введите мастер-пароль", "View должен соответствовать passwordInputScreen")
+		// Проверяем, что состояние модели действительно изменилось
+		s.AssertState(t, passwordInputScreen)
+	})
+
+	t.Run("With Nil Command", func(t *testing.T) {
+		s := NewScreenTestSuite()
+		s.WithState(welcomeScreen)
+
+		// Ожидаем View от welcomeScreen
+		view := s.CaptureView(t, nil)
+
+		// Проверяем, что View соответствует исходному состоянию
+		assert.Contains(t, view, "Добро пожаловать", "View должен соответствовать welcomeScreen")
+		// Проверяем, что состояние модели не изменилось
+		s.AssertState(t, welcomeScreen)
+	})
+}
+
+// TestScreenTestSuite_CaptureOutput проверяет хелпер CaptureOutput.
+func TestScreenTestSuite_CaptureOutput(t *testing.T) {
+	t.Run("Sequence of Commands", func(t *testing.T) {
+		s := NewScreenTestSuite()
+		s.WithState(welcomeScreen)
+
+		// Команды: Enter (welcome -> passwordInput), Escape (passwordInput -> welcome)
+		cmd1 := func() tea.Msg { return tea.KeyMsg{Type: tea.KeyEnter} }
+		cmd2 := func() tea.Msg { return tea.KeyMsg{Type: tea.KeyEscape} }
+
+		// Ожидаем View от welcomeScreen (финальное состояние)
+		view := s.CaptureOutput(t, cmd1, cmd2)
+
+		assert.Contains(t, view, "Добро пожаловать", "View должен соответствовать финальному welcomeScreen")
+		s.AssertState(t, welcomeScreen)
+	})
+
+	t.Run("With Nil Commands", func(t *testing.T) {
+		s := NewScreenTestSuite()
+		s.WithState(passwordInputScreen)
+
+		cmd1 := func() tea.Msg { return tea.KeyMsg{Type: tea.KeyEnter} } // Должен сработать
+
+		// Ожидаем View от passwordInputScreen, так как nil команды игнорируются,
+		// а Enter на этом экране не меняет состояние (если не введен пароль).
+		// Точнее, Enter вызовет команду openKdbxCmd, которая может изменить состояние асинхронно,
+		// но CaptureOutput выполняет команды синхронно. Поэтому состояние останется passwordInputScreen.
+		view := s.CaptureOutput(t, nil, cmd1, nil)
+
+		assert.Contains(t, view, "Введите мастер-пароль", "View должен остаться passwordInputScreen")
+		s.AssertState(t, passwordInputScreen)
+	})
+
+	t.Run("No Commands", func(t *testing.T) {
+		s := NewScreenTestSuite()
+		s.WithState(entryListScreen)
+
+		view := s.CaptureOutput(t)
+
+		assert.Contains(t, view, "No items", "View должен остаться entryListScreen (и быть пустым)")
+		s.AssertState(t, entryListScreen)
+	})
 }
