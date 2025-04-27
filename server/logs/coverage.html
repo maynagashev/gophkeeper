@@ -67,7 +67,7 @@
 				
 				<option value="file5">github.com/maynagashev/gophkeeper/server/internal/repository/db.go (73.3%)</option>
 				
-				<option value="file6">github.com/maynagashev/gophkeeper/server/internal/repository/user_repository.go (0.0%)</option>
+				<option value="file6">github.com/maynagashev/gophkeeper/server/internal/repository/user_repository.go (100.0%)</option>
 				
 				<option value="file7">github.com/maynagashev/gophkeeper/server/internal/repository/vault_repository.go (0.0%)</option>
 				
@@ -969,49 +969,49 @@ type postgresUserRepository struct {
 }
 
 // NewPostgresUserRepository создает новый экземпляр репозитория пользователей для PostgreSQL.
-func NewPostgresUserRepository(db *sqlx.DB) UserRepository <span class="cov0" title="0">{
+func NewPostgresUserRepository(db *sqlx.DB) UserRepository <span class="cov8" title="1">{
         return &amp;postgresUserRepository{db: db}
 }</span>
 
 // CreateUser создает нового пользователя в базе данных.
 // Возвращает ID созданного пользователя или ошибку.
-func (r *postgresUserRepository) CreateUser(ctx context.Context, user *models.User) (int64, error) <span class="cov0" title="0">{
+func (r *postgresUserRepository) CreateUser(ctx context.Context, user *models.User) (int64, error) <span class="cov8" title="1">{
         query := `INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id`
         var userID int64
 
         err := r.db.QueryRowxContext(ctx, query, user.Username, user.PasswordHash).Scan(&amp;userID)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 // Проверяем на ошибку нарушения уникальности (duplicate key)
                 var pgErr *pq.Error
-                if errors.As(err, &amp;pgErr) &amp;&amp; pgErr.Code == pgUniqueViolationCode </span><span class="cov0" title="0">{
+                if errors.As(err, &amp;pgErr) &amp;&amp; pgErr.Code == pgUniqueViolationCode </span><span class="cov8" title="1">{
                         log.Printf("[Repo] Ошибка создания пользователя: имя пользователя '%s' уже занято", user.Username)
                         return 0, ErrUsernameTaken // Возвращаем кастомную ошибку
                 }</span>
-                <span class="cov0" title="0">log.Printf("[Repo] Непредвиденная ошибка при создании пользователя '%s': %v", user.Username, err)
+                <span class="cov8" title="1">log.Printf("[Repo] Непредвиденная ошибка при создании пользователя '%s': %v", user.Username, err)
                 return 0, fmt.Errorf("ошибка выполнения запроса на создание пользователя: %w", err)</span>
         }
 
-        <span class="cov0" title="0">log.Printf("[Repo] Пользователь '%s' успешно создан с ID %d", user.Username, userID)
+        <span class="cov8" title="1">log.Printf("[Repo] Пользователь '%s' успешно создан с ID %d", user.Username, userID)
         return userID, nil</span>
 }
 
 // GetUserByUsername находит пользователя по его имени.
 // Возвращает пользователя или ошибку, если пользователь не найден или произошла другая ошибка.
-func (r *postgresUserRepository) GetUserByUsername(ctx context.Context, username string) (*models.User, error) <span class="cov0" title="0">{
+func (r *postgresUserRepository) GetUserByUsername(ctx context.Context, username string) (*models.User, error) <span class="cov8" title="1">{
         query := `SELECT id, username, password_hash, created_at, updated_at FROM users WHERE username=$1`
         var user models.User
 
         err := r.db.GetContext(ctx, &amp;user, query, username)
-        if err != nil </span><span class="cov0" title="0">{
-                if errors.Is(err, sql.ErrNoRows) </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, sql.ErrNoRows) </span><span class="cov8" title="1">{
                         log.Printf("[Repo] Пользователь с именем '%s' не найден", username)
                         return nil, ErrUserNotFound // Пользователь не найден
                 }</span>
-                <span class="cov0" title="0">log.Printf("[Repo] Ошибка при поиске пользователя '%s': %v", username, err)
+                <span class="cov8" title="1">log.Printf("[Repo] Ошибка при поиске пользователя '%s': %v", username, err)
                 return nil, fmt.Errorf("ошибка выполнения запроса на получение пользователя: %w", err)</span>
         }
 
-        <span class="cov0" title="0">log.Printf("[Repo] Найден пользователь '%s' (ID: %d)", username, user.ID)
+        <span class="cov8" title="1">log.Printf("[Repo] Найден пользователь '%s' (ID: %d)", username, user.ID)
         return &amp;user, nil</span>
 }
 
