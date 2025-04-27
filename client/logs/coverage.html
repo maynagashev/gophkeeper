@@ -97,7 +97,7 @@
 				
 				<option value="file20">github.com/maynagashev/gophkeeper/client/internal/tui/screen_server_url.go (100.0%)</option>
 				
-				<option value="file21">github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go (67.9%)</option>
+				<option value="file21">github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go (92.8%)</option>
 				
 				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go (17.0%)</option>
 				
@@ -3517,6 +3517,15 @@ import (
         "github.com/maynagashev/gophkeeper/client/internal/kdbx"
 )
 
+// --- Константы для ID пунктов меню синхронизации --- //.
+const (
+        syncMenuIDConfigureURL  = "configure_url"
+        syncMenuIDLoginRegister = "login_register"
+        syncMenuIDSyncNow       = "sync_now"
+        syncMenuIDViewVersions  = "view_versions"
+        syncMenuIDLogout        = "logout"
+)
+
 // --- Тип для элементов меню синхронизации --- //
 
 // syncMenuItem представляет элемент в меню синхронизации.
@@ -3635,7 +3644,7 @@ func (m *model) handleSyncMenuLogout() tea.Cmd <span class="cov8" title="1">{
 }
 
 // Меняем возвращаемый тип на *model.
-func (m *model) updateSyncServerScreen(msg tea.Msg) (*model, tea.Cmd) <span class="cov0" title="0">{
+func (m *model) updateSyncServerScreen(msg tea.Msg) (*model, tea.Cmd) <span class="cov8" title="1">{
         var cmds []tea.Cmd
         var listCmd tea.Cmd
 
@@ -3643,41 +3652,44 @@ func (m *model) updateSyncServerScreen(msg tea.Msg) (*model, tea.Cmd) <span clas
         m.syncServerMenu, listCmd = m.syncServerMenu.Update(msg)
         cmds = append(cmds, listCmd)
 
-        if keyMsg, ok := msg.(tea.KeyMsg); ok </span><span class="cov0" title="0">{
+        if keyMsg, ok := msg.(tea.KeyMsg); ok </span><span class="cov8" title="1">{
                 switch keyMsg.String() </span>{
-                case keyEnter:<span class="cov0" title="0">
+                case keyEnter:<span class="cov8" title="1">
                         // Обработка выбора пункта меню
                         cmd := m.handleSyncMenuAction()
                         cmds = append(cmds, cmd)</span>
                         // Может потребоваться ClearScreen в зависимости от действия
-                case keyEsc, keyBack:<span class="cov0" title="0">
+                case keyEsc, keyBack:<span class="cov8" title="1">
                         m.state = entryListScreen
-                        // Возвращаем указатель на модель
-                        return m, tea.ClearScreen</span> // Очистка экрана добавлена
+                        return m, tea.ClearScreen</span>
+                // Добавляем отдельный case для Backspace
+                case "backspace":<span class="cov8" title="1">
+                        m.state = entryListScreen
+                        return m, tea.ClearScreen</span>
                 }
         }
 
         // Возвращаем указатель на модель
-        <span class="cov0" title="0">return m, tea.Batch(cmds...)</span>
+        <span class="cov8" title="1">return m, tea.Batch(cmds...)</span>
 }
 
 // handleSyncMenuAction обрабатывает действие выбора в меню синхронизации.
-func (m *model) handleSyncMenuAction() tea.Cmd <span class="cov0" title="0">{
+func (m *model) handleSyncMenuAction() tea.Cmd <span class="cov8" title="1">{
         selectedItem, ok := m.syncServerMenu.SelectedItem().(syncMenuItem)
-        if !ok </span><span class="cov0" title="0">{
+        if !ok </span><span class="cov8" title="1">{
                 return nil
         }</span>
 
-        <span class="cov0" title="0">switch selectedItem.id </span>{
-        case "configure_url":<span class="cov0" title="0">
+        <span class="cov8" title="1">switch selectedItem.id </span>{
+        case syncMenuIDConfigureURL:<span class="cov8" title="1">
                 return m.handleSyncMenuConfigureURL()</span>
-        case "login_register":<span class="cov0" title="0">
+        case syncMenuIDLoginRegister:<span class="cov8" title="1">
                 return m.handleSyncMenuLoginRegister()</span>
-        case "sync_now":<span class="cov0" title="0">
+        case syncMenuIDSyncNow:<span class="cov8" title="1">
                 return m.handleSyncMenuSyncNow()</span>
-        case "view_versions":<span class="cov0" title="0">
+        case syncMenuIDViewVersions:<span class="cov8" title="1">
                 return m.handleSyncMenuViewVersions()</span>
-        case "logout":<span class="cov0" title="0">
+        case syncMenuIDLogout:<span class="cov8" title="1">
                 return m.handleSyncMenuLogout()</span>
         }
 

@@ -10,6 +10,15 @@ import (
 	"github.com/maynagashev/gophkeeper/client/internal/kdbx"
 )
 
+// --- Константы для ID пунктов меню синхронизации --- //.
+const (
+	syncMenuIDConfigureURL  = "configure_url"
+	syncMenuIDLoginRegister = "login_register"
+	syncMenuIDSyncNow       = "sync_now"
+	syncMenuIDViewVersions  = "view_versions"
+	syncMenuIDLogout        = "logout"
+)
+
 // --- Тип для элементов меню синхронизации --- //
 
 // syncMenuItem представляет элемент в меню синхронизации.
@@ -145,8 +154,11 @@ func (m *model) updateSyncServerScreen(msg tea.Msg) (*model, tea.Cmd) {
 			// Может потребоваться ClearScreen в зависимости от действия
 		case keyEsc, keyBack:
 			m.state = entryListScreen
-			// Возвращаем указатель на модель
-			return m, tea.ClearScreen // Очистка экрана добавлена
+			return m, tea.ClearScreen
+		// Добавляем отдельный case для Backspace
+		case "backspace":
+			m.state = entryListScreen
+			return m, tea.ClearScreen
 		}
 	}
 
@@ -162,15 +174,15 @@ func (m *model) handleSyncMenuAction() tea.Cmd {
 	}
 
 	switch selectedItem.id {
-	case "configure_url":
+	case syncMenuIDConfigureURL:
 		return m.handleSyncMenuConfigureURL()
-	case "login_register":
+	case syncMenuIDLoginRegister:
 		return m.handleSyncMenuLoginRegister()
-	case "sync_now":
+	case syncMenuIDSyncNow:
 		return m.handleSyncMenuSyncNow()
-	case "view_versions":
+	case syncMenuIDViewVersions:
 		return m.handleSyncMenuViewVersions()
-	case "logout":
+	case syncMenuIDLogout:
 		return m.handleSyncMenuLogout()
 	}
 
