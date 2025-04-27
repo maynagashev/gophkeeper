@@ -101,7 +101,7 @@
 				
 				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go (92.7%)</option>
 				
-				<option value="file23">github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go (87.0%)</option>
+				<option value="file23">github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go (96.3%)</option>
 				
 				<option value="file24">github.com/maynagashev/gophkeeper/client/internal/tui/screen_welcome.go (100.0%)</option>
 				
@@ -4330,12 +4330,10 @@ func handleVersionsLoadedMsg(m *model, msg versionsLoadedMsg) (tea.Model, tea.Cm
         <span class="cov8" title="1">listCmd := m.versionList.SetItems(items) // Не игнорируем команду
 
         // Оборачиваем сообщение ClearScreen в команду
-        clearCmd := func() tea.Msg </span><span class="cov0" title="0">{
-                return tea.ClearScreen()
-        }</span>
+        clearCmd := tea.ClearScreen
 
         // Добавляем ClearScreen для очистки артефактов
-        <span class="cov8" title="1">return m, tea.Batch(listCmd, clearCmd)</span>
+        return m, tea.Batch(listCmd, clearCmd)</span>
 }
 
 // handleVersionsLoadErrorMsg обрабатывает ошибку загрузки версий.
@@ -4356,7 +4354,7 @@ func handleVersionsLoadErrorMsg(m *model, msg versionsLoadErrorMsg) (tea.Model, 
 }
 
 // handleRollbackSuccessMsg обрабатывает успешный откат к версии.
-func handleRollbackSuccessMsg(m *model, msg rollbackSuccessMsg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+func handleRollbackSuccessMsg(m *model, msg rollbackSuccessMsg) (tea.Model, tea.Cmd) <span class="cov8" title="1">{
         // После успешного отката нужно принудительно скачать новую текущую версию
         statusText := fmt.Sprintf("Откат к версии #%d успешен. Загрузка...", msg.versionID)
         newM, statusCmd := m.setStatusMessage(statusText)
@@ -4366,15 +4364,15 @@ func handleRollbackSuccessMsg(m *model, msg rollbackSuccessMsg) (tea.Model, tea.
 }</span>
 
 // handleRollbackErrorMsg обрабатывает ошибку отката.
-func handleRollbackErrorMsg(m *model, msg rollbackErrorMsg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+func handleRollbackErrorMsg(m *model, msg rollbackErrorMsg) (tea.Model, tea.Cmd) <span class="cov8" title="1">{
         // Проверяем, является ли ошибка ошибкой авторизации
-        if errors.Is(msg.err, api.ErrAuthorization) </span><span class="cov0" title="0">{
+        if errors.Is(msg.err, api.ErrAuthorization) </span><span class="cov8" title="1">{
                 m.state = loginRegisterChoiceScreen // Переходим на экран выбора входа/регистрации
                 newM, statusCmd := m.setStatusMessage("Сессия истекла. Пожалуйста, войдите снова (L).")
                 return newM, tea.Batch(statusCmd, tea.ClearScreen)
         }</span>
         // Иначе устанавливаем ошибку для отображения на экране версий
-        <span class="cov0" title="0">m.rollbackError = msg.err
+        <span class="cov8" title="1">m.rollbackError = msg.err
         // Добавляем ClearScreen при показе ошибки
         return m, tea.ClearScreen</span>
 }

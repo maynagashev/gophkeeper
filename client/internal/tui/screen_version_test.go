@@ -741,3 +741,115 @@ func TestHandleVersionMessages(t *testing.T) {
 		// assert.NotContains(t, m.statusMessage, "(L)", "Status message should not suggest logging in for generic error")
 	})
 }
+
+// TestHandleRollbackSuccessMsg проверяет обработчик успешного отката.
+func TestHandleRollbackSuccessMsg(t *testing.T) {
+	s := NewScreenTestSuite()
+	m := s.Model
+	// Настраиваем мок API клиента
+	mockAPI := &CommandsTestMockAPIClient{}
+	mockAPI.On("DownloadVault", mock.Anything).Return(errors.New("mock download error")) // Ожидаем вызов
+	m.apiClient = mockAPI                                                                // Используем мок
+	m.kdbxPath = "/tmp/test.kdbx"                                                        // Нужен для downloadVaultCmd
+
+	rollbackVersionID := int64(99)
+	msg := rollbackSuccessMsg{versionID: rollbackVersionID}
+
+	_, cmd := handleRollbackSuccessMsg(m, msg)
+
+	// 1. Проверяем команду
+	require.NotNil(t, cmd, "Команда не должна быть nil")
+	cmdMsg := cmd() // Выполняем батч команду
+	batchCmds, ok := cmdMsg.(tea.BatchMsg)
+	require.True(t, ok, "Команда должна быть tea.BatchMsg")
+	// Ожидаем 3 команд: statusCmd, clearCmd, downloadVaultCmd
+	assert.Len(t, batchCmds, 3, "BatchMsg должен содержать 3 команды")
+
+	// 2. Косвенно проверяем наличие команд в батче
+	// Мы ожидаем: clearStatusMsg и две другие команды (clearCmd и downloadVaultCmd)
+	foundClearStatus := false
+	otherCmdCount := 0
+
+	for _, itemCmd := range batchCmds {
+		if itemCmd == nil {
+			continue
+		}
+		itemMsg := itemCmd() // Выполняем команду, чтобы проверить сообщение
+		if _, isClearStatus := itemMsg.(clearStatusMsg); isClearStatus {
+			foundClearStatus = true
+		} else {
+			// Считаем все остальные команды
+			otherCmdCount++
+		}
+	}
+
+	assert.True(t, foundClearStatus, "BatchMsg должен содержать команду статуса (clearStatusMsg)")
+	assert.Equal(t, 2, otherCmdCount, "BatchMsg должен содержать две другие команды (clearCmd и downloadVaultCmd)")
+
+	// Проверяем, что метод DownloadVault был вызван
+	mockAPI.AssertExpectations(t)
+}
+
+// TestHandleRollbackErrorMsg проверяет обработчик ошибки отката.
+func TestHandleRollbackErrorMsg(t *testing.T) {
+	t.Run("Authorization Error", func(t *testing.T) {
+		s := NewScreenTestSuite()
+		m := s.Model
+
+		authErr := fmt.Errorf("some wrapped error: %w", api.ErrAuthorization)
+		msg := rollbackErrorMsg{err: authErr}
+
+		model, cmd := handleRollbackErrorMsg(m, msg)
+		newM := toModel(t, model)
+
+		// Проверяем изменение состояния
+		assert.Equal(t, loginRegisterChoiceScreen, newM.state, "Состояние должно измениться на loginRegisterChoiceScreen")
+
+		// Проверяем команду
+		require.NotNil(t, cmd, "Команда не должна быть nil")
+		cmdMsg := cmd() // Выполняем батч команду
+		batchCmds, ok := cmdMsg.(tea.BatchMsg)
+		require.True(t, ok, "Команда должна быть tea.BatchMsg")
+		assert.Len(t, batchCmds, 2, "BatchMsg должен содержать 2 команды")
+
+		// Проверяем наличие clearStatusMsg и другой команды (предположительно clearCmd)
+		foundClearStatus := false
+		otherCmdCount := 0
+		for _, itemCmd := range batchCmds {
+			if itemCmd == nil {
+				continue
+			}
+			itemMsg := itemCmd()
+			if _, isClearStatus := itemMsg.(clearStatusMsg); isClearStatus {
+				foundClearStatus = true
+			} else {
+				otherCmdCount++
+			}
+		}
+		assert.True(t, foundClearStatus, "BatchMsg должен содержать команду статуса (clearStatusMsg)")
+		assert.Equal(t, 1, otherCmdCount, "BatchMsg должен содержать еще одну команду (clearCmd)")
+	})
+
+	t.Run("Generic Error", func(t *testing.T) {
+		s := NewScreenTestSuite()
+		m := s.Model
+		initialState := m.state // Сохраняем начальное состояние
+
+		genericErr := errors.New("some network error")
+		msg := rollbackErrorMsg{err: genericErr}
+
+		model, cmd := handleRollbackErrorMsg(m, msg)
+		newM := toModel(t, model)
+
+		// Проверяем, что состояние не изменилось
+		assert.Equal(t, initialState, newM.state, "Состояние не должно изменяться при обычной ошибке")
+		// Проверяем, что ошибка записана в модель
+		assert.Equal(t, genericErr, newM.rollbackError, "Ошибка должна быть записана в модель")
+
+		// Проверяем команду (должна быть команда, возвращающая clearScreenMsg)
+		require.NotNil(t, cmd, "Команда не должна быть nil")
+		cmdMsg := cmd() // Выполняем команду
+		assert.NotNil(t, cmdMsg, "Результат выполнения команды ClearScreen не должен быть nil")
+		// Точный тип проверить не можем, т.к. clearScreenMsg не экспортируется
+	})
+}

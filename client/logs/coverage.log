@@ -142,11 +142,11 @@ github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:122:			h
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:132:			handleVersionListKeys			100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:164:			viewVersionListScreen			100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:195:			updateVersionListScreen			76.9%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:229:			handleVersionsLoadedMsg			92.3%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:263:			handleVersionsLoadErrorMsg		100.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:280:			handleRollbackSuccessMsg		0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:290:			handleRollbackErrorMsg			0.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:304:			formatTime				66.7%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:229:			handleVersionsLoadedMsg			100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:261:			handleVersionsLoadErrorMsg		100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:278:			handleRollbackSuccessMsg		100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:288:			handleRollbackErrorMsg			100.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go:302:			formatTime				66.7%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_welcome.go:9:			updateWelcomeScreen			100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_welcome.go:25:			viewWelcomeScreen			100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/test_helpers.go:69:			NewSyncError				0.0%
@@ -193,4 +193,4 @@ github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:46:				deepCopyEn
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:51:				FindEntryInDB				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:60:				findEntryInDB				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:65:				FindEntryInGroups			100.0%
-total:												(statements)				77.5%
+total:												(statements)				78.0%
