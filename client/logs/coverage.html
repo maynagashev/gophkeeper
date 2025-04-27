@@ -97,7 +97,7 @@
 				
 				<option value="file20">github.com/maynagashev/gophkeeper/client/internal/tui/screen_server_url.go (100.0%)</option>
 				
-				<option value="file21">github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go (18.5%)</option>
+				<option value="file21">github.com/maynagashev/gophkeeper/client/internal/tui/screen_sync.go (38.3%)</option>
 				
 				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go (17.0%)</option>
 				
@@ -1086,25 +1086,25 @@ func startSyncCmd(m *model) tea.Cmd <span class="cov8" title="1">{
                 // 1. Проверка URL
                 if m.serverURL == "" </span><span class="cov8" title="1">{
                         err := errors.New("URL сервера не настроен")
-                        slog.Warn("Предусловие синхронизации не выполнено", "error", err)
+                        slog.Warn("Предусловие синхронизации не выполнено: URL", "error", err)
                         return SyncError{err: err}
                 }</span>
                 // 2. Проверка токена
                 <span class="cov8" title="1">if m.authToken == "" </span><span class="cov8" title="1">{
                         err := errors.New("необходимо войти на сервер")
-                        slog.Warn("Предусловие синхронизации не выполнено", "error", err)
+                        slog.Warn("Предусловие синхронизации не выполнено: Token", "error", err)
                         return SyncError{err: err}
                 }</span>
                 // 3. Проверка API клиента
                 <span class="cov8" title="1">if m.apiClient == nil </span><span class="cov8" title="1">{
                         err := errors.New("API клиент не инициализирован")
-                        slog.Error("Критическая ошибка: API клиент nil перед синхронизацией")
+                        slog.Error("Критическая ошибка: apiClient nil", "error", err)
                         return SyncError{err: err}
                 }</span>
                 // 4. Проверка базы данных
                 <span class="cov8" title="1">if m.db == nil </span><span class="cov8" title="1">{
                         err := errors.New("локальная база данных не загружена")
-                        slog.Error("Критическая ошибка: База данных nil перед синхронизацией")
+                        slog.Error("Критическая ошибка: m.db nil", "error", err)
                         return SyncError{err: err}
                 }</span>
 
@@ -3563,12 +3563,12 @@ func (m *model) handleSyncMenuConfigureURL() tea.Cmd <span class="cov8" title="1
 }
 
 // handleSyncMenuLoginRegister обрабатывает выбор пункта "Войти / Зарегистрироваться".
-func (m *model) handleSyncMenuLoginRegister() tea.Cmd <span class="cov0" title="0">{
-        if m.serverURL == "" </span><span class="cov0" title="0">{
+func (m *model) handleSyncMenuLoginRegister() tea.Cmd <span class="cov8" title="1">{
+        if m.serverURL == "" </span><span class="cov8" title="1">{
                 _, cmd := m.setStatusMessage("Сначала настройте URL сервера")
                 return cmd
         }</span>
-        <span class="cov0" title="0">m.loginUsernameInput.Focus()
+        <span class="cov8" title="1">m.loginUsernameInput.Focus()
         m.loginPasswordInput.Blur()
         m.loginRegisterFocusedField = 0
         m.state = loginRegisterChoiceScreen
@@ -3576,12 +3576,12 @@ func (m *model) handleSyncMenuLoginRegister() tea.Cmd <span class="cov0" title="
 }
 
 // handleSyncMenuSyncNow обрабатывает выбор пункта "Синхронизировать сейчас".
-func (m *model) handleSyncMenuSyncNow() tea.Cmd <span class="cov0" title="0">{
-        if m.authToken == "" </span><span class="cov0" title="0">{
+func (m *model) handleSyncMenuSyncNow() tea.Cmd <span class="cov8" title="1">{
+        if m.authToken == "" </span><span class="cov8" title="1">{
                 _, cmd := m.setStatusMessage("Необходимо войти перед синхронизацией")
                 return cmd
         }</span>
-        <span class="cov0" title="0">newM, statusCmd := m.setStatusMessage("Запуск синхронизации...")
+        <span class="cov8" title="1">newM, statusCmd := m.setStatusMessage("Запуск синхронизации...")
         mModel, ok := newM.(*model)
         if !ok </span><span class="cov0" title="0">{
                 slog.Error("Неожиданный тип модели после setStatusMessage")
@@ -3589,7 +3589,7 @@ func (m *model) handleSyncMenuSyncNow() tea.Cmd <span class="cov0" title="0">{
                         return errMsg{err: errors.New("внутренняя ошибка типа модели")}
                 }</span>)
         }
-        <span class="cov0" title="0">syncCmd := startSyncCmd(mModel)
+        <span class="cov8" title="1">syncCmd := startSyncCmd(mModel)
         return tea.Batch(statusCmd, syncCmd)</span>
 }
 

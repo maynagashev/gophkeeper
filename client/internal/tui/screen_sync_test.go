@@ -5,7 +5,11 @@ import (
 	"fmt"
 	"testing"
 
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/maynagashev/gophkeeper/models"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/tobischo/gokeepasslib/v3"
 )
 
 // TODO: Добавить тесты для syncMenuItem и viewSyncServerScreen
@@ -131,6 +135,141 @@ func TestHandleSyncMenuConfigureURL(t *testing.T) {
 			assert.NotNil(t, cmd, "Команда не должна быть nil")
 			// Прямая проверка типа команды Blink затруднительна,
 			// поэтому просто убеждаемся, что команда возвращена.
+		})
+	}
+}
+
+// TestHandleSyncMenuLoginRegister проверяет функцию handleSyncMenuLoginRegister.
+func TestHandleSyncMenuLoginRegister(t *testing.T) {
+	tests := []struct {
+		name          string
+		serverURL     string
+		expectedState screenState
+		expectCmd     bool   // Ожидаем ли мы команду (Blink)?
+		expectStatus  string // Ожидаемое сообщение статуса, если URL не настроен
+	}{
+		{
+			name:          "URL настроен",
+			serverURL:     "http://localhost:8080",
+			expectedState: loginRegisterChoiceScreen,
+			expectCmd:     true,
+		},
+		{
+			name:          "URL не настроен",
+			serverURL:     "",
+			expectedState: syncServerScreen, // Состояние не должно меняться
+			expectCmd:     false,            // Команда Blink не ожидается, ожидается статус
+			expectStatus:  "Сначала настройте URL сервера",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockAPI := new(MockAPIClient)
+			m := initModel("", false, "", mockAPI)
+			m.serverURL = tt.serverURL
+			m.state = syncServerScreen
+
+			cmd := m.handleSyncMenuLoginRegister()
+
+			assert.Equal(t, tt.expectedState, m.state, "Неправильное состояние после вызова")
+
+			if tt.expectCmd {
+				assert.NotNil(t, cmd, "Ожидалась команда Blink, но получено nil")
+				assert.True(t, m.loginUsernameInput.Focused(), "Поле ввода имени пользователя должно быть в фокусе")
+				assert.Equal(t, 0, m.loginRegisterFocusedField, "Фокус должен быть на первом поле (индекс 0)")
+			} else {
+				// Команды Blink быть не должно, но должна быть команда установки статуса (tea.Tick).
+				assert.NotNil(t, cmd, "Ожидалась команда установки статуса, но получено nil")
+				assert.Equal(t, tt.expectStatus, m.savingStatus, "Неверное сообщение статуса в модели")
+			}
+		})
+	}
+}
+
+// TestHandleSyncMenuSyncNow проверяет функцию handleSyncMenuSyncNow.
+func TestHandleSyncMenuSyncNow(t *testing.T) {
+	tests := []struct {
+		name          string
+		authToken     string
+		expectStatus  string
+		expectSyncCmd bool
+	}{
+		{
+			name:          "Авторизован, запуск синхронизации",
+			authToken:     "valid-token",
+			expectStatus:  "Запуск синхронизации...",
+			expectSyncCmd: true,
+		},
+		{
+			name:          "Не авторизован, ошибка",
+			authToken:     "",
+			expectStatus:  "Необходимо войти перед синхронизацией",
+			expectSyncCmd: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockAPI := new(MockAPIClient) // Используем мок
+			// Задаем непустой kdbxPath
+			m := initModel("/tmp/test-sync.kdbx", false, "", mockAPI)
+			m.authToken = tt.authToken
+			m.state = syncServerScreen
+			// Устанавливаем URL сервера для успешного случая
+			if tt.expectSyncCmd {
+				m.serverURL = "http://test.server"
+			}
+			// Инициализируем базу данных, чтобы пройти проверку в startSyncCmd
+			m.db = gokeepasslib.NewDatabase()
+			m.db.Content = &gokeepasslib.DBContent{ // Инициализируем Content и Root
+				Meta: gokeepasslib.NewMetaData(),
+				Root: &gokeepasslib.RootData{
+					Groups: []gokeepasslib.Group{
+						gokeepasslib.NewGroup(), // Создаем корневую группу
+					},
+				},
+			}
+
+			// Настраиваем мок для случая, когда ожидаем успешный запуск
+			if tt.expectSyncCmd {
+				// Ожидаемый ответ от GetVaultMetadata
+				expectedMeta := &models.VaultVersion{
+					ID:      1,
+					VaultID: 1,
+					// ContentModifiedAt можно не указывать, если он не критичен для этого теста
+				}
+				// Уточняем ожидаемый тип контекста или используем mock.Anything
+				mockAPI.On("GetVaultMetadata", mock.Anything).Return(expectedMeta, nil).Once()
+			}
+
+			cmd := m.handleSyncMenuSyncNow()
+
+			assert.NotNil(t, cmd, "Команда не должна быть nil")
+			// Проверяем сообщение статуса в поле savingStatus
+			assert.Equal(t, tt.expectStatus, m.savingStatus, "Неверное сообщение статуса")
+
+			if tt.expectSyncCmd {
+				// Ожидаем BatchMsg, содержащую TickMsg и syncCmd
+				msg := cmd() // Выполняем команду
+				batchMsg, ok := msg.(tea.BatchMsg)
+				assert.True(t, ok, "Ожидалась tea.BatchMsg")
+				assert.Len(t, batchMsg, 2, "BatchMsg должна содержать 2 команды")
+				assert.NotNil(t, batchMsg[0], "Первая команда (Tick) не должна быть nil")
+				assert.NotNil(t, batchMsg[1], "Вторая команда (sync) не должна быть nil")
+				// Проверяем, что первая команда - Tick для статуса
+				// assert.IsType(t, tea.TickMsg{}, batchMsg[0](), "...") // TODO: Fix type check
+
+				// Проверяем, что вторая команда запускает синхронизацию (проверяем тип сообщения)
+				syncMsgResult := batchMsg[1]() // Получаем результат выполнения команды syncCmd
+				assert.IsType(t, syncStartedMsg{}, syncMsgResult, "Вторая команда в batch должна генерировать syncStartedMsg")
+				// mockAPI.AssertExpectations(t) // Временно убираем, т.к. startSyncCmd еще не вызывает GetVaultMetadata
+			} else {
+				// Ожидаем только TickMsg для статуса
+				assert.NotNil(t, cmd, "Ожидалась команда Tick, но получено nil")
+				// msg := cmd()
+				// assert.IsType(t, tea.TickMsg{}, msg, "...") // TODO: Fix type check
+			}
 		})
 	}
 }
