@@ -58,7 +58,7 @@ github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:15:				prepa
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:60:				createEntryFromInputs				92.3%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:109:			updateEntryAddScreen				78.7%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:197:			updateFocus					100.0%
-github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:210:			viewEntryAddScreen				0.0%
+github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go:210:			viewEntryAddScreen				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_delete.go:11:		updateAttachmentListDeleteScreen		93.3%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_delete.go:71:		performAttachmentDelete				100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_delete.go:109:		viewAttachmentListDeleteScreen			100.0%
@@ -199,4 +199,4 @@ github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:46:				deepCopyEn
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:51:				FindEntryInDB					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:60:				findEntryInDB					100.0%
 github.com/maynagashev/gophkeeper/client/internal/tui/utils.go:65:				FindEntryInGroups				100.0%
-total:												(statements)					57.2%
+total:												(statements)					57.8%

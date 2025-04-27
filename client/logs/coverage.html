@@ -71,7 +71,7 @@
 				
 				<option value="file7">github.com/maynagashev/gophkeeper/client/internal/tui/model.go (100.0%)</option>
 				
-				<option value="file8">github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go (76.2%)</option>
+				<option value="file8">github.com/maynagashev/gophkeeper/client/internal/tui/screen_add.go (88.6%)</option>
 				
 				<option value="file9">github.com/maynagashev/gophkeeper/client/internal/tui/screen_attachment_delete.go (96.5%)</option>
 				
@@ -2155,30 +2155,30 @@ func (m *model) updateFocus() []tea.Cmd <span class="cov8" title="1">{
 }
 
 // viewEntryAddScreen отрисовывает экран добавления новой записи.
-func (m *model) viewEntryAddScreen() string <span class="cov0" title="0">{
+func (m *model) viewEntryAddScreen() string <span class="cov8" title="1">{
         s := "Добавление новой записи\n\n"
         s += "Введите данные для новой записи:\n"
         // Отображаем все поля ввода (включая поля карты)
-        for i, input := range m.editInputs </span><span class="cov0" title="0">{
+        for i, input := range m.editInputs </span><span class="cov8" title="1">{
                 focusIndicator := "  "
-                if m.focusedField == i </span><span class="cov0" title="0">{
+                if m.focusedField == i </span><span class="cov8" title="1">{
                         focusIndicator = "&gt; "
                 }</span>
-                <span class="cov0" title="0">s += fmt.Sprintf("%s%s: %s\n", focusIndicator, input.Placeholder, input.View())</span>
+                <span class="cov8" title="1">s += fmt.Sprintf("%s%s: %s\n", focusIndicator, input.Placeholder, input.View())</span>
         }
 
         // Отображаем добавляемые вложения
-        <span class="cov0" title="0">s += "\n--- Вложения для добавления ---\n"
-        if len(m.newEntryAttachments) == 0 </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">s += "\n--- Вложения для добавления ---\n"
+        if len(m.newEntryAttachments) == 0 </span><span class="cov8" title="1">{
                 s += "(Нет вложений)\n"
-        }</span> else<span class="cov0" title="0"> {
-                for i, att := range m.newEntryAttachments </span><span class="cov0" title="0">{
+        }</span> else<span class="cov8" title="1"> {
+                for i, att := range m.newEntryAttachments </span><span class="cov8" title="1">{
                         s += fmt.Sprintf(" [%d] %s (%d байт)\n", i, att.Name, len(att.Content))
                 }</span>
         }
 
         // s += "(Enter - добавить, Ctrl+C - выход)\n" // Убрали, т.к. добавляется в View
-        <span class="cov0" title="0">return s</span>
+        <span class="cov8" title="1">return s</span>
 }
 </pre>
 		

@@ -206,41 +206,54 @@ func TestUpdateEntryAddScreen(t *testing.T) {
 	assert.True(t, suite.Model.attachmentPathInput.Focused(), "Поле ввода пути должно быть в фокусе")
 }
 
-/* // Временно отключаем тест из-за сложностей с проверкой фокуса
-// TestViewEntryAddScreen проверяет отрисовку экрана добавления записи.
+// TestViewEntryAddScreen проверяет функцию viewEntryAddScreen.
 func TestViewEntryAddScreen(t *testing.T) {
-	suite := NewScreenTestSuite()
-	suite.WithState(entryAddScreen)
-	suite.Model.prepareAddScreen()
+	t.Run("Без вложений", func(t *testing.T) {
+		// Создаем модель и подготавливаем экран добавления
+		m := &model{
+			state: entryAddScreen,
+		}
+		m.prepareAddScreen() // Инициализирует editInputs и editingEntry
 
-	// Добавляем тестовое вложение
-	suite.Model.newEntryAttachments = []struct {
-		Name    string
-		Content []byte
-	}{
-		{Name: "attach1.txt", Content: []byte("data")},
-	}
+		// Получаем отрисованный вид
+		view := m.viewEntryAddScreen()
 
-	// Заполняем поле Title
-	suite.Model.editInputs[editableFieldTitle].SetValue("My Title")
-	// Симулируем нажатие Tab и сразу обрабатываем команду
-	_, cmd := suite.SimulateKeyPress(tea.KeyTab)
-	suite.CaptureOutput(t, cmd) // Передаем t и выполняем команду
+		// Проверяем основные элементы
+		assert.Contains(t, view, "Добавление новой записи", "Должен отображаться заголовок")
+		assert.Contains(t, view, "> Title: > Title", "Поле Title должно быть с фокусом")
+		assert.Contains(t, view, "  UserName: > UserName", "Поле UserName должно быть без фокуса")
 
-	// Рендерим вид
-	view := suite.Model.View()
+		// Проверяем отображение вложений
+		assert.Contains(t, view, "--- Вложения для добавления ---", "Должен быть раздел вложений")
+		assert.Contains(t, view, "(Нет вложений)", "Должно отображаться сообщение об отсутствии вложений")
+	})
 
-	// Проверяем наличие заголовка
-	assert.Contains(t, view, "Добавление новой записи")
+	t.Run("С вложениями", func(t *testing.T) {
+		// Создаем модель и подготавливаем экран добавления
+		m := &model{
+			state: entryAddScreen,
+		}
+		m.prepareAddScreen()
+		// Устанавливаем вложения ПОСЛЕ вызова prepareAddScreen
+		m.newEntryAttachments = []struct {
+			Name    string
+			Content []byte
+		}{
+			{Name: "doc.txt", Content: []byte("тест")},
+			{Name: "image.jpg", Content: make([]byte, 1024)},
+		}
 
-	// Проверяем отображение полей ввода
-	assert.Contains(t, view, "  Title: My Title") // Без фокуса
-	assert.Contains(t, view, "> UserName:")      // С фокусом
-	assert.Contains(t, view, "  Password:")
-	// ... можно добавить проверки для всех полей
+		// Получаем отрисованный вид
+		view := m.viewEntryAddScreen()
 
-	// Проверяем отображение вложений
-	assert.Contains(t, view, "--- Вложения для добавления ---")
-	assert.Contains(t, view, "[0] attach1.txt (4 байт)")
+		// Проверяем основные элементы
+		assert.Contains(t, view, "Добавление новой записи", "Должен отображаться заголовок")
+		assert.Contains(t, view, "> Title: > Title", "Поле Title должно быть с фокусом")
+
+		// Проверяем отображение вложений
+		assert.Contains(t, view, "--- Вложения для добавления ---", "Должен быть раздел вложений")
+		assert.Contains(t, view, "[0] doc.txt (8 байт)", "Должно отображаться первое вложение с размером (кириллица)")
+		assert.Contains(t, view, "[1] image.jpg (1024 байт)", "Должно отображаться второе вложение с размером")
+		assert.NotContains(t, view, "(Нет вложений)", "Не должно быть сообщения об отсутствии вложений")
+	})
 }
-*/
