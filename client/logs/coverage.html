@@ -101,7 +101,7 @@
 				
 				<option value="file22">github.com/maynagashev/gophkeeper/client/internal/tui/screen_test_helpers.go (92.7%)</option>
 				
-				<option value="file23">github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go (62.3%)</option>
+				<option value="file23">github.com/maynagashev/gophkeeper/client/internal/tui/screen_version.go (71.7%)</option>
 				
 				<option value="file24">github.com/maynagashev/gophkeeper/client/internal/tui/screen_welcome.go (100.0%)</option>
 				
@@ -4271,28 +4271,28 @@ func (m *model) viewVersionListScreen() string <span class="cov8" title="1">{
 }
 
 // updateVersionListScreen обрабатывает сообщения для экрана списка версий.
-func (m *model) updateVersionListScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov0" title="0">{
+func (m *model) updateVersionListScreen(msg tea.Msg) (tea.Model, tea.Cmd) <span class="cov8" title="1">{
         var cmd tea.Cmd
         var cmds []tea.Cmd
 
         // Обработка сообщений клавиатуры
-        if keyMsg, ok := msg.(tea.KeyMsg); ok </span><span class="cov0" title="0">{
+        if keyMsg, ok := msg.(tea.KeyMsg); ok </span><span class="cov8" title="1">{
                 // Если показывается экран подтверждения
-                if m.confirmRollback </span><span class="cov0" title="0">{
+                if m.confirmRollback </span><span class="cov8" title="1">{
                         // Передаем контекст в обработчик подтверждения
                         // Используем Background(), т.к. Update не имеет контекста
                         return m.handleVersionRollbackConfirm(context.Background(), keyMsg)
                 }</span>
 
                 // Если показывается ошибка отката
-                <span class="cov0" title="0">if m.rollbackError != nil </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">if m.rollbackError != nil </span><span class="cov8" title="1">{
                         return m.handleVersionRollbackError(keyMsg)
                 }</span>
 
                 // Стандартная обработка клавиш для списка версий
-                <span class="cov0" title="0">model, keyCmd := m.handleVersionListKeys(keyMsg)
+                <span class="cov8" title="1">model, keyCmd := m.handleVersionListKeys(keyMsg)
                 // Если клавиша была обработана в handleVersionListKeys, она вернет команду
-                if keyCmd != nil </span><span class="cov0" title="0">{
+                if keyCmd != nil </span><span class="cov8" title="1">{
                         return model, keyCmd
                 }</span>
                 // Если клавиша не была обработана выше, передаем ее списку
