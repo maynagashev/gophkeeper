@@ -81,7 +81,7 @@
 				
 				<option value="file12">github.com/maynagashev/gophkeeper/client/internal/tui/screen_detail.go (61.8%)</option>
 				
-				<option value="file13">github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go (68.1%)</option>
+				<option value="file13">github.com/maynagashev/gophkeeper/client/internal/tui/screen_edit.go (66.4%)</option>
 				
 				<option value="file14">github.com/maynagashev/gophkeeper/client/internal/tui/screen_list.go (72.4%)</option>
 				
@@ -111,7 +111,7 @@
 				
 				<option value="file27">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (46.2%)</option>
 				
-				<option value="file28">github.com/maynagashev/gophkeeper/client/internal/tui/utils.go (100.0%)</option>
+				<option value="file28">github.com/maynagashev/gophkeeper/client/internal/tui/utils.go (92.9%)</option>
 				
 				</select>
 			</div>
@@ -2808,19 +2808,19 @@ func (m *model) handleEditScreenKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) <span 
 }
 
 // handleAttachmentDeleteAction обрабатывает действие удаления вложения.
-func (m *model) handleAttachmentDeleteAction() (tea.Model, tea.Cmd) <span class="cov0" title="0">{
-        if m.editingEntry != nil &amp;&amp; len(m.editingEntry.Binaries) &gt; 0 </span><span class="cov0" title="0">{
+func (m *model) handleAttachmentDeleteAction() (tea.Model, tea.Cmd) <span class="cov8" title="1">{
+        if m.editingEntry != nil &amp;&amp; len(m.editingEntry.Binaries) &gt; 0 </span><span class="cov8" title="1">{
                 slog.Info("Переход к экрану удаления вложения")
                 items := make([]list.Item, len(m.editingEntry.Binaries))
-                for i, binRef := range m.editingEntry.Binaries </span><span class="cov0" title="0">{
+                for i, binRef := range m.editingEntry.Binaries </span><span class="cov8" title="1">{
                         items[i] = attachmentItem{name: binRef.Name, id: binRef.Value.ID}
                 }</span>
-                <span class="cov0" title="0">m.attachmentList.SetItems(items)
+                <span class="cov8" title="1">m.attachmentList.SetItems(items)
                 m.attachmentList.SetSize(defaultListWidth, defaultListHeight/attachmentListHeightDivisor)
                 m.state = attachmentListDeleteScreen
                 return m, tea.ClearScreen</span>
         }
-        <span class="cov0" title="0">slog.Info("Нет вложений для удаления")
+        <span class="cov8" title="1">slog.Info("Нет вложений для удаления")
         return m, nil</span>
 }
 
@@ -2860,30 +2860,30 @@ func (m *model) saveEntryChanges() (tea.Model, tea.Cmd) <span class="cov8" title
 }
 
 // viewEntryEditScreen отрисовывает экран редактирования записи.
-func (m *model) viewEntryEditScreen() string <span class="cov8" title="1">{
+func (m *model) viewEntryEditScreen() string <span class="cov0" title="0">{
         var s strings.Builder
         s.WriteString("Редактирование записи: " + m.editingEntry.GetTitle() + "\n\n")
         // Отображаем все поля ввода (включая поля карты)
-        for i, input := range m.editInputs </span><span class="cov8" title="1">{
+        for i, input := range m.editInputs </span><span class="cov0" title="0">{
                 focusIndicator := "  "
-                if m.focusedField == i </span><span class="cov8" title="1">{
+                if m.focusedField == i </span><span class="cov0" title="0">{
                         focusIndicator = "&gt; "
                 }</span>
-                <span class="cov8" title="1">s.WriteString(fmt.Sprintf("%s%s: %s\n", focusIndicator, input.Placeholder, input.View()))</span>
+                <span class="cov0" title="0">s.WriteString(fmt.Sprintf("%s%s: %s\n", focusIndicator, input.Placeholder, input.View()))</span>
         }
 
         // Отображаем вложения
-        <span class="cov8" title="1">s.WriteString("\n--- Вложения ---\n")
-        if len(m.editingEntry.Binaries) == 0 </span><span class="cov8" title="1">{
+        <span class="cov0" title="0">s.WriteString("\n--- Вложения ---\n")
+        if len(m.editingEntry.Binaries) == 0 </span><span class="cov0" title="0">{
                 s.WriteString("(Нет вложений)\n")
-        }</span> else<span class="cov8" title="1"> {
-                for i, binaryRef := range m.editingEntry.Binaries </span><span class="cov8" title="1">{
+        }</span> else<span class="cov0" title="0"> {
+                for i, binaryRef := range m.editingEntry.Binaries </span><span class="cov0" title="0">{
                         // TODO: Добавить индикатор выбора для удаления?
                         s.WriteString(fmt.Sprintf(" [%d] %s\n", i, binaryRef.Name))
                 }</span>
         }
 
-        <span class="cov8" title="1">return s.String()</span>
+        <span class="cov0" title="0">return s.String()</span>
 }
 </pre>
 		
@@ -5576,7 +5576,7 @@ func DeepCopyEntry(original gokeepasslib.Entry) gokeepasslib.Entry <span class="
         // Копируем срез ссылок на бинарные данные (BinaryReference)
         // Сами структуры BinaryReference содержат простые типы (Name, Value.ID),
         // поэтому достаточно поверхностного копирования среза.
-        <span class="cov8" title="1">if original.Binaries != nil </span><span class="cov8" title="1">{
+        <span class="cov8" title="1">if original.Binaries != nil </span><span class="cov0" title="0">{
                 newEntry.Binaries = make([]gokeepasslib.BinaryReference, len(original.Binaries))
                 copy(newEntry.Binaries, original.Binaries)
         }</span>

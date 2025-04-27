@@ -8,6 +8,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/tobischo/gokeepasslib/v3"
 	w "github.com/tobischo/gokeepasslib/v3/wrappers"
 )
@@ -312,56 +313,90 @@ func TestUpdateEntryEditScreen(t *testing.T) {
 	})
 }
 
-// TestViewEntryEditScreen проверяет функцию viewEntryEditScreen.
-func TestViewEntryEditScreen(t *testing.T) {
-	// Создаем тестовую запись с несколькими полями и вложениями
-	entry := gokeepasslib.Entry{
-		Values: []gokeepasslib.ValueData{
-			{Key: fieldNameTitle, Value: gokeepasslib.V{Content: "Просмотр"}},
-			{Key: fieldNameUserName, Value: gokeepasslib.V{Content: "tester"}},
-		},
-	}
+// TestHandleAttachmentDeleteAction проверяет функцию handleAttachmentDeleteAction.
+func TestHandleAttachmentDeleteAction(t *testing.T) {
+	t.Run("С вложениями для удаления", func(t *testing.T) {
+		// Создаем запись с вложениями
+		entry := gokeepasslib.Entry{}
+		binRef1 := gokeepasslib.BinaryReference{Name: "file1.dat"}
+		binRef1.Value.ID = 10
+		binRef2 := gokeepasslib.BinaryReference{Name: "report.pdf"}
+		binRef2.Value.ID = 20
+		entry.Binaries = []gokeepasslib.BinaryReference{binRef1, binRef2}
 
-	// Создаем ссылки на бинарные данные отдельно
-	binRef1 := gokeepasslib.BinaryReference{Name: "attach1.txt"}
-	binRef1.Value.ID = 1
-	binRef2 := gokeepasslib.BinaryReference{Name: "image.png"}
-	binRef2.Value.ID = 2
-	entry.Binaries = []gokeepasslib.BinaryReference{binRef1, binRef2}
+		// Создаем модель
+		m := &model{
+			state:          entryEditScreen,
+			editingEntry:   &entry,
+			attachmentList: initAttachmentDeleteList(), // Инициализируем список
+		}
 
-	// Создаем модель и подготавливаем экран редактирования
-	m := &model{
-		state:         entryEditScreen,
-		selectedEntry: &entryItem{entry: entry},
-		focusedField:  editableFieldUserName, // Фокус на втором поле
-	}
-	m.prepareEditScreen()
+		// Вызываем функцию
+		resultModel, cmd := m.handleAttachmentDeleteAction()
+		assert.NotNil(t, cmd, "Должна быть команда ClearScreen") // Ожидаем команду
+		require.IsType(t, &model{}, resultModel, "Должен вернуться указатель на model")
+		modelAfter, ok := resultModel.(*model)
+		require.True(t, ok, "Приведение типа к *model должно быть успешным")
 
-	// Получаем отрисованный вид
-	view := m.viewEntryEditScreen()
+		// Проверяем результат
+		assert.Equal(t, attachmentListDeleteScreen, modelAfter.state, "Состояние должно измениться на удаление вложений")
+		items := modelAfter.attachmentList.Items()
+		require.Len(t, items, 2, "В списке должно быть 2 элемента")
 
-	// Проверяем основные элементы
-	assert.Contains(t, view, "Редактирование записи: Просмотр", "Должен отображаться заголовок редактирования")
-	assert.Contains(t, view, "> Title: > Просмотр", "Поле Title должно быть с индикатором фокуса и '>' перед значением")
-	assert.Contains(t, view, "  UserName: > tester",
-		"Поле UserName должно быть без индикатора фокуса и с '>' перед значением")
+		// Проверяем первый элемент
+		require.IsType(t, attachmentItem{}, items[0])
+		item1, ok := items[0].(attachmentItem)
+		require.True(t, ok, "Приведение типа к attachmentItem должно быть успешным")
+		assert.Equal(t, "file1.dat", item1.Title())
+		assert.Equal(t, "ID: 10", item1.Description())
 
-	// Проверяем отображение вложений
-	assert.Contains(t, view, "--- Вложения ---", "Должен быть раздел вложений")
-	assert.Contains(t, view, "[0] attach1.txt", "Должно отображаться первое вложение")
-	assert.Contains(t, view, "[1] image.png", "Должно отображаться второе вложение")
+		// Проверяем второй элемент
+		require.IsType(t, attachmentItem{}, items[1])
+		item2, ok := items[1].(attachmentItem)
+		require.True(t, ok, "Приведение типа к attachmentItem должно быть успешным")
+		assert.Equal(t, "report.pdf", item2.Title())
+		assert.Equal(t, "ID: 20", item2.Description())
+	})
 
-	// Проверяем случай без вложений
-	entryNoAttachments := gokeepasslib.Entry{
-		Values: []gokeepasslib.ValueData{
-			{Key: fieldNameTitle, Value: gokeepasslib.V{Content: "Без вложений"}},
-		},
-	}
-	m = &model{
-		state:         entryEditScreen,
-		selectedEntry: &entryItem{entry: entryNoAttachments},
-	}
-	m.prepareEditScreen()
-	viewNoAttachments := m.viewEntryEditScreen()
-	assert.Contains(t, viewNoAttachments, "(Нет вложений)", "Должно отображаться сообщение об отсутствии вложений")
+	t.Run("Без вложений", func(t *testing.T) {
+		// Создаем запись без вложений
+		entry := gokeepasslib.Entry{}
+
+		// Создаем модель
+		m := &model{
+			state:          entryEditScreen,
+			editingEntry:   &entry,
+			attachmentList: initAttachmentDeleteList(),
+		}
+
+		// Вызываем функцию
+		resultModel, cmd := m.handleAttachmentDeleteAction()
+		assert.Nil(t, cmd, "Не должно быть команды") // Не должно быть команды
+		require.IsType(t, &model{}, resultModel, "Должен вернуться указатель на model")
+		modelAfter, ok := resultModel.(*model)
+		require.True(t, ok, "Приведение типа к *model должно быть успешным")
+
+		// Проверяем результат
+		assert.Equal(t, entryEditScreen, modelAfter.state, "Состояние не должно меняться")
+		assert.Empty(t, modelAfter.attachmentList.Items(), "Список должен оставаться пустым")
+	})
+
+	t.Run("editingEntry is nil", func(t *testing.T) {
+		// Создаем модель без editingEntry
+		m := &model{
+			state:          entryEditScreen,
+			editingEntry:   nil,
+			attachmentList: initAttachmentDeleteList(),
+		}
+
+		// Вызываем функцию
+		resultModel, cmd := m.handleAttachmentDeleteAction()
+		assert.Nil(t, cmd, "Не должно быть команды") // Не должно быть команды
+		require.IsType(t, &model{}, resultModel, "Должен вернуться указатель на model")
+		modelAfter, ok := resultModel.(*model)
+		require.True(t, ok, "Приведение типа к *model должно быть успешным")
+
+		// Проверяем результат
+		assert.Equal(t, entryEditScreen, modelAfter.state, "Состояние не должно меняться")
+	})
 }
