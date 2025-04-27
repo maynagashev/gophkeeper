@@ -16,6 +16,7 @@ import (
 	"github.com/maynagashev/gophkeeper/server/internal/mocks"
 	"github.com/maynagashev/gophkeeper/server/internal/repository"
 	"github.com/maynagashev/gophkeeper/server/internal/services"
+	"github.com/maynagashev/gophkeeper/server/internal/storage"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -589,6 +590,487 @@ func TestVaultService_UploadVault(t *testing.T) {
 			if !tt.expectedConflict && (tt.expectedErr == nil || !strings.Contains(tt.expectedErr.Error(), "загрузке файла")) {
 				require.NoError(mockSQL.ExpectationsWereMet(), "Ожидания sqlmock не выполнены")
 			}
+		})
+	}
+}
+
+// TestVaultService_DownloadVault проверяет функциональность скачивания текущей версии хранилища.
+func TestVaultService_DownloadVault(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	testUserID := int64(1)
+	testVaultID := int64(101)
+	testVersionID := int64(201)
+	testObjectKey := "test/file.kdbx"
+	testContent := "test file content"
+
+	tests := []struct {
+		name      string
+		mockSetup func(
+			*mocks.VaultRepository,
+			*mocks.VaultVersionRepository,
+			*mocks.FileStorage,
+		)
+		expectedData   string
+		expectedErr    error
+		checkErrorIs   bool
+		expectedMeta   *models.VaultVersion
+		shouldReadData bool
+	}{
+		{
+			name: "Успешное скачивание хранилища",
+			mockSetup: func(
+				mockVaultRepo *mocks.VaultRepository,
+				_ *mocks.VaultVersionRepository,
+				mockFileStorage *mocks.FileStorage,
+			) {
+				// Создаем версию
+				version := &models.VaultVersion{
+					ID:        testVersionID,
+					VaultID:   testVaultID,
+					ObjectKey: testObjectKey,
+				}
+
+				// Настраиваем мок репозитория
+				mockVaultRepo.EXPECT().
+					GetVaultWithCurrentVersionByUserID(mock.Anything, testUserID).
+					Return(&models.Vault{ID: testVaultID, UserID: testUserID}, version, nil).Once()
+
+				// Настраиваем мок хранилища файлов
+				mockFileStorage.EXPECT().
+					DownloadFile(mock.Anything, testObjectKey).
+					Return(io.NopCloser(strings.NewReader(testContent)), nil).Once()
+			},
+			expectedData: testContent,
+			expectedErr:  nil,
+			expectedMeta: &models.VaultVersion{
+				ID:        testVersionID,
+				VaultID:   testVaultID,
+				ObjectKey: testObjectKey,
+			},
+			shouldReadData: true,
+		},
+		{
+			name: "Хранилище не найдено",
+			mockSetup: func(
+				mockVaultRepo *mocks.VaultRepository,
+				_ *mocks.VaultVersionRepository,
+				_ *mocks.FileStorage,
+			) {
+				mockVaultRepo.EXPECT().
+					GetVaultWithCurrentVersionByUserID(mock.Anything, testUserID).
+					Return(nil, nil, repository.ErrVaultNotFound).Once()
+			},
+			expectedData: "",
+			expectedErr:  services.ErrVaultNotFound,
+			checkErrorIs: true,
+		},
+		{
+			name: "Ошибка репозитория",
+			mockSetup: func(
+				mockVaultRepo *mocks.VaultRepository,
+				_ *mocks.VaultVersionRepository,
+				_ *mocks.FileStorage,
+			) {
+				mockVaultRepo.EXPECT().
+					GetVaultWithCurrentVersionByUserID(mock.Anything, testUserID).
+					Return(nil, nil, errors.New("db error")).Once()
+			},
+			expectedData: "",
+			expectedErr:  errors.New("внутренняя ошибка сервера при получении метаданных"),
+		},
+		{
+			name: "Нет активной версии",
+			mockSetup: func(
+				mockVaultRepo *mocks.VaultRepository,
+				_ *mocks.VaultVersionRepository,
+				_ *mocks.FileStorage,
+			) {
+				mockVaultRepo.EXPECT().
+					GetVaultWithCurrentVersionByUserID(mock.Anything, testUserID).
+					Return(&models.Vault{ID: testVaultID, UserID: testUserID}, nil, nil).Once()
+			},
+			expectedData: "",
+			expectedErr:  services.ErrVaultNotFound,
+			checkErrorIs: true,
+		},
+		{
+			name: "Объект не найден в хранилище",
+			mockSetup: func(
+				mockVaultRepo *mocks.VaultRepository,
+				_ *mocks.VaultVersionRepository,
+				mockFileStorage *mocks.FileStorage,
+			) {
+				version := &models.VaultVersion{
+					ID:        testVersionID,
+					VaultID:   testVaultID,
+					ObjectKey: testObjectKey,
+				}
+
+				mockVaultRepo.EXPECT().
+					GetVaultWithCurrentVersionByUserID(mock.Anything, testUserID).
+					Return(&models.Vault{ID: testVaultID, UserID: testUserID}, version, nil).Once()
+
+				mockFileStorage.EXPECT().
+					DownloadFile(mock.Anything, testObjectKey).
+					Return(nil, storage.ErrObjectNotFound).Once()
+			},
+			expectedData: "",
+			expectedErr:  services.ErrVaultNotFound,
+			checkErrorIs: true,
+		},
+		{
+			name: "Ошибка скачивания файла",
+			mockSetup: func(
+				mockVaultRepo *mocks.VaultRepository,
+				_ *mocks.VaultVersionRepository,
+				mockFileStorage *mocks.FileStorage,
+			) {
+				version := &models.VaultVersion{
+					ID:        testVersionID,
+					VaultID:   testVaultID,
+					ObjectKey: testObjectKey,
+				}
+
+				mockVaultRepo.EXPECT().
+					GetVaultWithCurrentVersionByUserID(mock.Anything, testUserID).
+					Return(&models.Vault{ID: testVaultID, UserID: testUserID}, version, nil).Once()
+
+				mockFileStorage.EXPECT().
+					DownloadFile(mock.Anything, testObjectKey).
+					Return(nil, errors.New("storage error")).Once()
+			},
+			expectedData: "",
+			expectedErr:  errors.New("внутренняя ошибка сервера при скачивании файла"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Настраиваем сервис с моками
+			service, mockVaultRepo, mockVersionRepo, mockFileStorage, _ := setupVaultServiceWithMocks()
+			tt.mockSetup(mockVaultRepo, mockVersionRepo, mockFileStorage)
+
+			// Вызываем тестируемый метод
+			reader, metadata, err := service.DownloadVault(testUserID)
+
+			// Проверяем результат
+			if tt.expectedErr != nil {
+				require.Error(err)
+				if tt.checkErrorIs {
+					require.ErrorIs(err, tt.expectedErr)
+				} else {
+					assert.Contains(err.Error(), tt.expectedErr.Error())
+				}
+				assert.Nil(reader)
+				assert.Nil(metadata)
+			} else {
+				require.NoError(err)
+				require.NotNil(reader)
+				require.NotNil(metadata)
+
+				// Сравниваем метаданные
+				assert.Equal(tt.expectedMeta.ID, metadata.ID)
+				assert.Equal(tt.expectedMeta.VaultID, metadata.VaultID)
+				assert.Equal(tt.expectedMeta.ObjectKey, metadata.ObjectKey)
+
+				// Читаем данные из reader, если нужно
+				if tt.shouldReadData {
+					data, readErr := io.ReadAll(reader)
+					require.NoError(readErr)
+					assert.Equal(tt.expectedData, string(data))
+				}
+			}
+
+			// Проверяем, что все ожидания моков были выполнены
+			mockVaultRepo.AssertExpectations(t)
+			mockVersionRepo.AssertExpectations(t)
+			mockFileStorage.AssertExpectations(t)
+		})
+	}
+}
+
+// TestVaultService_ListVersions проверяет функциональность получения списка версий хранилища.
+func TestVaultService_ListVersions(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	testUserID := int64(1)
+	testVaultID := int64(101)
+	testLimit := 10
+	testOffset := 0
+
+	testVersions := []models.VaultVersion{
+		{ID: 201, VaultID: testVaultID, CreatedAt: time.Now().Add(-time.Hour * 2)},
+		{ID: 202, VaultID: testVaultID, CreatedAt: time.Now().Add(-time.Hour)},
+		{ID: 203, VaultID: testVaultID, CreatedAt: time.Now()},
+	}
+
+	tests := []struct {
+		name             string
+		mockSetup        func(*mocks.VaultRepository, *mocks.VaultVersionRepository)
+		expectedErr      error
+		checkErrorIs     bool
+		expectedVersions []models.VaultVersion
+	}{
+		{
+			name: "Успешное получение списка версий",
+			mockSetup: func(
+				mockVaultRepo *mocks.VaultRepository,
+				mockVersionRepo *mocks.VaultVersionRepository,
+			) {
+				// Настраиваем мок репозитория хранилища
+				mockVaultRepo.EXPECT().
+					GetVaultByUserID(mock.Anything, testUserID).
+					Return(&models.Vault{ID: testVaultID, UserID: testUserID}, nil).Once()
+
+				// Настраиваем мок репозитория версий
+				mockVersionRepo.EXPECT().
+					ListVersionsByVaultID(mock.Anything, testVaultID, testLimit, testOffset).
+					Return(testVersions, nil).Once()
+			},
+			expectedErr:      nil,
+			expectedVersions: testVersions,
+		},
+		{
+			name: "Хранилище не найдено",
+			mockSetup: func(
+				mockVaultRepo *mocks.VaultRepository,
+				_ *mocks.VaultVersionRepository,
+			) {
+				mockVaultRepo.EXPECT().
+					GetVaultByUserID(mock.Anything, testUserID).
+					Return(nil, repository.ErrVaultNotFound).Once()
+			},
+			expectedErr:      nil, // Сервис возвращает пустой слайс, а не ошибку
+			expectedVersions: []models.VaultVersion{},
+		},
+		{
+			name: "Ошибка репозитория при поиске хранилища",
+			mockSetup: func(
+				mockVaultRepo *mocks.VaultRepository,
+				_ *mocks.VaultVersionRepository,
+			) {
+				mockVaultRepo.EXPECT().
+					GetVaultByUserID(mock.Anything, testUserID).
+					Return(nil, errors.New("db error")).Once()
+			},
+			expectedErr: errors.New("внутренняя ошибка сервера"),
+		},
+		{
+			name: "Ошибка репозитория при получении списка версий",
+			mockSetup: func(
+				mockVaultRepo *mocks.VaultRepository,
+				mockVersionRepo *mocks.VaultVersionRepository,
+			) {
+				mockVaultRepo.EXPECT().
+					GetVaultByUserID(mock.Anything, testUserID).
+					Return(&models.Vault{ID: testVaultID, UserID: testUserID}, nil).Once()
+
+				mockVersionRepo.EXPECT().
+					ListVersionsByVaultID(mock.Anything, testVaultID, testLimit, testOffset).
+					Return(nil, errors.New("db error")).Once()
+			},
+			expectedErr: errors.New("внутренняя ошибка сервера"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Настраиваем сервис с моками
+			service, mockVaultRepo, mockVersionRepo, _, _ := setupVaultServiceWithMocks()
+			tt.mockSetup(mockVaultRepo, mockVersionRepo)
+
+			// Вызываем тестируемый метод
+			versions, err := service.ListVersions(testUserID, testLimit, testOffset)
+
+			// Проверяем результат
+			if tt.expectedErr != nil {
+				require.Error(err)
+				if tt.checkErrorIs {
+					require.ErrorIs(err, tt.expectedErr)
+				} else {
+					assert.Contains(err.Error(), tt.expectedErr.Error())
+				}
+				assert.Nil(versions)
+			} else {
+				require.NoError(err)
+				require.NotNil(versions)
+				assert.Equal(len(tt.expectedVersions), len(versions))
+
+				for i, v := range tt.expectedVersions {
+					assert.Equal(v.ID, versions[i].ID)
+					assert.Equal(v.VaultID, versions[i].VaultID)
+				}
+			}
+
+			// Проверяем, что все ожидания моков были выполнены
+			mockVaultRepo.AssertExpectations(t)
+			mockVersionRepo.AssertExpectations(t)
+		})
+	}
+}
+
+// TestVaultService_RollbackToVersion проверяет функциональность отката к указанной версии хранилища.
+func TestVaultService_RollbackToVersion(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	testUserID := int64(1)
+	testVaultID := int64(101)
+	testVersionID := int64(201)
+
+	tests := []struct {
+		name         string
+		mockSetup    func(*mocks.VaultRepository, *mocks.VaultVersionRepository)
+		expectedErr  error
+		checkErrorIs bool
+	}{
+		{
+			name: "Успешный откат к версии",
+			mockSetup: func(
+				mockVaultRepo *mocks.VaultRepository,
+				mockVersionRepo *mocks.VaultVersionRepository,
+			) {
+				// Настраиваем мок репозитория хранилища
+				mockVaultRepo.EXPECT().
+					GetVaultByUserID(mock.Anything, testUserID).
+					Return(&models.Vault{ID: testVaultID, UserID: testUserID}, nil).Once()
+
+				// Настраиваем мок репозитория версий
+				mockVersionRepo.EXPECT().
+					GetVersionByID(mock.Anything, testVersionID).
+					Return(&models.VaultVersion{ID: testVersionID, VaultID: testVaultID}, nil).Once()
+
+				// Ожидаем обновление текущей версии
+				mockVaultRepo.EXPECT().
+					UpdateVaultCurrentVersion(mock.Anything, testVaultID, testVersionID).
+					Return(nil).Once()
+			},
+			expectedErr: nil,
+		},
+		{
+			name: "Хранилище не найдено",
+			mockSetup: func(
+				mockVaultRepo *mocks.VaultRepository,
+				_ *mocks.VaultVersionRepository,
+			) {
+				mockVaultRepo.EXPECT().
+					GetVaultByUserID(mock.Anything, testUserID).
+					Return(nil, repository.ErrVaultNotFound).Once()
+			},
+			expectedErr:  services.ErrVaultNotFound,
+			checkErrorIs: true,
+		},
+		{
+			name: "Ошибка репозитория при поиске хранилища",
+			mockSetup: func(
+				mockVaultRepo *mocks.VaultRepository,
+				_ *mocks.VaultVersionRepository,
+			) {
+				mockVaultRepo.EXPECT().
+					GetVaultByUserID(mock.Anything, testUserID).
+					Return(nil, errors.New("db error")).Once()
+			},
+			expectedErr: errors.New("внутренняя ошибка сервера"),
+		},
+		{
+			name: "Версия не найдена",
+			mockSetup: func(
+				mockVaultRepo *mocks.VaultRepository,
+				mockVersionRepo *mocks.VaultVersionRepository,
+			) {
+				mockVaultRepo.EXPECT().
+					GetVaultByUserID(mock.Anything, testUserID).
+					Return(&models.Vault{ID: testVaultID, UserID: testUserID}, nil).Once()
+
+				mockVersionRepo.EXPECT().
+					GetVersionByID(mock.Anything, testVersionID).
+					Return(nil, repository.ErrVersionNotFound).Once()
+			},
+			expectedErr:  services.ErrVersionNotFound,
+			checkErrorIs: true,
+		},
+		{
+			name: "Ошибка репозитория при получении версии",
+			mockSetup: func(
+				mockVaultRepo *mocks.VaultRepository,
+				mockVersionRepo *mocks.VaultVersionRepository,
+			) {
+				mockVaultRepo.EXPECT().
+					GetVaultByUserID(mock.Anything, testUserID).
+					Return(&models.Vault{ID: testVaultID, UserID: testUserID}, nil).Once()
+
+				mockVersionRepo.EXPECT().
+					GetVersionByID(mock.Anything, testVersionID).
+					Return(nil, errors.New("db error")).Once()
+			},
+			expectedErr: errors.New("внутренняя ошибка сервера"),
+		},
+		{
+			name: "Версия принадлежит другому хранилищу",
+			mockSetup: func(
+				mockVaultRepo *mocks.VaultRepository,
+				mockVersionRepo *mocks.VaultVersionRepository,
+			) {
+				mockVaultRepo.EXPECT().
+					GetVaultByUserID(mock.Anything, testUserID).
+					Return(&models.Vault{ID: testVaultID, UserID: testUserID}, nil).Once()
+
+				mockVersionRepo.EXPECT().
+					GetVersionByID(mock.Anything, testVersionID).
+					Return(&models.VaultVersion{ID: testVersionID, VaultID: testVaultID + 1}, nil).Once()
+			},
+			expectedErr:  services.ErrForbidden,
+			checkErrorIs: true,
+		},
+		{
+			name: "Ошибка при обновлении текущей версии",
+			mockSetup: func(
+				mockVaultRepo *mocks.VaultRepository,
+				mockVersionRepo *mocks.VaultVersionRepository,
+			) {
+				mockVaultRepo.EXPECT().
+					GetVaultByUserID(mock.Anything, testUserID).
+					Return(&models.Vault{ID: testVaultID, UserID: testUserID}, nil).Once()
+
+				mockVersionRepo.EXPECT().
+					GetVersionByID(mock.Anything, testVersionID).
+					Return(&models.VaultVersion{ID: testVersionID, VaultID: testVaultID}, nil).Once()
+
+				mockVaultRepo.EXPECT().
+					UpdateVaultCurrentVersion(mock.Anything, testVaultID, testVersionID).
+					Return(errors.New("db error")).Once()
+			},
+			expectedErr: errors.New("внутренняя ошибка сервера при откате"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Настраиваем сервис с моками
+			service, mockVaultRepo, mockVersionRepo, _, _ := setupVaultServiceWithMocks()
+			tt.mockSetup(mockVaultRepo, mockVersionRepo)
+
+			// Вызываем тестируемый метод
+			err := service.RollbackToVersion(testUserID, testVersionID)
+
+			// Проверяем результат
+			if tt.expectedErr != nil {
+				require.Error(err)
+				if tt.checkErrorIs {
+					require.ErrorIs(err, tt.expectedErr)
+				} else {
+					assert.Contains(err.Error(), tt.expectedErr.Error())
+				}
+			} else {
+				require.NoError(err)
+			}
+
+			// Проверяем, что все ожидания моков были выполнены
+			mockVaultRepo.AssertExpectations(t)
+			mockVersionRepo.AssertExpectations(t)
 		})
 	}
 }
