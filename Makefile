@@ -111,3 +111,26 @@ build-client-darwin:
 	@echo "Сборка клиента для macOS (amd64)..."
 	@mkdir -p $(BIN_DIR)
 	@GOOS=darwin GOARCH=amd64 go build $(LDFLAGS) -o $(BIN_DIR)/$(CLIENT_TARGET_BASE)-darwin-amd64 $(CLIENT_CMD)
+
+# --- Демонстрация --- #
+.PHONY: record-tui-demo
+DEMO_KDBX_PATH=/tmp/gophkeeper_demo.kdbx
+DEMO_CAST_PATH=docs/tui_demo.cast
+# Путь к бинарнику клиента относительно текущего Makefile
+CLIENT_BINARY_PATH=./client/bin/gophkeeper
+
+# Запись демонстрации работы TUI клиента с помощью asciinema
+record-tui-demo: build-client
+	@echo "Подготовка к записи TUI демо..."
+	@rm -f $(DEMO_KDBX_PATH)
+	@echo "Запускается запись в $(DEMO_CAST_PATH)..."
+	@echo "Запись начнется автоматически. Выполните базовый сценарий:"
+	@echo "  создание KDBX -> добавление записи -> сохранение -> выход."
+	@echo "Команда для запуска клиента: $(CLIENT_BINARY_PATH) --db $(DEMO_KDBX_PATH)"
+	@echo "---"
+	@asciinema rec $(DEMO_CAST_PATH) --title "GophKeeper TUI Demo" --command "$(CLIENT_BINARY_PATH) --db $(DEMO_KDBX_PATH) --debug"
+	@echo "---"
+	@echo "Запись завершена и сохранена в $(DEMO_CAST_PATH)"
+	@echo "Очистка временного файла: $(DEMO_KDBX_PATH)..."
+	@rm -f $(DEMO_KDBX_PATH)
+	@echo "Готово."
