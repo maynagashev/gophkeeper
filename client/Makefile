@@ -1,9 +1,9 @@
 # Makefile для проекта GophKeeper
 
-.PHONY: run build clean client
+.PHONY: client build clean client
 
 # Цель по умолчанию
-default: run
+default: client
 
 # Запуск клиента
 client:

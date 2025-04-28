@@ -1,0 +1,4 @@
+2025/04/28 07:44:34 [ubuntu/1lBE7GvjG0-000001] "POST https://localhost:8443/api/login HTTP/2.0" from 127.0.0.1:39084 - 200 214B in 176.531117ms
+2025/04/28 07:44:40 [ubuntu/1lBE7GvjG0-000002] "GET https://localhost:8443/api/vault HTTP/2.0" from 127.0.0.1:39084 - 200 271B in 12.21777ms
+2025/04/28 07:44:40 [ubuntu/1lBE7GvjG0-000003] "POST https://localhost:8443/api/vault/upload HTTP/2.0" from 127.0.0.1:39084 - 200 41B in 72.560344ms
+2025/04/28 07:44:43 [ubuntu/1lBE7GvjG0-000004] "GET https://localhost:8443/api/vault/versions?limit=50 HTTP/2.0" from 127.0.0.1:39084 - 200 4591B in 12.417503ms
