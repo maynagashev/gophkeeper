@@ -105,9 +105,9 @@
 				
 				<option value="file24">github.com/maynagashev/gophkeeper/client/internal/tui/screen_welcome.go (100.0%)</option>
 				
-				<option value="file25">github.com/maynagashev/gophkeeper/client/internal/tui/tui.go (18.3%)</option>
+				<option value="file25">github.com/maynagashev/gophkeeper/client/internal/tui/tui.go (17.5%)</option>
 				
-				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (70.5%)</option>
+				<option value="file26">github.com/maynagashev/gophkeeper/client/internal/tui/update.go (65.8%)</option>
 				
 				<option value="file27">github.com/maynagashev/gophkeeper/client/internal/tui/utils.go (92.9%)</option>
 				
@@ -4545,8 +4545,15 @@ func (m *model) getDBDebugInfo() string <span class="cov0" title="0">{
 
 // Helper function to generate the debug info string.
 func (m *model) getDebugInfoString() string <span class="cov0" title="0">{
-        var debugInfo strings.Builder
+        cwd, errCwd := os.Getwd()
+        if errCwd != nil </span><span class="cov0" title="0">{
+                cwd = "Error getting CWD: " + errCwd.Error()
+        }</span>
+
+        <span class="cov0" title="0">var debugInfo strings.Builder
         debugInfo.WriteString(fmt.Sprintf(" [State: %s]\n", m.state.String()))
+        debugInfo.WriteString(fmt.Sprintf(" [KDBX Path: %s]\n", m.kdbxPath))
+        debugInfo.WriteString(fmt.Sprintf(" [CWD: %s]\n", cwd))
         debugInfo.WriteString(fmt.Sprintf(" [URL: %s]\n", m.serverURL))
         debugInfo.WriteString(fmt.Sprintf(" [Token: %s]\n", m.authToken)) // Keep showing token in debug
         debugInfo.WriteString(fmt.Sprintf(" [Lock Acquired: %t]\n", m.lockAcquired))
@@ -4555,8 +4562,8 @@ func (m *model) getDebugInfoString() string <span class="cov0" title="0">{
         dbDebugInfo := m.getDBDebugInfo()
         debugInfo.WriteString(dbDebugInfo)
 
-        return debugInfo.String()
-}</span>
+        return debugInfo.String()</span>
+}
 
 // View отрисовывает пользовательский интерфейс.
 func (m *model) View() string <span class="cov8" title="1">{
@@ -4702,6 +4709,7 @@ import (
         "errors"
         "fmt"
         "log/slog"
+        "strings"
         "time"
 
         // Убедимся, что импорты на месте.
@@ -4711,30 +4719,61 @@ import (
         "github.com/tobischo/gokeepasslib/v3/wrappers"
 )
 
+// Константы для расчета layout.
+const (
+        // Высота строк разделителя и заголовка блока отладки.
+        debugSeparatorHeight = 2
+)
+
 // handleWindowSizeMsg обрабатывает изменение размера окна.
 func handleWindowSizeMsg(m *model, msg tea.WindowSizeMsg) <span class="cov0" title="0">{
-        // Обновляем размеры компонентов
-        h, v := m.docStyle.GetFrameSize() // Используем стиль из модели
+        h, v := m.docStyle.GetFrameSize() // Получаем горизонтальные и вертикальные отступы стиля документа
         listWidth := msg.Width - h
-        // Высота для основного списка записей
-        entryListHeight := msg.Height - v - helpStatusHeightOffset // Используем константу
 
-        // Высота для меню синхронизации
-        // Статус занимает 3 строки + 1 строка разделитель = 4
-        const statusHeight = 4
-        syncMenuHeight := msg.Height - v - statusHeight
+        // Рассчитываем высоту футера (помощь + статус + отладка)
+        helpHeight := 1
+        statusHeight := 0
+        if m.savingStatus != "" || m.readOnlyMode </span><span class="cov0" title="0">{
+                statusHeight = 1 // 1 строка для статуса/read-only
+        }</span>
+        <span class="cov0" title="0">debugHeight := 0
+        if m.debugMode </span><span class="cov0" title="0">{
+                debugContentHeight := strings.Count(m.getDebugInfoString(), "\n") + 1 // Количество строк в отладке
+                debugHeight = debugSeparatorHeight + debugContentHeight               // Используем константу
+        }</span>
+        <span class="cov0" title="0">footerHeight := helpHeight + statusHeight + debugHeight
 
-        m.entryList.SetSize(listWidth, entryListHeight)
-        m.passwordInput.Width = msg.Width - passwordInputOffset
-        m.syncServerMenu.SetSize(listWidth, syncMenuHeight) // Используем новую высоту
+        // Рассчитываем доступную высоту для основного контента (списков)
+        availableHeight := msg.Height - v - footerHeight
+        if availableHeight &lt; 0 </span><span class="cov0" title="0">{
+                availableHeight = 0 // Не может быть отрицательной
+        }</span>
 
-        // TODO: Обновить размеры других полей ввода по необходимости
-        m.serverURLInput.Width = listWidth - passwordInputOffset
-        m.loginUsernameInput.Width = listWidth - passwordInputOffset
-        m.loginPasswordInput.Width = listWidth - passwordInputOffset
-        m.registerUsernameInput.Width = listWidth - passwordInputOffset
-        m.registerPasswordInput.Width = listWidth - passwordInputOffset
-}</span>
+        // Устанавливаем размеры для всех списков
+        <span class="cov0" title="0">m.entryList.SetSize(listWidth, availableHeight)
+        m.versionList.SetSize(listWidth, availableHeight)
+
+        // Рассчитываем высоту для списка меню синхронизации, вычитая высоту блока статуса
+        const syncStatusInfoHeight = 5 // 3 строки статуса + 2 разделителя \n
+        syncMenuListHeight := availableHeight - syncStatusInfoHeight
+        if syncMenuListHeight &lt; 0 </span><span class="cov0" title="0">{
+                syncMenuListHeight = 0
+        }</span>
+        <span class="cov0" title="0">m.syncServerMenu.SetSize(listWidth, syncMenuListHeight)
+
+        // Обновляем ширину полей ввода (можно сделать универсальнее)
+        inputWidth := listWidth // Используем полную ширину (может требовать подстройки)
+        if inputWidth &lt; 0 </span><span class="cov0" title="0">{
+                inputWidth = 0
+        }</span>
+        <span class="cov0" title="0">m.passwordInput.Width = inputWidth
+        m.serverURLInput.Width = inputWidth
+        m.loginUsernameInput.Width = inputWidth
+        m.loginPasswordInput.Width = inputWidth
+        m.registerUsernameInput.Width = inputWidth
+        m.registerPasswordInput.Width = inputWidth
+        m.attachmentPathInput.Width = inputWidth</span>
+}
 
 // handleDBMsg обрабатывает сообщения, связанные с базой данных или статусом.
 func handleDBMsg(m *model, msg tea.Msg) (tea.Model, tea.Cmd, bool) <span class="cov8" title="1">{

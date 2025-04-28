@@ -130,8 +130,15 @@ func (m *model) getDBDebugInfo() string {
 
 // Helper function to generate the debug info string.
 func (m *model) getDebugInfoString() string {
+	cwd, errCwd := os.Getwd()
+	if errCwd != nil {
+		cwd = "Error getting CWD: " + errCwd.Error()
+	}
+
 	var debugInfo strings.Builder
 	debugInfo.WriteString(fmt.Sprintf(" [State: %s]\n", m.state.String()))
+	debugInfo.WriteString(fmt.Sprintf(" [KDBX Path: %s]\n", m.kdbxPath))
+	debugInfo.WriteString(fmt.Sprintf(" [CWD: %s]\n", cwd))
 	debugInfo.WriteString(fmt.Sprintf(" [URL: %s]\n", m.serverURL))
 	debugInfo.WriteString(fmt.Sprintf(" [Token: %s]\n", m.authToken)) // Keep showing token in debug
 	debugInfo.WriteString(fmt.Sprintf(" [Lock Acquired: %t]\n", m.lockAcquired))

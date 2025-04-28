@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"strings"
 	"time"
 
 	// Убедимся, что импорты на месте.
@@ -13,29 +14,60 @@ import (
 	"github.com/tobischo/gokeepasslib/v3/wrappers"
 )
 
+// Константы для расчета layout.
+const (
+	// Высота строк разделителя и заголовка блока отладки.
+	debugSeparatorHeight = 2
+)
+
 // handleWindowSizeMsg обрабатывает изменение размера окна.
 func handleWindowSizeMsg(m *model, msg tea.WindowSizeMsg) {
-	// Обновляем размеры компонентов
-	h, v := m.docStyle.GetFrameSize() // Используем стиль из модели
+	h, v := m.docStyle.GetFrameSize() // Получаем горизонтальные и вертикальные отступы стиля документа
 	listWidth := msg.Width - h
-	// Высота для основного списка записей
-	entryListHeight := msg.Height - v - helpStatusHeightOffset // Используем константу
 
-	// Высота для меню синхронизации
-	// Статус занимает 3 строки + 1 строка разделитель = 4
-	const statusHeight = 4
-	syncMenuHeight := msg.Height - v - statusHeight
+	// Рассчитываем высоту футера (помощь + статус + отладка)
+	helpHeight := 1
+	statusHeight := 0
+	if m.savingStatus != "" || m.readOnlyMode {
+		statusHeight = 1 // 1 строка для статуса/read-only
+	}
+	debugHeight := 0
+	if m.debugMode {
+		debugContentHeight := strings.Count(m.getDebugInfoString(), "\n") + 1 // Количество строк в отладке
+		debugHeight = debugSeparatorHeight + debugContentHeight               // Используем константу
+	}
+	footerHeight := helpHeight + statusHeight + debugHeight
 
-	m.entryList.SetSize(listWidth, entryListHeight)
-	m.passwordInput.Width = msg.Width - passwordInputOffset
-	m.syncServerMenu.SetSize(listWidth, syncMenuHeight) // Используем новую высоту
+	// Рассчитываем доступную высоту для основного контента (списков)
+	availableHeight := msg.Height - v - footerHeight
+	if availableHeight < 0 {
+		availableHeight = 0 // Не может быть отрицательной
+	}
 
-	// TODO: Обновить размеры других полей ввода по необходимости
-	m.serverURLInput.Width = listWidth - passwordInputOffset
-	m.loginUsernameInput.Width = listWidth - passwordInputOffset
-	m.loginPasswordInput.Width = listWidth - passwordInputOffset
-	m.registerUsernameInput.Width = listWidth - passwordInputOffset
-	m.registerPasswordInput.Width = listWidth - passwordInputOffset
+	// Устанавливаем размеры для всех списков
+	m.entryList.SetSize(listWidth, availableHeight)
+	m.versionList.SetSize(listWidth, availableHeight)
+
+	// Рассчитываем высоту для списка меню синхронизации, вычитая высоту блока статуса
+	const syncStatusInfoHeight = 5 // 3 строки статуса + 2 разделителя \n
+	syncMenuListHeight := availableHeight - syncStatusInfoHeight
+	if syncMenuListHeight < 0 {
+		syncMenuListHeight = 0
+	}
+	m.syncServerMenu.SetSize(listWidth, syncMenuListHeight)
+
+	// Обновляем ширину полей ввода (можно сделать универсальнее)
+	inputWidth := listWidth // Используем полную ширину (может требовать подстройки)
+	if inputWidth < 0 {
+		inputWidth = 0
+	}
+	m.passwordInput.Width = inputWidth
+	m.serverURLInput.Width = inputWidth
+	m.loginUsernameInput.Width = inputWidth
+	m.loginPasswordInput.Width = inputWidth
+	m.registerUsernameInput.Width = inputWidth
+	m.registerPasswordInput.Width = inputWidth
+	m.attachmentPathInput.Width = inputWidth
 }
 
 // handleDBMsg обрабатывает сообщения, связанные с базой данных или статусом.

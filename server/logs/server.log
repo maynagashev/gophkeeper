@@ -16,3 +16,17 @@
 2025/04/28 14:25:19 [ubuntu/oR5aUAvwoJ-000016] "GET https://localhost:8443/api/vault HTTP/2.0" from 127.0.0.1:57624 - 404 39B in 3.374934ms
 2025/04/28 14:25:19 [ubuntu/oR5aUAvwoJ-000017] "POST https://localhost:8443/api/vault/upload HTTP/2.0" from 127.0.0.1:57624 - 200 41B in 62.866212ms
 2025/04/28 14:25:23 [ubuntu/oR5aUAvwoJ-000018] "GET https://localhost:8443/api/vault/versions?limit=50 HTTP/2.0" from 127.0.0.1:57624 - 200 310B in 5.452616ms
+2025/04/28 14:43:22 [ubuntu/oR5aUAvwoJ-000019] "POST https://localhost:8443/api/register HTTP/2.0" from 127.0.0.1:48212 - 201 71B in 153.056277ms
+2025/04/28 14:43:26 [ubuntu/oR5aUAvwoJ-000020] "POST https://localhost:8443/api/login HTTP/2.0" from 127.0.0.1:48212 - 200 216B in 147.764779ms
+2025/04/28 14:43:30 [ubuntu/oR5aUAvwoJ-000021] "GET https://localhost:8443/api/vault HTTP/2.0" from 127.0.0.1:48212 - 404 39B in 5.519451ms
+2025/04/28 14:43:30 [ubuntu/oR5aUAvwoJ-000022] "POST https://localhost:8443/api/vault/upload HTTP/2.0" from 127.0.0.1:48212 - 200 41B in 49.754722ms
+2025/04/28 14:43:34 [ubuntu/oR5aUAvwoJ-000023] "GET https://localhost:8443/api/vault/versions?limit=50 HTTP/2.0" from 127.0.0.1:48212 - 200 311B in 6.40643ms
+2025/04/28 14:43:59 [ubuntu/oR5aUAvwoJ-000024] "GET https://localhost:8443/api/vault HTTP/2.0" from 127.0.0.1:48212 - 200 272B in 2.530976ms
+2025/04/28 14:43:59 [ubuntu/oR5aUAvwoJ-000025] "POST https://localhost:8443/api/vault/upload HTTP/2.0" from 127.0.0.1:48212 - 200 41B in 15.355399ms
+2025/04/28 14:44:01 [ubuntu/oR5aUAvwoJ-000026] "GET https://localhost:8443/api/vault/versions?limit=50 HTTP/2.0" from 127.0.0.1:48212 - 200 583B in 4.229848ms
+2025/04/28 14:44:03 [ubuntu/oR5aUAvwoJ-000027] "POST https://localhost:8443/api/vault/rollback HTTP/2.0" from 127.0.0.1:48212 - 204 0B in 8.222695ms
+2025/04/28 14:44:03 [ubuntu/oR5aUAvwoJ-000028] "GET https://localhost:8443/api/vault/download HTTP/2.0" from 127.0.0.1:48212 - 200 1829B in 6.989902ms
+2025/04/28 15:03:29 [ubuntu/oR5aUAvwoJ-000029] "POST https://localhost:8443/api/login HTTP/2.0" from 127.0.0.1:57276 - 200 214B in 154.196741ms
+2025/04/28 15:03:35 [ubuntu/oR5aUAvwoJ-000030] "GET https://localhost:8443/api/vault/versions?limit=50 HTTP/2.0" from 127.0.0.1:57276 - 200 4862B in 8.795284ms
+2025/04/28 15:03:40 [ubuntu/oR5aUAvwoJ-000031] "POST https://localhost:8443/api/vault/rollback HTTP/2.0" from 127.0.0.1:57276 - 204 0B in 8.897594ms
+2025/04/28 15:03:40 [ubuntu/oR5aUAvwoJ-000032] "GET https://localhost:8443/api/vault/download HTTP/2.0" from 127.0.0.1:57276 - 200 1781B in 7.794964ms
