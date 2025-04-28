@@ -7,7 +7,9 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
+	"github.com/maynagashev/gophkeeper/models"
 	"github.com/maynagashev/gophkeeper/server/internal/middleware"
 	"github.com/maynagashev/gophkeeper/server/internal/services"
 )
@@ -67,6 +69,23 @@ func (h *VaultHandler) Upload(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("[VaultHandler:Upload] Запрос на загрузку файла от пользователя %d", userID)
 
+	// === Чтение заголовка X-Kdbx-Content-Modified-At ===
+	contentModTimeStr := r.Header.Get("X-Kdbx-Content-Modified-At")
+	if contentModTimeStr == "" {
+		log.Printf("[VaultHandler:Upload] Отсутствует обязательный заголовок X-Kdbx-Content-Modified-At")
+		http.Error(w, "Отсутствует обязательный заголовок X-Kdbx-Content-Modified-At", http.StatusBadRequest)
+		return
+	}
+
+	contentModTime, err := time.Parse(time.RFC3339, contentModTimeStr)
+	if err != nil {
+		log.Printf("[VaultHandler:Upload] Ошибка парсинга заголовка "+
+			"X-Kdbx-Content-Modified-At ('%s'): %v", contentModTimeStr, err)
+		http.Error(w, "Неверный формат заголовка X-Kdbx-Content-Modified-At (ожидается RFC3339)", http.StatusBadRequest)
+		return
+	}
+	// ===================================================
+
 	// Получаем размер файла из заголовка Content-Length
 	sizeStr := r.Header.Get("Content-Length")
 	size, err := strconv.ParseInt(sizeStr, 10, 64)
@@ -83,18 +102,27 @@ func (h *VaultHandler) Upload(w http.ResponseWriter, r *http.Request) {
 		contentType = "application/octet-stream"
 	}
 
-	// Вызываем сервис для загрузки файла
-	err = h.vaultService.UploadVault(userID, r.Body, size, contentType)
+	// Вызываем сервис для загрузки файла, передавая contentModTime
+	err = h.vaultService.UploadVault(userID, r.Body, size, contentType, contentModTime)
 	if err != nil {
-		// Обработка ошибок сервиса (пока только внутренние)
-		log.Printf("[VaultHandler:Upload] Ошибка сервиса при загрузке файла для пользователя %d: %v", userID, err)
-		http.Error(w, "Внутренняя ошибка сервера при загрузке файла", http.StatusInternalServerError)
+		// Обработка ошибок сервиса
+		if errors.Is(err, services.ErrConflictVersion) {
+			log.Printf("[VaultHandler:Upload] Конфликт версии при загрузке файла для пользователя %d: %v", userID, err)
+			// Формируем строку ошибки для переноса
+			conflictMsg := "Конфликт версий: на сервере уже есть более новая " +
+				"или идентичная версия с другим содержимым."
+			http.Error(w, conflictMsg, http.StatusConflict)
+		} else {
+			// Другие ошибки считаем внутренними
+			log.Printf("[VaultHandler:Upload] Ошибка сервиса при загрузке файла для пользователя %d: %v", userID, err)
+			http.Error(w, "Внутренняя ошибка сервера при загрузке файла", http.StatusInternalServerError)
+		}
 		return
 	}
 
-	// Успешный ответ
+	// Успешный ответ (даже если версия была идентичной и не создавалась новая)
 	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write([]byte("Файл успешно загружен\n"))
+	_, _ = w.Write([]byte("Файл успешно загружен\n")) // TODO: Возможно, стоит вернуть ID версии как в api.md?
 	log.Printf("[VaultHandler:Upload] Файл для пользователя %d успешно загружен", userID)
 }
 
@@ -178,10 +206,34 @@ func (h *VaultHandler) ListVersions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// --- Формирование ответа с учетом current_version_id ---
+	// Получаем ID текущей версии, чтобы добавить его в ответ
+	currentVersionMeta, err := h.vaultService.GetVaultMetadata(userID)
+	var currentVersionID *int64
+	if err == nil && currentVersionMeta != nil { // Если ошибки нет и метаданные получены
+		cvID := currentVersionMeta.ID // Копируем значение ID
+		currentVersionID = &cvID
+	} else if err != nil && !errors.Is(err, services.ErrVaultNotFound) {
+		// Если произошла другая ошибка при получении метаданных
+		log.Printf("[VaultHandler:ListVersions] Ошибка при получении current_version_id для ответа: %v", err)
+		// Не прерываем выполнение, просто currentVersionID будет nil
+	}
+
+	// Структура ответа для /versions
+	type listVersionsResponse struct {
+		Versions         []models.VaultVersion `json:"versions"`
+		CurrentVersionID *int64                `json:"current_version_id,omitempty"`
+	}
+
+	response := listVersionsResponse{
+		Versions:         versions,
+		CurrentVersionID: currentVersionID,
+	}
+
 	// Отправляем список версий в JSON
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	if err = json.NewEncoder(w).Encode(versions); err != nil {
+	if err = json.NewEncoder(w).Encode(response); err != nil { // Отправляем новую структуру
 		log.Printf("[VaultHandler:ListVersions] Ошибка кодирования ответа со списком версий: %v", err)
 	}
 }

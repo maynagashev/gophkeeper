@@ -29,7 +29,8 @@ func (m *model) updateServerURLInputScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 			slog.Info("URL сервера обновлен", "url", newURL)
 			// Переходим к выбору логина/регистрации
 			m.state = loginRegisterChoiceScreen
-			return m, nil
+			// Добавляем ClearScreen для очистки артефактов
+			return m, tea.ClearScreen
 		}
 	}
 	// Обновляем поле ввода

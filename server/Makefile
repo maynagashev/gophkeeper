@@ -11,13 +11,13 @@ DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:$
 MIGRATIONS_PATH=./migrations
 MIGRATE_IMAGE=migrate/migrate:v4.17.1 
 
-.PHONY: run build clean test lint db-up migrate-up migrate-down migrate-force
+.PHONY: run build clean test lint db-up migrate-up migrate-down migrate-force server
 
 # Цель по умолчанию (пока просто сборка)
-default: run
+default: server
 
 # Запуск сервера
-run:
+server:
 	@echo "Запуск GophKeeper сервера..."
 	@go run ./cmd/server/main.go | tee ./logs/server.log
 
@@ -58,7 +58,7 @@ db-up:
 	@docker-compose up -d postgres
 
 # Применение миграций с использованием Docker
-migrate-up:
+migrate:
 	@echo "Применение миграций БД из ${MIGRATIONS_PATH} с помощью Docker ${MIGRATE_IMAGE}..."
 	@docker run --rm -v $$(pwd)/${MIGRATIONS_PATH}:/migrations --network host ${MIGRATE_IMAGE} -path /migrations -database "${DATABASE_URL}" up
 

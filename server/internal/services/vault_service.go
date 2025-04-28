@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/maynagashev/gophkeeper/models"
@@ -19,7 +20,7 @@ import (
 // VaultService определяет интерфейс для сервиса работы с хранилищами.
 type VaultService interface {
 	GetVaultMetadata(userID int64) (*models.VaultVersion, error)
-	UploadVault(userID int64, reader io.Reader, size int64, contentType string) error
+	UploadVault(userID int64, reader io.Reader, size int64, contentType string, contentModifiedAt time.Time) error
 	DownloadVault(userID int64) (io.ReadCloser, *models.VaultVersion, error)
 	ListVersions(userID int64, limit, offset int) ([]models.VaultVersion, error)
 	RollbackToVersion(userID int64, versionID int64) error
@@ -75,25 +76,21 @@ func (s *vaultService) GetVaultMetadata(userID int64) (*models.VaultVersion, err
 	return currentVersion, nil
 }
 
-// UploadVault обрабатывает загрузку файла хранилища, создавая новую версию.
-func (s *vaultService) UploadVault(userID int64, reader io.Reader, size int64, contentType string) error {
+// Добавили contentModifiedAt в параметры.
+func (s *vaultService) UploadVault(
+	userID int64,
+	reader io.Reader,
+	size int64,
+	contentType string,
+	contentModifiedAt time.Time,
+) error {
 	ctx := context.Background()
 
-	// Генерируем УНИКАЛЬНЫЙ ключ объекта для MinIO
-	objectKey := fmt.Sprintf("user_%d/vault_%s.kdbx", userID, uuid.NewString())
-
-	// Создаем TeeReader для одновременной загрузки и расчета хеша
-	hash := sha256.New()
-	teeReader := io.TeeReader(reader, hash)
-
-	// Загружаем файл в MinIO
-	err := s.fileStorage.UploadFile(ctx, objectKey, teeReader, size, contentType)
+	// Загружаем файл и получаем его чек-сумму
+	objectKey, checksumClient, err := s.uploadFileToStorage(ctx, userID, reader, size, contentType)
 	if err != nil {
-		log.Printf("[VaultService] Ошибка загрузки файла в хранилище для пользователя %d: %v", userID, err)
-		return errors.New("внутренняя ошибка сервера при загрузке файла")
+		return err
 	}
-	checksum := hex.EncodeToString(hash.Sum(nil))
-	log.Printf("[VaultService] Файл для пользователя %d загружен в '%s', SHA256: %s", userID, objectKey, checksum)
 
 	// --- Транзакция БД --- //
 	tx, err := s.db.BeginTx(ctx, nil)
@@ -120,23 +117,138 @@ func (s *vaultService) UploadVault(userID int64, reader io.Reader, size int64, c
 		}
 	}()
 
-	// Используем транзакционные репозитории (если они есть) или передаем tx
-	// Пока будем передавать tx в существующие методы репозиториев,
-	// модифицировав их для приема tx или создав tx-варианты.
-	// Сейчас для простоты будем считать, что методы репо могут работать с tx (нужно будет доработать репозитории).
-
-	// 1. Найти или создать Vault для пользователя
-	vaultID, err := s.findOrCreateVault(ctx, userID) // Выносим логику в отдельный метод
-	if err != nil {
-		return err // Ошибка уже залогирована внутри findOrCreateVault
+	// Получаем текущее хранилище и его ВЕРСИЮ
+	vault, currentVersion, err := s.vaultRepo.GetVaultWithCurrentVersionByUserID(ctx, userID) // TODO: Передать tx
+	if err != nil && !errors.Is(err, repository.ErrVaultNotFound) {
+		// Неожиданная ошибка при поиске
+		log.Printf("[VaultService] Ошибка поиска хранилища/версии для пользователя %d: %v", userID, err)
+		return errors.New("внутренняя ошибка сервера") // defer откатит транзакцию
 	}
 
-	// 2. Создать запись о новой версии
+	// Сравниваем версии и решаем, нужно ли создавать новую
+	shouldCreateNewVersion, err := s.shouldCreateNewVersion(currentVersion, contentModifiedAt, checksumClient)
+	if err != nil {
+		return err // Возвращаем ошибку конфликта, если она возникла
+	}
+
+	// Если нужно создать новую версию
+	if shouldCreateNewVersion {
+		err = s.createNewVersion(ctx, vault, userID, objectKey, checksumClient, size, contentModifiedAt)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Ошибки нет (либо была идентичная версия), defer выполнит Commit
+	return nil
+}
+
+// uploadFileToStorage загружает файл в хранилище и возвращает ключ объекта и чек-сумму.
+func (s *vaultService) uploadFileToStorage(
+	ctx context.Context,
+	userID int64,
+	reader io.Reader,
+	size int64,
+	contentType string,
+) (string, string, error) {
+	// Используем io.TeeReader, чтобы одновременно считать хеш и передать данные дальше
+	hash := sha256.New()
+	teeReader := io.TeeReader(reader, hash)
+
+	// Генерируем уникальный ключ объекта для MinIO
+	objectKey := fmt.Sprintf("user_%d/vault_%s.kdbx", userID, uuid.New().String())
+
+	// Загружаем файл в MinIO
+	err := s.fileStorage.UploadFile(ctx, objectKey, teeReader, size, contentType)
+	if err != nil {
+		log.Printf("[VaultService] Ошибка загрузки файла в хранилище для пользователя %d: %v", userID, err)
+		return "", "", errors.New("внутренняя ошибка сервера при загрузке файла")
+	}
+
+	// Получаем вычисленную чек-сумму клиента
+	checksumClient := hex.EncodeToString(hash.Sum(nil))
+	log.Printf("[VaultService] Файл для пользователя %d загружен в '%s', SHA256: %s",
+		userID, objectKey, checksumClient)
+
+	return objectKey, checksumClient, nil
+}
+
+// shouldCreateNewVersion определяет, нужно ли создавать новую версию на основе сравнения с текущей.
+func (s *vaultService) shouldCreateNewVersion(
+	currentVersion *models.VaultVersion,
+	clientTime time.Time,
+	checksumClient string,
+) (bool, error) {
+	// Если текущей версии нет, то создаем новую
+	if currentVersion == nil || currentVersion.ContentModifiedAt == nil {
+		return true, nil
+	}
+
+	serverTime := *currentVersion.ContentModifiedAt
+	checksumServer := ""
+	if currentVersion.Checksum != nil {
+		checksumServer = *currentVersion.Checksum
+	}
+
+	log.Printf("[VaultService] Сравнение версий: Клиент T=%v C=%s | Сервер T=%v C=%s",
+		clientTime, checksumClient, serverTime, checksumServer)
+
+	if clientTime.Before(serverTime) {
+		// Время клиента < времени сервера -> Конфликт
+		log.Printf("[VaultService] Отклонено: время клиента (%v) раньше времени сервера (%v). Конфликт.",
+			clientTime, serverTime)
+		return false, ErrConflictVersion
+	} else if clientTime.Equal(serverTime) {
+		// Время совпадает, проверяем чек-суммы
+		if checksumClient == checksumServer {
+			// Идентичная версия
+			log.Printf("[VaultService] Пропуск: идентичная версия (время и чек-сумма совпадают).")
+			return false, nil
+		}
+		// Время совпадает, чек-суммы разные -> Конфликт
+		log.Printf("[VaultService] Отклонено: время совпадает (%v), но чек-суммы разные. Конфликт.", clientTime)
+		return false, ErrConflictVersion
+	}
+
+	// Если clientTime.After(serverTime), создаем новую версию
+	return true, nil
+}
+
+// createNewVersion создает новую версию хранилища или новое хранилище, если оно не существует.
+func (s *vaultService) createNewVersion(
+	ctx context.Context,
+	vault *models.Vault,
+	userID int64,
+	objectKey string,
+	checksumClient string,
+	size int64,
+	contentModifiedAt time.Time,
+) error {
+	// Найдем или создадим Vault
+	var vaultID int64
+	if vault == nil {
+		// Хранилище не найдено, создаем новое
+		log.Printf("[VaultService] Хранилище для пользователя %d не найдено, создаем новое.", userID)
+		newVault := &models.Vault{UserID: userID}
+		var err error
+		vaultID, err = s.vaultRepo.CreateVault(ctx, newVault) // TODO: Передать tx
+		if err != nil {
+			log.Printf("[VaultService] Ошибка создания хранилища в транзакции для пользователя %d: %v", userID, err)
+			return errors.New("внутренняя ошибка сервера")
+		}
+		log.Printf("[VaultService] Новое хранилище создано (ID: %d) для пользователя %d", vaultID, userID)
+	} else {
+		vaultID = vault.ID
+		log.Printf("[VaultService] Используется существующее хранилище (ID: %d) для пользователя %d", vaultID, userID)
+	}
+
+	// Создаем запись о новой версии
 	newVersion := &models.VaultVersion{
-		VaultID:   vaultID,
-		ObjectKey: objectKey,
-		Checksum:  &checksum,
-		SizeBytes: &size,
+		VaultID:           vaultID,
+		ObjectKey:         objectKey,
+		Checksum:          &checksumClient,
+		SizeBytes:         &size,
+		ContentModifiedAt: &contentModifiedAt,
 	}
 	versionID, err := s.vaultVersionRepo.CreateVersion(ctx, newVersion) // TODO: Передать tx
 	if err != nil {
@@ -145,7 +257,7 @@ func (s *vaultService) UploadVault(userID int64, reader io.Reader, size int64, c
 	}
 	log.Printf("[VaultService] Новая версия создана (ID: %d) для хранилища %d", versionID, vaultID)
 
-	// 3. Обновить current_version_id в Vault
+	// Обновляем current_version_id в Vault
 	err = s.vaultRepo.UpdateVaultCurrentVersion(ctx, vaultID, versionID) // TODO: Передать tx
 	if err != nil {
 		log.Printf("[VaultService] Ошибка обновления current_version_id в транзакции для хранилища %d: %v", vaultID, err)
@@ -153,38 +265,8 @@ func (s *vaultService) UploadVault(userID int64, reader io.Reader, size int64, c
 	}
 	log.Printf("[VaultService] current_version_id для хранилища %d обновлен на %d", vaultID, versionID)
 
-	// Ошибки нет, defer выполнит Commit
 	log.Printf("[VaultService] Загрузка и обновление метаданных для пользователя %d завершены успешно", userID)
 	return nil
-}
-
-// findOrCreateVault находит ID существующего хранилища или создает новое.
-// Возвращает ID хранилища или ошибку.
-// Эта функция предполагает, что она вызывается внутри существующей транзакции (передать tx?).
-func (s *vaultService) findOrCreateVault(ctx context.Context, userID int64) (int64, error) {
-	vault, err := s.vaultRepo.GetVaultByUserID(ctx, userID) // TODO: Передать tx
-	if err == nil {
-		// Хранилище найдено
-		log.Printf("[VaultService] Найдено существующее хранилище (ID: %d) для пользователя %d", vault.ID, userID)
-		return vault.ID, nil
-	}
-
-	if !errors.Is(err, repository.ErrVaultNotFound) {
-		// Неожиданная ошибка при поиске
-		log.Printf("[VaultService] Ошибка поиска хранилища в транзакции для пользователя %d: %v", userID, err)
-		return 0, errors.New("внутренняя ошибка сервера")
-	}
-
-	// Хранилище не найдено, создаем новое
-	log.Printf("[VaultService] Хранилище для пользователя %d не найдено, создаем новое.", userID)
-	newVault := &models.Vault{UserID: userID}
-	vaultID, err := s.vaultRepo.CreateVault(ctx, newVault) // TODO: Передать tx
-	if err != nil {
-		log.Printf("[VaultService] Ошибка создания хранилища в транзакции для пользователя %d: %v", userID, err)
-		return 0, errors.New("внутренняя ошибка сервера")
-	}
-	log.Printf("[VaultService] Новое хранилище создано (ID: %d) для пользователя %d", vaultID, userID)
-	return vaultID, nil
 }
 
 // DownloadVault скачивает ТЕКУЩУЮ версию файла хранилища.
@@ -306,4 +388,5 @@ var (
 	ErrVaultNotFound   = errors.New("хранилище или его версия не найдены")
 	ErrVersionNotFound = errors.New("указанная версия хранилища не найдена")
 	ErrForbidden       = errors.New("доступ запрещен") // Общая ошибка доступа
+	ErrConflictVersion = errors.New("конфликт версий")
 )

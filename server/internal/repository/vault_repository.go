@@ -99,26 +99,30 @@ func (r *postgresVaultRepository) GetVaultWithCurrentVersionByUserID(
 	ctx context.Context,
 	userID int64,
 ) (*models.Vault, *models.VaultVersion, error) {
+	// Добавили выборку vv.content_modified_at
 	query := `
 		SELECT
 		    v.id AS vault_id, v.user_id, v.created_at AS vault_created_at, v.updated_at AS vault_updated_at,
-		    vv.id AS version_id, vv.object_key, vv.checksum, vv.size_bytes, vv.created_at AS version_created_at
+		    vv.id AS version_id, vv.object_key, vv.checksum, vv.size_bytes,
+		    vv.created_at AS version_created_at, vv.content_modified_at AS version_content_modified_at
 		FROM vaults v
 		LEFT JOIN vault_versions vv ON v.current_version_id = vv.id
 		WHERE v.user_id = $1
 		LIMIT 1`
 
 	// Используем временную структуру для сканирования результата JOIN
+	// Добавили поле для content_modified_at
 	type result struct {
-		VaultID          int64      `db:"vault_id"`
-		UserID           int64      `db:"user_id"`
-		VaultCreatedAt   time.Time  `db:"vault_created_at"`
-		VaultUpdatedAt   time.Time  `db:"vault_updated_at"`
-		VersionID        *int64     `db:"version_id"` // Указатель, т.к. LEFT JOIN может дать NULL
-		ObjectKey        *string    `db:"object_key"`
-		Checksum         *string    `db:"checksum"`
-		SizeBytes        *int64     `db:"size_bytes"`
-		VersionCreatedAt *time.Time `db:"version_created_at"`
+		VaultID                  int64      `db:"vault_id"`
+		UserID                   int64      `db:"user_id"`
+		VaultCreatedAt           time.Time  `db:"vault_created_at"`
+		VaultUpdatedAt           time.Time  `db:"vault_updated_at"`
+		VersionID                *int64     `db:"version_id"` // Указатель, т.к. LEFT JOIN может дать NULL
+		ObjectKey                *string    `db:"object_key"`
+		Checksum                 *string    `db:"checksum"`
+		SizeBytes                *int64     `db:"size_bytes"`
+		VersionCreatedAt         *time.Time `db:"version_created_at"`
+		VersionContentModifiedAt *time.Time `db:"version_content_modified_at"` // Указатель, т.к. LEFT JOIN может дать NULL
 	}
 
 	var res result
@@ -143,13 +147,15 @@ func (r *postgresVaultRepository) GetVaultWithCurrentVersionByUserID(
 
 	var currentVersion *models.VaultVersion
 	if res.VersionID != nil { // Если есть текущая версия
+		// Добавили заполнение ContentModifiedAt
 		currentVersion = &models.VaultVersion{
-			ID:        *res.VersionID,
-			VaultID:   res.VaultID,
-			ObjectKey: *res.ObjectKey,
-			Checksum:  res.Checksum,
-			SizeBytes: res.SizeBytes,
-			CreatedAt: *res.VersionCreatedAt,
+			ID:                *res.VersionID,
+			VaultID:           res.VaultID,
+			ObjectKey:         *res.ObjectKey,
+			Checksum:          res.Checksum,
+			SizeBytes:         res.SizeBytes,
+			CreatedAt:         *res.VersionCreatedAt,
+			ContentModifiedAt: res.VersionContentModifiedAt, // Указатель на время или nil
 		}
 		log.Printf("[VaultRepo] Найдено хранилище ID %d с текущей версией ID %d"+
 			" для пользователя %d", vault.ID, currentVersion.ID, userID)

@@ -12,6 +12,7 @@ import (
 	"github.com/gofrs/flock"
 
 	"github.com/maynagashev/gophkeeper/client/internal/api" // Импортируем пакет API клиента
+	// Импортируем пакет models для использования в debug info.
 )
 
 const (
@@ -43,95 +44,136 @@ func (m *model) setStatusMessage(status string) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-// View отрисовывает пользовательский интерфейс.
-//
-//nolint:funlen
-func (m *model) View() string {
-	var mainContent string
-	var help string
-
+// getMainContentView возвращает основное содержимое для текущего состояния.
+func (m *model) getMainContentView() string {
 	switch m.state {
 	case welcomeScreen:
-		mainContent = m.viewWelcomeScreen()
-		help = "(Enter - продолжить, Ctrl+C/q - выход)"
+		return m.viewWelcomeScreen()
 	case passwordInputScreen:
-		mainContent = m.viewPasswordInputScreen()
-		help = "(Enter - подтвердить, Ctrl+C - выход)"
+		return m.viewPasswordInputScreen()
 	case newKdbxPasswordScreen:
-		mainContent = m.viewNewKdbxPasswordScreen()
-		help = "(Tab - сменить поле, Enter - создать, Esc/Ctrl+C - выход)"
+		return m.viewNewKdbxPasswordScreen()
 	case entryListScreen:
-		mainContent = m.entryList.View()
-		help = "(↑/↓, Enter - детали, / - поиск, a - доб, s - синхр, l - логин, Ctrl+S - сохр, q - вых)"
+		return m.entryList.View()
 	case entryDetailScreen:
-		mainContent = m.viewEntryDetailScreen()
-		help = "(e - ред., Ctrl+S - сохр., Esc/b - назад)"
+		return m.viewEntryDetailScreen()
 	case entryEditScreen:
-		mainContent = m.viewEntryEditScreen()
-		help = "(Tab/↑/↓, Enter - сохр., Esc - отмена, ^O - влож+, ^D - влож-)"
+		return m.viewEntryEditScreen()
 	case entryAddScreen:
-		mainContent = m.viewEntryAddScreen()
-		help = "(Tab/↑/↓, Enter - доб., ^O - влож+, Esc - отмена)"
+		return m.viewEntryAddScreen()
 	case attachmentListDeleteScreen:
-		mainContent = m.viewAttachmentListDeleteScreen()
-		help = "(↑/↓ - навигация, Enter/d - удалить, Esc/b - отмена)"
+		return m.viewAttachmentListDeleteScreen()
 	case attachmentPathInputScreen:
-		mainContent = m.viewAttachmentPathInputScreen()
-		help = "(Enter - подтвердить, Esc - отмена)"
+		return m.viewAttachmentPathInputScreen()
 	case syncServerScreen:
-		mainContent = m.viewSyncServerScreen()
-		help = "(↑/↓ - навигация, Enter - выбрать, Esc/b - назад)"
+		return m.viewSyncServerScreen()
 	case serverURLInputScreen:
-		mainContent = m.viewServerURLInputScreen()
-		help = "(Enter - подтвердить, Esc - назад)"
+		return m.viewServerURLInputScreen()
 	case loginRegisterChoiceScreen:
-		mainContent = m.viewLoginRegisterChoiceScreen()
-		help = "(R - регистрация, L - вход, Esc/b - назад)"
+		return m.viewLoginRegisterChoiceScreen()
 	case loginScreen:
-		mainContent = m.viewLoginScreen()
-		help = "(Tab - след. поле, Enter - войти, Esc - назад)"
+		return m.viewLoginScreen()
 	case registerScreen:
-		mainContent = m.viewRegisterScreen()
-		help = "(Tab - след. поле, Enter - зарегистрироваться, Esc - назад)"
+		return m.viewRegisterScreen()
+	case versionListScreen:
+		return m.viewVersionListScreen()
 	default:
-		mainContent = "Неизвестное состояние!"
-		if m.debugMode {
-			help = "State: " + m.state.String()
-		} else {
-			help = "Unknown state"
-		}
+		return "Неизвестное состояние!"
+	}
+}
+
+// Helper function to get the main content and help string based on the state.
+func (m *model) getContentAndHelp() (string, string) {
+	mainContent := m.getMainContentView()
+	// Используем карту из модели
+	help, ok := m.helpTextMap[m.state]
+	if !ok {
+		help = "Unknown state" // Default help for unknown state
+	}
+	return mainContent, help
+}
+
+// getDBModTimeString возвращает отформатированную строку времени модификации для БД.
+func (m *model) getDBModTimeString() string {
+	// Предполагаем, что db, Content и Root проверены перед вызовом
+	if len(m.db.Content.Root.Groups) == 0 {
+		return "<not set>" // No groups to get time from
+	}
+	rootGroup := &m.db.Content.Root.Groups[0]
+	if rootGroup.Times.LastModificationTime != nil {
+		return rootGroup.Times.LastModificationTime.Time.Format(time.RFC3339) + " (group0 mod)"
+	}
+	if rootGroup.Times.CreationTime != nil {
+		return rootGroup.Times.CreationTime.Time.Format(time.RFC3339) + " (group0 creation)"
+	}
+	return "<not set>"
+}
+
+// getDBDebugInfo генерирует отладочную информацию, связанную с базой данных.
+func (m *model) getDBDebugInfo() string {
+	if m.db == nil {
+		return " [DB: not loaded]\n"
+	}
+	if m.db.Content == nil || m.db.Content.Root == nil || m.db.Content.Meta == nil {
+		return " [DB: Content, Root or Meta missing]\n"
 	}
 
-	// Добавляем отладочную информацию, если включен debugMode
-	if m.debugMode {
-		var debugInfo strings.Builder
-		debugInfo.WriteString(" [State: " + m.state.String() + "]\n")
-		debugInfo.WriteString(" [URL: " + m.serverURL + "]\n")
-		// Выводим сам токен (или пустоту, если его нет)
-		debugInfo.WriteString(" [Token: " + m.authToken + "]")
-		help = help + "\n---\nОтладка:\n" + debugInfo.String()
-	}
+	var dbDebugInfo strings.Builder
+	dbDebugInfo.WriteString(fmt.Sprintf(" [DB Name: %s]\n", m.db.Content.Meta.DatabaseName))
+	modTimeStr := m.getDBModTimeString()
+	dbDebugInfo.WriteString(fmt.Sprintf(" [DB ModTime: %s]\n", modTimeStr))
+	return dbDebugInfo.String()
+}
 
-	// Добавляем статус сохранения или Read-Only, если он есть и мы не на определенных экранах
-	statusLine := ""
+// Helper function to generate the debug info string.
+func (m *model) getDebugInfoString() string {
+	var debugInfo strings.Builder
+	debugInfo.WriteString(fmt.Sprintf(" [State: %s]\n", m.state.String()))
+	debugInfo.WriteString(fmt.Sprintf(" [URL: %s]\n", m.serverURL))
+	debugInfo.WriteString(fmt.Sprintf(" [Token: %s]\n", m.authToken)) // Keep showing token in debug
+	debugInfo.WriteString(fmt.Sprintf(" [Lock Acquired: %t]\n", m.lockAcquired))
+
+	// Добавляем информацию о БД через helper
+	dbDebugInfo := m.getDBDebugInfo()
+	debugInfo.WriteString(dbDebugInfo)
+
+	return debugInfo.String()
+}
+
+// View отрисовывает пользовательский интерфейс.
+func (m *model) View() string {
+	mainContent, help := m.getContentAndHelp()
+
+	// --- Формируем подвал (статус + отладка) --- //
+	var footer strings.Builder
+
+	// Добавляем статус, если он есть
 	readOnlyIndicator := ""
 	if m.readOnlyMode {
 		readOnlyIndicator = " [Read-Only]"
 	}
-	displayStatus := (m.savingStatus != "" || m.readOnlyMode) &&
-		m.state != welcomeScreen &&
-		m.state != passwordInputScreen &&
-		m.state != newKdbxPasswordScreen &&
-		m.state != attachmentPathInputScreen
+	displayStatus := m.savingStatus != "" || m.readOnlyMode
 	if displayStatus {
-		statusLine = "\n" + m.savingStatus + readOnlyIndicator
+		footer.WriteString("\n") // Перенос перед статусом
+		footer.WriteString(m.savingStatus)
+		footer.WriteString(readOnlyIndicator)
+	}
+
+	// Добавляем отладку, если включен режим
+	if m.debugMode {
+		// Убедимся, что help для неизвестного состояния установлен, если нужно
+		if help == "Unknown state" {
+			help = fmt.Sprintf("State: %s", m.state.String())
+		}
+		// Добавляем разделитель и отладку
+		footer.WriteString("\n\n---\nОтладка:\n") // Двойной перенос перед отладкой
+		footer.WriteString(m.getDebugInfoString())
 	}
 
 	// Собираем финальный вывод
-	// Применяем общий стиль к основному контенту
 	styledContent := m.docStyle.Render(mainContent)
-	// Собираем все вместе, всегда добавляя перенос строки перед help
-	return fmt.Sprintf("%s\n%s\n%s", styledContent, help, statusLine)
+	// Сначала основной контент, потом помощь, потом весь подвал
+	return fmt.Sprintf("%s\n%s%s", styledContent, help, footer.String())
 }
 
 // Start запускает TUI приложение.
@@ -212,101 +254,7 @@ func Start(kdbxPath string, debugMode bool) {
 	// Успешный выход ПОСЛЕ defer Unlock
 }
 
-// --- Вспомогательные типы и функции ---
-
-// syncMenuItem представляет элемент в меню синхронизации.
-type syncMenuItem struct {
-	title string
-	id    string // Идентификатор для обработки выбора
-}
-
-func (i syncMenuItem) Title() string       { return i.title }
-func (i syncMenuItem) Description() string { return "" } // Описание не нужно
-func (i syncMenuItem) FilterValue() string { return i.title }
-
-// --- Функции-заглушки для отображения других экранов были удалены ---
-
 // viewServerURLInputScreen отображает экран ввода URL сервера.
 func (m *model) viewServerURLInputScreen() string {
 	return fmt.Sprintf("Введите URL сервера:\n%s", m.serverURLInput.View())
-}
-
-// viewSyncServerScreen отображает экран "Синхронизация и Сервер".
-func (m *model) viewSyncServerScreen() string {
-	serverURLText := m.serverURL // Используем правильное имя переменной
-	if serverURLText == "" {
-		serverURLText = "Не настроен"
-	}
-
-	statusInfo := fmt.Sprintf(
-		"URL Сервера: %s\nСтатус входа: %s\nПоследняя синх.: %s\n",
-		serverURLText,
-		m.loginStatus,
-		m.lastSyncStatus,
-	)
-
-	// Объединяем информацию о статусе и меню действий
-	return statusInfo + "\n" + m.syncServerMenu.View()
-}
-
-// updateSyncServerScreen обрабатывает сообщения для экрана "Синхронизация и Сервер".
-//
-//nolint:gocognit,nestif // TODO: Упростить вложенность и когнитивную сложность
-func (m *model) updateSyncServerScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmds []tea.Cmd
-
-	// Используем if вместо switch т.к. обрабатываем только один тип
-	if keyMsg, ok := msg.(tea.KeyMsg); ok { // Внешний 'ok'
-		switch keyMsg.String() {
-		case keyEnter:
-			selectedItem := m.syncServerMenu.SelectedItem()
-			if item, itemOk := selectedItem.(syncMenuItem); itemOk { // Используем 'itemOk' для внутреннего блока
-				switch item.id {
-				case "configure_url":
-					m.state = serverURLInputScreen
-					// Устанавливаем текущий URL в поле ввода или плейсхолдер
-					if m.serverURL != "" {
-						m.serverURLInput.SetValue(m.serverURL)
-					} else {
-						m.serverURLInput.Placeholder = defaultServerURL
-						m.serverURLInput.SetValue("")
-					}
-					m.serverURLInput.Focus()
-					return m, textinput.Blink
-				case "login_register":
-					if m.serverURL == "" {
-						// Сначала нужно настроить URL
-						m.state = serverURLInputScreen
-						m.serverURLInput.Placeholder = defaultServerURL
-						m.serverURLInput.SetValue("")
-						m.serverURLInput.Focus()
-						return m, textinput.Blink
-					}
-					// URL есть, переходим к выбору Вход/Регистрация (убираем else)
-					m.state = loginRegisterChoiceScreen
-					return m, nil
-				case "sync_now":
-					// TODO: Реализовать логику синхронизации
-					return m.setStatusMessage("TODO: Запуск синхронизации...")
-				case "logout":
-					// TODO: Реализовать логику выхода (очистка токена и т.д.)
-					m.authToken = ""
-					m.loginStatus = "Не выполнен"
-					return m.setStatusMessage("Выход выполнен.")
-					// case "view_versions": // TODO
-				}
-			}
-		case keyEsc, keyBack:
-			// Возврат к списку записей
-			m.state = entryListScreen
-			return m, nil
-		}
-	}
-
-	// Обновляем список меню, если это не было KeyMsg или не обработанное
-	var listCmd tea.Cmd
-	m.syncServerMenu, listCmd = m.syncServerMenu.Update(msg)
-	cmds = append(cmds, listCmd)
-
-	return m, tea.Batch(cmds...)
 }

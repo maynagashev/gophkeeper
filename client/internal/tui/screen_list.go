@@ -55,8 +55,8 @@ func (m *model) updateEntryListScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case "s":
 			m.state = syncServerScreen
-			// m.syncServerMenu.Focus() // list.Model не имеет Focus()
-			return m, nil
+			// Добавляем ClearScreen при переходе
+			return m, tea.ClearScreen
 		case "l":
 			// TODO: Проверить, настроен ли URL и валиден ли токен
 			// Если URL не настроен -> serverUrlInputScreen
@@ -72,13 +72,14 @@ func (m *model) updateEntryListScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // handleDBOpenedMsg обрабатывает сообщение об успешном открытии базы.
 func (m *model) handleDBOpenedMsg(msg dbOpenedMsg) (tea.Model, tea.Cmd) {
+	slog.Debug("handleDBOpenedMsg: Начало")
 	m.db = msg.db
 	m.err = nil
 	prevState := m.state
 	m.state = entryListScreen
 	slog.Info("База KDBX успешно открыта", "path", m.kdbxPath)
 
-	// <<< НАЧАЛО: Загрузка Auth данных >>>
+	// Загрузка Auth данных
 	loadedURL, loadedToken, errLoad := kdbx.LoadAuthData(m.db)
 	if errLoad != nil {
 		// Просто логируем ошибку, не прерываем работу
@@ -100,7 +101,14 @@ func (m *model) handleDBOpenedMsg(msg dbOpenedMsg) (tea.Model, tea.Cmd) {
 			slog.Info("Auth данные не найдены в KDBX")
 		}
 	}
-	// <<< КОНЕЦ: Загрузка Auth данных >>>
+
+	// Устанавливаем токен в API клиенте ЗДЕСЬ, после блока if/else
+	if m.apiClient != nil {
+		m.apiClient.SetAuthToken(m.authToken) // m.authToken будет либо загруженным, либо пустым
+		slog.Debug("Установлен токен в API клиенте после загрузки из KDBX", "token_set", m.authToken != "")
+	} else {
+		slog.Error("API клиент nil при попытке установить токен после загрузки из KDBX")
+	}
 
 	// --- Существующий код для заполнения списка ---
 	entries := kdbx.GetAllEntries(m.db)
@@ -127,5 +135,6 @@ func (m *model) handleDBOpenedMsg(msg dbOpenedMsg) (tea.Model, tea.Cmd) {
 		dbOpenedCmds = append(dbOpenedCmds, tea.ClearScreen)
 	}
 
+	slog.Debug("handleDBOpenedMsg: Конец, m.db обновлен")
 	return m, tea.Batch(dbOpenedCmds...)
 }
