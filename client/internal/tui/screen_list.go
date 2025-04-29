@@ -8,6 +8,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 
 	// Убедимся, что импорт есть.
+	"github.com/maynagashev/gophkeeper/client/internal/api"
 	"github.com/maynagashev/gophkeeper/client/internal/kdbx"
 )
 
@@ -70,6 +71,44 @@ func (m *model) updateEntryListScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(cmds...)
 }
 
+// _handleAuthLoadError обрабатывает ошибку загрузки Auth данных.
+func (m *model) _handleAuthLoadError(errLoad error, urlFromFlag bool) {
+	slog.Error("Ошибка загрузки Auth данных из KDBX", "error", errLoad)
+	if !urlFromFlag {
+		m.serverURL = ""
+		m.apiClient = nil
+	}
+	m.authToken = ""
+	m.loginStatus = statusNotLoggedIn + " (ошибка загрузки)"
+}
+
+// _handleAuthLoadSuccess обрабатывает успешную загрузку Auth данных.
+func (m *model) _handleAuthLoadSuccess(loadedURL, loadedToken string, urlFromFlag bool) {
+	if urlFromFlag {
+		// URL задан флагом, загружаем только токен
+		m.authToken = loadedToken
+		slog.Info("URL сервера задан флагом, загружен только токен из KDBX", "token_found", m.authToken != "")
+	} else {
+		// URL не задан флагом, используем загруженный URL
+		m.serverURL = loadedURL
+		m.authToken = loadedToken
+		if m.serverURL != "" {
+			m.apiClient = api.NewHTTPClient(m.serverURL)
+			slog.Info("URL сервера загружен из KDBX, создан API клиент", "url", m.serverURL, "token_found", m.authToken != "")
+		} else {
+			m.apiClient = nil
+			slog.Info("URL сервера не задан и не найден в KDBX.")
+		}
+	}
+
+	// Обновляем статус входа
+	if m.authToken != "" {
+		m.loginStatus = "Вход выполнен (сессия загружена)"
+	} else {
+		m.loginStatus = statusNotLoggedIn
+	}
+}
+
 // handleDBOpenedMsg обрабатывает сообщение об успешном открытии базы.
 func (m *model) handleDBOpenedMsg(msg dbOpenedMsg) (tea.Model, tea.Cmd) {
 	slog.Debug("handleDBOpenedMsg: Начало")
@@ -79,35 +118,26 @@ func (m *model) handleDBOpenedMsg(msg dbOpenedMsg) (tea.Model, tea.Cmd) {
 	m.state = entryListScreen
 	slog.Info("База KDBX успешно открыта", "path", m.kdbxPath)
 
-	// Загрузка Auth данных
+	// --- Обновленная логика загрузки Auth данных ---
+	// Определяем, был ли URL задан через флаг (т.е. apiClient уже инициализирован)
+	urlFromFlag := m.serverURL != "" && m.apiClient != nil
+	slog.Debug("Проверка URL из флага", "urlFromFlag", urlFromFlag, "initialURL", m.serverURL)
+
 	loadedURL, loadedToken, errLoad := kdbx.LoadAuthData(m.db)
+	// Вызываем соответствующие хелперы
 	if errLoad != nil {
-		// Просто логируем ошибку, не прерываем работу
-		slog.Error("Ошибка загрузки Auth данных из KDBX", "error", errLoad)
-		// Устанавливаем пустые значения по умолчанию
-		m.serverURL = ""
-		m.authToken = ""
-		m.loginStatus = statusNotLoggedIn + " (ошибка загрузки)" // Используем константу
+		m._handleAuthLoadError(errLoad, urlFromFlag)
 	} else {
-		// Сохраняем загруженные данные в модель
-		m.serverURL = loadedURL
-		m.authToken = loadedToken
-		// Обновляем статус входа
-		if m.authToken != "" {
-			m.loginStatus = "Вход выполнен (сессия загружена)"
-			slog.Info("Auth данные успешно загружены из KDBX", "url_found", m.serverURL != "", "token_found", m.authToken != "")
-		} else {
-			m.loginStatus = statusNotLoggedIn // Используем константу
-			slog.Info("Auth данные не найдены в KDBX")
-		}
+		m._handleAuthLoadSuccess(loadedURL, loadedToken, urlFromFlag)
 	}
 
-	// Устанавливаем токен в API клиенте ЗДЕСЬ, после блока if/else
+	// Устанавливаем токен в API клиенте, если клиент существует
 	if m.apiClient != nil {
 		m.apiClient.SetAuthToken(m.authToken) // m.authToken будет либо загруженным, либо пустым
-		slog.Debug("Установлен токен в API клиенте после загрузки из KDBX", "token_set", m.authToken != "")
+		slog.Debug("Установлен токен в API клиенте после загрузки/проверки KDBX", "token_set", m.authToken != "")
 	} else {
-		slog.Error("API клиент nil при попытке установить токен после загрузки из KDBX")
+		// Эта ситуация возможна, если URL не задан ни флагом, ни в KDBX
+		slog.Warn("API клиент не инициализирован (URL не задан), токен не установлен.")
 	}
 
 	// --- Существующий код для заполнения списка ---

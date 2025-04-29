@@ -6,9 +6,12 @@ require (
 	github.com/charmbracelet/bubbles v0.20.0
 	github.com/charmbracelet/bubbletea v1.3.4
 	github.com/gofrs/flock v0.12.1
+	github.com/maynagashev/gophkeeper/models v0.0.0-20250419170703-77449cf8005a
 	github.com/stretchr/testify v1.10.0
 	github.com/tobischo/gokeepasslib/v3 v3.6.1
 )
+
+replace github.com/maynagashev/gophkeeper/models => ../models
 
 require (
 	github.com/atotto/clipboard v0.1.4 // indirect
@@ -17,6 +20,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.9.0 // indirect
 	github.com/sahilm/fuzzy v0.1.1 // indirect
+	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/tobischo/argon2 v0.1.0 // indirect
 	golang.org/x/crypto v0.37.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

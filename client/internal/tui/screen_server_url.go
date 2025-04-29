@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"fmt"
 	"log/slog"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -38,4 +39,9 @@ func (m *model) updateServerURLInputScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.serverURLInput = newInput
 	// Возвращаем обновленную модель и команду от textinput
 	return m, inputCmd
+}
+
+// viewServerURLInputScreen отображает экран ввода URL сервера.
+func (m *model) viewServerURLInputScreen() string {
+	return fmt.Sprintf("Введите URL сервера:\n%s", m.serverURLInput.View())
 }

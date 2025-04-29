@@ -23,7 +23,7 @@ func (m *model) updateLoginRegisterChoiceScreen(msg tea.Msg) (tea.Model, tea.Cmd
 			m.loginRegisterFocusedField = 0
 			return m, tea.Batch(textinput.Blink, tea.ClearScreen)
 		case keyEsc, keyBack:
-			m.state = entryListScreen // Возвращаемся к списку записей
+			m.state = syncServerScreen // Возвращаемся на экран синхронизации и сервера
 			return m, nil
 		}
 	}

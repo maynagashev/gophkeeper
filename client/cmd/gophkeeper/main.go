@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"log"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -17,6 +18,15 @@ const (
 	dbPathEnvVar = "GOPHKEEPER_DB_PATH"
 	// Путь к файлу KDBX по умолчанию.
 	defaultDBPath = "gophkeeper.kdbx"
+)
+
+// Переменные для версии и даты сборки, устанавливаются через ldflags.
+var (
+	version = "dev" // Значение по умолчанию, если не установлено при сборке
+	//nolint:gochecknoglobals // Устанавливается через ldflags при сборке
+	buildDate = "unknown" // Значение по умолчанию
+	//nolint:gochecknoglobals // Устанавливается через ldflags при сборке
+	commitHash = "N/A" // Значение по умолчанию
 )
 
 // setupLogging настраивает логирование в файл logs/gophkeeper.log.
@@ -44,15 +54,31 @@ func setupLogging() {
 }
 
 func main() {
+	// Добавляем флаг для версии
+	versionFlag := flag.Bool("version", false, "Показать версию и дату сборки")
+
 	// Настройка логирования
 	setupLogging()
 
 	// Определение флагов
 	kdbxPathFlag := flag.String("db", defaultDBPath, "Путь к файлу базы данных KDBX (переопределяет "+dbPathEnvVar+")")
 	debugModeFlag := flag.Bool("debug", false, "Включить режим отладки TUI")
+	serverURLFlag := flag.String("server-url", "", "URL сервера GophKeeper (например, https://localhost:8443)")
 
 	// Парсинг флагов командной строки
 	flag.Parse()
+
+	// Если указан флаг --version, выводим информацию и выходим
+	if *versionFlag {
+		// Используем стандартный log для вывода в консоль, так как slog настроен на файл
+		log.SetOutput(os.Stdout) // Направляем вывод log в stdout
+		log.SetFlags(0)          // Убираем префиксы даты/времени
+		log.Println("GophKeeper Client")
+		log.Printf("Version: %s", version)
+		log.Printf("Build Date: %s", buildDate)
+		log.Printf("Commit Hash: %s", commitHash)
+		os.Exit(0)
+	}
 
 	// Определение финального пути к файлу KDBX
 	finalPath := defaultDBPath
@@ -86,8 +112,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	slog.Info("Запуск GophKeeper", "db_path", finalPath, "source", source, "debug_mode", *debugModeFlag)
+	slog.Info("Запуск GophKeeper",
+		"db_path", finalPath,
+		"source", source,
+		"debug_mode", *debugModeFlag,
+		"server_url", *serverURLFlag,
+	)
 
 	// Запускаем TUI, передавая финальный путь и флаг отладки
-	tui.Start(finalPath, *debugModeFlag)
+	tui.Start(finalPath, *debugModeFlag, *serverURLFlag)
 }

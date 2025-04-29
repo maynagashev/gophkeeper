@@ -73,7 +73,7 @@ func loadVersionsCmd(m *model) tea.Cmd {
 }
 
 // rollbackToVersionCmd выполняет откат к выбранной версии.
-func rollbackToVersionCmd(m *model, versionID int64) tea.Cmd {
+func rollbackToVersionCmd(ctx context.Context, m *model, versionID int64) tea.Cmd {
 	return func() tea.Msg {
 		if m.apiClient == nil {
 			return rollbackErrorMsg{err: errors.New("API клиент не инициализирован")}
@@ -83,7 +83,7 @@ func rollbackToVersionCmd(m *model, versionID int64) tea.Cmd {
 			return rollbackErrorMsg{err: errors.New("требуется авторизация")}
 		}
 
-		ctx := context.Background()
+		// Используем переданный контекст
 		err := m.apiClient.RollbackToVersion(ctx, versionID)
 		if err != nil {
 			slog.Error("Ошибка отката к версии", "version_id", versionID, "error", err)
@@ -98,15 +98,15 @@ func rollbackToVersionCmd(m *model, versionID int64) tea.Cmd {
 // --- Функции обработки экрана версий --- //
 
 // handleVersionRollbackConfirm обрабатывает ввод в режиме подтверждения отката.
-func (m *model) handleVersionRollbackConfirm(keyMsg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *model) handleVersionRollbackConfirm(ctx context.Context, keyMsg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch keyMsg.String() {
 	case keyEnter:
 		// Подтверждение отката
 		if m.selectedVersionForRollback != nil {
 			m.confirmRollback = false
 			m.rollbackError = nil
-			// Добавляем ClearScreen
-			return m, tea.Batch(tea.ClearScreen, rollbackToVersionCmd(m, m.selectedVersionForRollback.ID))
+			// Передаем полученный контекст в команду
+			return m, tea.Batch(tea.ClearScreen, rollbackToVersionCmd(ctx, m, m.selectedVersionForRollback.ID))
 		}
 	case keyEsc, keyBack:
 		// Отмена отката
@@ -200,7 +200,9 @@ func (m *model) updateVersionListScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if keyMsg, ok := msg.(tea.KeyMsg); ok {
 		// Если показывается экран подтверждения
 		if m.confirmRollback {
-			return m.handleVersionRollbackConfirm(keyMsg)
+			// Передаем контекст в обработчик подтверждения
+			// Используем Background(), т.к. Update не имеет контекста
+			return m.handleVersionRollbackConfirm(context.Background(), keyMsg)
 		}
 
 		// Если показывается ошибка отката
@@ -246,10 +248,13 @@ func handleVersionsLoadedMsg(m *model, msg versionsLoadedMsg) (tea.Model, tea.Cm
 	}
 
 	// Обновляем список и получаем команду от него
-	cmd := m.versionList.SetItems(items) // Не игнорируем команду
+	listCmd := m.versionList.SetItems(items) // Не игнорируем команду
+
+	// Оборачиваем сообщение ClearScreen в команду
+	clearCmd := tea.ClearScreen
 
 	// Добавляем ClearScreen для очистки артефактов
-	return m, tea.Batch(cmd, tea.ClearScreen)
+	return m, tea.Batch(listCmd, clearCmd)
 }
 
 // handleVersionsLoadErrorMsg обрабатывает ошибку загрузки версий.

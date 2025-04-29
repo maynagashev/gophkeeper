@@ -1,19 +1,26 @@
 # Makefile для проекта GophKeeper
 
-.PHONY: run build clean client
+.PHONY: client build clean client
 
 # Цель по умолчанию
-default: run
+default: client
 
 # Запуск клиента
 client:
 	@echo "Запуск GophKeeper клиента..."
-	@go run ./cmd/gophkeeper/main.go -debug | tee logs/run.log
+	@go run ./cmd/gophkeeper/main.go -debug --server-url=https://localhost:8443 | tee logs/run.log
 
 # Сборка клиента
 build:
 	@echo "Сборка GophKeeper клиента..."
-	@go build -o ./bin/gophkeeper ./cmd/gophkeeper/main.go
+	# Получаем версию из Git (тег, или хэш коммита если тега нет, + '-dirty' если есть не закомиченные изменения)
+	@{ \
+		version=$$(git describe --tags --always --dirty --abbrev=7); \
+		buildDate=$$(date -u '+%Y-%m-%dT%H:%M:%SZ'); \
+		ldflags="-X 'main.version=$$version' -X 'main.buildDate=$$buildDate'"; \
+		echo "Версия: $$version, Дата сборки: $$buildDate"; \
+		go build -ldflags="$$ldflags" -o ./bin/gophkeeper ./cmd/gophkeeper/main.go; \
+	}
 	@echo "Клиент собран: ./bin/gophkeeper"
 
 # Запуск с указанием пути через флаг

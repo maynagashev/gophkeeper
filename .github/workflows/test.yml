@@ -6,68 +6,121 @@ on:
     branches: [ main, master, develop ]
 
 jobs:
-  test:
-    name: Run Tests
+  test-client:
+    name: Run Client Tests
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
         go-version: '1.24.2'
         check-latest: true
-        
-    - name: Show existing test file
-      run: |
-        ls -la client/example/
-        echo "Используем тестовый файл из репозитория: client/example/test.kdbx (пароль: test)"
-      
+
+    # Убедимся, что тестовый файл существует и доступен
+    - name: Check test file existence
+      run: ls -la client/example/test.kdbx
+      continue-on-error: false # Прервать, если файла нет
+
     - name: Run client tests
+      working-directory: ./client # Указываем рабочую директорию
       run: make test
-      
+
     - name: Run client tests with coverage
+      working-directory: ./client # Указываем рабочую директорию
       run: make test-coverage
-      
-    - name: Archive code coverage results
+
+    - name: Archive client code coverage results
       uses: actions/upload-artifact@v4
       with:
-        name: code-coverage-report
+        name: client-code-coverage-report
         path: client/logs/coverage.html
-        
-  lint:
-    name: Run Linters
+
+  test-server:
+    name: Run Server Tests
     runs-on: ubuntu-latest
-    
+    needs: [test-client, lint] # Запускаем после тестов клиента и линтера
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
         go-version: '1.24.2'
-        
+        check-latest: true
+
+    - name: Start services
+      run: docker compose up -d postgres minio
+
+    - name: Wait for services to start
+      run: | # Простая пауза, в идеале - health checks
+        echo "Waiting for services to be ready..."
+        sleep 15
+        echo "Services should be ready."
+        docker compose ps # Показать статус контейнеров
+
+    - name: Run server tests with coverage
+      working-directory: ./server # Указываем рабочую директорию
+      env:
+        # Переменные окружения для подключения к сервисам из docker-compose
+        # Используем стандартные порты и креды, если не переопределены
+        POSTGRES_PORT: 5432 # Указываем порт внутри сети docker
+        DATABASE_DSN: "postgres://gophkeeper:secret@127.0.0.1:5433/gophkeeper?sslmode=disable"
+        MINIO_ENDPOINT: "localhost:9000"
+        MINIO_USER: "minioadmin"
+        MINIO_PASSWORD: "minioadmin"
+        MINIO_BUCKET: "gophkeeper-vaults"
+      run: make test-coverage
+
+    - name: Stop services
+      # Запускаем этот шаг, даже если тесты упали
+      if: always()
+      run: docker compose down
+
+    - name: Archive server code coverage results
+      # Запускаем этот шаг, только если тесты прошли успешно
+      if: success()
+      uses: actions/upload-artifact@v4
+      with:
+        name: server-code-coverage-report
+        path: server/logs/coverage.html
+
+  lint:
+    name: Run Linters
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.24.2'
+
     - name: Install golangci-lint
       run: |
         curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.64.8
         golangci-lint --version
-        
-    - name: Download CLIENT Go modules
+
+    - name: Download Go modules (Client)
       working-directory: ./client
       run: go mod download
 
-    - name: Lint CLIENT module
+    - name: Lint Go code (Client)
       working-directory: ./client
       run: golangci-lint run ./... --fix
 
-    - name: Download SERVER Go modules
+    - name: Download Go modules (Server)
       working-directory: ./server
       run: go mod download
 
-    - name: Lint SERVER module
+    - name: Lint Go code (Server)
       working-directory: ./server
       run: golangci-lint run ./... --fix
 

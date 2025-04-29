@@ -143,25 +143,25 @@ func startSyncCmd(m *model) tea.Cmd {
 		// 1. Проверка URL
 		if m.serverURL == "" {
 			err := errors.New("URL сервера не настроен")
-			slog.Warn("Предусловие синхронизации не выполнено", "error", err)
+			slog.Warn("Предусловие синхронизации не выполнено: URL", "error", err)
 			return SyncError{err: err}
 		}
 		// 2. Проверка токена
 		if m.authToken == "" {
 			err := errors.New("необходимо войти на сервер")
-			slog.Warn("Предусловие синхронизации не выполнено", "error", err)
+			slog.Warn("Предусловие синхронизации не выполнено: Token", "error", err)
 			return SyncError{err: err}
 		}
 		// 3. Проверка API клиента
 		if m.apiClient == nil {
 			err := errors.New("API клиент не инициализирован")
-			slog.Error("Критическая ошибка: API клиент nil перед синхронизацией")
+			slog.Error("Критическая ошибка: apiClient nil", "error", err)
 			return SyncError{err: err}
 		}
 		// 4. Проверка базы данных
 		if m.db == nil {
 			err := errors.New("локальная база данных не загружена")
-			slog.Error("Критическая ошибка: База данных nil перед синхронизацией")
+			slog.Error("Критическая ошибка: m.db nil", "error", err)
 			return SyncError{err: err}
 		}
 

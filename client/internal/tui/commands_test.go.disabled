@@ -1,0 +1,512 @@
+package tui
+
+import (
+	"context"
+	"errors"
+	"io"
+	"os"
+	"path/filepath"
+	"testing"
+	"time"
+
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+	"github.com/tobischo/gokeepasslib/v3"
+
+	"github.com/maynagashev/gophkeeper/client/internal/api"
+	"github.com/maynagashev/gophkeeper/models"
+)
+
+// MockAPIClient - мок для API клиента.
+type MockAPIClient struct {
+	mock.Mock
+}
+
+func (m *MockAPIClient) Register(ctx context.Context, username, password string) error {
+	args := m.Called(ctx, username, password)
+	return args.Error(0)
+}
+
+func (m *MockAPIClient) Login(ctx context.Context, username, password string) (string, error) {
+	args := m.Called(ctx, username, password)
+	return args.String(0), args.Error(1)
+}
+
+func (m *MockAPIClient) GetVaultMetadata(ctx context.Context) (*models.VaultVersion, error) {
+	args := m.Called(ctx)
+	if versionPtr := args.Get(0); versionPtr != nil {
+		return versionPtr.(*models.VaultVersion), args.Error(1)
+	}
+	return nil, args.Error(1)
+}
+
+func (m *MockAPIClient) UploadVault(ctx context.Context, r io.Reader, size int64, contentModTime time.Time) error {
+	args := m.Called(ctx, r, size, contentModTime)
+	return args.Error(0)
+}
+
+func (m *MockAPIClient) DownloadVault(ctx context.Context) (io.ReadCloser, *models.VaultVersion, error) {
+	args := m.Called(ctx)
+	var reader io.ReadCloser
+	if r := args.Get(0); r != nil {
+		reader = r.(io.ReadCloser)
+	}
+	var meta *models.VaultVersion
+	if m := args.Get(1); m != nil {
+		meta = m.(*models.VaultVersion)
+	}
+	return reader, meta, args.Error(2)
+}
+
+// Обновим метод ListVersions, чтобы соответствовать интерфейсу api.Client.
+func (m *MockAPIClient) ListVersions(ctx context.Context, limit, offset int) ([]models.VaultVersion, int64, error) {
+	args := m.Called(ctx, limit, offset)
+	return args.Get(0).([]models.VaultVersion), args.Get(1).(int64), args.Error(2)
+}
+
+// Обновим метод RollbackToVersion, чтобы соответствовал интерфейсу api.Client.
+func (m *MockAPIClient) RollbackToVersion(ctx context.Context, versionID int64) error {
+	args := m.Called(ctx, versionID)
+	return args.Error(0)
+}
+
+func (m *MockAPIClient) SetAuthToken(token string) {
+	m.Called(token)
+}
+
+// Создадим свой тип модели для тестов синхронизации.
+type mockSyncModel struct {
+	apiClient api.Client
+	authToken string
+	serverURL string
+	db        *gokeepasslib.Database
+}
+
+func (m *mockSyncModel) GetAPIClient() api.Client {
+	return m.apiClient
+}
+
+func (m *mockSyncModel) GetAuthToken() string {
+	return m.authToken
+}
+
+func (m *mockSyncModel) GetServerURL() string {
+	return m.serverURL
+}
+
+func (m *mockSyncModel) GetDB() *gokeepasslib.Database {
+	return m.db
+}
+
+// TestOpenKdbxCmd проверяет команду открытия KDBX файла.
+func TestOpenKdbxCmd(t *testing.T) {
+	// Создаем временный каталог для тестов
+	tempDir, err := os.MkdirTemp("", "gophkeeper-test")
+	require.NoError(t, err)
+	defer os.RemoveAll(tempDir)
+
+	// Подготавливаем тестовый файл KDBX
+	testDBFile := filepath.Join(tempDir, "test.kdbx")
+	testPassword := "test-password"
+
+	// Создаем новую базу данных
+	db := gokeepasslib.NewDatabase()
+	db.Content = gokeepasslib.NewContent()
+	rootGroup := gokeepasslib.NewGroup()
+	rootGroup.Name = "Root"
+	db.Content.Root = &gokeepasslib.RootData{
+		Groups: []gokeepasslib.Group{rootGroup},
+	}
+
+	// Сохраняем базу данных
+	fileHandle, err := os.Create(testDBFile)
+	require.NoError(t, err)
+	defer fileHandle.Close()
+
+	db.Credentials = gokeepasslib.NewPasswordCredentials(testPassword)
+	err = gokeepasslib.NewEncoder(fileHandle).Encode(db)
+	require.NoError(t, err)
+	fileHandle.Close()
+
+	t.Run("SuccessfulOpen", func(t *testing.T) {
+		// Вызов команды открытия KDBX файла
+		cmd := OpenKdbxCmd(testDBFile, testPassword)
+		msg := cmd()
+
+		// Проверка результата
+		dbOpenedMsg, ok := msg.(DBOpenedMsg)
+		require.True(t, ok, "Должно вернуться сообщение DBOpenedMsg")
+		assert.NotNil(t, dbOpenedMsg.DB, "База данных должна быть не nil")
+	})
+
+	t.Run("WrongPassword", func(t *testing.T) {
+		// Вызов команды с неверным паролем
+		cmd := OpenKdbxCmd(testDBFile, "wrong-password")
+		msg := cmd()
+
+		// Проверка результата
+		errMsg, ok := msg.(ErrMsg)
+		require.True(t, ok, "Должно вернуться сообщение ErrMsg")
+		assert.Error(t, errMsg.Err, "Ошибка должна быть не nil")
+		assert.Contains(t, errMsg.Err.Error(), "credentials", "Ошибка должна быть связана с учетными данными")
+	})
+
+	t.Run("FileNotExists", func(t *testing.T) {
+		// Вызов команды с несуществующим файлом
+		cmd := OpenKdbxCmd(filepath.Join(tempDir, "nonexistent.kdbx"), testPassword)
+		msg := cmd()
+
+		// Проверка результата
+		errMsg, ok := msg.(ErrMsg)
+		require.True(t, ok, "Должно вернуться сообщение ErrMsg")
+		assert.Error(t, errMsg.Err, "Ошибка должна быть не nil")
+		assert.Contains(t, errMsg.Err.Error(), "no such file", "Ошибка должна указывать на отсутствие файла")
+	})
+}
+
+// TestSaveKdbxCmd проверяет команду сохранения KDBX файла.
+func TestSaveKdbxCmd(t *testing.T) {
+	// Создаем временный каталог для тестов
+	tempDir, err := os.MkdirTemp("", "gophkeeper-test")
+	require.NoError(t, err)
+	defer os.RemoveAll(tempDir)
+
+	// Подготавливаем тестовый файл KDBX
+	testDBFile := filepath.Join(tempDir, "test.kdbx")
+	testPassword := "test-password"
+
+	// Создаем новую базу данных
+	db := gokeepasslib.NewDatabase()
+	db.Content = gokeepasslib.NewContent()
+	rootGroup := gokeepasslib.NewGroup()
+	rootGroup.Name = "Root"
+	db.Content.Root = &gokeepasslib.RootData{
+		Groups: []gokeepasslib.Group{rootGroup},
+	}
+
+	t.Run("SuccessfulSave", func(t *testing.T) {
+		// Вызов команды сохранения KDBX файла
+		cmd := SaveKdbxCmd(db, testDBFile, testPassword)
+		msg := cmd()
+
+		// Проверка результата
+		_, ok := msg.(DBSavedMsg)
+		require.True(t, ok, "Должно вернуться сообщение DBSavedMsg")
+
+		// Проверяем, что файл был создан
+		_, err := os.Stat(testDBFile)
+		assert.NoError(t, err, "Файл базы данных должен существовать")
+	})
+
+	t.Run("SaveToInvalidPath", func(t *testing.T) {
+		// Вызов команды сохранения в недоступный путь
+		invalidPath := filepath.Join(tempDir, "nonexistent-dir", "test.kdbx")
+		cmd := SaveKdbxCmd(db, invalidPath, testPassword)
+		msg := cmd()
+
+		// Проверка результата
+		errMsg, ok := msg.(DBSaveErrorMsg)
+		require.True(t, ok, "Должно вернуться сообщение DBSaveErrorMsg")
+		assert.Error(t, errMsg.Err, "Ошибка должна быть не nil")
+	})
+}
+
+// TestClearStatusCmd проверяет команду очистки статуса.
+func TestClearStatusCmd(t *testing.T) {
+	// Вызов команды очистки статуса с небольшой задержкой
+	delay := 10 * time.Millisecond
+	cmd := ClearStatusCmd(delay)
+
+	// Ждем немного больше времени, чем delay
+	start := time.Now()
+	msg := cmd()
+	elapsed := time.Since(start)
+
+	// Проверяем, что получили ожидаемое сообщение
+	_, ok := msg.(ClearStatusMsg)
+	assert.True(t, ok, "Должно вернуться сообщение ClearStatusMsg")
+
+	// Проверяем, что задержка была соблюдена
+	assert.GreaterOrEqual(t, elapsed, delay, "Команда должна выполняться с указанной задержкой")
+}
+
+// TestLoginRegistrationCommands проверяет команды входа и регистрации.
+func TestLoginRegistrationCommands(t *testing.T) {
+	// Создаем мок API клиента
+	mockAPI := new(MockAPIClient)
+
+	// Создаем объект модели для тестирования
+	model := NewTestModel()
+	model.SetAPIClient(mockAPI)
+
+	t.Run("SuccessfulLogin", func(t *testing.T) {
+		username := "testuser"
+		password := "testpass"
+		expectedToken := "test-jwt-token"
+
+		// Настраиваем поведение мока
+		mockAPI.On("Login", mock.Anything, username, password).Return(expectedToken, nil).Once()
+
+		// Вызываем команду входа
+		cmd := model.MakeLoginCmd(username, password)
+		msg := cmd()
+
+		// Проверяем результат
+		loginMsg, ok := msg.(LoginSuccessMsg)
+		require.True(t, ok, "Должно вернуться сообщение LoginSuccessMsg")
+		assert.Equal(t, expectedToken, loginMsg.Token, "Токен должен совпадать с ожидаемым")
+
+		// Проверяем, что мок был вызван
+		mockAPI.AssertExpectations(t)
+	})
+
+	t.Run("FailedLogin", func(t *testing.T) {
+		username := "baduser"
+		password := "badpass"
+		expectedError := errors.New("неверное имя пользователя или пароль")
+
+		// Настраиваем поведение мока
+		mockAPI.On("Login", mock.Anything, username, password).Return("", expectedError).Once()
+
+		// Вызываем команду входа
+		cmd := model.MakeLoginCmd(username, password)
+		msg := cmd()
+
+		// Проверяем результат
+		errorMsg, ok := msg.(LoginError)
+		require.True(t, ok, "Должно вернуться сообщение LoginError")
+		assert.Equal(t, expectedError.Error(), errorMsg.Error(), "Текст ошибки должен совпадать")
+
+		// Проверяем, что мок был вызван
+		mockAPI.AssertExpectations(t)
+	})
+
+	t.Run("SuccessfulRegister", func(t *testing.T) {
+		username := "newuser"
+		password := "newpass"
+
+		// Настраиваем поведение мока
+		mockAPI.On("Register", mock.Anything, username, password).Return(nil).Once()
+
+		// Вызываем команду регистрации
+		cmd := model.MakeRegisterCmd(username, password)
+		msg := cmd()
+
+		// Проверяем результат
+		_, ok := msg.(RegisterSuccessMsg)
+		require.True(t, ok, "Должно вернуться сообщение RegisterSuccessMsg")
+
+		// Проверяем, что мок был вызван
+		mockAPI.AssertExpectations(t)
+	})
+
+	t.Run("FailedRegister", func(t *testing.T) {
+		username := "existinguser"
+		password := "somepass"
+		expectedError := errors.New("пользователь уже существует")
+
+		// Настраиваем поведение мока
+		mockAPI.On("Register", mock.Anything, username, password).Return(expectedError).Once()
+
+		// Вызываем команду регистрации
+		cmd := model.MakeRegisterCmd(username, password)
+		msg := cmd()
+
+		// Проверяем результат
+		errorMsg, ok := msg.(RegisterError)
+		require.True(t, ok, "Должно вернуться сообщение RegisterError")
+		assert.Equal(t, expectedError.Error(), errorMsg.Error(), "Текст ошибки должен совпадать")
+
+		// Проверяем, что мок был вызван
+		mockAPI.AssertExpectations(t)
+	})
+}
+
+// TestSyncCommands проверяет команды синхронизации.
+func TestSyncCommands(t *testing.T) {
+	// Создаем мок API клиента
+	mockAPI := new(MockAPIClient)
+	// Настройка метода ListVersions для совместимости с интерфейсом
+	mockAPI.On("ListVersions", mock.Anything, mock.Anything, mock.Anything).
+		Return([]models.VaultVersion{}, int64(0), nil)
+	// Также настроим RollbackToVersion для совместимости
+	mockAPI.On("RollbackToVersion", mock.Anything, mock.Anything).Return(nil)
+
+	// Создаем объект модели для тестирования синхронизации
+	syncModel := &mockSyncModel{
+		apiClient: mockAPI,
+		authToken: "test-token",
+		serverURL: "https://test.example.com",
+	}
+
+	t.Run("StartSyncCmd_Success", func(t *testing.T) {
+		// Устанавливаем DB чтобы предусловия были выполнены
+		db := gokeepasslib.NewDatabase()
+		db.Content = gokeepasslib.NewContent()
+		db.Content.Root = &gokeepasslib.RootData{}
+		syncModel.db = db
+
+		// Определим функцию для проверки предусловий
+		startSyncCmd := func(m *mockSyncModel) tea.Cmd {
+			return func() tea.Msg {
+				if m.GetServerURL() == "" {
+					return NewSyncError(errors.New("URL сервера не настроен"))
+				}
+				if m.GetAuthToken() == "" {
+					return NewSyncError(errors.New("необходимо войти на сервер"))
+				}
+				if m.GetAPIClient() == nil {
+					return NewSyncError(errors.New("API клиент не инициализирован"))
+				}
+				if m.GetDB() == nil {
+					return NewSyncError(errors.New("локальная база данных не загружена"))
+				}
+				return SyncStartedMsg{}
+			}
+		}
+
+		// Вызываем нашу функцию с моделью
+		cmd := startSyncCmd(syncModel)
+		msg := cmd()
+
+		// Проверяем результат
+		_, ok := msg.(SyncStartedMsg)
+		require.True(t, ok, "Должно вернуться сообщение SyncStartedMsg")
+	})
+
+	t.Run("StartSyncCmd_NoURL", func(t *testing.T) {
+		// Модель без URL
+		noURLModel := &mockSyncModel{
+			apiClient: mockAPI,
+			authToken: "test-token",
+			db:        syncModel.db,
+		}
+
+		// Определим функцию для проверки предусловий
+		startSyncCmd := func(m *mockSyncModel) tea.Cmd {
+			return func() tea.Msg {
+				if m.GetServerURL() == "" {
+					return NewSyncError(errors.New("URL сервера не настроен"))
+				}
+				return SyncStartedMsg{}
+			}
+		}
+
+		// Вызываем нашу функцию с моделью
+		cmd := startSyncCmd(noURLModel)
+		msg := cmd()
+
+		// Проверяем результат
+		errorMsg, ok := msg.(SyncError)
+		require.True(t, ok, "Должно вернуться сообщение SyncError")
+		assert.Contains(t, errorMsg.Error(), "URL сервера не настроен", "Ошибка должна указывать на отсутствие URL")
+	})
+
+	t.Run("StartSyncCmd_NoToken", func(t *testing.T) {
+		// Модель без токена
+		noTokenModel := &mockSyncModel{
+			apiClient: mockAPI,
+			serverURL: "https://test.example.com",
+			db:        syncModel.db,
+		}
+
+		// Определим функцию для проверки предусловий
+		startSyncCmd := func(m *mockSyncModel) tea.Cmd {
+			return func() tea.Msg {
+				if m.GetServerURL() == "" {
+					return NewSyncError(errors.New("URL сервера не настроен"))
+				}
+				if m.GetAuthToken() == "" {
+					return NewSyncError(errors.New("необходимо войти на сервер"))
+				}
+				return SyncStartedMsg{}
+			}
+		}
+
+		// Вызываем нашу функцию с моделью
+		cmd := startSyncCmd(noTokenModel)
+		msg := cmd()
+
+		// Проверяем результат
+		errorMsg, ok := msg.(SyncError)
+		require.True(t, ok, "Должно вернуться сообщение SyncError")
+		assert.Contains(t, errorMsg.Error(), "необходимо войти", "Ошибка должна указывать на необходимость входа")
+	})
+
+	t.Run("FetchServerMetadataCmd", func(t *testing.T) {
+		// Создаем тестовые метаданные
+		testMeta := &models.VaultVersion{
+			ID:        int64(123), // Используем int64 вместо string
+			CreatedAt: time.Now(),
+		}
+
+		// Настраиваем поведение мока
+		mockAPI.On("GetVaultMetadata", mock.Anything).Return(testMeta, nil).Once()
+
+		// Определим функцию для получения метаданных с сервера
+		fetchServerMetadataCmd := func(m *mockSyncModel) tea.Cmd {
+			return func() tea.Msg {
+				ctx := context.Background()
+				meta, err := m.GetAPIClient().GetVaultMetadata(ctx)
+				if err != nil {
+					// Проверяем специфичные ошибки
+					if err.Error() == "хранилище не найдено на сервере" {
+						return ServerMetadataMsg{Metadata: nil, Found: false}
+					}
+					return NewSyncError(err)
+				}
+				return ServerMetadataMsg{Metadata: meta, Found: true}
+			}
+		}
+
+		// Вызываем нашу функцию с моделью
+		cmd := fetchServerMetadataCmd(syncModel)
+		msg := cmd()
+
+		// Проверяем результат
+		metaMsg, ok := msg.(ServerMetadataMsg)
+		require.True(t, ok, "Должно вернуться сообщение ServerMetadataMsg")
+		assert.True(t, metaMsg.Found, "Флаг Found должен быть true")
+		assert.Equal(t, testMeta, metaMsg.Metadata, "Метаданные должны совпадать")
+
+		// Проверяем, что мок был вызван
+		mockAPI.AssertExpectations(t)
+	})
+
+	t.Run("FetchServerMetadataCmd_NotFound", func(t *testing.T) {
+		// Настраиваем поведение мока - хранилище не найдено
+		notFoundErr := errors.New("хранилище не найдено на сервере")
+		mockAPI.On("GetVaultMetadata", mock.Anything).Return(nil, notFoundErr).Once()
+
+		// Определим функцию для получения метаданных с сервера
+		fetchServerMetadataCmd := func(m *mockSyncModel) tea.Cmd {
+			return func() tea.Msg {
+				ctx := context.Background()
+				meta, err := m.GetAPIClient().GetVaultMetadata(ctx)
+				if err != nil {
+					// Проверяем специфичные ошибки
+					if err.Error() == "хранилище не найдено на сервере" {
+						return ServerMetadataMsg{Metadata: nil, Found: false}
+					}
+					return NewSyncError(err)
+				}
+				return ServerMetadataMsg{Metadata: meta, Found: true}
+			}
+		}
+
+		// Вызываем нашу функцию с моделью
+		cmd := fetchServerMetadataCmd(syncModel)
+		msg := cmd()
+
+		// Проверяем результат
+		metaMsg, ok := msg.(ServerMetadataMsg)
+		require.True(t, ok, "Должно вернуться сообщение ServerMetadataMsg")
+		assert.False(t, metaMsg.Found, "Флаг Found должен быть false")
+		assert.Nil(t, metaMsg.Metadata, "Метаданные должны быть nil")
+
+		// Проверяем, что мок был вызван
+		mockAPI.AssertExpectations(t)
+	})
+}

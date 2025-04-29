@@ -10,6 +10,15 @@ import (
 	"github.com/maynagashev/gophkeeper/client/internal/kdbx"
 )
 
+// --- Константы для ID пунктов меню синхронизации --- //.
+const (
+	syncMenuIDConfigureURL  = "configure_url"
+	syncMenuIDLoginRegister = "login_register"
+	syncMenuIDSyncNow       = "sync_now"
+	syncMenuIDViewVersions  = "view_versions"
+	syncMenuIDLogout        = "logout"
+)
+
 // --- Тип для элементов меню синхронизации --- //
 
 // syncMenuItem представляет элемент в меню синхронизации.
@@ -127,9 +136,14 @@ func (m *model) handleSyncMenuLogout() tea.Cmd {
 	return saveCmd
 }
 
-// updateSyncServerScreen обрабатывает сообщения для экрана синхронизации/сервера.
-func (m *model) updateSyncServerScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
+// Меняем возвращаемый тип на *model.
+func (m *model) updateSyncServerScreen(msg tea.Msg) (*model, tea.Cmd) {
 	var cmds []tea.Cmd
+	var listCmd tea.Cmd
+
+	// Обновляем список меню сначала
+	m.syncServerMenu, listCmd = m.syncServerMenu.Update(msg)
+	cmds = append(cmds, listCmd)
 
 	if keyMsg, ok := msg.(tea.KeyMsg); ok {
 		switch keyMsg.String() {
@@ -140,15 +154,15 @@ func (m *model) updateSyncServerScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// Может потребоваться ClearScreen в зависимости от действия
 		case keyEsc, keyBack:
 			m.state = entryListScreen
-			return m, tea.ClearScreen // Очистка экрана добавлена
+			return m, tea.ClearScreen
+		// Добавляем отдельный case для Backspace
+		case "backspace":
+			m.state = entryListScreen
+			return m, tea.ClearScreen
 		}
 	}
 
-	// Обновляем список меню
-	var listCmd tea.Cmd
-	m.syncServerMenu, listCmd = m.syncServerMenu.Update(msg)
-	cmds = append(cmds, listCmd)
-
+	// Возвращаем указатель на модель
 	return m, tea.Batch(cmds...)
 }
 
@@ -160,15 +174,15 @@ func (m *model) handleSyncMenuAction() tea.Cmd {
 	}
 
 	switch selectedItem.id {
-	case "configure_url":
+	case syncMenuIDConfigureURL:
 		return m.handleSyncMenuConfigureURL()
-	case "login_register":
+	case syncMenuIDLoginRegister:
 		return m.handleSyncMenuLoginRegister()
-	case "sync_now":
+	case syncMenuIDSyncNow:
 		return m.handleSyncMenuSyncNow()
-	case "view_versions":
+	case syncMenuIDViewVersions:
 		return m.handleSyncMenuViewVersions()
-	case "logout":
+	case syncMenuIDLogout:
 		return m.handleSyncMenuLogout()
 	}
 

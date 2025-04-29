@@ -25,13 +25,22 @@ func (m *model) updatePasswordInputScreen(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.passwordInput.Focus() // Возвращаем фокус
 			cmds = append(cmds, textinput.Blink)
 			// Не обрабатываем другие клавиши в этом цикле
-		} else if keyMsg.String() == keyEnter {
-			password := m.passwordInput.Value()
-			m.passwordInput.Blur()
-			m.passwordInput.Reset()
-			// Сохраняем пароль в модели перед отправкой команды
-			m.password = password
-			cmds = append(cmds, openKdbxCmd(m.kdbxPath, password))
+		} else {
+			switch keyMsg.String() {
+			case keyEnter:
+				password := m.passwordInput.Value()
+				m.passwordInput.Blur()
+				m.passwordInput.Reset()
+				// Сохраняем пароль в модели перед отправкой команды
+				m.password = password
+				cmds = append(cmds, openKdbxCmd(m.kdbxPath, password))
+			case keyEsc, keyCtrlC: // Используем константу
+				m.state = welcomeScreen
+				m.passwordInput.Blur()
+				m.passwordInput.Reset()
+				m.password = "" // Сбрасываем пароль
+				cmds = append(cmds, tea.ClearScreen)
+			}
 		}
 	}
 	return m, tea.Batch(cmds...)

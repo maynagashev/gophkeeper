@@ -28,13 +28,13 @@ const (
 	attachmentListDeleteScreen                    // Экран выбора вложения для удаления
 	attachmentPathInputScreen                     // Экран ввода пути к добавляемому вложению
 	newKdbxPasswordScreen                         // Экран ввода пароля для нового KDBX файла
-	// Новые состояния для синхронизации и сервера.
-	syncServerScreen          screenState = iota // Экран "Синхронизация и Сервер"
-	serverURLInputScreen                         // Экран ввода URL сервера
-	loginRegisterChoiceScreen                    // Экран выбора "Войти или Зарегистрироваться?"
-	loginScreen                                  // Экран ввода данных для входа
-	registerScreen                               // Экран ввода данных для регистрации
-	versionListScreen                            // Экран списка версий
+	// Экраны для синхронизации и сервера.
+	syncServerScreen          // Экран "Синхронизация и Сервер"
+	serverURLInputScreen      // Экран ввода URL сервера
+	loginRegisterChoiceScreen // Экран выбора "Войти или Зарегистрироваться?"
+	loginScreen               // Экран ввода данных для входа
+	registerScreen            // Экран ввода данных для регистрации
+	versionListScreen         // Экран списка версий
 )
 
 // String возвращает строковое представление screenState.
@@ -123,6 +123,7 @@ const (
 	keyShiftTab = "shift+tab"
 	keyUp       = "up"
 	keyDown     = "down"
+	keyCtrlC    = "ctrl+c" // Добавляем константу
 )
 
 const numNewPasswordFields = 2 // Количество полей на экране создания пароля
@@ -215,9 +216,9 @@ type model struct {
 	previousScreenState screenState         // Предыдущее состояние (для возврата)
 	savingStatus        string              // Статус сохранения (отображается внизу)
 	statusTimer         *time.Timer         // Таймер для очистки статуса сохранения
-	width               int                 //nolint:unused // Потенциально для адаптивной верстки
-	height              int                 //nolint:unused // Потенциально для адаптивной верстки
-	listMutex           sync.Mutex          //nolint:unused // Задел на будущее для синхронизации
+	width               int
+	height              int
+	listMutex           sync.Mutex //nolint:unused // Задел на будущее для синхронизации
 
 	// Поля для создания нового KDBX
 	newPasswordInput1       textinput.Model // Первое поле ввода нового пароля

@@ -14,6 +14,9 @@ import (
 // prepareAddScreen инициализирует поля для экрана добавления.
 func (m *model) prepareAddScreen() {
 	m.editInputs = make([]textinput.Model, numEditableFields)
+	// Создаем пустую запись для заполнения
+	newEntry := gokeepasslib.NewEntry()
+	m.editingEntry = &newEntry
 	m.focusedField = editableFieldTitle // Начинаем с поля Title
 	// Сбрасываем вложения, которые могли остаться от предыдущего добавления
 	m.newEntryAttachments = nil
